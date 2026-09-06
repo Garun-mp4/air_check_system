@@ -135,7 +135,11 @@ function controlTone(status: ClientControlStatus | null): string {
   if (!status) {
     return 'neutral'
   }
-  if (status.connection.status === 'online' && status.pending_commands === 0) {
+  const synchronized =
+    status.reported.exhaust_on === status.desired.exhaust_on &&
+    status.reported.intake_on === status.desired.intake_on &&
+    status.reported.window_open === status.desired.window_open
+  if (status.connection.status === 'online' && status.pending_commands === 0 && synchronized) {
     return 'success'
   }
   if (status.connection.status === 'offline') {
@@ -374,7 +378,7 @@ function MetricCard({
         {value}
         {unit ? <small>{unit}</small> : null}
       </strong>
-      <span className="data-card-note">{note ?? 'датчик room-01'}</span>
+      <span className="data-card-note">{note ?? 'локальный датчик'}</span>
     </article>
   )
 }
@@ -476,15 +480,32 @@ export default function AirDashboard() {
     const from = new Date(to.getTime() - rangeHours[range] * 60 * 60 * 1000)
     setLoading(true)
     try {
-      const [latest, historical] = await Promise.all([
+      const [latestResult, historyResult] = await Promise.allSettled([
         getLatestDashboard(signal),
         getHistory(from, to, 1000, signal),
       ])
-      const controlStatus = await getControlStatus()
-      setDashboard(latest)
-      setHistory(historical.data)
-      setControls(controlStatus)
-      setControlError(null)
+      if (latestResult.status === 'rejected') {
+        throw latestResult.reason
+      }
+      if (historyResult.status === 'rejected') {
+        throw historyResult.reason
+      }
+      setDashboard(latestResult.value)
+      setHistory(historyResult.value.data)
+      try {
+        const controlStatus = await getControlStatus()
+        setControls(controlStatus)
+        setControlError(null)
+      } catch (controlLoadError) {
+        if (controlLoadError instanceof Error && controlLoadError.name === 'AbortError') {
+          return
+        }
+        setControlError(
+          controlLoadError instanceof ClientApiError
+            ? controlLoadError.message
+            : 'Не удалось загрузить состояние управления',
+        )
+      }
       setError(null)
       setLastUpdated(new Date().toISOString())
     } catch (loadError) {
@@ -583,6 +604,10 @@ export default function AirDashboard() {
   const windowDesiredOpen = controls?.desired.window_open ?? currentWindowOpen === true
   const controlsTone = controlTone(controls)
   const controlsPending = controls?.pending_commands ?? 0
+  const deviceId = controls?.device_id ?? 'локальный узел'
+  const deviceIdShort = deviceId.toUpperCase()
+  const deviceConnectionStatus = controls?.connection.status ?? (measurement ? 'online' : 'offline')
+  const deviceConnectionTone = controls ? controlsTone : measurement ? 'success' : 'neutral'
 
   return (
     <div className="app-shell dashboard-shell">
@@ -594,10 +619,10 @@ export default function AirDashboard() {
 
           <div className="room-context" aria-label="Активная комната">
             <span className="room-context-label">ЛОКАЛЬНЫЙ УЗЕЛ</span>
-            <strong>room-01</strong>
+            <strong>{deviceId}</strong>
             <span className="room-context-status">
-              <span className="status-dot status-dot-success" />
-              online
+              <span className={'status-dot status-dot-' + deviceConnectionTone} />
+              {deviceConnectionStatus}
             </span>
           </div>
 
@@ -638,8 +663,8 @@ export default function AirDashboard() {
           <div className="mobile-sheet">
             <div className="mobile-sheet-context">
               <span className="room-context-label">АКТИВНАЯ КОМНАТА</span>
-              <strong>room-01</strong>
-              <span><span className="status-dot status-dot-success" /> локальный узел</span>
+              <strong>{deviceId}</strong>
+              <span><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceConnectionStatus}</span>
             </div>
             <nav aria-label="Мобильная навигация">
               <a className="mobile-nav-link is-active" href="#overview" onClick={() => setMenuOpen(false)}>Панель</a>
@@ -666,7 +691,7 @@ export default function AirDashboard() {
         <section className="dashboard-intro" id="overview">
           <div className="container">
             <div className="intro-overline">
-              <span className="eyebrow">CONTROL PANEL / ROOM-01</span>
+              <span className="eyebrow">CONTROL PANEL / {deviceIdShort}</span>
               <span className="live-chip"><span className={'status-dot status-dot-' + systemTone} />{systemStatus}</span>
             </div>
             <div className="intro-row">
@@ -686,7 +711,7 @@ export default function AirDashboard() {
         {loading && !dashboard ? (
           <div className="container">
             <div className="panel-state panel-state-loading" role="status">
-              <span><strong>Синхронизация с room-01</strong><br />Получаем свежие показания и состояние модели.</span>
+              <span><strong>Синхронизация с {deviceId}</strong><br />Получаем свежие показания и состояние модели.</span>
               <span className="loading-bar" />
             </div>
           </div>
@@ -717,7 +742,7 @@ export default function AirDashboard() {
                   <strong>Сигнал комнаты</strong>
                 </div>
               </div>
-              <span className="pulse-room-id">room-01 / REST</span>
+              <span className="pulse-room-id">{deviceId} / REST</span>
             </div>
 
             <div className="air-pulse-body">
@@ -828,7 +853,10 @@ export default function AirDashboard() {
                   description="удаление воздуха из комнаты"
                   active={controls?.reported.exhaust_on ?? false}
                   desiredActive={controls?.desired.exhaust_on ?? false}
-                  pending={controls === null || activeCommand === 'exhaust:on' || activeCommand === 'exhaust:off'}
+                  pending={controls === null ||
+                    controls?.reported.exhaust_on !== controls?.desired.exhaust_on ||
+                    activeCommand === 'exhaust:on' ||
+                    activeCommand === 'exhaust:off'}
                   onToggle={() => void executeControl('exhaust', controls?.reported.exhaust_on ? 'off' : 'on')}
                 />
                 <ActuatorRow
@@ -838,7 +866,10 @@ export default function AirDashboard() {
                   description="подача воздуха через фильтр"
                   active={controls?.reported.intake_on ?? false}
                   desiredActive={controls?.desired.intake_on ?? false}
-                  pending={controls === null || activeCommand === 'intake:on' || activeCommand === 'intake:off'}
+                  pending={controls === null ||
+                    controls?.reported.intake_on !== controls?.desired.intake_on ||
+                    activeCommand === 'intake:on' ||
+                    activeCommand === 'intake:off'}
                   onToggle={() => void executeControl('intake', controls?.reported.intake_on ? 'off' : 'on')}
                 />
               </div>
@@ -872,7 +903,7 @@ export default function AirDashboard() {
                     className={'category-tab ' + (windowMode === 'auto' ? 'category-tab-active' : '')}
                     type="button"
                     onClick={() => void executeControl('window', 'auto')}
-                    disabled={controls === null || activeCommand !== null}
+                    disabled={controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
                     aria-pressed={windowMode === 'auto'}
                   >
                     Авто
@@ -881,7 +912,7 @@ export default function AirDashboard() {
                     className={'category-tab ' + (windowMode === 'manual' && windowDesiredOpen ? 'category-tab-active' : '')}
                     type="button"
                     onClick={() => void executeControl('window', 'open')}
-                    disabled={controls === null || activeCommand !== null}
+                    disabled={controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
                     aria-pressed={windowMode === 'manual' && windowDesiredOpen}
                   >
                     Открыть
@@ -890,7 +921,7 @@ export default function AirDashboard() {
                     className={'category-tab ' + (windowMode === 'manual' && !windowDesiredOpen ? 'category-tab-active' : '')}
                     type="button"
                     onClick={() => void executeControl('window', 'close')}
-                    disabled={controls === null || activeCommand !== null}
+                    disabled={controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
                     aria-pressed={windowMode === 'manual' && !windowDesiredOpen}
                   >
                     Закрыть
@@ -921,7 +952,7 @@ export default function AirDashboard() {
               <h2>Показатели комнаты</h2>
               <p>Текущие значения с локального набора датчиков.</p>
             </div>
-            <span className="section-context"><span className="status-dot status-dot-success" /> room-01 · live</span>
+            <span className="section-context"><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceId} · {deviceConnectionStatus}</span>
           </div>
 
           <div className="metrics-grid">
