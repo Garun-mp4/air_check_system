@@ -2,7 +2,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { DashboardNavigation, getSectionIdFromHash } from './AirDashboard'
+import { DashboardNavigation, getConnectionStatusLabel, getSectionIdFromHash } from './AirDashboard'
 
 describe('dashboard navigation', () => {
   it('resolves only known section hashes', () => {
@@ -30,5 +30,12 @@ describe('dashboard navigation', () => {
     expect(mobileMarkup.match(/class="mobile-nav-link is-active"/g)).toHaveLength(1)
     expect(desktopMarkup.match(/aria-current="location"/g)).toHaveLength(1)
     expect(mobileMarkup.match(/aria-current="location"/g)).toHaveLength(1)
+  })
+
+  it('uses human-readable connection labels', () => {
+    expect(getConnectionStatusLabel('online')).toBe('в сети')
+    expect(getConnectionStatusLabel('stale')).toBe('связь нестабильна')
+    expect(getConnectionStatusLabel('offline')).toBe('нет связи')
+    expect(getConnectionStatusLabel(undefined)).toBe('нет данных')
   })
 })

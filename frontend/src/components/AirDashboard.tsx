@@ -54,7 +54,6 @@ type IconName =
   | 'menu'
   | 'close'
   | 'clock'
-  | 'outdoor'
   | 'arrow'
 
 const rangeHours: Record<RangeKey, number> = {
@@ -207,17 +206,26 @@ function controlTone(status: ClientControlStatus | null): string {
   return 'warning'
 }
 
+export function getConnectionStatusLabel(
+  status: ClientControlStatus['connection']['status'] | null | undefined,
+): string {
+  if (status === 'online') {
+    return 'в сети'
+  }
+  if (status === 'stale') {
+    return 'связь нестабильна'
+  }
+  if (status === 'offline') {
+    return 'нет связи'
+  }
+  return 'нет данных'
+}
+
 function controlConnectionLabel(status: ClientControlStatus | null): string {
   if (!status) {
     return 'нет данных'
   }
-  if (status.connection.status === 'online') {
-    return 'узел online'
-  }
-  if (status.connection.status === 'stale') {
-    return 'связь устаревает'
-  }
-  return 'узел offline'
+  return getConnectionStatusLabel(status.connection.status)
 }
 
 function controlStateLabel(target: ClientControlTarget, active: boolean): string {
@@ -363,15 +371,6 @@ function Icon({ name }: { name: IconName }) {
       </svg>
     )
   }
-  if (name === 'outdoor') {
-    return (
-      <svg {...svgProps}>
-        <circle cx="12" cy="12" r="8.5" />
-        <path d="M12 5v3M12 16v3M5 12h3M16 12h3M7.1 7.1l2.1 2.1M14.8 14.8l2.1 2.1" />
-        <circle cx="12" cy="12" r="2.2" />
-      </svg>
-    )
-  }
   if (name === 'arrow') {
     return (
       <svg {...svgProps}>
@@ -419,7 +418,7 @@ function MetricCard({
   quality,
   className = '',
 }: {
-  icon: Exclude<IconName, 'air' | 'exhaust' | 'intake' | 'database' | 'model' | 'wifi' | 'refresh' | 'menu' | 'close' | 'clock' | 'outdoor' | 'arrow'>
+  icon: Exclude<IconName, 'air' | 'exhaust' | 'intake' | 'database' | 'model' | 'wifi' | 'refresh' | 'menu' | 'close' | 'clock' | 'arrow'>
   label: string
   value: string
   unit?: string
@@ -535,13 +534,15 @@ function ChartCard({
   title,
   caption,
   children,
-  footer,
+  unit,
+  legend,
   wide = false,
 }: {
   title: string
   caption: string
   children: ReactNode
-  footer: string
+  unit?: string
+  legend?: ReactNode
   wide?: boolean
 }) {
   return (
@@ -551,12 +552,12 @@ function ChartCard({
           <span className="chart-card-context">{caption}</span>
           <h3>{title}</h3>
         </div>
-        <span className="chart-card-unit">{title === 'CO₂' ? 'ppm' : title === 'Температура' ? '°C' : 'состояние'}</span>
+        <div className="chart-card-meta">
+          {unit ? <span className="chart-card-unit">{unit}</span> : null}
+          {legend ? <span className="chart-card-legend" aria-label="Обозначения состояния окна">{legend}</span> : null}
+        </div>
       </div>
       <div className="chart-shell">{children}</div>
-      <div className="chart-footer">
-        <span>{footer}</span>
-      </div>
     </article>
   )
 }
@@ -875,7 +876,7 @@ export default function AirDashboard() {
   const sourceLabel = lastUpdated
     ? 'обновлено в ' + formatTime(lastUpdated)
     : 'ожидание синхронизации'
-  const systemStatus = error ? 'требует внимания' : measurement ? 'online' : 'ожидание'
+  const systemStatus = error ? 'нужна проверка' : measurement ? 'в сети' : 'ожидание'
   const systemTone = error ? 'error' : measurement ? 'success' : 'neutral'
   const currentWindowOpen = controls
     ? controls.reported.window_open
@@ -886,8 +887,8 @@ export default function AirDashboard() {
   const controlsTone = controlTone(controls)
   const controlsPending = controls?.pending_commands ?? 0
   const deviceId = controls?.device_id ?? 'локальный узел'
-  const deviceIdShort = deviceId.toUpperCase()
   const deviceConnectionStatus = controls?.connection.status ?? (measurement ? 'online' : 'offline')
+  const deviceConnectionLabel = getConnectionStatusLabel(deviceConnectionStatus)
   const deviceConnectionTone = controls ? controlsTone : measurement ? 'success' : 'neutral'
 
   return (
@@ -915,11 +916,11 @@ export default function AirDashboard() {
           </a>
 
           <div className="room-context" aria-label="Активная комната">
-            <span className="room-context-label">ЛОКАЛЬНЫЙ УЗЕЛ</span>
-            <strong>{deviceId}</strong>
+            <span className="room-context-label">Комната</span>
+            <strong translate="no">{deviceId}</strong>
             <span className="room-context-status">
               <span className={'status-dot status-dot-' + deviceConnectionTone} />
-              {deviceConnectionStatus}
+              {deviceConnectionLabel}
             </span>
           </div>
 
@@ -967,9 +968,9 @@ export default function AirDashboard() {
           inert={!menuOpen}
         >
           <div className="mobile-sheet-context">
-            <span className="room-context-label">АКТИВНАЯ КОМНАТА</span>
-            <strong>{deviceId}</strong>
-            <span><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceConnectionStatus}</span>
+            <span className="room-context-label">Комната</span>
+            <strong translate="no">{deviceId}</strong>
+            <span><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceConnectionLabel}</span>
           </div>
           <DashboardNavigation
             className="mobile-nav"
@@ -998,19 +999,24 @@ export default function AirDashboard() {
         <section className="dashboard-intro" id="overview">
           <div className="container">
             <div className="intro-overline">
-              <span className="eyebrow">AirCheck / {deviceIdShort}</span>
-              <span className="live-chip"><span className={'status-dot status-dot-' + systemTone} />{systemStatus}</span>
+              <span className="eyebrow intro-location">Комната <span translate="no">{deviceId}</span></span>
+              <span className={'intro-status intro-status-' + systemTone}><span className={'status-dot status-dot-' + systemTone} />{systemStatus}</span>
             </div>
             <div className="intro-row">
               <div>
                 <h1>Панель управления</h1>
                 <p>Показания комнаты, решение автоматики и ручные команды для локального узла.</p>
               </div>
-              <div className="intro-meta">
-                <span>последняя синхронизация</span>
-                <strong>{formatTimestamp(measurement?.timestamp)}</strong>
-                <span>обновление каждые 30 с</span>
-              </div>
+              <dl className="intro-meta">
+                <div>
+                  <dt>Синхронизация</dt>
+                  <dd>{formatTimestamp(measurement?.timestamp)}</dd>
+                </div>
+                <div>
+                  <dt>Интервал обновления</dt>
+                  <dd>30 с</dd>
+                </div>
+              </dl>
             </div>
           </div>
         </section>
@@ -1103,7 +1109,7 @@ export default function AirDashboard() {
 
           <aside className="dashboard-card node-card">
             <div className="system-card-top">
-              <span className="eyebrow">Локальный узел</span>
+              <span className="eyebrow">Состояние системы</span>
               <span className={'system-status system-status-' + systemTone}><span className={'status-dot status-dot-' + systemTone} />{systemStatus}</span>
             </div>
             <h2>Связь и модель</h2>
@@ -1111,7 +1117,7 @@ export default function AirDashboard() {
             <div className="system-list">
               <div className="system-row">
                 <span className="system-row-label"><Icon name="wifi" /> Источник</span>
-                <strong>simulator / ESP32</strong>
+                <strong translate="no">simulator / ESP32</strong>
               </div>
               <div className="system-row">
                 <span className="system-row-label"><Icon name="database" /> Хранилище</span>
@@ -1119,7 +1125,7 @@ export default function AirDashboard() {
               </div>
               <div className="system-row">
                 <span className="system-row-label"><Icon name="model" /> Прогноз</span>
-                <strong>{prediction ? prediction.model_name + ' / v' + prediction.model_version : 'недоступна'}</strong>
+                <strong translate="no">{prediction ? prediction.model_name + ' / v' + prediction.model_version : 'недоступна'}</strong>
               </div>
             </div>
             <div className="node-card-foot">
@@ -1259,7 +1265,7 @@ export default function AirDashboard() {
               <h2>Воздух в комнате</h2>
               <p>Текущие значения локального набора датчиков.</p>
             </div>
-            <span className="section-context"><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceId} · {deviceConnectionStatus}</span>
+            <span className="section-context"><span className={'status-dot status-dot-' + deviceConnectionTone} /> <span translate="no">{deviceId}</span> · {deviceConnectionLabel}</span>
           </div>
 
           <div className="metrics-grid">
@@ -1279,12 +1285,10 @@ export default function AirDashboard() {
 
           <div className="outdoor-context">
             <div className="outdoor-heading">
-              <span className="section-context-icon"><Icon name="outdoor" /></span>
               <div>
-                <span className="eyebrow">Для сравнения</span>
                 <h3>Снаружи</h3>
+                <p>Внешние показатели для сравнения с комнатой</p>
               </div>
-              <span>Параметры внешнего воздуха</span>
             </div>
             <div className="outdoor-grid">
               <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.outdoor.temperature, 1)} unit="°C" note="снаружи" className="data-card-compact" />
@@ -1334,13 +1338,23 @@ export default function AirDashboard() {
           </div>
 
           <div className="chart-grid dashboard-chart-grid">
-            <ChartCard title="CO₂" caption="концентрация" footer="ppm">
+            <ChartCard title="CO₂" caption="концентрация" unit="ppm">
               <LineChart data={co2Series} unit="ppm" ariaLabel="График изменения концентрации CO2" />
             </ChartCard>
-            <ChartCard title="Температура" caption="температура" footer="°C">
+            <ChartCard title="Температура" caption="температура" unit="°C">
               <LineChart data={temperatureSeries} unit="°C" ariaLabel="График температуры помещения" />
             </ChartCard>
-            <ChartCard title="Состояние окна" caption="окно" footer="серый — закрыто, зелёный — открыто" wide>
+            <ChartCard
+              title="Состояние окна"
+              caption="окно"
+              legend={(
+                <>
+                  <span><i className="chart-legend-swatch chart-legend-swatch-closed" aria-hidden="true" />Закрыто</span>
+                  <span><i className="chart-legend-swatch chart-legend-swatch-open" aria-hidden="true" />Открыто</span>
+                </>
+              )}
+              wide
+            >
               <WindowChart data={history} ariaLabel="График состояния окна" />
             </ChartCard>
           </div>
