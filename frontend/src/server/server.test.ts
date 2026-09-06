@@ -294,6 +294,70 @@ describe('control service', () => {
     expect((await service.status()).windowMode).toBe('manual')
   })
 
+  it('keeps a manually enabled fan running while air quality is normal', async () => {
+    const repository = new MemoryRepository()
+    const service = new ControlService(repository, config)
+    const result = await service.issue({
+      deviceId: 'room-01',
+      target: 'exhaust',
+      action: 'on',
+    })
+    await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: new Date('2026-09-06T10:00:00Z'),
+      reported: { exhaustOn: true, intakeOn: false, windowOpen: false },
+      appliedCommandIds: result.commands.map((command) => command.id),
+    })
+
+    const commands = await service.reconcile(
+      measurementAt(1, new Date('2026-09-06T10:01:00Z'), 650, false),
+      null,
+    )
+
+    expect(commands).toEqual([])
+    expect((await service.status()).desired.exhaustOn).toBe(true)
+  })
+
+  it('stops automatically enabled fans when a normal cycle has no open window', async () => {
+    const repository = new MemoryRepository()
+    const service = new ControlService(repository, config)
+    const started = await repository.queueControlCommands([
+      {
+        deviceId: 'room-01',
+        target: 'exhaust',
+        desiredState: true,
+        source: 'automatic',
+        reason: 'test',
+        batchId: 'automatic-on',
+      },
+      {
+        deviceId: 'room-01',
+        target: 'intake',
+        desiredState: true,
+        source: 'automatic',
+        reason: 'test',
+        batchId: 'automatic-on',
+      },
+    ])
+    await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: new Date('2026-09-06T10:00:00Z'),
+      reported: { exhaustOn: true, intakeOn: true, windowOpen: false },
+      appliedCommandIds: started.map((command) => command.id),
+    })
+
+    const commands = await service.reconcile(
+      measurementAt(1, new Date('2026-09-06T10:01:00Z'), 650, false),
+      null,
+    )
+
+    expect(commands.map((command) => command.target)).toEqual([
+      'exhaust',
+      'intake',
+    ])
+    expect(commands.every((command) => command.desiredState === false)).toBe(true)
+  })
+
   it('closes the automatic ventilation batch after CO2 recovers', async () => {
     vi.useFakeTimers()
     try {

@@ -233,6 +233,22 @@ export class ControlService {
     ) => {
       commandPlans.push({ target, desiredState, reason })
     }
+    const shouldStopAutomaticFan = async (
+      target: 'exhaust' | 'intake',
+    ): Promise<boolean> => {
+      const active =
+        target === 'exhaust'
+          ? state.desired.exhaustOn || state.reported.exhaustOn
+          : state.desired.intakeOn || state.reported.intakeOn
+      if (!active) {
+        return false
+      }
+      const latestCommand = await this.repository.getLatestControlCommand(
+        this.config.deviceId,
+        target,
+      )
+      return latestCommand?.source === 'automatic' && latestCommand.desiredState
+    }
 
     if (critical) {
       const reason =
@@ -255,38 +271,45 @@ export class ControlService {
       if (!state.desired.intakeOn || !state.reported.intakeOn) {
         commandPlans.push({ target: 'intake', desiredState: true, reason })
       }
-    } else if (
-      currentCo2 < this.config.co2NormalThreshold &&
-      (predictedCo2 === null || predictedCo2 < this.config.co2NormalThreshold) &&
-      (state.desired.windowOpen || state.reported.windowOpen) &&
-      state.windowOpenSince !== null &&
-      Date.now() - state.windowOpenSince.getTime() >=
-        this.config.autoVentilationMinimumMinutes * 60_000
-    ) {
-      const reason =
-        'Автоматика: CO₂ вернулся в комфортную зону после минимального времени проветривания.'
-      if (state.desired.windowOpen || state.reported.windowOpen) {
-        addPlan('window', false, reason)
-      }
-      if (state.desired.exhaustOn || state.reported.exhaustOn) {
-        addPlan('exhaust', false, reason)
-      }
-      if (state.desired.intakeOn || state.reported.intakeOn) {
-        addPlan('intake', false, reason)
-      }
-    } else if (
-      currentCo2 < this.config.co2NormalThreshold &&
-      (predictedCo2 === null || predictedCo2 < this.config.co2NormalThreshold) &&
-      !state.desired.windowOpen &&
-      !state.reported.windowOpen
-    ) {
-      const reason =
-        'Автоматика: поддержание выключенного воздушного контура после восстановления CO₂.'
-      if (state.desired.exhaustOn || state.reported.exhaustOn) {
-        commandPlans.push({ target: 'exhaust', desiredState: false, reason })
-      }
-      if (state.desired.intakeOn || state.reported.intakeOn) {
-        commandPlans.push({ target: 'intake', desiredState: false, reason })
+    } else {
+      const [automaticExhaustOn, automaticIntakeOn] = await Promise.all([
+        shouldStopAutomaticFan('exhaust'),
+        shouldStopAutomaticFan('intake'),
+      ])
+
+      if (
+        currentCo2 < this.config.co2NormalThreshold &&
+        (predictedCo2 === null || predictedCo2 < this.config.co2NormalThreshold) &&
+        (state.desired.windowOpen || state.reported.windowOpen) &&
+        state.windowOpenSince !== null &&
+        Date.now() - state.windowOpenSince.getTime() >=
+          this.config.autoVentilationMinimumMinutes * 60_000
+      ) {
+        const reason =
+          'Автоматика: CO₂ вернулся в комфортную зону после минимального времени проветривания.'
+        if (state.desired.windowOpen || state.reported.windowOpen) {
+          addPlan('window', false, reason)
+        }
+        if (automaticExhaustOn) {
+          addPlan('exhaust', false, reason)
+        }
+        if (automaticIntakeOn) {
+          addPlan('intake', false, reason)
+        }
+      } else if (
+        currentCo2 < this.config.co2NormalThreshold &&
+        (predictedCo2 === null || predictedCo2 < this.config.co2NormalThreshold) &&
+        !state.desired.windowOpen &&
+        !state.reported.windowOpen
+      ) {
+        const reason =
+          'Автоматика: поддержание выключенного воздушного контура после восстановления CO₂.'
+        if (automaticExhaustOn) {
+          addPlan('exhaust', false, reason)
+        }
+        if (automaticIntakeOn) {
+          addPlan('intake', false, reason)
+        }
       }
     }
 

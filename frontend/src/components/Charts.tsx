@@ -15,6 +15,25 @@ interface ChartProps {
   ariaLabel: string
 }
 
+const maxRenderedPoints = 72
+
+function sampleItems<T>(data: T[]): T[] {
+  if (data.length <= maxRenderedPoints) {
+    return data
+  }
+
+  return Array.from({ length: maxRenderedPoints }, (_, index) => {
+    const sourceIndex = Math.round(
+      (index * (data.length - 1)) / (maxRenderedPoints - 1),
+    )
+    return data[sourceIndex]
+  })
+}
+
+function sampleSeries<T extends { timestamp: string }>(data: T[]): T[] {
+  return sampleItems(data)
+}
+
 function formatAxisTime(timestamp: string): string {
   return new Intl.DateTimeFormat('ru-RU', {
     hour: '2-digit',
@@ -51,12 +70,13 @@ export function LineChart({ data, unit, ariaLabel }: ChartProps) {
   if (data.length === 0) {
     return <div className="chart-empty">Нет данных за выбранный период</div>
   }
-  const geometry = lineGeometry(data)
+  const renderData = sampleSeries(data)
+  const geometry = lineGeometry(renderData)
   const guideValues = [0, 0.5, 1].map(
     (fraction) => geometry.max - (geometry.max - geometry.min) * fraction,
   )
   const labelIndexes = Array.from(
-    new Set([0, Math.floor((data.length - 1) / 2), data.length - 1]),
+    new Set([0, Math.floor((renderData.length - 1) / 2), renderData.length - 1]),
   )
 
   return (
@@ -84,26 +104,28 @@ export function LineChart({ data, unit, ariaLabel }: ChartProps) {
         )
       })}
       <path className="chart-series" d={pathFor(geometry.points)} />
-      {geometry.points.map((point, index) => (
-        <circle
-          className="chart-point"
-          key={point.timestamp + '-' + index}
-          cx={point.x}
-          cy={point.y}
-          r="3"
-        />
-      ))}
+      {renderData.length <= 24
+        ? geometry.points.map((point, index) => (
+            <circle
+              className="chart-point"
+              key={point.timestamp + '-' + index}
+              cx={point.x}
+              cy={point.y}
+              r="3"
+            />
+          ))
+        : null}
       {labelIndexes.map((index) => {
         const point = geometry.points[index]
         return (
           <text
             className="chart-axis-label"
-            key={data[index].timestamp + '-' + index}
+            key={renderData[index].timestamp + '-' + index}
             x={point.x}
             y={chartHeight - 4}
-            textAnchor={index === 0 ? 'start' : index === data.length - 1 ? 'end' : 'middle'}
+            textAnchor={index === 0 ? 'start' : index === renderData.length - 1 ? 'end' : 'middle'}
           >
-            {formatAxisTime(data[index].timestamp)}
+            {formatAxisTime(renderData[index].timestamp)}
           </text>
         )
       })}
@@ -121,11 +143,12 @@ export function WindowChart({
   if (data.length === 0) {
     return <div className="chart-empty">Нет данных за выбранный период</div>
   }
+  const renderData = sampleItems(data)
   const innerWidth = chartWidth - chartPadding.left - chartPadding.right
-  const usableWidth = Math.max(innerWidth / data.length, 4)
+  const usableWidth = Math.max(innerWidth / renderData.length, 4)
   const barWidth = Math.max(usableWidth - 2, 2)
   const labelIndexes = Array.from(
-    new Set([0, Math.floor((data.length - 1) / 2), data.length - 1]),
+    new Set([0, Math.floor((renderData.length - 1) / 2), renderData.length - 1]),
   )
 
   return (
@@ -149,7 +172,7 @@ export function WindowChart({
         y1={chartPadding.top + 100}
         y2={chartPadding.top + 100}
       />
-      {data.map((measurement, index) => (
+      {renderData.map((measurement, index) => (
         <rect
           className={
             measurement.window_open
@@ -184,14 +207,14 @@ export function WindowChart({
           key={data[index].timestamp + '-' + index}
           x={
             chartPadding.left +
-            (data.length === 1
+            (renderData.length === 1
               ? innerWidth / 2
-              : (index / (data.length - 1)) * innerWidth)
+              : (index / (renderData.length - 1)) * innerWidth)
           }
           y={chartHeight - 4}
-          textAnchor={index === 0 ? 'start' : index === data.length - 1 ? 'end' : 'middle'}
+          textAnchor={index === 0 ? 'start' : index === renderData.length - 1 ? 'end' : 'middle'}
         >
-          {formatAxisTime(data[index].timestamp)}
+          {formatAxisTime(renderData[index].timestamp)}
         </text>
       ))}
     </svg>

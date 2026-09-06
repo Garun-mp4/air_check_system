@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { ReactNode } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 
 import {
   ClientApiError,
@@ -30,6 +30,15 @@ import {
 import { LineChart, WindowChart } from './Charts'
 
 type RangeKey = '6h' | '24h' | '7d'
+export const dashboardNavItems = [
+  { id: 'overview', label: 'Панель' },
+  { id: 'controls', label: 'Управление' },
+  { id: 'signals', label: 'Сенсоры' },
+  { id: 'history', label: 'История' },
+] as const
+
+type DashboardSectionId = (typeof dashboardNavItems)[number]['id']
+
 type IconName =
   | 'air'
   | 'exhaust'
@@ -58,6 +67,46 @@ const rangeLabels: Record<RangeKey, string> = {
   '6h': '6 ч',
   '24h': '24 ч',
   '7d': '7 дней',
+}
+
+export function getSectionIdFromHash(hash: string): DashboardSectionId {
+  const sectionId = hash.startsWith('#') ? hash.slice(1) : hash
+  return dashboardNavItems.some((item) => item.id === sectionId)
+    ? (sectionId as DashboardSectionId)
+    : 'overview'
+}
+
+export function DashboardNavigation({
+  className,
+  label,
+  linkClassName,
+  activeSection,
+  onNavigate,
+}: {
+  className?: string
+  label: string
+  linkClassName: string
+  activeSection: DashboardSectionId
+  onNavigate: (sectionId: DashboardSectionId, event: MouseEvent<HTMLAnchorElement>) => void
+}) {
+  return (
+    <nav className={className} aria-label={label}>
+      {dashboardNavItems.map((item) => {
+        const isActive = activeSection === item.id
+        return (
+          <a
+            className={linkClassName + (isActive ? ' is-active' : '')}
+            href={'#' + item.id}
+            key={item.id}
+            onClick={(event) => onNavigate(item.id, event)}
+            aria-current={isActive ? 'location' : undefined}
+          >
+            {item.label}
+          </a>
+        )
+      })}
+    </nav>
+  )
 }
 
 const recommendationLabels: Record<ClientRecommendation['type'], string> = {
@@ -499,15 +548,14 @@ function ChartCard({
     <article className={'dashboard-card chart-card ' + (wide ? 'chart-card-wide' : '')}>
       <div className="chart-card-header">
         <div>
-          <span className="eyebrow">{caption}</span>
+          <span className="chart-card-context">{caption}</span>
           <h3>{title}</h3>
         </div>
-        <span className="chart-card-unit">{title === 'CO₂' ? 'ppm' : title === 'Температура' ? '°C' : 'state'}</span>
+        <span className="chart-card-unit">{title === 'CO₂' ? 'ppm' : title === 'Температура' ? '°C' : 'состояние'}</span>
       </div>
       <div className="chart-shell">{children}</div>
       <div className="chart-footer">
         <span>{footer}</span>
-        <span>measurements API</span>
       </div>
     </article>
   )
@@ -520,11 +568,16 @@ export default function AirDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+  const [activeSection, setActiveSection] = useState<DashboardSectionId>('overview')
   const [menuOpen, setMenuOpen] = useState(false)
   const [controls, setControls] = useState<ClientControlStatus | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
   const [activeCommand, setActiveCommand] = useState<string | null>(null)
   const [controlNotice, setControlNotice] = useState<string | null>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const navigationTargetRef = useRef<DashboardSectionId | null>(null)
+  const navigationDirectionRef = useRef<'up' | 'down' | null>(null)
+  const navigationStartScrollYRef = useRef<number | null>(null)
 
   const loadData = useCallback(async (signal?: AbortSignal) => {
     const to = new Date()
@@ -615,6 +668,181 @@ export default function AirDashboard() {
   }, [loadData])
 
   useEffect(() => {
+    const sections = dashboardNavItems
+      .map(({ id }) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section !== null)
+
+    if (sections.length === 0) {
+      return
+    }
+
+    const scrollMarginTop = 80
+    // Browsers can leave a section a fraction of a pixel below its scroll margin.
+    // Keep the spy tolerant of that rounding so the target tab is not replaced
+    // by the section immediately above it after a smooth scroll.
+    const scrollSpyThreshold = scrollMarginTop + 2
+    let frameId: number | null = null
+
+    const updateActiveSection = () => {
+      frameId = null
+
+      const navigationTarget = navigationTargetRef.current
+      if (navigationTarget) {
+        const targetSection = sections.find((section) => section.id === navigationTarget)
+        if (targetSection) {
+          const targetTop = targetSection.getBoundingClientRect().top
+          const navigationStartScrollY = navigationStartScrollYRef.current
+          const navigationDirection = navigationDirectionRef.current ??= targetTop > scrollMarginTop ? 'down' : 'up'
+          const navigationWasInterrupted = navigationStartScrollY !== null && (
+            navigationDirection === 'down'
+              ? window.scrollY < navigationStartScrollY - 2
+              : window.scrollY > navigationStartScrollY + 2
+          )
+          const navigationOvershot = navigationDirection === 'down'
+            ? targetTop < scrollMarginTop - 12
+            : targetTop > scrollMarginTop + 12
+
+          if (Math.abs(targetTop - scrollMarginTop) > 12 && !navigationWasInterrupted && !navigationOvershot) {
+            setActiveSection((currentSection) =>
+              currentSection === navigationTarget ? currentSection : navigationTarget,
+            )
+            return
+          }
+        }
+        navigationTargetRef.current = null
+        navigationDirectionRef.current = null
+        navigationStartScrollYRef.current = null
+      }
+
+      let currentSection = sections[0]
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= scrollSpyThreshold) {
+          currentSection = section
+        } else {
+          break
+        }
+      }
+
+      const nextSectionId = currentSection.id as DashboardSectionId
+      setActiveSection((currentSectionId) =>
+        currentSectionId === nextSectionId ? currentSectionId : nextSectionId,
+      )
+
+      if (window.location.hash && window.location.hash !== '#' + nextSectionId) {
+        window.history.replaceState(null, '', '#' + nextSectionId)
+      }
+    }
+
+    const scheduleActiveSectionUpdate = () => {
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(updateActiveSection)
+      }
+    }
+
+    const cancelPendingNavigation = () => {
+      navigationTargetRef.current = null
+      navigationDirectionRef.current = null
+      navigationStartScrollYRef.current = null
+    }
+
+    if (window.location.hash) {
+      const initialSectionId = getSectionIdFromHash(window.location.hash)
+      navigationTargetRef.current = initialSectionId
+      navigationStartScrollYRef.current = window.scrollY
+      setActiveSection(initialSectionId)
+      window.requestAnimationFrame(() => {
+        document.getElementById(initialSectionId)?.scrollIntoView({ behavior: 'auto', block: 'start' })
+      })
+    }
+
+    const handleHashChange = () => {
+      const nextSectionId = getSectionIdFromHash(window.location.hash)
+      navigationTargetRef.current = nextSectionId
+      navigationDirectionRef.current = null
+      navigationStartScrollYRef.current = window.scrollY
+      setActiveSection(nextSectionId)
+      scheduleActiveSectionUpdate()
+      window.requestAnimationFrame(() => {
+        document.getElementById(nextSectionId)?.scrollIntoView({ behavior: 'auto', block: 'start' })
+      })
+    }
+
+    scheduleActiveSectionUpdate()
+    window.addEventListener('scroll', scheduleActiveSectionUpdate, { passive: true })
+    window.addEventListener('resize', scheduleActiveSectionUpdate)
+    window.addEventListener('wheel', cancelPendingNavigation, { passive: true })
+    window.addEventListener('touchstart', cancelPendingNavigation, { passive: true })
+    window.addEventListener('pointerdown', cancelPendingNavigation)
+    window.addEventListener('hashchange', handleHashChange)
+    window.addEventListener('popstate', handleHashChange)
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId)
+      }
+      window.removeEventListener('scroll', scheduleActiveSectionUpdate)
+      window.removeEventListener('resize', scheduleActiveSectionUpdate)
+      window.removeEventListener('wheel', cancelPendingNavigation)
+      window.removeEventListener('touchstart', cancelPendingNavigation)
+      window.removeEventListener('pointerdown', cancelPendingNavigation)
+      window.removeEventListener('hashchange', handleHashChange)
+      window.removeEventListener('popstate', handleHashChange)
+    }
+  }, [])
+
+  const handleSectionNavigation = useCallback((
+    sectionId: DashboardSectionId,
+    event: MouseEvent<HTMLAnchorElement>,
+  ) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return
+    }
+
+    event.preventDefault()
+    navigationTargetRef.current = sectionId
+    navigationDirectionRef.current = null
+    navigationStartScrollYRef.current = window.scrollY
+    setActiveSection(sectionId)
+    setMenuOpen(false)
+
+    const nextHash = '#' + sectionId
+    if (window.location.hash !== nextHash) {
+      window.history.pushState(null, '', nextHash)
+    }
+    window.requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false)
+        menuButtonRef.current?.focus()
+      }
+    }
+
+    const mediaQuery = window.matchMedia('(min-width: 768px)')
+    const handleViewportChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    mediaQuery.addEventListener('change', handleViewportChange)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      mediaQuery.removeEventListener('change', handleViewportChange)
+    }
+  }, [menuOpen])
+
+  useEffect(() => {
     document.body.classList.toggle('is-menu-open', menuOpen)
     return () => document.body.classList.remove('is-menu-open')
   }, [menuOpen])
@@ -664,9 +892,14 @@ export default function AirDashboard() {
 
   return (
     <div className="app-shell dashboard-shell">
+      <a className="skip-link" href="#main-content">К содержимому</a>
       <header className="app-topbar">
         <div className="container app-topbar-inner">
-          <a className="brand dashboard-brand" href="#overview" onClick={() => setMenuOpen(false)}>
+          <a
+            className="brand dashboard-brand"
+            href="#overview"
+            onClick={(event) => handleSectionNavigation('overview', event)}
+          >
             <picture className="brand-logo-frame">
               <source srcSet="/aircheck-logo.webp" type="image/webp" />
               <img
@@ -690,12 +923,13 @@ export default function AirDashboard() {
             </span>
           </div>
 
-          <nav className="app-nav" aria-label="Навигация панели управления">
-            <a className="app-nav-link is-active" href="#overview">Панель</a>
-            <a className="app-nav-link" href="#controls">Управление</a>
-            <a className="app-nav-link" href="#signals">Сенсоры</a>
-            <a className="app-nav-link" href="#history">История</a>
-          </nav>
+          <DashboardNavigation
+            className="app-nav"
+            label="Навигация панели управления"
+            linkClassName="app-nav-link"
+            activeSection={activeSection}
+            onNavigate={handleSectionNavigation}
+          />
 
           <div className="topbar-actions">
             <span className="topbar-sync">
@@ -706,6 +940,7 @@ export default function AirDashboard() {
               className="control-button"
               type="button"
               onClick={() => void loadData()}
+              disabled={loading}
               aria-busy={loading}
             >
               <Icon name="refresh" />
@@ -714,8 +949,10 @@ export default function AirDashboard() {
             <button
               className="menu-button"
               type="button"
+              ref={menuButtonRef}
               aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
               aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
               onClick={() => setMenuOpen((value) => !value)}
             >
               <Icon name={menuOpen ? 'close' : 'menu'} />
@@ -723,50 +960,56 @@ export default function AirDashboard() {
           </div>
         </div>
 
-        {menuOpen ? (
-          <div className="mobile-sheet">
-            <div className="mobile-sheet-context">
-              <span className="room-context-label">АКТИВНАЯ КОМНАТА</span>
-              <strong>{deviceId}</strong>
-              <span><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceConnectionStatus}</span>
-            </div>
-            <nav aria-label="Мобильная навигация">
-              <a className="mobile-nav-link is-active" href="#overview" onClick={() => setMenuOpen(false)}>Панель</a>
-              <a className="mobile-nav-link" href="#controls" onClick={() => setMenuOpen(false)}>Управление</a>
-              <a className="mobile-nav-link" href="#signals" onClick={() => setMenuOpen(false)}>Сенсоры</a>
-              <a className="mobile-nav-link" href="#history" onClick={() => setMenuOpen(false)}>История</a>
-            </nav>
-            <button
-              className="button-primary mobile-refresh"
-              type="button"
-              onClick={() => {
-                setMenuOpen(false)
-                void loadData()
-              }}
-            >
-              <Icon name="refresh" />
-              Обновить данные
-            </button>
+        <div
+          className={'mobile-sheet' + (menuOpen ? ' is-open' : '')}
+          id="mobile-navigation"
+          aria-hidden={!menuOpen}
+          inert={!menuOpen}
+        >
+          <div className="mobile-sheet-context">
+            <span className="room-context-label">АКТИВНАЯ КОМНАТА</span>
+            <strong>{deviceId}</strong>
+            <span><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceConnectionStatus}</span>
           </div>
-        ) : null}
+          <DashboardNavigation
+            className="mobile-nav"
+            label="Мобильная навигация"
+            linkClassName="mobile-nav-link"
+            activeSection={activeSection}
+            onNavigate={handleSectionNavigation}
+          />
+          <button
+            className="button-primary mobile-refresh"
+            type="button"
+            onClick={() => {
+              setMenuOpen(false)
+              void loadData()
+            }}
+            disabled={loading}
+            aria-busy={loading}
+          >
+            <Icon name="refresh" />
+            Обновить данные
+          </button>
+        </div>
       </header>
 
-      <main>
+      <main id="main-content">
         <section className="dashboard-intro" id="overview">
           <div className="container">
             <div className="intro-overline">
-              <span className="eyebrow">CONTROL PANEL / {deviceIdShort}</span>
+              <span className="eyebrow">AirCheck / {deviceIdShort}</span>
               <span className="live-chip"><span className={'status-dot status-dot-' + systemTone} />{systemStatus}</span>
             </div>
             <div className="intro-row">
               <div>
                 <h1>Панель управления</h1>
-                <p>Состояние воздуха в комнате, прогноз CO₂ и следующее действие — в одном рабочем контуре.</p>
+                <p>Показания комнаты, решение автоматики и ручные команды для локального узла.</p>
               </div>
               <div className="intro-meta">
-                <span>последний пакет</span>
+                <span>последняя синхронизация</span>
                 <strong>{formatTimestamp(measurement?.timestamp)}</strong>
-                <span>polling / 30 с</span>
+                <span>обновление каждые 30 с</span>
               </div>
             </div>
           </div>
@@ -774,7 +1017,7 @@ export default function AirDashboard() {
 
         {loading && !dashboard ? (
           <div className="container">
-            <div className="panel-state panel-state-loading" role="status">
+            <div className="panel-state panel-state-loading" role="status" aria-live="polite">
               <span><strong>Синхронизация с {deviceId}</strong><br />Получаем свежие показания и состояние модели.</span>
               <span className="loading-bar" />
             </div>
@@ -782,7 +1025,7 @@ export default function AirDashboard() {
         ) : null}
         {error ? (
           <div className="container">
-            <div className="panel-state panel-state-error" role="alert">
+            <div className="panel-state panel-state-error" role="alert" aria-live="assertive">
               <span><strong>Не удалось обновить панель</strong><br />{error}</span>
               <button className="button-secondary" type="button" onClick={() => void loadData()}>Повторить</button>
             </div>
@@ -797,42 +1040,39 @@ export default function AirDashboard() {
         ) : null}
 
         <section className="container dashboard-section dashboard-top-grid">
-          <article className="air-pulse">
-            <div className="air-pulse-header">
-              <div className="air-pulse-title">
-                <span className="pulse-icon"><Icon name="air" /></span>
-                <div>
-                  <span className="eyebrow eyebrow-on-dark">LIVE AIR PULSE</span>
-                  <strong>Сигнал комнаты</strong>
-                </div>
+          <article className="dashboard-card current-air-card">
+            <div className="current-air-header">
+              <div>
+                <span className="eyebrow">Сейчас</span>
+                <h2>Воздух в комнате</h2>
               </div>
-              <span className="pulse-room-id">{deviceId} / REST</span>
+              <span className={'current-air-state current-air-state-' + co2BadgeClass(currentCo2).replace('badge-', '')}>
+                <span className={'status-dot status-dot-' + (currentCo2 === null ? 'neutral' : currentCo2 >= 1000 ? 'error' : currentCo2 >= 800 ? 'warning' : 'success')} />
+                {co2Label(currentCo2)}
+              </span>
             </div>
 
-            <div className="air-pulse-body">
-              <div className="pulse-reading">
-                <span className="eyebrow eyebrow-on-dark">CO₂ сейчас</span>
-                <strong className="pulse-number">{formatValue(currentCo2)}<small>ppm</small></strong>
-                <div className="pulse-status-row">
-                  <span className={'badge-pill ' + co2BadgeClass(currentCo2)}>{co2Label(currentCo2)}</span>
-                  <span className="pulse-delta">{formatDelta(change5, 5)}</span>
+            <div className="current-air-body">
+              <div className="current-reading">
+                <span className="reading-label">CO₂</span>
+                <strong className="current-reading-value">{formatValue(currentCo2)}<small>ppm</small></strong>
+                <div className="reading-meta">
+                  <span>{formatDelta(change5, 5)}</span>
+                  <span>измерено {formatTime(measurement?.timestamp)}</span>
                 </div>
               </div>
 
-              <div className="pulse-forecast">
-                <div className="pulse-forecast-heading">
-                  <span>горизонт прогноза</span>
-                  <strong>+15 мин</strong>
+              <div className="forecast-reading">
+                <div className="forecast-reading-head">
+                  <span>Прогноз через 15 мин</span>
+                  <span className={'forecast-status forecast-status-' + (prediction ? 'ready' : 'waiting')}>
+                    {prediction ? 'готов' : 'нет данных'}
+                  </span>
                 </div>
-                <div className="pulse-forecast-track">
-                  <span className="forecast-node forecast-node-now" />
-                  <span className="forecast-track-line"><span /></span>
-                  <span className="forecast-node forecast-node-next" />
-                </div>
-                <div className="pulse-forecast-values">
-                  <span><small>сейчас</small><strong>{formatValue(currentCo2)}</strong></span>
+                <div className="forecast-reading-values">
+                  <span><small>сейчас</small><strong>{formatValue(currentCo2)} <em>ppm</em></strong></span>
                   <Icon name="arrow" />
-                  <span><small>ожидается</small><strong>{formatValue(prediction?.predicted_co2_15min)}</strong></span>
+                  <span><small>ожидается</small><strong>{formatValue(prediction?.predicted_co2_15min)} <em>ppm</em></strong></span>
                 </div>
               </div>
             </div>
@@ -850,7 +1090,7 @@ export default function AirDashboard() {
             <div className={'action-strip action-strip-' + recommendationTone(recommendation)}>
               <span className="action-strip-icon"><Icon name={recommendation?.type === 'normal' ? 'air' : 'window'} /></span>
               <div className="action-strip-copy">
-                <span className="eyebrow eyebrow-on-dark">СЛЕДУЮЩЕЕ ДЕЙСТВИЕ</span>
+                <span className="action-strip-label">Следующее действие</span>
                 <strong>{recommendation?.message ?? 'Рекомендация появится после первого измерения'}</strong>
                 <span>{recommendation?.reason ?? 'Правила учитывают текущий CO₂, прогноз и состояние окна.'}</span>
               </div>
@@ -861,13 +1101,13 @@ export default function AirDashboard() {
             </div>
           </article>
 
-          <aside className="dashboard-card system-card">
+          <aside className="dashboard-card node-card">
             <div className="system-card-top">
-              <span className="eyebrow">SYSTEM STATUS</span>
+              <span className="eyebrow">Локальный узел</span>
               <span className={'system-status system-status-' + systemTone}><span className={'status-dot status-dot-' + systemTone} />{systemStatus}</span>
             </div>
-            <h2>Пайплайн данных</h2>
-            <p>Один поток от датчика до решения.</p>
+            <h2>Связь и модель</h2>
+            <p>Состояние источника, хранилища и прогноза.</p>
             <div className="system-list">
               <div className="system-row">
                 <span className="system-row-label"><Icon name="wifi" /> Источник</span>
@@ -878,20 +1118,23 @@ export default function AirDashboard() {
                 <strong>PostgreSQL</strong>
               </div>
               <div className="system-row">
-                <span className="system-row-label"><Icon name="model" /> Модель</span>
+                <span className="system-row-label"><Icon name="model" /> Прогноз</span>
                 <strong>{prediction ? prediction.model_name + ' / v' + prediction.model_version : 'недоступна'}</strong>
               </div>
             </div>
-            <div className="system-endpoint"><span>POST</span> /api/v1/measurements</div>
+            <div className="node-card-foot">
+              <span>последнее измерение</span>
+              <strong>{formatTimestamp(measurement?.timestamp)}</strong>
+            </div>
           </aside>
         </section>
 
         <section className="container dashboard-section controls-section" id="controls">
           <div className="section-toolbar controls-toolbar">
             <div>
-              <span className="eyebrow">02 / CLIMATE CONTROL</span>
-              <h2>Управление воздухом</h2>
-              <p>Вытяжка и приток работают в одном контуре, окно — под контролем автоматики или оператора.</p>
+              <span className="eyebrow">Команды</span>
+              <h2>Управление проветриванием</h2>
+              <p>Вытяжка и приток можно включать вместе. Окно работает по автоматическому или ручному сценарию.</p>
             </div>
             <span className={'section-context control-context control-context-' + controlsTone}>
               <span className={'status-dot status-dot-' + controlsTone} />
@@ -903,12 +1146,12 @@ export default function AirDashboard() {
             <article className="dashboard-card ventilation-card">
               <div className="control-card-header">
                 <div>
-                  <span className="eyebrow">VENTILATION</span>
-                  <h3>Воздушный контур</h3>
+                  <span className="eyebrow">Вентиляция</span>
+                  <h3>Вытяжка и приток</h3>
                 </div>
-                <span className="control-card-kicker">параллельный режим</span>
+                <span className="control-card-kicker">два канала</span>
               </div>
-              <p className="control-card-description">Оба направления можно включать одновременно: вытяжка выводит отработанный воздух, приток подаёт фильтрованный.</p>
+              <p className="control-card-description">Каналы независимы: вытяжка выводит воздух, приток подаёт его через фильтр.</p>
               <div className="actuator-list">
                 <ActuatorRow
                   target="exhaust"
@@ -946,7 +1189,7 @@ export default function AirDashboard() {
             <article className="dashboard-card window-control-card">
               <div className="control-card-header">
                 <div>
-                  <span className="eyebrow">WINDOW STATE</span>
+                  <span className="eyebrow">Состояние</span>
                   <h3>Окно</h3>
                 </div>
                 <span className={'window-state-badge window-state-badge-' + (currentWindowOpen ? 'open' : 'closed')}>
@@ -961,7 +1204,7 @@ export default function AirDashboard() {
                 </div>
               </div>
               <div className="window-mode-control">
-                <span className="eyebrow">MODE / ACTION</span>
+                <span className="eyebrow">Режим и команда</span>
                 <div className="nav-pill-group control-mode-tabs" role="group" aria-label="Управление окном">
                   <button
                     className={'category-tab ' + (windowMode === 'auto' ? 'category-tab-active' : '')}
@@ -995,26 +1238,26 @@ export default function AirDashboard() {
               <p className="window-control-hint">
                 {windowMode === 'manual' && controls?.window.override_until
                   ? 'Ручной режим действует до ' + formatTime(controls.window.override_until) + ', затем автоматика вернётся сама.'
-                  : 'В режиме «Авто» окно открывается при критическом CO₂ и закрывается после минимального проветривания.'}
+                  : 'В режиме «Авто» окно открывается при критическом CO₂ и закрывается после минимального времени проветривания.'}
               </p>
             </article>
           </div>
 
           {controlError ? (
-            <div className="control-feedback control-feedback-error" role="alert">
+            <div className="control-feedback control-feedback-error" role="alert" aria-live="assertive">
               <span>{controlError}</span>
               <button className="button-secondary" type="button" onClick={() => void loadData()}>Повторить</button>
             </div>
           ) : null}
-          {controlNotice ? <div className="control-feedback" role="status">{controlNotice}</div> : null}
+          {controlNotice ? <div className="control-feedback" role="status" aria-live="polite">{controlNotice}</div> : null}
         </section>
 
         <section className="container dashboard-section" id="signals">
           <div className="section-toolbar">
             <div>
-              <span className="eyebrow">01 / SENSOR ARRAY</span>
-              <h2>Показатели комнаты</h2>
-              <p>Текущие значения с локального набора датчиков.</p>
+              <span className="eyebrow">Показания</span>
+              <h2>Воздух в комнате</h2>
+              <p>Текущие значения локального набора датчиков.</p>
             </div>
             <span className="section-context"><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceId} · {deviceConnectionStatus}</span>
           </div>
@@ -1038,10 +1281,10 @@ export default function AirDashboard() {
             <div className="outdoor-heading">
               <span className="section-context-icon"><Icon name="outdoor" /></span>
               <div>
-                <span className="eyebrow">CONTEXT / OUTDOOR</span>
+                <span className="eyebrow">Для сравнения</span>
                 <h3>Снаружи</h3>
               </div>
-              <span>Параметры для принятия решения</span>
+              <span>Параметры внешнего воздуха</span>
             </div>
             <div className="outdoor-grid">
               <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.outdoor.temperature, 1)} unit="°C" note="снаружи" className="data-card-compact" />
@@ -1062,9 +1305,9 @@ export default function AirDashboard() {
         <section className="container dashboard-section dashboard-history" id="history">
           <div className="section-toolbar history-toolbar">
             <div>
-              <span className="eyebrow">02 / TIME SERIES</span>
-              <h2>История измерений</h2>
-              <p>Реальные ряды из PostgreSQL без сглаживания.</p>
+              <span className="eyebrow">История</span>
+              <h2>Как менялся воздух</h2>
+              <p>Показания из PostgreSQL за выбранный период.</p>
             </div>
             <div className="range-control">
               <span className="range-label">период</span>
@@ -1091,26 +1334,15 @@ export default function AirDashboard() {
           </div>
 
           <div className="chart-grid dashboard-chart-grid">
-            <ChartCard title="CO₂" caption="indoor / parts per million" footer="концентрация CO₂">
+            <ChartCard title="CO₂" caption="концентрация" footer="ppm">
               <LineChart data={co2Series} unit="ppm" ariaLabel="График изменения концентрации CO2" />
             </ChartCard>
-            <ChartCard title="Температура" caption="indoor / degrees celsius" footer="температура помещения">
+            <ChartCard title="Температура" caption="температура" footer="°C">
               <LineChart data={temperatureSeries} unit="°C" ariaLabel="График температуры помещения" />
             </ChartCard>
-            <ChartCard title="Состояние окна" caption="indoor / ventilation state" footer="серый — закрыто, зелёный — открыто" wide>
+            <ChartCard title="Состояние окна" caption="окно" footer="серый — закрыто, зелёный — открыто" wide>
               <WindowChart data={history} ariaLabel="График состояния окна" />
             </ChartCard>
-          </div>
-        </section>
-
-        <section className="container dashboard-section dashboard-note-section">
-          <div className="dashboard-note">
-            <span className="dashboard-note-icon"><Icon name="model" /></span>
-            <div>
-              <strong>Локальная установка</strong>
-              <span>Источник можно заменить на физическую ESP32 без изменения JSON-контракта, API или этой панели.</span>
-            </div>
-            <span className="dashboard-note-code">REST / JSON · polling 30 с</span>
           </div>
         </section>
       </main>

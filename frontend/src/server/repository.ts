@@ -24,6 +24,10 @@ export interface Repository {
   createRecommendation(input: RecommendationDraft): Promise<Recommendation>
   getLatestRecommendation(): Promise<Recommendation | null>
   getControlState(deviceId: string): Promise<ControlState>
+  getLatestControlCommand(
+    deviceId: string,
+    target: ControlCommand['target'],
+  ): Promise<ControlCommand | null>
   queueControlCommands(input: ControlCommandInput[]): Promise<ControlCommand[]>
   listPendingControlCommands(deviceId: string, limit: number): Promise<ControlCommand[]>
   reportControlState(input: DeviceStateReport): Promise<ControlState>
@@ -199,6 +203,18 @@ export class MemoryRepository implements Repository {
     ).length
     state.lastCommand = [...commands].sort(sortCommands)[0] ?? null
     return cloneControlState(state)
+  }
+
+  async getLatestControlCommand(
+    deviceId: string,
+    target: ControlCommand['target'],
+  ): Promise<ControlCommand | null> {
+    const command = [...this.controlCommands]
+      .filter(
+        (item) => item.deviceId === deviceId && item.target === target,
+      )
+      .sort(sortCommands)[0]
+    return command ? { ...command } : null
   }
 
   async queueControlCommands(input: ControlCommandInput[]): Promise<ControlCommand[]> {
@@ -631,6 +647,19 @@ export class PostgresRepository implements Repository {
   async getControlState(deviceId: string): Promise<ControlState> {
     await this.ensureControlState(deviceId)
     return this.readControlState(deviceId)
+  }
+
+  async getLatestControlCommand(
+    deviceId: string,
+    target: ControlCommand['target'],
+  ): Promise<ControlCommand | null> {
+    const result = await this.pool.query<ControlCommandRow>(
+      'SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at ' +
+        'FROM actuator_commands WHERE device_id = $1 AND target = $2 ' +
+        'ORDER BY created_at DESC, id DESC LIMIT 1',
+      [deviceId, target],
+    )
+    return result.rows[0] ? mapControlCommand(result.rows[0]) : null
   }
 
   async queueControlCommands(input: ControlCommandInput[]): Promise<ControlCommand[]> {
