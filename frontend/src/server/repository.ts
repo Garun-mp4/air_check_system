@@ -214,7 +214,23 @@ export class MemoryRepository implements Repository {
           : item.target === 'intake'
             ? state.desired.intakeOn
             : state.desired.windowOpen
-      if (currentDesired === item.desiredState) {
+      const currentReported =
+        item.target === 'exhaust'
+          ? state.reported.exhaustOn
+          : item.target === 'intake'
+            ? state.reported.intakeOn
+            : state.reported.windowOpen
+      const pendingForTarget = this.controlCommands.some(
+        (command) =>
+          command.deviceId === item.deviceId &&
+          command.target === item.target &&
+          command.status === 'pending' &&
+          command.desiredState === item.desiredState,
+      )
+      if (
+        currentDesired === item.desiredState &&
+        (currentReported === item.desiredState || pendingForTarget)
+      ) {
         continue
       }
       const command: ControlCommand = {
@@ -269,7 +285,13 @@ export class MemoryRepository implements Repository {
         (item) =>
           item.id === commandId &&
           item.deviceId === input.deviceId &&
-          item.status === 'pending',
+          item.status === 'pending' &&
+          ((item.target === 'exhaust' &&
+            item.desiredState === input.reported.exhaustOn) ||
+            (item.target === 'intake' &&
+              item.desiredState === input.reported.intakeOn) ||
+            (item.target === 'window' &&
+              item.desiredState === input.reported.windowOpen)),
       )
       if (command) {
         command.status = 'applied'
@@ -623,6 +645,13 @@ export class PostgresRepository implements Repository {
         [input[0].deviceId],
       )
       const current = await this.readControlState(input[0].deviceId, client)
+      const pendingResult = await client.query<{
+        target: ControlCommand['target']
+        desired_state: boolean
+      }>(
+        "SELECT target, desired_state FROM actuator_commands WHERE device_id = $1 AND status = 'pending'",
+        [input[0].deviceId],
+      )
       const created: ControlCommand[] = []
       for (const item of input) {
         const currentDesired =
@@ -631,7 +660,21 @@ export class PostgresRepository implements Repository {
             : item.target === 'intake'
               ? current.desired.intakeOn
               : current.desired.windowOpen
-        if (currentDesired === item.desiredState) {
+        const currentReported =
+          item.target === 'exhaust'
+            ? current.reported.exhaustOn
+            : item.target === 'intake'
+              ? current.reported.intakeOn
+              : current.reported.windowOpen
+        const pendingForTarget = pendingResult.rows.some(
+          (row) =>
+            row.target === item.target &&
+            row.desired_state === item.desiredState,
+        )
+        if (
+          currentDesired === item.desiredState &&
+          (currentReported === item.desiredState || pendingForTarget)
+        ) {
           continue
         }
         const result = await client.query<ControlCommandRow>(
@@ -647,6 +690,10 @@ export class PostgresRepository implements Repository {
           ],
         )
         created.push(mapControlCommand(result.rows[0]))
+        pendingResult.rows.push({
+          target: item.target,
+          desired_state: item.desiredState,
+        })
         if (item.target === 'exhaust') {
           await client.query(
             'UPDATE actuator_states SET desired_exhaust_on = $2, updated_at = NOW() WHERE device_id = $1',
@@ -708,8 +755,14 @@ export class PostgresRepository implements Repository {
       )
       if (input.appliedCommandIds.length > 0) {
         await client.query(
-          "UPDATE actuator_commands SET status = 'applied', applied_at = NOW() WHERE device_id = $1 AND status = 'pending' AND id = ANY($2::bigint[])",
-          [input.deviceId, input.appliedCommandIds],
+          "UPDATE actuator_commands SET status = 'applied', applied_at = NOW() WHERE device_id = $1 AND status = 'pending' AND id = ANY($2::bigint[]) AND ((target = 'exhaust' AND desired_state = $3::boolean) OR (target = 'intake' AND desired_state = $4::boolean) OR (target = 'window' AND desired_state = $5::boolean))",
+          [
+            input.deviceId,
+            input.appliedCommandIds,
+            input.reported.exhaustOn,
+            input.reported.intakeOn,
+            input.reported.windowOpen,
+          ],
         )
       }
       await client.query('COMMIT')

@@ -86,11 +86,21 @@ function withAutomationSummary(
         minute: '2-digit',
       }) +
       '.'
-  } else if (status.pendingCommands > 0 || status.connectionStatus !== 'online') {
+  } else if (
+    status.pendingCommands > 0 ||
+    status.connectionStatus !== 'online' ||
+    status.reported.exhaustOn !== status.desired.exhaustOn ||
+    status.reported.intakeOn !== status.desired.intakeOn ||
+    status.reported.windowOpen !== status.desired.windowOpen
+  ) {
     automationStatus = 'waiting_for_device'
     message =
       status.pendingCommands > 0
         ? 'Команда ожидает подтверждения локального узла.'
+        : status.reported.exhaustOn !== status.desired.exhaustOn ||
+            status.reported.intakeOn !== status.desired.intakeOn ||
+            status.reported.windowOpen !== status.desired.windowOpen
+          ? 'Фактическое состояние отличается от желаемого, ожидается синхронизация.'
         : 'Ожидание отчёта от локального узла.'
   } else if (status.reported.windowOpen || status.desired.windowOpen) {
     automationStatus = 'ventilating'
@@ -216,43 +226,68 @@ export class ControlService {
     const commandPlans: Array<
       Pick<ControlCommandInput, 'target' | 'desiredState' | 'reason'>
     > = []
+    const addPlan = (
+      target: ControlCommandInput['target'],
+      desiredState: boolean,
+      reason: string,
+    ) => {
+      commandPlans.push({ target, desiredState, reason })
+    }
 
     if (critical) {
       const reason =
         'Автоматика: CO₂ достиг критического порога или прогнозирует его через 15 минут.'
-      if (!state.desired.windowOpen) {
+      if (!state.desired.windowOpen || !state.reported.windowOpen) {
         commandPlans.push({ target: 'window', desiredState: true, reason })
       }
-      if (!state.desired.exhaustOn) {
+      if (!state.desired.exhaustOn || !state.reported.exhaustOn) {
         commandPlans.push({ target: 'exhaust', desiredState: true, reason })
       }
-      if (!state.desired.intakeOn) {
+      if (!state.desired.intakeOn || !state.reported.intakeOn) {
         commandPlans.push({ target: 'intake', desiredState: true, reason })
       }
     } else if (shouldSupportOpenWindow) {
       const reason =
         'Автоматика: окно открыто, поэтому оба воздушных контура поддерживают проветривание.'
-      if (!state.desired.exhaustOn) {
+      if (!state.desired.exhaustOn || !state.reported.exhaustOn) {
         commandPlans.push({ target: 'exhaust', desiredState: true, reason })
       }
-      if (!state.desired.intakeOn) {
+      if (!state.desired.intakeOn || !state.reported.intakeOn) {
         commandPlans.push({ target: 'intake', desiredState: true, reason })
       }
     } else if (
       currentCo2 < this.config.co2NormalThreshold &&
       (predictedCo2 === null || predictedCo2 < this.config.co2NormalThreshold) &&
-      state.desired.windowOpen &&
+      (state.desired.windowOpen || state.reported.windowOpen) &&
       state.windowOpenSince !== null &&
       Date.now() - state.windowOpenSince.getTime() >=
         this.config.autoVentilationMinimumMinutes * 60_000
     ) {
       const reason =
         'Автоматика: CO₂ вернулся в комфортную зону после минимального времени проветривания.'
-      commandPlans.push(
-        { target: 'window', desiredState: false, reason },
-        { target: 'exhaust', desiredState: false, reason },
-        { target: 'intake', desiredState: false, reason },
-      )
+      if (state.desired.windowOpen || state.reported.windowOpen) {
+        addPlan('window', false, reason)
+      }
+      if (state.desired.exhaustOn || state.reported.exhaustOn) {
+        addPlan('exhaust', false, reason)
+      }
+      if (state.desired.intakeOn || state.reported.intakeOn) {
+        addPlan('intake', false, reason)
+      }
+    } else if (
+      currentCo2 < this.config.co2NormalThreshold &&
+      (predictedCo2 === null || predictedCo2 < this.config.co2NormalThreshold) &&
+      !state.desired.windowOpen &&
+      !state.reported.windowOpen
+    ) {
+      const reason =
+        'Автоматика: поддержание выключенного воздушного контура после восстановления CO₂.'
+      if (state.desired.exhaustOn || state.reported.exhaustOn) {
+        commandPlans.push({ target: 'exhaust', desiredState: false, reason })
+      }
+      if (state.desired.intakeOn || state.reported.intakeOn) {
+        commandPlans.push({ target: 'intake', desiredState: false, reason })
+      }
     }
 
     if (commandPlans.length === 0) {

@@ -236,6 +236,30 @@ describe('memory repository', () => {
     })
     expect(state.pendingCommands).toBe(0)
   })
+
+  it('does not acknowledge a command when the reported state disagrees', async () => {
+    const repository = new MemoryRepository()
+    const [command] = await repository.queueControlCommands([
+      {
+        deviceId: 'room-01',
+        target: 'exhaust',
+        desiredState: true,
+        source: 'manual',
+        reason: 'test',
+        batchId: 'batch-mismatch',
+      },
+    ])
+
+    const state = await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: new Date(),
+      reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+      appliedCommandIds: [command.id],
+    })
+
+    expect(state.pendingCommands).toBe(1)
+    expect(state.lastCommand?.status).toBe('pending')
+  })
 })
 
 describe('control service', () => {
@@ -268,6 +292,65 @@ describe('control service', () => {
 
     expect(commands).toEqual([])
     expect((await service.status()).windowMode).toBe('manual')
+  })
+
+  it('closes the automatic ventilation batch after CO2 recovers', async () => {
+    vi.useFakeTimers()
+    try {
+      const repository = new MemoryRepository()
+      const service = new ControlService(repository, config)
+      const openedAt = new Date('2026-09-06T10:00:00Z')
+      vi.setSystemTime(openedAt)
+
+      const openedCommands = await repository.queueControlCommands([
+        {
+          deviceId: 'room-01',
+          target: 'window',
+          desiredState: true,
+          source: 'automatic',
+          reason: 'test',
+          batchId: 'open-batch',
+        },
+        {
+          deviceId: 'room-01',
+          target: 'exhaust',
+          desiredState: true,
+          source: 'automatic',
+          reason: 'test',
+          batchId: 'open-batch',
+        },
+        {
+          deviceId: 'room-01',
+          target: 'intake',
+          desiredState: true,
+          source: 'automatic',
+          reason: 'test',
+          batchId: 'open-batch',
+        },
+      ])
+      await repository.reportControlState({
+        deviceId: 'room-01',
+        timestamp: openedAt,
+        reported: { exhaustOn: true, intakeOn: true, windowOpen: true },
+        appliedCommandIds: openedCommands.map((command) => command.id),
+      })
+
+      vi.setSystemTime(new Date('2026-09-06T10:06:00Z'))
+      const closingCommands = await service.reconcile(
+        measurementAt(1, new Date('2026-09-06T10:06:00Z'), 620, true),
+        null,
+      )
+
+      expect(closingCommands.map((command) => command.target)).toEqual([
+        'window',
+        'exhaust',
+        'intake',
+      ])
+      expect(closingCommands.every((command) => command.desiredState === false)).toBe(true)
+      expect(new Set(closingCommands.map((command) => command.batchId)).size).toBe(1)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
 
