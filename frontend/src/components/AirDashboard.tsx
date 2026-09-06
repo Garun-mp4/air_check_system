@@ -667,7 +667,18 @@ export default function AirDashboard() {
       <header className="app-topbar">
         <div className="container app-topbar-inner">
           <a className="brand dashboard-brand" href="#overview" onClick={() => setMenuOpen(false)}>
-            <img className="brand-logo" src="/aircheck-logo.svg" alt="AirCheck" />
+            <picture className="brand-logo-frame">
+              <source srcSet="/aircheck-logo.webp" type="image/webp" />
+              <img
+                className="brand-logo"
+                src="/aircheck-logo.png"
+                alt=""
+                width="40"
+                height="40"
+                aria-hidden="true"
+              />
+            </picture>
+            <span className="brand-name">AirCheck</span>
           </a>
 
           <div className="room-context" aria-label="Активная комната">

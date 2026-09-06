@@ -1421,10 +1421,28 @@ a:focus-visible {
   line-height: 0;
 }
 
+.brand-logo-frame {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
 .brand-logo {
   display: block;
-  width: 132px;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-name {
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.45px;
+  line-height: 1;
 }
 
 .room-context {
@@ -2903,8 +2921,9 @@ a:focus-visible {
     width: min(calc(100% - var(--spacing-lg)), 1280px);
   }
 
-  .brand-logo {
-    width: 118px;
+  .brand-logo-frame {
+    width: 36px;
+    height: 36px;
   }
 
   .control-button {
