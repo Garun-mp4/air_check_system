@@ -17,6 +17,16 @@ import {
   type ClientRecommendation,
   type DashboardData,
 } from '../lib/client-api'
+import {
+  PM25_ELEVATED_LIMIT,
+  PM25_GOOD_LIMIT,
+  PM25_SCALE_MAX,
+  getPm25AriaLabel,
+  getPm25Label,
+  getPm25Level,
+  getPm25MarkerPosition,
+  getPm25Tone,
+} from '../lib/air-quality'
 import { LineChart, WindowChart } from './Charts'
 
 type RangeKey = '6h' | '24h' | '7d'
@@ -357,6 +367,7 @@ function MetricCard({
   value,
   unit,
   note,
+  quality,
   className = '',
 }: {
   icon: Exclude<IconName, 'air' | 'exhaust' | 'intake' | 'database' | 'model' | 'wifi' | 'refresh' | 'menu' | 'close' | 'clock' | 'outdoor' | 'arrow'>
@@ -364,6 +375,7 @@ function MetricCard({
   value: string
   unit?: string
   note?: string
+  quality?: ReactNode
   className?: string
 }) {
   return (
@@ -378,8 +390,47 @@ function MetricCard({
         {value}
         {unit ? <small>{unit}</small> : null}
       </strong>
+      {quality}
       <span className="data-card-note">{note ?? 'локальный датчик'}</span>
     </article>
+  )
+}
+
+function Pm25Scale({ value }: { value: number | null | undefined }) {
+  const level = getPm25Level(value)
+  const tone = getPm25Tone(level)
+  const markerPosition = getPm25MarkerPosition(value)
+
+  return (
+    <div className="pm25-quality">
+      <div className="pm25-quality-heading">
+        <span>Качество воздуха</span>
+        <span className={'pm25-quality-status pm25-quality-status-' + tone}>
+          <span className={'status-dot status-dot-' + tone} />
+          {getPm25Label(level)}
+        </span>
+      </div>
+      <div className="pm25-scale" role="img" aria-label={getPm25AriaLabel(value)}>
+        <div className="pm25-scale-track">
+          <span className="pm25-scale-zone pm25-scale-zone-good" />
+          <span className="pm25-scale-zone pm25-scale-zone-elevated" />
+          <span className="pm25-scale-zone pm25-scale-zone-high" />
+        </div>
+        {markerPosition !== null ? (
+          <span
+            className="pm25-scale-marker"
+            style={{ left: markerPosition + '%' }}
+            aria-hidden="true"
+          />
+        ) : null}
+      </div>
+      <div className="pm25-scale-labels" aria-hidden="true">
+        <span>0</span>
+        <span>{PM25_GOOD_LIMIT}</span>
+        <span>{PM25_ELEVATED_LIMIT}</span>
+        <span>{PM25_SCALE_MAX}+</span>
+      </div>
+    </div>
   )
 }
 
@@ -572,6 +623,8 @@ export default function AirDashboard() {
   const prediction: ClientPrediction | null = dashboard?.prediction ?? null
   const recommendation: ClientRecommendation | null = dashboard?.recommendation ?? null
   const currentCo2 = measurement?.indoor.co2 ?? null
+  const indoorPm25 = measurement?.indoor.pm25 ?? null
+  const outdoorPm25 = measurement?.outdoor.pm25 ?? null
   const change5 = useMemo(() => getCo2Change(history, 5), [history])
   const change10 = useMemo(() => getCo2Change(history, 10), [history])
   const markerPosition = useMemo(() => {
@@ -958,7 +1011,15 @@ export default function AirDashboard() {
           <div className="metrics-grid">
             <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.indoor.temperature, 1)} unit="°C" note="внутри · сейчас" />
             <MetricCard icon="humidity" label="Влажность" value={formatValue(measurement?.indoor.humidity, 0)} unit="%" note="внутри · сейчас" />
-            <MetricCard icon="pm25" label="PM2.5" value={formatValue(measurement?.indoor.pm25, 1)} unit="µg/m³" note="внутри · сейчас" />
+            <MetricCard
+              icon="pm25"
+              label="PM2.5"
+              value={formatValue(indoorPm25, 1)}
+              unit="µg/m³"
+              note="внутри · сейчас"
+              quality={<Pm25Scale value={indoorPm25} />}
+              className="data-card-pm25"
+            />
             <MetricCard icon="window" label="Окно" value={windowLabel} note={measurement ? 'состояние · ' + formatTime(measurement.timestamp) : 'нет данных'} className="data-card-window" />
           </div>
 
@@ -974,7 +1035,15 @@ export default function AirDashboard() {
             <div className="outdoor-grid">
               <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.outdoor.temperature, 1)} unit="°C" note="снаружи" className="data-card-compact" />
               <MetricCard icon="humidity" label="Влажность" value={formatValue(measurement?.outdoor.humidity, 0)} unit="%" note="снаружи" className="data-card-compact" />
-              <MetricCard icon="pm25" label="PM2.5" value={formatValue(measurement?.outdoor.pm25, 1)} unit="µg/m³" note="снаружи" className="data-card-compact" />
+              <MetricCard
+                icon="pm25"
+                label="PM2.5"
+                value={formatValue(outdoorPm25, 1)}
+                unit="µg/m³"
+                note="снаружи"
+                quality={<Pm25Scale value={outdoorPm25} />}
+                className="data-card-compact data-card-pm25"
+              />
             </div>
           </div>
         </section>

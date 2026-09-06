@@ -2373,6 +2373,133 @@ a:focus-visible {
   letter-spacing: 0;
 }
 
+.dashboard-shell .data-card-pm25 {
+  min-height: 180px;
+}
+
+.pm25-quality {
+  display: grid;
+  gap: var(--spacing-xxs);
+  margin-top: var(--spacing-xxs);
+}
+
+.pm25-quality-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+
+.pm25-quality-heading > span:first-child,
+.pm25-quality-status,
+.pm25-scale-labels {
+  font-family: var(--font-code);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.pm25-quality-heading > span:first-child {
+  color: var(--color-muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.pm25-quality-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pm25-quality-status-success {
+  color: var(--color-success);
+}
+
+.pm25-quality-status-warning {
+  color: var(--color-warning);
+}
+
+.pm25-quality-status-error {
+  color: var(--color-error);
+}
+
+.pm25-quality-status-neutral {
+  color: var(--color-muted);
+}
+
+.pm25-scale {
+  position: relative;
+  height: 16px;
+  padding-block: var(--spacing-xxs);
+}
+
+.pm25-scale-track {
+  display: grid;
+  grid-template-columns: 3fr 4fr 3fr;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--rounded-pill);
+  background: var(--color-surface-strong);
+}
+
+.pm25-scale-zone {
+  display: block;
+  height: 100%;
+}
+
+.pm25-scale-zone-good {
+  background: var(--color-success);
+}
+
+.pm25-scale-zone-elevated {
+  background: var(--color-warning);
+}
+
+.pm25-scale-zone-high {
+  background: var(--color-error);
+}
+
+.pm25-scale-marker {
+  position: absolute;
+  top: 0;
+  width: 4px;
+  height: 16px;
+  transform: translateX(-50%);
+  background: var(--color-ink);
+  border: 2px solid var(--color-canvas);
+  border-radius: var(--rounded-pill);
+}
+
+.pm25-scale-labels {
+  position: relative;
+  min-height: 12px;
+  color: var(--color-muted);
+}
+
+.pm25-scale-labels span {
+  position: absolute;
+  top: 0;
+}
+
+.pm25-scale-labels span:nth-child(1) {
+  left: 0;
+}
+
+.pm25-scale-labels span:nth-child(2) {
+  left: 30%;
+  transform: translateX(-50%);
+}
+
+.pm25-scale-labels span:nth-child(3) {
+  left: 70%;
+  transform: translateX(-50%);
+}
+
+.pm25-scale-labels span:nth-child(4) {
+  right: 0;
+}
+
 .data-card-note {
   color: var(--color-muted);
   font-family: var(--font-code);
