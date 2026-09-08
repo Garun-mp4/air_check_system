@@ -5019,3 +5019,202 @@ a:focus-visible {
     display: none;
   }
 }
+
+/* Chart interaction: the plot is a working instrument, not a decorative image. */
+.dashboard-shell .interactive-chart {
+  width: 100%;
+  min-width: 0;
+}
+
+.dashboard-shell .chart-viewport-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  min-width: 0;
+  margin-bottom: var(--spacing-xs);
+}
+
+.dashboard-shell .chart-viewport-status {
+  min-width: 0;
+  color: var(--color-muted);
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.dashboard-shell .chart-viewport-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex: 0 0 auto;
+}
+
+.dashboard-shell .chart-viewport-button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.dashboard-shell .chart-reset-button {
+  min-height: 36px;
+  padding: 0 var(--spacing-sm);
+  font-size: var(--caption-size);
+}
+
+.dashboard-shell .chart-viewport-button:disabled,
+.dashboard-shell .chart-reset-button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.dashboard-shell .chart-interaction-help {
+  margin: 0 0 var(--spacing-xs);
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.dashboard-shell .interactive-chart-surface {
+  width: 100%;
+  overflow: hidden;
+  border-top: 1px solid var(--color-hairline);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dashboard-shell .interactive-chart-surface:active {
+  cursor: grabbing;
+}
+
+.dashboard-shell .interactive-chart-surface .chart-svg {
+  cursor: inherit;
+}
+
+.dashboard-shell .chart-focus-line {
+  stroke: var(--color-muted-soft);
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+
+.dashboard-shell .chart-focus-point {
+  fill: var(--color-canvas);
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+
+.dashboard-shell .chart-focus-label {
+  fill: var(--color-ink);
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.dashboard-shell .window-history-summary {
+  display: grid;
+  gap: var(--spacing-xs);
+  margin: 0 0 var(--spacing-lg);
+  padding: var(--spacing-sm) 0;
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.dashboard-shell .window-history-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.dashboard-shell .window-history-count {
+  color: var(--color-muted);
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-shell .window-history-summary-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.dashboard-shell .window-history-summary-row > div {
+  display: grid;
+  min-width: 0;
+  gap: var(--spacing-xxs);
+}
+
+.dashboard-shell .window-history-summary-row strong {
+  color: var(--color-ink);
+  font-size: var(--body-sm-size);
+  font-weight: 600;
+}
+
+.dashboard-shell .window-history-summary-row span:not(.window-history-marker) {
+  overflow: hidden;
+  color: var(--color-muted);
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-shell .window-history-marker {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: var(--rounded-full);
+  background: var(--color-muted-soft);
+}
+
+.dashboard-shell .window-history-marker.is-open {
+  background: var(--color-success);
+}
+
+.dashboard-shell .window-history-marker.is-closed {
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-muted-soft);
+}
+
+.dashboard-shell .window-history-summary > p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--body-sm-size);
+  line-height: 1.45;
+}
+
+@media (max-width: 559px) {
+  .dashboard-shell .chart-viewport-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-shell .chart-viewport-actions {
+    width: 100%;
+  }
+
+  .dashboard-shell .chart-viewport-button {
+    flex: 0 0 36px;
+  }
+
+  .dashboard-shell .chart-reset-button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell .interactive-chart-surface {
+    scroll-behavior: auto;
+  }
+}

@@ -27,7 +27,7 @@ import {
   getPm25MarkerPosition,
   getPm25Tone,
 } from '../lib/air-quality'
-import { LineChart, WindowChart } from './Charts'
+import { LineChart } from './Charts'
 
 type RangeKey = '6h' | '24h' | '7d'
 export const dashboardNavItems = [
@@ -146,6 +146,57 @@ function formatTime(timestamp: string | null | undefined): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(timestamp))
+}
+
+export interface WindowHistorySummary {
+  transitionCount: number
+  lastChange: {
+    from: boolean
+    to: boolean
+    timestamp: string
+  } | null
+}
+
+export function getWindowHistorySummary(
+  measurements: ClientMeasurement[],
+): WindowHistorySummary {
+  const ordered = measurements
+    .filter((measurement) => Boolean(measurement.timestamp))
+    .slice()
+    .sort((first, second) => (
+      new Date(first.timestamp).getTime() - new Date(second.timestamp).getTime()
+    ))
+
+  let transitionCount = 0
+  let lastChange: WindowHistorySummary['lastChange'] = null
+
+  for (let index = 1; index < ordered.length; index += 1) {
+    const previous = ordered[index - 1]
+    const current = ordered[index]
+    if (previous.window_open !== current.window_open) {
+      transitionCount += 1
+      lastChange = {
+        from: previous.window_open,
+        to: current.window_open,
+        timestamp: current.timestamp,
+      }
+    }
+  }
+
+  return { transitionCount, lastChange }
+}
+
+function formatTransitionCount(count: number): string {
+  if (count === 0) {
+    return 'без изменений'
+  }
+  if (count % 10 === 1 && count % 100 !== 11) {
+    return count + ' изменение'
+  }
+  if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
+    return count + ' изменения'
+  }
+  return count + ' изменений'
 }
 
 function co2BadgeClass(value: number | null | undefined): string {
@@ -535,18 +586,14 @@ function ChartCard({
   caption,
   children,
   unit,
-  legend,
-  wide = false,
 }: {
   title: string
   caption: string
   children: ReactNode
   unit?: string
-  legend?: ReactNode
-  wide?: boolean
 }) {
   return (
-    <article className={'dashboard-card chart-card ' + (wide ? 'chart-card-wide' : '')}>
+    <article className="dashboard-card chart-card">
       <div className="chart-card-header">
         <div>
           <span className="chart-card-context">{caption}</span>
@@ -554,7 +601,6 @@ function ChartCard({
         </div>
         <div className="chart-card-meta">
           {unit ? <span className="chart-card-unit">{unit}</span> : null}
-          {legend ? <span className="chart-card-legend" aria-label="Обозначения состояния окна">{legend}</span> : null}
         </div>
       </div>
       <div className="chart-shell">{children}</div>
@@ -871,6 +917,7 @@ export default function AirDashboard() {
     timestamp: item.timestamp,
     value: item.indoor.temperature,
   }))
+  const windowHistory = useMemo(() => getWindowHistorySummary(history), [history])
   const lastHistoryPoint = history.at(-1)
   const isEmpty = !loading && !error && !measurement && history.length === 0
   const sourceLabel = lastUpdated
@@ -1209,6 +1256,26 @@ export default function AirDashboard() {
                   <span>{windowMode === 'manual' ? 'ручной режим' : 'автоматический режим'}</span>
                 </div>
               </div>
+              <div className="window-history-summary" aria-label="История состояния окна">
+                <div className="window-history-summary-header">
+                  <span className="eyebrow">За {rangeLabels[range]}</span>
+                  <span className="window-history-count">{formatTransitionCount(windowHistory.transitionCount)}</span>
+                </div>
+                {windowHistory.lastChange ? (
+                  <div className="window-history-summary-row">
+                    <span
+                      className={'window-history-marker ' + (windowHistory.lastChange.to ? 'is-open' : 'is-closed')}
+                      aria-hidden="true"
+                    />
+                    <div>
+                      <strong>{windowHistory.lastChange.to ? 'Открыто' : 'Закрыто'}</strong>
+                      <span>последнее изменение · {formatTimestamp(windowHistory.lastChange.timestamp)}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p>Состояние не менялось за выбранный период.</p>
+                )}
+              </div>
               <div className="window-mode-control">
                 <span className="eyebrow">Режим и команда</span>
                 <div className="nav-pill-group control-mode-tabs" role="group" aria-label="Управление окном">
@@ -1311,7 +1378,7 @@ export default function AirDashboard() {
             <div>
               <span className="eyebrow">История</span>
               <h2>Как менялся воздух</h2>
-              <p>Показания из PostgreSQL за выбранный период.</p>
+              <p>Показания из PostgreSQL за выбранный период. Перетаскивайте график, используйте Ctrl + колесо или два пальца для масштаба.</p>
             </div>
             <div className="range-control">
               <span className="range-label">период</span>
@@ -1343,19 +1410,6 @@ export default function AirDashboard() {
             </ChartCard>
             <ChartCard title="Температура" caption="температура" unit="°C">
               <LineChart data={temperatureSeries} unit="°C" ariaLabel="График температуры помещения" />
-            </ChartCard>
-            <ChartCard
-              title="Состояние окна"
-              caption="окно"
-              legend={(
-                <>
-                  <span><i className="chart-legend-swatch chart-legend-swatch-closed" aria-hidden="true" />Закрыто</span>
-                  <span><i className="chart-legend-swatch chart-legend-swatch-open" aria-hidden="true" />Открыто</span>
-                </>
-              )}
-              wide
-            >
-              <WindowChart data={history} ariaLabel="График состояния окна" />
             </ChartCard>
           </div>
         </section>
