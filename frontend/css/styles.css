@@ -6084,7 +6084,8 @@ body.is-settings-open {
 
 .dashboard-shell .air-context-card {
   position: relative;
-  display: block;
+  display: flex;
+  align-items: flex-start;
   min-width: 0;
   min-height: 432px;
   overflow: hidden;
