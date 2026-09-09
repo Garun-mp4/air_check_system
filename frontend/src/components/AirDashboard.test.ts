@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest'
 import {
   AirComparison,
   AirContextCards,
-  AirContextMap,
   DashboardNavigation,
   SettingsPanel,
   getConnectionStatusLabel,
@@ -34,7 +33,6 @@ describe('dashboard navigation', () => {
     }
     const cards = renderToStaticMarkup(createElement(AirContextCards, {
       measurement,
-      onNavigate: () => undefined,
     }))
     const comparison = renderToStaticMarkup(createElement(AirComparison, { measurement }))
 
@@ -46,19 +44,22 @@ describe('dashboard navigation', () => {
     expect(cards).toContain('23,1')
     expect(cards).toContain('45<small>%</small>')
     expect(cards).toContain('Закрыто')
+    expect(cards).not.toContain('Нажмите, чтобы открыть подробные показания')
+    expect(cards).not.toContain('aria-controls=')
     expect(cards.match(/air-context-card-metric-pm25/g)).toHaveLength(2)
     expect(cards.match(/air-context-card-metric-window/g)).toHaveLength(1)
     expect(comparison).toContain('CO₂ не сравнивается')
     expect(comparison).toContain('внутри чище')
   })
 
-  it('explains indoor and outdoor readings with navigable zones', () => {
-    const markup = renderToStaticMarkup(createElement(AirContextMap, { onNavigate: () => undefined }))
+  it('keeps indoor and outdoor readings together without duplicate sensor links', () => {
+    const markup = renderToStaticMarkup(createElement(AirContextCards))
 
     expect(markup).toContain('Снаружи')
     expect(markup).toContain('Внутри комнаты')
-    expect(markup).toContain('aria-controls="outdoor-sensors"')
-    expect(markup).toContain('aria-controls="indoor-sensors"')
+    expect(markup).not.toContain('id="indoor-sensors"')
+    expect(markup).not.toContain('id="outdoor-sensors"')
+    expect(markup).not.toContain('aria-controls=')
   })
 
   it('resolves only known section hashes', () => {

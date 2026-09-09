@@ -609,79 +609,6 @@ function Icon({ name }: { name: IconName }) {
   )
 }
 
-function MetricCard({
-  icon,
-  label,
-  value,
-  unit,
-  note,
-  quality,
-  className = '',
-}: {
-  icon: Exclude<IconName, 'air' | 'exhaust' | 'intake' | 'database' | 'model' | 'wifi' | 'refresh' | 'menu' | 'close' | 'clock' | 'arrow'>
-  label: string
-  value: string
-  unit?: string
-  note?: string
-  quality?: ReactNode
-  className?: string
-}) {
-  return (
-    <article className={'data-card ' + className}>
-      <div className="data-card-top">
-        <span className="data-card-label">{label}</span>
-        <span className="data-card-icon">
-          <Icon name={icon} />
-        </span>
-      </div>
-      <strong className="data-card-value">
-        {value}
-        {unit ? <small>{unit}</small> : null}
-      </strong>
-      {quality}
-      <span className="data-card-note">{note ?? 'локальный датчик'}</span>
-    </article>
-  )
-}
-
-function Pm25Scale({ value }: { value: number | null | undefined }) {
-  const level = getPm25Level(value)
-  const tone = getPm25Tone(level)
-  const markerPosition = getPm25MarkerPosition(value)
-
-  return (
-    <div className="pm25-quality">
-      <div className="pm25-quality-heading">
-        <span>Качество воздуха</span>
-        <span className={'pm25-quality-status pm25-quality-status-' + tone}>
-          <span className={'status-dot status-dot-' + tone} />
-          {getPm25Label(level)}
-        </span>
-      </div>
-      <div className="pm25-scale" role="img" aria-label={getPm25AriaLabel(value)}>
-        <div className="pm25-scale-track">
-          <span className="pm25-scale-zone pm25-scale-zone-good" />
-          <span className="pm25-scale-zone pm25-scale-zone-elevated" />
-          <span className="pm25-scale-zone pm25-scale-zone-high" />
-        </div>
-        {markerPosition !== null ? (
-          <span
-            className="pm25-scale-marker"
-            style={{ left: markerPosition + '%' }}
-            aria-hidden="true"
-          />
-        ) : null}
-      </div>
-      <div className="pm25-scale-labels" aria-hidden="true">
-        <span>0</span>
-        <span>{PM25_GOOD_LIMIT}</span>
-        <span>{PM25_ELEVATED_LIMIT}</span>
-        <span>{PM25_SCALE_MAX}+</span>
-      </div>
-    </div>
-  )
-}
-
 function ActuatorRow({
   target,
   icon,
@@ -749,8 +676,6 @@ function ChartCard({
     </article>
   )
 }
-
-type SensorZone = 'indoor' | 'outdoor'
 
 type AirContextMetricProps = {
   icon: 'temperature' | 'humidity' | 'window'
@@ -830,11 +755,9 @@ function AirContextPm25Metric({ value }: { value: number | null | undefined }) {
 }
 
 export function AirContextCards({
-  onNavigate,
   measurement = null,
   windowOpen,
 }: {
-  onNavigate: (zone: SensorZone) => void
   measurement?: ClientMeasurement | null
   windowOpen?: boolean | null
 }) {
@@ -862,13 +785,10 @@ export function AirContextCards({
   return (
     <div className="air-context-cards" role="group" aria-label="Контексты воздуха">
       {contexts.map((context) => (
-        <button
+        <article
           className={'air-context-card air-context-card-' + context.zone}
-          type="button"
           key={context.zone}
-          onClick={() => onNavigate(context.zone)}
-          aria-controls={context.zone === 'indoor' ? 'indoor-sensors' : 'outdoor-sensors'}
-          aria-label={'Перейти к показаниям ' + context.label.toLowerCase()}
+          aria-label={context.title}
         >
           <span className="air-context-card-media" aria-hidden="true">
             <img src={context.image} alt="" width={1672} height={941} loading="lazy" decoding="async" />
@@ -907,25 +827,11 @@ export function AirContextCards({
                 />
               ) : null}
             </span>
-            <span className="air-context-card-footer">
-              <span>Нажмите, чтобы открыть подробные показания</span>
-              <span className="air-context-card-reading">
-                {measurement ? 'обновлено ' + formatTime(measurement.timestamp) : 'показания ожидаются'}
-              </span>
-            </span>
           </span>
-        </button>
+        </article>
       ))}
     </div>
   )
-}
-
-export function AirContextMap(props: {
-  onNavigate: (zone: SensorZone) => void
-  measurement?: ClientMeasurement | null
-  windowOpen?: boolean | null
-}) {
-  return <AirContextCards {...props} />
 }
 
 export function AirComparison({
@@ -1608,13 +1514,6 @@ export default function AirDashboard() {
     })
   }, [])
 
-  const handleSensorNavigation = useCallback((zone: SensorZone) => {
-    const targetId = zone === 'indoor' ? 'indoor-sensors' : 'outdoor-sensors'
-    window.requestAnimationFrame(() => {
-      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }, [])
-
   useEffect(() => {
     if (!menuOpen) {
       return
@@ -1674,8 +1573,6 @@ export default function AirDashboard() {
   const prediction: ClientPrediction | null = dashboard?.prediction ?? null
   const recommendation: ClientRecommendation | null = dashboard?.recommendation ?? null
   const currentCo2 = measurement?.indoor.co2 ?? null
-  const indoorPm25 = measurement?.indoor.pm25 ?? null
-  const outdoorPm25 = measurement?.outdoor.pm25 ?? null
   const change5 = useMemo(() => getCo2Change(history, 5), [history])
   const change10 = useMemo(() => getCo2Change(history, 10), [history])
   const markerPosition = useMemo(() => {
@@ -2114,57 +2011,8 @@ export default function AirDashboard() {
           <AirContextCards
             measurement={measurement}
             windowOpen={currentWindowOpen}
-            onNavigate={handleSensorNavigation}
           />
           <AirComparison measurement={measurement} />
-
-          <div className="sensor-zone sensor-zone-indoor" id="indoor-sensors">
-            <div className="sensor-zone-heading">
-              <div>
-                <span className="eyebrow">Внутри комнаты</span>
-                <h3>Показания в комнате</h3>
-              </div>
-              <span className="sensor-zone-note"><Icon name="room" /> датчики внутри</span>
-            </div>
-            <div className="metrics-grid">
-              <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.indoor.temperature, 1)} unit="°C" note="внутри · сейчас" />
-              <MetricCard icon="humidity" label="Влажность" value={formatValue(measurement?.indoor.humidity, 0)} unit="%" note="внутри · сейчас" />
-              <MetricCard
-                icon="pm25"
-                label="PM2.5"
-                value={formatValue(indoorPm25, 1)}
-                unit="µg/m³"
-                note="внутри · сейчас"
-                quality={<Pm25Scale value={indoorPm25} />}
-                className="data-card-pm25"
-              />
-              <MetricCard icon="window" label="Окно" value={windowLabel} note={measurement ? 'состояние · ' + formatTime(measurement.timestamp) : 'нет данных'} className="data-card-window" />
-            </div>
-          </div>
-
-          <div className="outdoor-context sensor-zone sensor-zone-outdoor" id="outdoor-sensors">
-            <div className="outdoor-heading sensor-zone-heading">
-              <div>
-                <span className="eyebrow">Снаружи</span>
-                <h3>Внешний воздух</h3>
-                <p>Показания за окном для сравнения</p>
-              </div>
-              <span className="sensor-zone-note"><Icon name="air" /> датчики снаружи</span>
-            </div>
-            <div className="outdoor-grid">
-              <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.outdoor.temperature, 1)} unit="°C" note="снаружи" className="data-card-compact" />
-              <MetricCard icon="humidity" label="Влажность" value={formatValue(measurement?.outdoor.humidity, 0)} unit="%" note="снаружи" className="data-card-compact" />
-              <MetricCard
-                icon="pm25"
-                label="PM2.5"
-                value={formatValue(outdoorPm25, 1)}
-                unit="µg/m³"
-                note="снаружи"
-                quality={<Pm25Scale value={outdoorPm25} />}
-                className="data-card-compact data-card-pm25"
-              />
-            </div>
-          </div>
         </section>
 
         <section className="container dashboard-section dashboard-history" id="history">

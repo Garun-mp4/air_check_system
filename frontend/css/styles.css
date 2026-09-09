@@ -6651,3 +6651,16 @@ body.is-settings-open {
     padding-top: 0;
   }
 }
+
+/* Context cards are now the single source of readings, not navigation controls. */
+.dashboard-shell .air-context-card {
+  cursor: default;
+}
+
+.dashboard-shell .air-context-card:hover {
+  border-color: var(--color-hairline);
+}
+
+.dashboard-shell .air-context-card:active {
+  transform: none;
+}
