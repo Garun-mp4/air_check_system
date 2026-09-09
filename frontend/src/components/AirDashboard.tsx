@@ -1593,9 +1593,6 @@ export default function AirDashboard() {
                   <span className="eyebrow">Состояние</span>
                   <h3>Окно</h3>
                 </div>
-                <span className={'window-state-badge window-state-badge-' + (currentWindowOpen ? 'open' : 'closed')}>
-                  <span className="status-dot" /> {windowLabel}
-                </span>
               </div>
               <div className="window-reading">
                 <span className={'window-reading-icon window-reading-icon-' + (currentWindowOpen ? 'open' : 'closed')}><Icon name="window" /></span>
