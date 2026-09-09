@@ -5279,12 +5279,15 @@ body.is-settings-open {
 }
 
 .dashboard-shell .settings-button {
+  position: relative;
   display: none;
+  width: 40px;
+  height: 40px;
   min-height: 40px;
+  flex: 0 0 40px;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xs);
-  padding: 0 var(--spacing-sm);
+  padding: 0;
   background: var(--color-canvas);
   border: 1px solid var(--color-hairline);
   border-radius: var(--rounded-md);
@@ -5305,10 +5308,37 @@ body.is-settings-open {
   transform: translateY(1px);
 }
 
+.dashboard-shell .settings-button::after {
+  position: absolute;
+  top: calc(100% + var(--spacing-xs));
+  left: 50%;
+  z-index: 40;
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  background: var(--color-ink);
+  border-radius: var(--rounded-sm);
+  color: var(--color-canvas);
+  content: attr(data-tooltip);
+  font-size: var(--caption-size);
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -2px);
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
+  white-space: nowrap;
+}
+
+.dashboard-shell .settings-button:hover::after,
+.dashboard-shell .settings-button:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 .dashboard-shell .settings-button svg,
 .dashboard-shell .mobile-settings-link svg {
-  width: 16px;
-  height: 16px;
+  display: block;
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
 }
 
@@ -5578,17 +5608,6 @@ body.is-settings-open {
 @media (min-width: 768px) {
   .dashboard-shell .settings-button {
     display: inline-flex;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .dashboard-shell .settings-button {
-    width: 40px;
-    padding: 0;
-  }
-
-  .dashboard-shell .settings-button span {
-    display: none;
   }
 }
 
