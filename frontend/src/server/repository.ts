@@ -12,6 +12,7 @@ import type {
   PredictionInput,
   Recommendation,
   RecommendationDraft,
+  RetentionCleanupResult,
   WindowControlMode,
 } from './types'
 
@@ -23,6 +24,7 @@ export interface Repository {
   getLatestPrediction(): Promise<Prediction | null>
   createRecommendation(input: RecommendationDraft): Promise<Recommendation>
   getLatestRecommendation(): Promise<Recommendation | null>
+  purgeExpiredData(cutoff: Date): Promise<RetentionCleanupResult>
   getControlState(deviceId: string): Promise<ControlState>
   getLatestControlCommand(
     deviceId: string,
@@ -169,6 +171,37 @@ export class MemoryRepository implements Repository {
 
   async getLatestRecommendation(): Promise<Recommendation | null> {
     return [...this.recommendations].sort(sortRecommendations)[0] ?? null
+  }
+
+  async purgeExpiredData(cutoff: Date): Promise<RetentionCleanupResult> {
+    const before = {
+      measurements: this.measurements.length,
+      predictions: this.predictions.length,
+      recommendations: this.recommendations.length,
+      commands: this.controlCommands.length,
+    }
+
+    this.measurements = this.measurements.filter(
+      (measurement) => measurement.timestamp >= cutoff,
+    )
+    this.predictions = this.predictions.filter(
+      (prediction) => prediction.createdAt >= cutoff,
+    )
+    this.recommendations = this.recommendations.filter(
+      (recommendation) => recommendation.createdAt >= cutoff,
+    )
+    this.controlCommands = this.controlCommands.filter(
+      (command) =>
+        command.status === 'pending' || command.createdAt >= cutoff,
+    )
+
+    return {
+      cutoff: new Date(cutoff),
+      measurements: before.measurements - this.measurements.length,
+      predictions: before.predictions - this.predictions.length,
+      recommendations: before.recommendations - this.recommendations.length,
+      commands: before.commands - this.controlCommands.length,
+    }
   }
 
   private ensureControlState(deviceId: string): ControlState {
@@ -604,6 +637,45 @@ export class PostgresRepository implements Repository {
         'FROM recommendations ORDER BY created_at DESC, id DESC LIMIT 1',
     )
     return result.rows[0] ? mapRecommendation(result.rows[0]) : null
+  }
+
+  async purgeExpiredData(cutoff: Date): Promise<RetentionCleanupResult> {
+    const client = await this.pool.connect()
+    try {
+      await client.query('BEGIN')
+      const measurements = await client.query(
+        'DELETE FROM measurements WHERE "timestamp" < $1',
+        [cutoff],
+      )
+      const predictions = await client.query(
+        'DELETE FROM predictions WHERE created_at < $1',
+        [cutoff],
+      )
+      const recommendations = await client.query(
+        'DELETE FROM recommendations WHERE created_at < $1',
+        [cutoff],
+      )
+      // Pending commands are deliberately retained: the ESP32 may still need
+      // to receive and acknowledge them. The current actuator state is kept
+      // in actuator_states and is never part of retention cleanup.
+      const commands = await client.query(
+        "DELETE FROM actuator_commands WHERE created_at < $1 AND status = 'applied'",
+        [cutoff],
+      )
+      await client.query('COMMIT')
+      return {
+        cutoff: new Date(cutoff),
+        measurements: Number(measurements.rowCount ?? 0),
+        predictions: Number(predictions.rowCount ?? 0),
+        recommendations: Number(recommendations.rowCount ?? 0),
+        commands: Number(commands.rowCount ?? 0),
+      }
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
   }
 
   private async ensureControlState(deviceId: string): Promise<void> {

@@ -56,6 +56,14 @@ export interface HistoryQuery {
   limit: number
 }
 
+export interface RetentionCleanupResult {
+  cutoff: Date
+  measurements: number
+  predictions: number
+  recommendations: number
+  commands: number
+}
+
 export interface DashboardResult {
   measurement: Measurement | null
   prediction: Prediction | null

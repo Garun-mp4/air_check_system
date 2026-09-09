@@ -31,6 +31,7 @@ import type {
   Prediction,
   Recommendation,
   PredictionStatus,
+  RetentionCleanupResult,
 } from './types'
 
 export class AirQualityService {
@@ -125,6 +126,13 @@ export class AirQualityService {
 
   async history(query: HistoryQuery): Promise<Measurement[]> {
     return this.repository.listMeasurements(query)
+  }
+
+  async cleanupExpiredData(now = new Date()): Promise<RetentionCleanupResult> {
+    const cutoff = new Date(
+      now.getTime() - this.config.dataRetentionHours * 60 * 60 * 1000,
+    )
+    return this.repository.purgeExpiredData(cutoff)
   }
 
   async controlsStatus(deviceId = this.config.deviceId): Promise<ControlStatus> {

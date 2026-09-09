@@ -8,6 +8,8 @@ import type {
   VentilationAction,
 } from './types'
 
+export const MAX_HISTORY_LIMIT = 5000
+
 export interface ValidationIssue {
   field: string
   message: string
@@ -164,8 +166,11 @@ export function parseHistoryQuery(
       issues.push({ field: 'limit', message: 'должно быть целым положительным числом' })
     } else {
       limit = Number(rawLimit)
-      if (limit < 1 || limit > 1000) {
-        issues.push({ field: 'limit', message: 'должно быть в диапазоне 1–1000' })
+      if (limit < 1 || limit > MAX_HISTORY_LIMIT) {
+        issues.push({
+          field: 'limit',
+          message: 'должно быть в диапазоне 1–' + MAX_HISTORY_LIMIT,
+        })
       }
     }
   }

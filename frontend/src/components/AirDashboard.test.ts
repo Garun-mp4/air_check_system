@@ -12,10 +12,17 @@ import {
   getSectionIdFromHash,
   getViewIdFromHash,
   getWindowHistorySummary,
+  rangeLabels,
+  rangeMinutes,
 } from './AirDashboard'
 import type { ClientMeasurement } from '../lib/client-api'
 
 describe('dashboard navigation', () => {
+  it('offers only the supported rolling history periods', () => {
+    expect(Object.keys(rangeLabels)).toEqual(['30m', '1h', '6h', '24h'])
+    expect(rangeMinutes).toEqual({ '30m': 30, '1h': 60, '6h': 360, '24h': 1440 })
+  })
+
   it('renders photo context cards and an explainable comparison', () => {
     const measurement: ClientMeasurement = {
       id: 1,

@@ -19,7 +19,7 @@ AirCheck — локальная панель управления качеств
 - отдельная панель настроек с техническими сведениями и правилами автоматики;
 - ручное обновление показаний прямо в карточке «Воздух в комнате» с отметкой времени последней синхронизации;
 - фото-контексты «Внутри комнаты» и «Снаружи» с переходом к соответствующей группе датчиков;
-- интерактивные графики CO₂ и температуры за 6 часов, 24 часа или 7 дней на Apache ECharts: tooltip по временной оси, crosshair, адаптивная отрисовка и пороговые линии CO₂;
+- интерактивные графики CO₂ и температуры за 30 минут, 1 час, 6 часов или 24 часа на Apache ECharts: tooltip по временной оси, crosshair, адаптивная отрисовка и пороговые линии CO₂;
 - панорамирование графика и нижнего диапазона, Ctrl + колесо, pinch-to-zoom и кнопки просмотра/масштаба для клавиатуры и touch-устройств;
 - компактная история состояния окна в карточке управления вместо отдельной непонятной полосы;
 - loading, empty, error и waiting-for-device состояния;
@@ -87,13 +87,19 @@ curl.exe http://localhost:8000/healthz
 ```powershell
 docker compose --profile demo run --rm simulator --mode backfill --points 480 --interval 30 --scenario normal
 docker compose run --rm --no-deps --entrypoint python ml-service train.py `
-  --source-url "http://backend:3000/api/v1/measurements/history?limit=1000" `
+  --source-url "http://backend:3000/api/v1/measurements/history?limit=5000" `
   --output-dir /app/model `
   --dataset-output /app/data/training_dataset.csv
 docker compose restart ml-service
 ```
 
 После успешного обучения ML-service возвращает `model.status = ready`. Модель не подменяется формулой вроде `current_co2 + 100`: training pipeline готовит признаки, делает временное разделение train/test, сравнивает Linear Regression и Random Forest, считает MAE/RMSE и сохраняет выбранную модель в Docker volume.
+
+### Хранение данных
+
+Backend автоматически удаляет записи старше 24 часов каждые 15 минут. Очистка выполняется одной транзакцией PostgreSQL и затрагивает сырые измерения, прогнозы, рекомендации и уже выполненные команды управления. Текущие состояния исполнительных устройств и команды со статусом `pending` сохраняются, чтобы локальный узел не потерял ожидающую выполнения команду. Сохранённая ML-модель не находится в таблицах и не удаляется: она хранится в отдельном Docker volume `ml-model`.
+
+Периодическая очистка не зависит от количества точек, возвращаемых API. Для полного 24-часового графика при интервале simulator 30 секунд лимит истории увеличен до 5000 точек.
 
 ### Live simulator
 
@@ -181,7 +187,7 @@ docker compose --profile demo down
 
 `GET /api/v1/measurements/latest` возвращает последнее измерение, прогноз и рекомендацию.
 
-`GET /api/v1/measurements/history?from=&to=&limit=` возвращает исторический ряд в порядке времени. `limit` — от 1 до 1000.
+`GET /api/v1/measurements/history?from=&to=&limit=` возвращает исторический ряд в порядке времени. `limit` — от 1 до 5000. Рабочие периоды панели: 30 минут, 1 час, 6 часов и 24 часа.
 
 `GET /api/v1/prediction/latest` и `GET /api/v1/recommendation` возвращают последние ML-прогноз и рекомендацию.
 
@@ -308,8 +314,9 @@ Responsive behavior:
 | `DATABASE_URL` | локальное подключение TypeScript server | `postgres://...localhost...` |
 | `PORT` | порт Next.js | `3000` |
 | `ML_SERVICE_URL` | адрес Python ML-сервиса | `http://localhost:8000` |
-| `HISTORY_LIMIT` | максимум истории API | `200` |
+| `HISTORY_LIMIT` | максимум истории API | `5000` |
 | `ML_HISTORY_LIMIT` | история для признаков ML | `200` |
+| `DATA_RETENTION_HOURS` | срок хранения измерений и производных записей | `24` |
 | `CO2_NORMAL_THRESHOLD` | верхняя граница комфортной зоны | `800` |
 | `CO2_CRITICAL_THRESHOLD` | порог автоматического проветривания | `1000` |
 | `DEVICE_ID` | идентификатор комнаты/узла | `room-01` |
@@ -385,12 +392,14 @@ docker compose config --quiet
 ## Миграции PostgreSQL
 
 - `database/migrations/001_init.sql` — measurements, predictions, recommendations;
-- `database/migrations/002_controls.sql` — actuator states и очередь команд.
+- `database/migrations/002_controls.sql` — actuator states и очередь команд;
+- `database/migrations/003_retention_indexes.sql` — индексы для периодической очистки.
 
-Для чистого PostgreSQL Compose применяет обе миграции при первом создании volume. Если volume уже существовал до добавления `002_controls.sql`, примените её один раз вручную:
+Для чистого PostgreSQL Compose применяет все миграции при первом создании volume. Если volume уже существовал до добавления `002_controls.sql` или `003_retention_indexes.sql`, примените отсутствующие файлы один раз вручную:
 
 ```powershell
 docker compose exec -T postgres psql -U air_quality -d air_quality -f /docker-entrypoint-initdb.d/002_controls.sql
+docker compose exec -T postgres psql -U air_quality -d air_quality -f /docker-entrypoint-initdb.d/003_retention_indexes.sql
 ```
 
 Команда идемпотентна благодаря `IF NOT EXISTS`.

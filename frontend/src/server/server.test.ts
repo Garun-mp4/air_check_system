@@ -15,6 +15,7 @@ import type {
 } from './types'
 import {
   ValidationError,
+  parseHistoryQuery,
   parseMeasurementInput,
   parseVentilationCommand,
 } from './validation'
@@ -22,8 +23,9 @@ import {
 const config: AppConfig = {
   databaseUrl: 'postgres://test',
   mlServiceUrl: 'http://ml.test',
-  historyLimit: 200,
+  historyLimit: 5000,
   mlHistoryLimit: 200,
+  dataRetentionHours: 24,
   mlRequestTimeoutMs: 1000,
   co2NormalThreshold: 800,
   co2CriticalThreshold: 1000,
@@ -101,6 +103,15 @@ describe('measurement validation', () => {
         window_open: 'yes',
       }),
     ).toThrow(ValidationError)
+  })
+})
+
+describe('history validation', () => {
+  it('accepts a full 24-hour history request and rejects larger limits', () => {
+    expect(parseHistoryQuery(new URLSearchParams('limit=5000'), 5000).limit).toBe(5000)
+    expect(() => parseHistoryQuery(new URLSearchParams('limit=5001'), 5000)).toThrow(
+      ValidationError,
+    )
   })
 })
 
@@ -202,6 +213,76 @@ describe('memory repository', () => {
 
     expect(history.map((item) => item.indoor.co2)).toEqual([680, 700])
     expect((await repository.getLatestMeasurement())?.indoor.co2).toBe(700)
+  })
+
+  it('purges expired readings and derived records but keeps pending commands', async () => {
+    vi.useFakeTimers()
+    try {
+      const repository = new MemoryRepository()
+      const cutoff = new Date('2026-09-06T12:00:00Z')
+      vi.setSystemTime(new Date('2026-09-06T11:59:00Z'))
+      await repository.createMeasurement(
+        inputAt(new Date('2026-09-06T11:59:00Z'), 700),
+      )
+      await repository.createPrediction({
+        targetTime: new Date('2026-09-06T12:14:00Z'),
+        predictedCo2: 720,
+        modelName: 'linear_regression',
+        modelVersion: '1.0',
+      })
+      await repository.createRecommendation({
+        type: 'normal',
+        message: 'Воздух в норме',
+        durationMinutes: null,
+        reason: 'test',
+      })
+      await repository.queueControlCommands([
+        {
+          deviceId: 'room-01',
+          target: 'exhaust',
+          desiredState: true,
+          source: 'manual',
+          reason: 'test',
+          batchId: 'retention-test',
+        },
+      ])
+
+      vi.setSystemTime(new Date('2026-09-06T12:01:00Z'))
+      await repository.createMeasurement(
+        inputAt(new Date('2026-09-06T12:01:00Z'), 710),
+      )
+      await repository.createPrediction({
+        targetTime: new Date('2026-09-06T12:16:00Z'),
+        predictedCo2: 730,
+        modelName: 'linear_regression',
+        modelVersion: '1.0',
+      })
+      await repository.createRecommendation({
+        type: 'monitor',
+        message: 'Продолжайте наблюдение',
+        durationMinutes: null,
+        reason: 'test',
+      })
+
+      const result = await repository.purgeExpiredData(cutoff)
+
+      expect(result).toMatchObject({
+        measurements: 1,
+        predictions: 1,
+        recommendations: 1,
+        commands: 0,
+      })
+      expect(
+        (await repository.listMeasurements({ limit: 10 })).map(
+          (item) => item.indoor.co2,
+        ),
+      ).toEqual([710])
+      expect((await repository.getLatestPrediction())?.predictedCo2).toBe(730)
+      expect((await repository.getLatestRecommendation())?.type).toBe('monitor')
+      expect((await repository.getControlState('room-01')).pendingCommands).toBe(1)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('queues simultaneous fan commands and acknowledges device state', async () => {
@@ -579,6 +660,25 @@ describe('air quality service', () => {
     expect(result.prediction?.predictedCo2).toBe(930)
     expect(result.recommendation?.type).toBe('forecast_warning')
     expect(predictor.predict).toHaveBeenCalledOnce()
+  })
+
+  it('calculates the rolling retention cutoff from configuration', async () => {
+    const repository = new MemoryRepository()
+    const service = new AirQualityService(repository, { predict: vi.fn() }, config)
+    const now = new Date('2026-09-07T12:00:00Z')
+
+    await repository.createMeasurement(
+      inputAt(new Date('2026-09-06T11:59:59Z'), 700),
+    )
+    await repository.createMeasurement(
+      inputAt(new Date('2026-09-06T12:00:01Z'), 710),
+    )
+
+    const result = await service.cleanupExpiredData(now)
+
+    expect(result.cutoff).toEqual(new Date('2026-09-06T12:00:00Z'))
+    expect(result.measurements).toBe(1)
+    expect((await repository.getLatestMeasurement())?.indoor.co2).toBe(710)
   })
 
   it('keeps the measurement and returns an honest unavailable status without history', async () => {

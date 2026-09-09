@@ -31,7 +31,7 @@ import {
 } from '../lib/air-quality'
 import { co2Thresholds, LineChart } from './Charts'
 
-type RangeKey = '6h' | '24h' | '7d'
+export type RangeKey = '30m' | '1h' | '6h' | '24h'
 type SettingsTab = 'technical' | 'automation'
 export const dashboardNavItems = [
   { id: 'overview', label: 'Панель' },
@@ -61,16 +61,18 @@ type IconName =
   | 'clock'
   | 'arrow'
 
-const rangeHours: Record<RangeKey, number> = {
-  '6h': 6,
-  '24h': 24,
-  '7d': 24 * 7,
+export const rangeMinutes: Record<RangeKey, number> = {
+  '30m': 30,
+  '1h': 60,
+  '6h': 6 * 60,
+  '24h': 24 * 60,
 }
 
-const rangeLabels: Record<RangeKey, string> = {
+export const rangeLabels: Record<RangeKey, string> = {
+  '30m': '30 мин',
+  '1h': '1 ч',
   '6h': '6 ч',
   '24h': '24 ч',
-  '7d': '7 дней',
 }
 
 export function getSectionIdFromHash(hash: string): DashboardSectionId {
@@ -1303,12 +1305,12 @@ export default function AirDashboard() {
     const loadSequence = ++loadSequenceRef.current
     const isLatestLoad = () => loadSequence === loadSequenceRef.current
     const to = new Date()
-    const from = new Date(to.getTime() - rangeHours[range] * 60 * 60 * 1000)
+    const from = new Date(to.getTime() - rangeMinutes[range] * 60 * 1000)
     setLoading(true)
     try {
       const [latestResult, historyResult] = await Promise.allSettled([
         getLatestDashboard(signal),
-        getHistory(from, to, 1000, signal),
+        getHistory(from, to, 5000, signal),
       ])
       if (!isLatestLoad()) {
         return

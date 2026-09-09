@@ -19,15 +19,47 @@ export class ApiError extends Error {
 }
 
 let service: AirQualityService | null = null
+let retentionTimer: ReturnType<typeof setInterval> | null = null
+
+const RETENTION_CLEANUP_INTERVAL_MS = 15 * 60 * 1000
+
+function startRetentionCleanup(nextService: AirQualityService): void {
+  if (retentionTimer !== null) {
+    return
+  }
+
+  const runCleanup = async () => {
+    try {
+      const result = await nextService.cleanupExpiredData()
+      const deleted =
+        result.measurements +
+        result.predictions +
+        result.recommendations +
+        result.commands
+      if (deleted > 0) {
+        console.info('data retention cleanup completed', result)
+      }
+    } catch (error) {
+      // A transient database failure must not stop future cleanup attempts.
+      console.error('data retention cleanup failed', error)
+    }
+  }
+
+  void runCleanup()
+  retentionTimer = setInterval(() => void runCleanup(), RETENTION_CLEANUP_INTERVAL_MS)
+  retentionTimer.unref?.()
+}
 
 export function getAirQualityService(): AirQualityService {
   if (!service) {
     const config = getConfig()
-    service = new AirQualityService(
+    const nextService = new AirQualityService(
       getRepository(config.databaseUrl),
       new MlClient(config.mlServiceUrl, config.mlRequestTimeoutMs),
       config,
     )
+    service = nextService
+    startRetentionCleanup(nextService)
   }
   return service
 }

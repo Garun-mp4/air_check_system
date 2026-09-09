@@ -205,7 +205,7 @@ export async function getLatestDashboard(
 export async function getHistory(
   from: Date,
   to: Date,
-  limit = 1000,
+  limit = 5000,
   signal?: AbortSignal,
 ): Promise<{ data: ClientMeasurement[]; meta: HistoryMeta }> {
   const params = new URLSearchParams({

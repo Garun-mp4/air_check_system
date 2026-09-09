@@ -3,6 +3,7 @@ export interface AppConfig {
   mlServiceUrl: string
   historyLimit: number
   mlHistoryLimit: number
+  dataRetentionHours: number
   mlRequestTimeoutMs: number
   co2NormalThreshold: number
   co2CriticalThreshold: number
@@ -52,8 +53,9 @@ export function getConfig(): AppConfig {
       process.env.DATABASE_URL ??
       'postgres://air_quality:air_quality_dev@localhost:5432/air_quality',
     mlServiceUrl: (process.env.ML_SERVICE_URL ?? 'http://localhost:8000').replace(/\/+$/, ''),
-    historyLimit: Math.floor(readNumber('HISTORY_LIMIT', 200, 1)),
+    historyLimit: Math.min(5000, Math.floor(readNumber('HISTORY_LIMIT', 5000, 1))),
     mlHistoryLimit: Math.floor(readNumber('ML_HISTORY_LIMIT', 200, 1)),
+    dataRetentionHours: Math.floor(readNumber('DATA_RETENTION_HOURS', 24, 1)),
     mlRequestTimeoutMs: Math.floor(readNumber('ML_REQUEST_TIMEOUT_MS', 5000, 100)),
     co2NormalThreshold: normal,
     co2CriticalThreshold: critical,
