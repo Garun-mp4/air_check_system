@@ -6134,6 +6134,10 @@ body.is-settings-open {
   object-fit: cover;
 }
 
+.dashboard-shell .air-context-card-outdoor .air-context-card-media img {
+  object-position: 30% center;
+}
+
 .dashboard-shell .air-context-card-content {
   position: relative;
   z-index: 1;
