@@ -30,6 +30,7 @@ import {
 import { LineChart } from './Charts'
 
 type RangeKey = '6h' | '24h' | '7d'
+type SettingsTab = 'technical' | 'automation'
 export const dashboardNavItems = [
   { id: 'overview', label: 'Панель' },
   { id: 'controls', label: 'Управление' },
@@ -51,6 +52,7 @@ type IconName =
   | 'model'
   | 'wifi'
   | 'refresh'
+  | 'settings'
   | 'menu'
   | 'close'
   | 'clock'
@@ -73,6 +75,11 @@ export function getSectionIdFromHash(hash: string): DashboardSectionId {
   return dashboardNavItems.some((item) => item.id === sectionId)
     ? (sectionId as DashboardSectionId)
     : 'overview'
+}
+
+export function getViewIdFromHash(hash: string): DashboardSectionId | 'settings' {
+  const sectionId = hash.startsWith('#') ? hash.slice(1) : hash
+  return sectionId === 'settings' ? 'settings' : getSectionIdFromHash(hash)
 }
 
 export function DashboardNavigation({
@@ -400,6 +407,14 @@ function Icon({ name }: { name: IconName }) {
       </svg>
     )
   }
+  if (name === 'settings') {
+    return (
+      <svg {...svgProps}>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L8 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.7v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L8 8.6l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.2h2.4v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2V14h-.2a1.7 1.7 0 0 0-1.5 1Z" />
+      </svg>
+    )
+  }
   if (name === 'menu') {
     return (
       <svg {...svgProps}>
@@ -608,6 +623,225 @@ function ChartCard({
   )
 }
 
+function SettingsFact({
+  icon,
+  label,
+  value,
+  note,
+}: {
+  icon: 'air' | 'clock' | 'database' | 'model' | 'wifi' | 'window'
+  label: string
+  value: ReactNode
+  note: string
+}) {
+  return (
+    <div className="settings-fact">
+      <span className="settings-fact-icon"><Icon name={icon} /></span>
+      <div className="settings-fact-copy">
+        <dt>{label}</dt>
+        <dd>{value}</dd>
+        <span>{note}</span>
+      </div>
+    </div>
+  )
+}
+
+export function SettingsPanel({
+  controls,
+  deviceId,
+  measurement,
+  prediction,
+  systemStatus,
+  systemTone,
+  tab,
+  onTabChange,
+  onClose,
+  closeButtonRef,
+}: {
+  controls: ClientControlStatus | null
+  deviceId: string
+  measurement: ClientMeasurement | null
+  prediction: ClientPrediction | null
+  systemStatus: string
+  systemTone: string
+  tab: SettingsTab
+  onTabChange: (nextTab: SettingsTab) => void
+  onClose: () => void
+  closeButtonRef: React.RefObject<HTMLButtonElement | null>
+}) {
+  const automationLabel = controls
+    ? controls.automation.enabled ? 'Включена' : 'Выключена'
+    : 'нет данных'
+  const windowModeLabel = controls
+    ? controls.window.mode === 'manual' ? 'Ручной режим' : 'Автоматический режим'
+    : 'нет данных'
+  const overrideLabel = controls?.window.override_until
+    ? 'До ' + formatTimestamp(controls.window.override_until)
+    : 'Нет активного ограничения'
+
+  return (
+    <div
+      className="settings-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <section
+        className="settings-drawer"
+        id="settings-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+      >
+        <div className="settings-drawer-header">
+          <div>
+            <span className="eyebrow">Настройки узла</span>
+            <h2 id="settings-title">Настройки</h2>
+            <p>Служебные сведения и состояние автоматики для {deviceId}.</p>
+          </div>
+          <button
+            className="settings-close"
+            type="button"
+            ref={closeButtonRef}
+            onClick={onClose}
+            aria-label="Закрыть настройки"
+            title="Закрыть настройки"
+          >
+            <Icon name="close" />
+          </button>
+        </div>
+
+        <div className="settings-tabs" role="tablist" aria-label="Разделы настроек">
+          <button
+            className={'settings-tab ' + (tab === 'technical' ? 'is-active' : '')}
+            id="settings-tab-technical"
+            type="button"
+            role="tab"
+            aria-selected={tab === 'technical'}
+            aria-controls="settings-panel-technical"
+            onClick={() => onTabChange('technical')}
+          >
+            Технические сведения
+          </button>
+          <button
+            className={'settings-tab ' + (tab === 'automation' ? 'is-active' : '')}
+            id="settings-tab-automation"
+            type="button"
+            role="tab"
+            aria-selected={tab === 'automation'}
+            aria-controls="settings-panel-automation"
+            onClick={() => onTabChange('automation')}
+          >
+            Автоматика
+          </button>
+        </div>
+
+        {tab === 'technical' ? (
+          <div
+            className="settings-panel"
+            id="settings-panel-technical"
+            role="tabpanel"
+            aria-labelledby="settings-tab-technical"
+            tabIndex={0}
+          >
+            <div className="settings-panel-heading">
+              <div>
+                <h3>Технические сведения</h3>
+                <p>Диагностическая информация без управляющих действий.</p>
+              </div>
+              <span className={'settings-status settings-status-' + systemTone}>
+                <span className={'status-dot status-dot-' + systemTone} />
+                {systemStatus}
+              </span>
+            </div>
+            <dl className="settings-facts">
+              <SettingsFact
+                icon="wifi"
+                label="Источник данных"
+                value={<span translate="no">simulator / ESP32</span>}
+                note="Simulator и будущая ESP32 используют один API-контракт."
+              />
+              <SettingsFact
+                icon="database"
+                label="Хранилище"
+                value={<span translate="no">PostgreSQL</span>}
+                note="Измерения и команды сохраняются локально."
+              />
+              <SettingsFact
+                icon="model"
+                label="Прогноз CO₂"
+                value={<span translate="no">{prediction ? prediction.model_name + ' / v' + prediction.model_version : 'недоступна'}</span>}
+                note={prediction ? 'Модель отвечает на последнюю точку.' : 'Модель ещё не вернула результат.'}
+              />
+              <SettingsFact
+                icon="air"
+                label="Контракт показаний"
+                value={<span translate="no">POST /api/v1/measurements</span>}
+                note="Тот же формат предназначен для локального узла и simulator."
+              />
+              <SettingsFact
+                icon="clock"
+                label="Последняя точка"
+                value={formatTimestamp(measurement?.timestamp)}
+                note="Время измерения от локального узла."
+              />
+            </dl>
+          </div>
+        ) : (
+          <div
+            className="settings-panel"
+            id="settings-panel-automation"
+            role="tabpanel"
+            aria-labelledby="settings-tab-automation"
+            tabIndex={0}
+          >
+            <div className="settings-panel-heading">
+              <div>
+                <h3>Автоматика</h3>
+                <p>Текущая политика управления и подтверждение от локального узла.</p>
+              </div>
+              <span className={'settings-status settings-status-' + (controls ? 'success' : 'neutral')}>
+                <span className={'status-dot status-dot-' + (controls ? 'success' : 'neutral')} />
+                {automationLabel}
+              </span>
+            </div>
+            <dl className="settings-facts">
+              <SettingsFact
+                icon="air"
+                label="Состояние автоматики"
+                value={automationLabel}
+                note={controls?.automation.message ?? 'Состояние автоматики пока не получено.'}
+              />
+              <SettingsFact
+                icon="window"
+                label="Режим окна"
+                value={windowModeLabel}
+                note={overrideLabel}
+              />
+              <SettingsFact
+                icon="clock"
+                label="Очередь команд"
+                value={controls ? String(controls.pending_commands) : 'нет данных'}
+                note={controls?.pending_commands ? 'Локальный узел ещё подтверждает команды.' : 'Неподтверждённых команд нет.'}
+              />
+            </dl>
+            <div className="settings-policy">
+              <h3>Как работает автоматика</h3>
+              <ul>
+                <li>При критическом CO₂ окно открывается автоматически.</li>
+                <li>Вытяжка и приток могут работать одновременно.</li>
+                <li>Ручная команда временно передаёт управление оператору.</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
+
 export default function AirDashboard() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [history, setHistory] = useState<ClientMeasurement[]>([])
@@ -617,14 +851,52 @@ export default function AirDashboard() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<DashboardSectionId>('overview')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('technical')
   const [controls, setControls] = useState<ClientControlStatus | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
   const [activeCommand, setActiveCommand] = useState<string | null>(null)
   const [controlNotice, setControlNotice] = useState<string | null>(null)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const settingsButtonRef = useRef<HTMLButtonElement>(null)
+  const settingsCloseButtonRef = useRef<HTMLButtonElement>(null)
+  const settingsOpenRef = useRef(false)
+  const lastDashboardHashRef = useRef('#overview')
   const navigationTargetRef = useRef<DashboardSectionId | null>(null)
   const navigationDirectionRef = useRef<'up' | 'down' | null>(null)
   const navigationStartScrollYRef = useRef<number | null>(null)
+
+  const openSettings = useCallback(() => {
+    const currentHash = window.location.hash
+    if (currentHash && currentHash !== '#settings') {
+      lastDashboardHashRef.current = '#' + getSectionIdFromHash(currentHash)
+    }
+    settingsOpenRef.current = true
+    setSettingsOpen(true)
+    setMenuOpen(false)
+    if (currentHash !== '#settings') {
+      window.history.pushState(null, '', '#settings')
+    }
+  }, [])
+
+  const closeSettings = useCallback(() => {
+    settingsOpenRef.current = false
+    setSettingsOpen(false)
+    const nextHash = lastDashboardHashRef.current || '#overview'
+    if (window.location.hash === '#settings') {
+      window.history.replaceState(null, '', nextHash)
+    }
+    const nextSectionId = getSectionIdFromHash(nextHash)
+    setActiveSection(nextSectionId)
+    window.requestAnimationFrame(() => {
+      document.getElementById(nextSectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      if (window.matchMedia('(min-width: 768px)').matches) {
+        settingsButtonRef.current?.focus()
+      } else {
+        menuButtonRef.current?.focus()
+      }
+    })
+  }, [])
 
   const loadData = useCallback(async (signal?: AbortSignal) => {
     const to = new Date()
@@ -733,6 +1005,10 @@ export default function AirDashboard() {
     const updateActiveSection = () => {
       frameId = null
 
+      if (settingsOpenRef.current) {
+        return
+      }
+
       const navigationTarget = navigationTargetRef.current
       if (navigationTarget) {
         const targetSection = sections.find((section) => section.id === navigationTarget)
@@ -771,6 +1047,7 @@ export default function AirDashboard() {
       }
 
       const nextSectionId = currentSection.id as DashboardSectionId
+      lastDashboardHashRef.current = '#' + nextSectionId
       setActiveSection((currentSectionId) =>
         currentSectionId === nextSectionId ? currentSectionId : nextSectionId,
       )
@@ -793,17 +1070,35 @@ export default function AirDashboard() {
     }
 
     if (window.location.hash) {
-      const initialSectionId = getSectionIdFromHash(window.location.hash)
-      navigationTargetRef.current = initialSectionId
-      navigationStartScrollYRef.current = window.scrollY
-      setActiveSection(initialSectionId)
-      window.requestAnimationFrame(() => {
-        document.getElementById(initialSectionId)?.scrollIntoView({ behavior: 'auto', block: 'start' })
-      })
+      const initialViewId = getViewIdFromHash(window.location.hash)
+      if (initialViewId === 'settings') {
+        settingsOpenRef.current = true
+        setSettingsOpen(true)
+      } else {
+        const initialSectionId = initialViewId
+        lastDashboardHashRef.current = '#' + initialSectionId
+        navigationTargetRef.current = initialSectionId
+        navigationStartScrollYRef.current = window.scrollY
+        setActiveSection(initialSectionId)
+        window.requestAnimationFrame(() => {
+          document.getElementById(initialSectionId)?.scrollIntoView({ behavior: 'auto', block: 'start' })
+        })
+      }
     }
 
     const handleHashChange = () => {
-      const nextSectionId = getSectionIdFromHash(window.location.hash)
+      const nextViewId = getViewIdFromHash(window.location.hash)
+      if (nextViewId === 'settings') {
+        settingsOpenRef.current = true
+        setSettingsOpen(true)
+        setMenuOpen(false)
+        return
+      }
+
+      settingsOpenRef.current = false
+      setSettingsOpen(false)
+      const nextSectionId = nextViewId
+      lastDashboardHashRef.current = '#' + nextSectionId
       navigationTargetRef.current = nextSectionId
       navigationDirectionRef.current = null
       navigationStartScrollYRef.current = window.scrollY
@@ -846,6 +1141,9 @@ export default function AirDashboard() {
     }
 
     event.preventDefault()
+    settingsOpenRef.current = false
+    setSettingsOpen(false)
+    lastDashboardHashRef.current = '#' + sectionId
     navigationTargetRef.current = sectionId
     navigationDirectionRef.current = null
     navigationStartScrollYRef.current = window.scrollY
@@ -893,6 +1191,28 @@ export default function AirDashboard() {
     document.body.classList.toggle('is-menu-open', menuOpen)
     return () => document.body.classList.remove('is-menu-open')
   }, [menuOpen])
+
+  useEffect(() => {
+    settingsOpenRef.current = settingsOpen
+    document.body.classList.toggle('is-settings-open', settingsOpen)
+    if (!settingsOpen) {
+      return () => document.body.classList.remove('is-settings-open')
+    }
+
+    const focusFrame = window.requestAnimationFrame(() => settingsCloseButtonRef.current?.focus())
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeSettings()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.classList.remove('is-settings-open')
+    }
+  }, [closeSettings, settingsOpen])
 
   const measurement = dashboard?.measurement ?? null
   const prediction: ClientPrediction | null = dashboard?.prediction ?? null
@@ -954,8 +1274,8 @@ export default function AirDashboard() {
                 className="brand-logo"
                 src="/aircheck-logo.png"
                 alt=""
-                width="40"
-                height="40"
+                width="44"
+                height="32"
                 aria-hidden="true"
               />
             </picture>
@@ -984,6 +1304,19 @@ export default function AirDashboard() {
               <span className={'status-dot status-dot-' + systemTone} />
               <span className="sync-copy">{error ? 'API требует внимания' : sourceLabel}</span>
             </span>
+            <button
+              className="settings-button"
+              type="button"
+              ref={settingsButtonRef}
+              onClick={openSettings}
+              aria-label="Открыть настройки"
+              aria-expanded={settingsOpen}
+              aria-controls="settings-dialog"
+              title="Настройки"
+            >
+              <Icon name="settings" />
+              <span>Настройки</span>
+            </button>
             <button
               className="control-button"
               type="button"
@@ -1027,6 +1360,15 @@ export default function AirDashboard() {
             onNavigate={handleSectionNavigation}
           />
           <button
+            className="mobile-nav-link mobile-settings-link"
+            type="button"
+            onClick={openSettings}
+            aria-controls="settings-dialog"
+          >
+            <Icon name="settings" />
+            <span>Настройки</span>
+          </button>
+          <button
             className="button-primary mobile-refresh"
             type="button"
             onClick={() => {
@@ -1042,7 +1384,7 @@ export default function AirDashboard() {
         </div>
       </header>
 
-      <main id="main-content">
+      <main id="main-content" inert={settingsOpen}>
         <section className="dashboard-intro" id="overview">
           <div className="container">
             <div className="intro-overline">
@@ -1092,7 +1434,7 @@ export default function AirDashboard() {
           </div>
         ) : null}
 
-        <section className="container dashboard-section dashboard-top-grid">
+        <section className="container dashboard-section dashboard-lead-section">
           <article className="dashboard-card current-air-card">
             <div className="current-air-header">
               <div>
@@ -1154,32 +1496,6 @@ export default function AirDashboard() {
             </div>
           </article>
 
-          <aside className="dashboard-card node-card">
-            <div className="system-card-top">
-              <span className="eyebrow">Состояние системы</span>
-              <span className={'system-status system-status-' + systemTone}><span className={'status-dot status-dot-' + systemTone} />{systemStatus}</span>
-            </div>
-            <h2>Связь и модель</h2>
-            <p>Состояние источника, хранилища и прогноза.</p>
-            <div className="system-list">
-              <div className="system-row">
-                <span className="system-row-label"><Icon name="wifi" /> Источник</span>
-                <strong translate="no">simulator / ESP32</strong>
-              </div>
-              <div className="system-row">
-                <span className="system-row-label"><Icon name="database" /> Хранилище</span>
-                <strong>PostgreSQL</strong>
-              </div>
-              <div className="system-row">
-                <span className="system-row-label"><Icon name="model" /> Прогноз</span>
-                <strong translate="no">{prediction ? prediction.model_name + ' / v' + prediction.model_version : 'недоступна'}</strong>
-              </div>
-            </div>
-            <div className="node-card-foot">
-              <span>последнее измерение</span>
-              <strong>{formatTimestamp(measurement?.timestamp)}</strong>
-            </div>
-          </aside>
         </section>
 
         <section className="container dashboard-section controls-section" id="controls">
@@ -1414,6 +1730,20 @@ export default function AirDashboard() {
           </div>
         </section>
       </main>
+      {settingsOpen ? (
+        <SettingsPanel
+          controls={controls}
+          deviceId={deviceId}
+          measurement={measurement}
+          prediction={prediction}
+          systemStatus={systemStatus}
+          systemTone={systemTone}
+          tab={settingsTab}
+          onTabChange={setSettingsTab}
+          onClose={closeSettings}
+          closeButtonRef={settingsCloseButtonRef}
+        />
+      ) : null}
     </div>
   )
 }

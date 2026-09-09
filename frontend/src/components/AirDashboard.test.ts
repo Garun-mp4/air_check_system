@@ -1,11 +1,13 @@
-import { createElement } from 'react'
+import { createElement, createRef } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import {
   DashboardNavigation,
+  SettingsPanel,
   getConnectionStatusLabel,
   getSectionIdFromHash,
+  getViewIdFromHash,
   getWindowHistorySummary,
 } from './AirDashboard'
 import type { ClientMeasurement } from '../lib/client-api'
@@ -16,6 +18,32 @@ describe('dashboard navigation', () => {
     expect(getSectionIdFromHash('history')).toBe('history')
     expect(getSectionIdFromHash('#unknown')).toBe('overview')
     expect(getSectionIdFromHash('')).toBe('overview')
+  })
+
+  it('keeps settings as a separate view from dashboard sections', () => {
+    expect(getViewIdFromHash('#settings')).toBe('settings')
+    expect(getViewIdFromHash('#history')).toBe('history')
+    expect(getViewIdFromHash('#unknown')).toBe('overview')
+  })
+
+  it('places technical details inside the settings panel', () => {
+    const markup = renderToStaticMarkup(createElement(SettingsPanel, {
+      controls: null,
+      deviceId: 'room-01',
+      measurement: null,
+      prediction: null,
+      systemStatus: 'ожидание',
+      systemTone: 'neutral',
+      tab: 'technical',
+      onTabChange: () => undefined,
+      onClose: () => undefined,
+      closeButtonRef: createRef<HTMLButtonElement>(),
+    }))
+
+    expect(markup).toContain('id="settings-dialog"')
+    expect(markup).toContain('Технические сведения')
+    expect(markup).toContain('PostgreSQL')
+    expect(markup).not.toContain('Связь и модель')
   })
 
   it('renders the hash section as active in both navigation variants', () => {
