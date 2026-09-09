@@ -287,27 +287,28 @@ export class MemoryRepository implements Repository {
 
   async reportControlState(input: DeviceStateReport): Promise<ControlState> {
     const state = this.ensureControlState(input.deviceId)
+    const reportedAt = new Date(input.timestamp)
+    if (
+      state.lastReportedAt !== null &&
+      reportedAt.getTime() < state.lastReportedAt.getTime()
+    ) {
+      return this.getControlState(input.deviceId)
+    }
     const previouslyOpen = state.reported.windowOpen
     state.reported = { ...input.reported }
-    state.lastReportedAt = new Date(input.timestamp)
+    state.lastReportedAt = reportedAt
     state.windowOpenSince = input.reported.windowOpen
-      ? state.windowOpenSince ?? new Date(input.timestamp)
+      ? state.windowOpenSince ?? reportedAt
       : null
     if (!previouslyOpen && input.reported.windowOpen) {
-      state.windowOpenSince = new Date(input.timestamp)
+      state.windowOpenSince = reportedAt
     }
     for (const commandId of input.appliedCommandIds) {
       const command = this.controlCommands.find(
         (item) =>
           item.id === commandId &&
           item.deviceId === input.deviceId &&
-          item.status === 'pending' &&
-          ((item.target === 'exhaust' &&
-            item.desiredState === input.reported.exhaustOn) ||
-            (item.target === 'intake' &&
-              item.desiredState === input.reported.intakeOn) ||
-            (item.target === 'window' &&
-              item.desiredState === input.reported.windowOpen)),
+          item.status === 'pending',
       )
       if (command) {
         command.status = 'applied'
@@ -768,12 +769,14 @@ export class PostgresRepository implements Repository {
     const client = await this.pool.connect()
     try {
       await client.query('BEGIN')
-      await client.query(
+      const reportResult = await client.query<{ device_id: string }>(
         'INSERT INTO actuator_states (device_id, exhaust_on, intake_on, window_open, desired_exhaust_on, desired_intake_on, desired_window_open, last_reported_at, window_open_since) ' +
           'VALUES ($1, $2::boolean, $3::boolean, $4::boolean, $2::boolean, $3::boolean, $4::boolean, $5::timestamptz, CASE WHEN $4::boolean THEN $5::timestamptz ELSE NULL::timestamptz END) ' +
           'ON CONFLICT (device_id) DO UPDATE SET exhaust_on = EXCLUDED.exhaust_on, intake_on = EXCLUDED.intake_on, ' +
           'window_open = EXCLUDED.window_open, window_open_since = CASE WHEN EXCLUDED.window_open THEN COALESCE(actuator_states.window_open_since, EXCLUDED.last_reported_at) ELSE NULL END, ' +
-          'last_reported_at = EXCLUDED.last_reported_at, updated_at = NOW()',
+          'last_reported_at = EXCLUDED.last_reported_at, updated_at = NOW() ' +
+          'WHERE actuator_states.last_reported_at IS NULL OR EXCLUDED.last_reported_at >= actuator_states.last_reported_at ' +
+          'RETURNING device_id',
         [
           input.deviceId,
           input.reported.exhaustOn,
@@ -782,15 +785,16 @@ export class PostgresRepository implements Repository {
           input.timestamp,
         ],
       )
-      if (input.appliedCommandIds.length > 0) {
+      if (
+        reportResult.rowCount !== null &&
+        reportResult.rowCount > 0 &&
+        input.appliedCommandIds.length > 0
+      ) {
         await client.query(
-          "UPDATE actuator_commands SET status = 'applied', applied_at = NOW() WHERE device_id = $1 AND status = 'pending' AND id = ANY($2::bigint[]) AND ((target = 'exhaust' AND desired_state = $3::boolean) OR (target = 'intake' AND desired_state = $4::boolean) OR (target = 'window' AND desired_state = $5::boolean))",
+          "UPDATE actuator_commands SET status = 'applied', applied_at = NOW() WHERE device_id = $1 AND status = 'pending' AND id = ANY($2::bigint[])",
           [
             input.deviceId,
             input.appliedCommandIds,
-            input.reported.exhaustOn,
-            input.reported.intakeOn,
-            input.reported.windowOpen,
           ],
         )
       }

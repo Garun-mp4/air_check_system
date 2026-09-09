@@ -255,7 +255,7 @@ describe('memory repository', () => {
     expect(state.pendingCommands).toBe(0)
   })
 
-  it('does not acknowledge a command when the reported state disagrees', async () => {
+  it('does not acknowledge a command belonging to another device', async () => {
     const repository = new MemoryRepository()
     const [command] = await repository.queueControlCommands([
       {
@@ -269,14 +269,82 @@ describe('memory repository', () => {
     ])
 
     const state = await repository.reportControlState({
-      deviceId: 'room-01',
+      deviceId: 'room-02',
       timestamp: new Date(),
-      reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+      reported: { exhaustOn: true, intakeOn: false, windowOpen: false },
       appliedCommandIds: [command.id],
     })
 
+    expect(state.pendingCommands).toBe(0)
+    expect((await repository.getControlState('room-01')).pendingCommands).toBe(1)
+    expect((await repository.getControlState('room-01')).lastCommand?.status).toBe('pending')
+  })
+
+  it('ignores stale device reports and keeps the newer acknowledgement state', async () => {
+    const repository = new MemoryRepository()
+    const freshTimestamp = new Date('2026-09-09T13:00:00Z')
+    await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: freshTimestamp,
+      reported: { exhaustOn: true, intakeOn: true, windowOpen: true },
+      appliedCommandIds: [],
+    })
+    const [stopCommand] = await repository.queueControlCommands([
+      {
+        deviceId: 'room-01',
+        target: 'exhaust',
+        desiredState: false,
+        source: 'manual',
+        reason: 'test',
+        batchId: 'stale-report',
+      },
+    ])
+
+    const state = await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: new Date('2026-09-09T12:00:00Z'),
+      reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+      appliedCommandIds: [stopCommand.id],
+    })
+
+    expect(state.reported).toEqual({ exhaustOn: true, intakeOn: true, windowOpen: true })
+    expect(state.lastReportedAt).toEqual(freshTimestamp)
+    expect(state.windowOpenSince).toEqual(freshTimestamp)
     expect(state.pendingCommands).toBe(1)
-    expect(state.lastCommand?.status).toBe('pending')
+  })
+
+  it('acknowledges every command explicitly applied in one device report', async () => {
+    const repository = new MemoryRepository()
+    const [started] = await repository.queueControlCommands([
+      {
+        deviceId: 'room-01',
+        target: 'exhaust',
+        desiredState: true,
+        source: 'manual',
+        reason: 'test',
+        batchId: 'sequence',
+      },
+    ])
+    const [stopped] = await repository.queueControlCommands([
+      {
+        deviceId: 'room-01',
+        target: 'exhaust',
+        desiredState: false,
+        source: 'manual',
+        reason: 'test',
+        batchId: 'sequence',
+      },
+    ])
+
+    const state = await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: new Date('2026-09-09T13:00:00Z'),
+      reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+      appliedCommandIds: [started.id, stopped.id],
+    })
+
+    expect(state.pendingCommands).toBe(0)
+    expect((await repository.getLatestControlCommand('room-01', 'exhaust'))?.status).toBe('applied')
   })
 })
 

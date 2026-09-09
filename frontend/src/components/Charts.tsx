@@ -299,8 +299,11 @@ export function buildTimeSeriesOption(
   unit: string,
   thresholds: ChartThreshold[] = [],
   palette: ChartPalette = defaultChartPalette,
+  viewport: ChartViewport = createFullViewport(inputData.length),
 ): EChartsOption {
   const data = validData(inputData)
+  const appliedViewport = clampViewport(viewport, data.length)
+  const zoomRange = viewportPercent(appliedViewport, data.length)
   const values = data.map((point) => point.value)
   const rawMin = values.length > 0 ? Math.min(...values) : 0
   const rawMax = values.length > 0 ? Math.max(...values) : 1
@@ -413,8 +416,8 @@ export function buildTimeSeriesOption(
         type: 'inside',
         xAxisIndex: 0,
         filterMode: 'none',
-        start: 0,
-        end: 100,
+        start: zoomRange.start,
+        end: zoomRange.end,
         zoomOnMouseWheel: 'ctrl',
         moveOnMouseMove: true,
         moveOnMouseWheel: false,
@@ -431,6 +434,8 @@ export function buildTimeSeriesOption(
         showDetail: false,
         showDataShadow: false,
         brushSelect: false,
+        start: zoomRange.start,
+        end: zoomRange.end,
         backgroundColor: palette.surface,
         borderColor: palette.hairline,
         fillerColor: palette.hairline,
@@ -501,7 +506,7 @@ function ChartViewportToolbar({
   const isAtEnd = viewport.end >= dataLength - 1.5
 
   return (
-    <div className="chart-viewport-toolbar" aria-label="Управление масштабом графика">
+    <div className="chart-viewport-toolbar" role="group" aria-label="Управление масштабом графика">
       <span className="chart-viewport-status" aria-live="polite">
         {viewportStatus(viewport, dataLength)}
       </span>
@@ -618,14 +623,17 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
       return
     }
 
+    const shouldResetViewport = !hasAppliedDataRef.current || previousRangeKeyRef.current !== rangeKey
+    const nextViewport = shouldResetViewport
+      ? createFullViewport(data.length)
+      : clampViewport(currentViewport, data.length)
     const palette = readChartPalette(surface)
-    chart.setOption(buildTimeSeriesOption(data, unit, thresholds, palette), { notMerge: true })
+    chart.setOption(buildTimeSeriesOption(data, unit, thresholds, palette, nextViewport), { notMerge: true })
     if (!dataZoomBoundRef.current && dataZoomHandler) {
       chart.on('datazoom', dataZoomHandler)
       dataZoomBoundRef.current = true
     }
 
-    const shouldResetViewport = !hasAppliedDataRef.current || previousRangeKeyRef.current !== rangeKey
     hasAppliedDataRef.current = true
     previousRangeKeyRef.current = rangeKey
     setViewport((current) => shouldResetViewport

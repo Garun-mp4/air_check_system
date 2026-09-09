@@ -33,6 +33,7 @@ describe('dashboard navigation', () => {
 
     expect(cards).toContain('/air-context-indoor.png')
     expect(cards).toContain('/air-context-outdoor.png')
+    expect(cards).toContain('width="1672" height="941"')
     expect(comparison).toContain('CO₂ не сравнивается')
     expect(comparison).toContain('внутри чище')
   })

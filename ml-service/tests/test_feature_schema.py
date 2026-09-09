@@ -53,6 +53,14 @@ def test_insufficient_history_is_excluded_without_random_fill():
     assert rows == []
 
 
+def test_training_rejects_a_non_boolean_window_state():
+    measurements = make_measurements()
+    measurements[0]["window_open"] = "false"
+
+    with pytest.raises(FeatureError, match="window_open must be boolean"):
+        build_training_rows(measurements)
+
+
 def test_prediction_payload_has_stable_feature_order():
     payload = {
         "co2": 920,

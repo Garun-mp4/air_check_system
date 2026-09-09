@@ -790,7 +790,7 @@ export function AirContextCards({
           aria-label={'Перейти к показаниям ' + context.label.toLowerCase()}
         >
           <span className="air-context-card-media" aria-hidden="true">
-            <img src={context.image} alt="" loading="lazy" decoding="async" />
+            <img src={context.image} alt="" width={1672} height={941} loading="lazy" decoding="async" />
           </span>
           <span className="air-context-card-content">
             <span className="air-context-card-heading">
@@ -1157,6 +1157,7 @@ export default function AirDashboard() {
   const navigationTargetRef = useRef<DashboardSectionId | null>(null)
   const navigationDirectionRef = useRef<'up' | 'down' | null>(null)
   const navigationStartScrollYRef = useRef<number | null>(null)
+  const loadSequenceRef = useRef(0)
 
   const openSettings = useCallback(() => {
     const currentHash = window.location.hash
@@ -1191,6 +1192,8 @@ export default function AirDashboard() {
   }, [])
 
   const loadData = useCallback(async (signal?: AbortSignal) => {
+    const loadSequence = ++loadSequenceRef.current
+    const isLatestLoad = () => loadSequence === loadSequenceRef.current
     const to = new Date()
     const from = new Date(to.getTime() - rangeHours[range] * 60 * 60 * 1000)
     setLoading(true)
@@ -1199,6 +1202,9 @@ export default function AirDashboard() {
         getLatestDashboard(signal),
         getHistory(from, to, 1000, signal),
       ])
+      if (!isLatestLoad()) {
+        return
+      }
       if (latestResult.status === 'rejected') {
         throw latestResult.reason
       }
@@ -1209,9 +1215,15 @@ export default function AirDashboard() {
       setHistory(historyResult.value.data)
       try {
         const controlStatus = await getControlStatus()
+        if (!isLatestLoad()) {
+          return
+        }
         setControls(controlStatus)
         setControlError(null)
       } catch (controlLoadError) {
+        if (!isLatestLoad()) {
+          return
+        }
         if (controlLoadError instanceof Error && controlLoadError.name === 'AbortError') {
           return
         }
@@ -1224,6 +1236,9 @@ export default function AirDashboard() {
       setError(null)
       setLastUpdated(new Date().toISOString())
     } catch (loadError) {
+      if (!isLatestLoad()) {
+        return
+      }
       if (loadError instanceof Error && loadError.name === 'AbortError') {
         return
       }
@@ -1233,7 +1248,9 @@ export default function AirDashboard() {
           : 'Не удалось загрузить данные мониторинга',
       )
     } finally {
-      setLoading(false)
+      if (isLatestLoad()) {
+        setLoading(false)
+      }
     }
   }, [range])
 
@@ -1303,6 +1320,7 @@ export default function AirDashboard() {
     }, 30_000)
     return () => {
       controller.abort()
+      loadSequenceRef.current += 1
       window.clearInterval(timer)
     }
   }, [loadData])

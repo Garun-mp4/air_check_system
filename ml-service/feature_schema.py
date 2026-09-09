@@ -109,6 +109,8 @@ def flatten_measurement(measurement: dict[str, Any]) -> dict[str, Any]:
         raise FeatureError("measurement must be an object")
     indoor = measurement.get("indoor") or {}
     outdoor = measurement.get("outdoor") or {}
+    if not isinstance(indoor, dict) or not isinstance(outdoor, dict):
+        raise FeatureError("indoor and outdoor must be objects")
 
     def value(nested: dict[str, Any], nested_key: str, flat_key: str) -> Any:
         if nested_key in nested:
@@ -116,6 +118,9 @@ def flatten_measurement(measurement: dict[str, Any]) -> dict[str, Any]:
         return measurement.get(flat_key)
 
     timestamp = parse_timestamp(measurement.get("timestamp"))
+    window_open = measurement.get("window_open")
+    if type(window_open) is not bool:
+        raise FeatureError("window_open must be boolean")
     return {
         "timestamp": timestamp,
         "co2": _number(value(indoor, "co2", "indoor_co2"), "indoor.co2"),
@@ -127,7 +132,7 @@ def flatten_measurement(measurement: dict[str, Any]) -> dict[str, Any]:
         ),
         "outdoor_humidity": _number(value(outdoor, "humidity", "outdoor_humidity"), "outdoor.humidity"),
         "outdoor_pm25": _number(value(outdoor, "pm25", "outdoor_pm25"), "outdoor.pm25"),
-        "window_open": measurement.get("window_open"),
+        "window_open": window_open,
     }
 
 
@@ -203,4 +208,3 @@ def rows_to_matrix(rows: list[dict[str, Any]]) -> tuple[list[list[float]], list[
     ]
     target = [float(row["co2_after_15min"]) for row in rows]
     return matrix, target
-

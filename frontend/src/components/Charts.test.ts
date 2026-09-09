@@ -50,4 +50,25 @@ describe('chart viewport controls', () => {
     expect(series?.sampling).toBe('lttb')
     expect(series?.markLine?.data).toHaveLength(2)
   })
+
+  it('keeps the requested viewport when the chart option is rebuilt', () => {
+    const option = buildTimeSeriesOption([
+      { timestamp: '2026-09-09T10:00:00Z', value: 650 },
+      { timestamp: '2026-09-09T10:10:00Z', value: 820 },
+      { timestamp: '2026-09-09T10:20:00Z', value: 1040 },
+      { timestamp: '2026-09-09T10:30:00Z', value: 900 },
+      { timestamp: '2026-09-09T10:40:00Z', value: 880 },
+      { timestamp: '2026-09-09T10:50:00Z', value: 860 },
+      { timestamp: '2026-09-09T11:00:00Z', value: 840 },
+      { timestamp: '2026-09-09T11:10:00Z', value: 820 },
+      { timestamp: '2026-09-09T11:20:00Z', value: 800 },
+      { timestamp: '2026-09-09T11:30:00Z', value: 780 },
+    ], 'ppm', [], undefined, { start: 1, end: 6 })
+    const zoom = option.dataZoom as Array<{ start?: number; end?: number }>
+
+    expect(zoom[0]?.start).toBeCloseTo(11.111, 3)
+    expect(zoom[0]?.end).toBeCloseTo(66.667, 3)
+    expect(zoom[1]?.start).toBeCloseTo(11.111, 3)
+    expect(zoom[1]?.end).toBeCloseTo(66.667, 3)
+  })
 })
