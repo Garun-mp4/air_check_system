@@ -1422,27 +1422,7 @@ export default function AirDashboard() {
       </header>
 
       <main id="main-content" inert={settingsOpen}>
-        <section className="dashboard-intro" id="overview">
-          <div className="container">
-            <div className="intro-overline">
-              <span className="eyebrow intro-location">Комната <span translate="no">{deviceId}</span></span>
-              <span className={'intro-status intro-status-' + systemTone}><span className={'status-dot status-dot-' + systemTone} />{systemStatus}</span>
-            </div>
-            <div className="intro-row">
-              <div>
-                <h1>Панель управления</h1>
-                <p>Показания комнаты, решение автоматики и ручные команды для локального узла.</p>
-              </div>
-              <dl className="intro-meta">
-                <div>
-                  <dt>Автообновление</dt>
-                  <dd>каждые 30 с</dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </section>
-
+        <h1 className="dashboard-page-title">Панель управления</h1>
         {loading && !dashboard ? (
           <div className="container">
             <div className="panel-state panel-state-loading" role="status" aria-live="polite">
@@ -1467,7 +1447,7 @@ export default function AirDashboard() {
           </div>
         ) : null}
 
-        <section className="container dashboard-section dashboard-lead-section">
+        <section className="container dashboard-section dashboard-lead-section" id="overview">
           <article className="dashboard-card current-air-card">
             <div className="current-air-header">
               <div>

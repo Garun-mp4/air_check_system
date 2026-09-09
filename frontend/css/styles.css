@@ -5229,6 +5229,19 @@ body.is-settings-open {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.dashboard-shell .dashboard-page-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .dashboard-shell .settings-button {
   display: none;
   min-height: 40px;
