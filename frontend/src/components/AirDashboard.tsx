@@ -750,22 +750,102 @@ function ChartCard({
 
 type SensorZone = 'indoor' | 'outdoor'
 
+type AirContextMetricProps = {
+  icon: 'temperature' | 'humidity' | 'window'
+  label: string
+  value: string
+  unit?: string
+  tone?: 'success' | 'neutral'
+  detail?: string
+  className?: string
+}
+
+function AirContextMetric({
+  icon,
+  label,
+  value,
+  unit,
+  tone = 'neutral',
+  detail,
+  className = '',
+}: AirContextMetricProps) {
+  return (
+    <span className={'air-context-card-metric ' + className}>
+      <span className="air-context-card-metric-label">
+        <span className="air-context-card-metric-icon"><Icon name={icon} /></span>
+        <span>{label}</span>
+      </span>
+      <strong className={'air-context-card-metric-value air-context-card-metric-value-' + tone}>
+        {value}
+        {unit ? <small>{unit}</small> : null}
+      </strong>
+      {detail ? <span className="air-context-card-metric-detail">{detail}</span> : null}
+    </span>
+  )
+}
+
+function AirContextPm25Metric({ value }: { value: number | null | undefined }) {
+  const level = getPm25Level(value)
+  const tone = getPm25Tone(level)
+  const markerPosition = getPm25MarkerPosition(value)
+
+  return (
+    <span className="air-context-card-metric air-context-card-metric-pm25">
+      <span className="air-context-card-metric-label">
+        <span className="air-context-card-metric-icon"><Icon name="pm25" /></span>
+        <span>PM2.5</span>
+      </span>
+      <strong className="air-context-card-metric-value">
+        {formatValue(value, 1)}
+        <small>µg/m³</small>
+      </strong>
+      <span className={'air-context-card-pm25-status pm25-quality-status-' + tone}>
+        <span className={'status-dot status-dot-' + tone} />
+        {getPm25Label(level)}
+      </span>
+      <span className="air-context-card-pm25-scale" role="img" aria-label={getPm25AriaLabel(value)}>
+        <span className="air-context-card-pm25-track">
+          <span className="pm25-scale-zone pm25-scale-zone-good" />
+          <span className="pm25-scale-zone pm25-scale-zone-elevated" />
+          <span className="pm25-scale-zone pm25-scale-zone-high" />
+        </span>
+        {markerPosition !== null ? (
+          <span
+            className="air-context-card-pm25-marker"
+            style={{ left: markerPosition + '%' }}
+            aria-hidden="true"
+          />
+        ) : null}
+      </span>
+      <span className="air-context-card-pm25-labels" aria-hidden="true">
+        <span>0</span>
+        <span>{PM25_GOOD_LIMIT}</span>
+        <span>{PM25_ELEVATED_LIMIT}</span>
+        <span>{PM25_SCALE_MAX}+</span>
+      </span>
+    </span>
+  )
+}
+
 export function AirContextCards({
   onNavigate,
   measurement = null,
+  windowOpen,
 }: {
   onNavigate: (zone: SensorZone) => void
   measurement?: ClientMeasurement | null
+  windowOpen?: boolean | null
 }) {
+  const resolvedWindowOpen = windowOpen ?? measurement?.window_open ?? null
+  const windowLabel = resolvedWindowOpen === null ? '—' : resolvedWindowOpen ? 'Открыто' : 'Закрыто'
   const contexts = [
     {
       zone: 'indoor' as const,
       label: 'Внутри комнаты',
       title: 'Воздух в комнате',
-      description: 'Основные показания и состояние окна',
+      description: 'Температура, влажность, частицы и окно',
       image: '/air-context-indoor.png',
       icon: 'room' as const,
-      reading: 'PM2.5 · ' + formatMetricValue(measurement?.indoor.pm25 ?? null, 1, 'µg/m³'),
     },
     {
       zone: 'outdoor' as const,
@@ -774,7 +854,6 @@ export function AirContextCards({
       description: 'Показания за окном для сравнения',
       image: '/air-context-outdoor.png',
       icon: 'air' as const,
-      reading: 'PM2.5 · ' + formatMetricValue(measurement?.outdoor.pm25 ?? null, 1, 'µg/m³'),
     },
   ]
 
@@ -800,9 +879,37 @@ export function AirContextCards({
                 <strong>{context.title}</strong>
               </span>
             </span>
+            <span className="air-context-card-description">{context.description}</span>
+            <span className="air-context-card-data" aria-label={context.zone === 'indoor' ? 'Показатели воздуха в комнате' : 'Показатели внешнего воздуха'}>
+              <AirContextMetric
+                icon="temperature"
+                label="Температура"
+                value={formatValue(measurement?.[context.zone].temperature, 1)}
+                unit="°C"
+              />
+              <AirContextMetric
+                icon="humidity"
+                label="Влажность"
+                value={formatValue(measurement?.[context.zone].humidity, 0)}
+                unit="%"
+              />
+              <AirContextPm25Metric value={measurement?.[context.zone].pm25} />
+              {context.zone === 'indoor' ? (
+                <AirContextMetric
+                  icon="window"
+                  label="Окно"
+                  value={windowLabel}
+                  tone={resolvedWindowOpen === true ? 'success' : 'neutral'}
+                  detail={measurement ? 'состояние · ' + formatTime(measurement.timestamp) : 'нет данных'}
+                  className="air-context-card-metric-window"
+                />
+              ) : null}
+            </span>
             <span className="air-context-card-footer">
-              <span>{context.description}</span>
-              <span className="air-context-card-reading">{context.reading}</span>
+              <span>Нажмите, чтобы открыть подробные показания</span>
+              <span className="air-context-card-reading">
+                {measurement ? 'обновлено ' + formatTime(measurement.timestamp) : 'показания ожидаются'}
+              </span>
             </span>
           </span>
         </button>
@@ -814,6 +921,7 @@ export function AirContextCards({
 export function AirContextMap(props: {
   onNavigate: (zone: SensorZone) => void
   measurement?: ClientMeasurement | null
+  windowOpen?: boolean | null
 }) {
   return <AirContextCards {...props} />
 }
@@ -2001,7 +2109,11 @@ export default function AirDashboard() {
             <span className="section-context"><span className={'status-dot status-dot-' + deviceConnectionTone} /> <span translate="no">{deviceId}</span> · {deviceConnectionLabel}</span>
           </div>
 
-          <AirContextCards measurement={measurement} onNavigate={handleSensorNavigation} />
+          <AirContextCards
+            measurement={measurement}
+            windowOpen={currentWindowOpen}
+            onNavigate={handleSensorNavigation}
+          />
           <AirComparison measurement={measurement} />
 
           <div className="sensor-zone sensor-zone-indoor" id="indoor-sensors">
