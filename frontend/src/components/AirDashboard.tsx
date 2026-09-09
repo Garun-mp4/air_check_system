@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 
 import {
@@ -56,6 +56,7 @@ type IconName =
   | 'wifi'
   | 'refresh'
   | 'settings'
+  | 'expand'
   | 'menu'
   | 'close'
   | 'clock'
@@ -549,6 +550,13 @@ function Icon({ name }: { name: IconName }) {
       </svg>
     )
   }
+  if (name === 'expand') {
+    return (
+      <svg {...svgProps}>
+        <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5" />
+      </svg>
+    )
+  }
   if (name === 'menu') {
     return (
       <svg {...svgProps}>
@@ -655,25 +663,121 @@ function ChartCard({
   caption,
   children,
   unit,
+  range,
+  onRangeChange,
 }: {
   title: string
   caption: string
   children: ReactNode
   unit?: string
+  range: RangeKey
+  onRangeChange: (range: RangeKey) => void
 }) {
+  const [expanded, setExpanded] = useState(false)
+  const titleId = useId()
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null)
+  const expandButtonRef = useRef<HTMLButtonElement | null>(null)
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (!expanded) {
+      return
+    }
+
+    previouslyFocusedRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null
+    document.body.classList.add('is-chart-expanded')
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setExpanded(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    requestAnimationFrame(() => closeButtonRef.current?.focus())
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.classList.remove('is-chart-expanded')
+      previouslyFocusedRef.current?.focus()
+      previouslyFocusedRef.current = null
+    }
+  }, [expanded])
+
   return (
-    <article className="dashboard-card chart-card">
+    <>
+      {expanded ? (
+        <button
+          className="chart-modal-backdrop"
+          type="button"
+          tabIndex={-1}
+          aria-label={'Закрыть график «' + title + '»'}
+          onClick={() => setExpanded(false)}
+        />
+      ) : null}
+      <article
+        className={'dashboard-card chart-card' + (expanded ? ' is-expanded' : '')}
+        role={expanded ? 'dialog' : undefined}
+        aria-modal={expanded ? true : undefined}
+        aria-labelledby={titleId}
+      >
       <div className="chart-card-header">
         <div>
           <span className="chart-card-context">{caption}</span>
-          <h3>{title}</h3>
+          <h3 id={titleId}>{title}</h3>
         </div>
-        <div className="chart-card-meta">
-          {unit ? <span className="chart-card-unit">{unit}</span> : null}
+        <div className="chart-card-actions">
+          {expanded ? <RangeControl range={range} onChange={onRangeChange} compact /> : null}
+          <div className="chart-card-meta">
+            {unit ? <span className="chart-card-unit">{unit}</span> : null}
+          </div>
+          <button
+            className="button-icon-circular chart-expand-button"
+            type="button"
+            ref={expanded ? closeButtonRef : expandButtonRef}
+            onClick={() => setExpanded((current) => !current)}
+            aria-label={expanded ? 'Закрыть увеличенный график' : 'Открыть график почти на весь экран'}
+            title={expanded ? 'Закрыть график' : 'Открыть график'}
+          >
+            <Icon name={expanded ? 'close' : 'expand'} />
+          </button>
         </div>
       </div>
       <div className="chart-shell">{children}</div>
-    </article>
+      </article>
+    </>
+  )
+}
+
+function RangeControl({
+  range,
+  onChange,
+  compact = false,
+}: {
+  range: RangeKey
+  onChange: (range: RangeKey) => void
+  compact?: boolean
+}) {
+  return (
+    <div className={'range-control' + (compact ? ' range-control-compact' : '')}>
+      <span className="range-label">период</span>
+      <div className="range-tabs" role="group" aria-label="Период истории">
+        {(Object.keys(rangeLabels) as RangeKey[]).map((key) => (
+          <button
+            className={'range-tab ' + (range === key ? 'is-active' : '')}
+            type="button"
+            key={key}
+            onClick={() => onChange(key)}
+            aria-pressed={range === key}
+          >
+            {rangeLabels[key]}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -2022,22 +2126,7 @@ export default function AirDashboard() {
               <h2>Как менялся воздух</h2>
               <p>Показания из PostgreSQL за выбранный период. Перетаскивайте график, используйте Ctrl + колесо или два пальца для масштаба.</p>
             </div>
-            <div className="range-control">
-              <span className="range-label">период</span>
-              <div className="range-tabs" role="group" aria-label="Период истории">
-                {(Object.keys(rangeLabels) as RangeKey[]).map((key) => (
-                  <button
-                    className={'range-tab ' + (range === key ? 'is-active' : '')}
-                    type="button"
-                    key={key}
-                    onClick={() => setRange(key)}
-                    aria-pressed={range === key}
-                  >
-                    {rangeLabels[key]}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <RangeControl range={range} onChange={setRange} />
           </div>
 
           <div className="history-summary">
@@ -2047,7 +2136,13 @@ export default function AirDashboard() {
           </div>
 
           <div className="chart-grid dashboard-chart-grid">
-            <ChartCard title="CO₂" caption="концентрация" unit="ppm">
+            <ChartCard
+              title="CO₂"
+              caption="концентрация"
+              unit="ppm"
+              range={range}
+              onRangeChange={setRange}
+            >
               <LineChart
                 data={co2Series}
                 unit="ppm"
@@ -2056,7 +2151,13 @@ export default function AirDashboard() {
                 rangeKey={range}
               />
             </ChartCard>
-            <ChartCard title="Температура" caption="температура" unit="°C">
+            <ChartCard
+              title="Температура"
+              caption="температура"
+              unit="°C"
+              range={range}
+              onRangeChange={setRange}
+            >
               <LineChart data={temperatureSeries} unit="°C" ariaLabel="График температуры помещения" rangeKey={range} />
             </ChartCard>
           </div>

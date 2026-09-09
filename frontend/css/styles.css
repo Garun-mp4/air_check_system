@@ -5255,6 +5255,181 @@ a:focus-visible {
   }
 }
 
+/* Chart focus mode: the same ECharts instance gets more room without losing its viewport. */
+body.is-chart-expanded {
+  overflow: hidden;
+}
+
+.dashboard-shell .range-tabs {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.dashboard-shell .range-tab {
+  min-width: 0;
+  flex: 1 1 0;
+  padding-inline: var(--spacing-xs);
+  white-space: nowrap;
+}
+
+.dashboard-shell .chart-card-actions {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+.dashboard-shell .chart-expand-button {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+.dashboard-shell .chart-expand-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dashboard-shell .range-control-compact {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.dashboard-shell .range-control-compact .range-label {
+  flex: 0 0 auto;
+  text-align: left;
+}
+
+.dashboard-shell .range-control-compact .range-tabs {
+  min-width: 248px;
+}
+
+.dashboard-shell .chart-modal-backdrop {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(16, 16, 16, 0.32);
+  cursor: default;
+  animation: chart-backdrop-in 160ms ease-out both;
+}
+
+.dashboard-shell .chart-card.is-expanded {
+  position: fixed;
+  z-index: 100;
+  inset: var(--spacing-lg);
+  display: flex;
+  min-height: 0;
+  max-height: calc(100vh - (var(--spacing-lg) * 2));
+  flex-direction: column;
+  padding: var(--spacing-lg);
+  background: var(--color-canvas);
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-card), 0 16px 40px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  animation: chart-dialog-in 180ms ease-out both;
+}
+
+.dashboard-shell .chart-card.is-expanded .chart-card-header {
+  flex: 0 0 auto;
+}
+
+.dashboard-shell .chart-card.is-expanded .chart-shell {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-items: stretch;
+  margin-top: var(--spacing-md);
+  padding-top: 0;
+  overflow: visible;
+}
+
+.dashboard-shell .chart-card.is-expanded .interactive-chart {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.dashboard-shell .chart-card.is-expanded .interactive-chart-surface {
+  min-height: 0;
+  height: auto;
+  flex: 1 1 auto;
+}
+
+.dashboard-shell .chart-card.is-expanded .interactive-chart-canvas {
+  min-height: 0;
+  height: 100%;
+}
+
+@keyframes chart-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes chart-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 559px) {
+  .dashboard-shell .range-control-compact {
+    flex: 1 1 auto;
+  }
+
+  .dashboard-shell .range-control-compact .range-tabs {
+    min-width: 0;
+  }
+
+  .dashboard-shell .chart-card.is-expanded {
+    inset: var(--spacing-sm);
+    max-height: calc(100vh - (var(--spacing-sm) * 2));
+    padding: var(--spacing-md);
+  }
+
+  .dashboard-shell .chart-card.is-expanded .chart-card-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-shell .chart-card.is-expanded .chart-card-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dashboard-shell .chart-card.is-expanded .chart-card-meta {
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell .chart-modal-backdrop,
+  .dashboard-shell .chart-card.is-expanded {
+    animation: none;
+  }
+}
+
 /* Settings stay available for diagnostics without competing with live readings. */
 body.is-settings-open {
   overflow: hidden;
