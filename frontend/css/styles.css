@@ -5580,3 +5580,79 @@ body.is-settings-open {
     align-self: flex-start;
   }
 }
+
+/* Refresh belongs to the live reading it updates, not to global navigation. */
+.dashboard-shell .current-air-tools {
+  display: grid;
+  justify-items: end;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.dashboard-shell .current-air-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs) var(--spacing-md);
+}
+
+.dashboard-shell .current-air-updated {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-muted);
+  font-family: var(--font-code);
+  font-size: 10px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.dashboard-shell .current-air-refresh {
+  gap: var(--spacing-xs);
+  min-height: 40px;
+  padding-inline: var(--spacing-md);
+  touch-action: manipulation;
+}
+
+.dashboard-shell .current-air-refresh:hover,
+.dashboard-shell .current-air-refresh:focus-visible {
+  background: var(--color-surface-soft);
+  border-color: var(--color-ink);
+}
+
+.dashboard-shell .current-air-refresh:disabled,
+.dashboard-shell .current-air-refresh:disabled:hover {
+  background: var(--color-surface-soft);
+  border-color: var(--color-hairline);
+  color: var(--color-muted);
+  cursor: wait;
+}
+
+.dashboard-shell .current-air-refresh[aria-busy="true"] svg {
+  animation: dashboard-spin 800ms linear infinite;
+}
+
+.dashboard-shell .current-air-refresh svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 559px) {
+  .dashboard-shell .current-air-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-shell .current-air-tools {
+    justify-items: stretch;
+  }
+
+  .dashboard-shell .current-air-status-row {
+    justify-content: space-between;
+  }
+
+  .dashboard-shell .current-air-refresh {
+    width: 100%;
+  }
+}

@@ -1261,7 +1261,7 @@ export default function AirDashboard() {
   return (
     <div className="app-shell dashboard-shell">
       <a className="skip-link" href="#main-content">К содержимому</a>
-      <header className="app-topbar">
+      <header className="app-topbar" inert={settingsOpen}>
         <div className="container app-topbar-inner">
           <a
             className="brand dashboard-brand"
@@ -1300,10 +1300,6 @@ export default function AirDashboard() {
           />
 
           <div className="topbar-actions">
-            <span className="topbar-sync">
-              <span className={'status-dot status-dot-' + systemTone} />
-              <span className="sync-copy">{error ? 'API требует внимания' : sourceLabel}</span>
-            </span>
             <button
               className="settings-button"
               type="button"
@@ -1316,16 +1312,6 @@ export default function AirDashboard() {
             >
               <Icon name="settings" />
               <span>Настройки</span>
-            </button>
-            <button
-              className="control-button"
-              type="button"
-              onClick={() => void loadData()}
-              disabled={loading}
-              aria-busy={loading}
-            >
-              <Icon name="refresh" />
-              <span>Обновить</span>
             </button>
             <button
               className="menu-button"
@@ -1368,19 +1354,6 @@ export default function AirDashboard() {
             <Icon name="settings" />
             <span>Настройки</span>
           </button>
-          <button
-            className="button-primary mobile-refresh"
-            type="button"
-            onClick={() => {
-              setMenuOpen(false)
-              void loadData()
-            }}
-            disabled={loading}
-            aria-busy={loading}
-          >
-            <Icon name="refresh" />
-            Обновить данные
-          </button>
         </div>
       </header>
 
@@ -1398,12 +1371,8 @@ export default function AirDashboard() {
               </div>
               <dl className="intro-meta">
                 <div>
-                  <dt>Синхронизация</dt>
-                  <dd>{formatTimestamp(measurement?.timestamp)}</dd>
-                </div>
-                <div>
-                  <dt>Интервал обновления</dt>
-                  <dd>30 с</dd>
+                  <dt>Автообновление</dt>
+                  <dd>каждые 30 с</dd>
                 </div>
               </dl>
             </div>
@@ -1441,10 +1410,29 @@ export default function AirDashboard() {
                 <span className="eyebrow">Сейчас</span>
                 <h2>Воздух в комнате</h2>
               </div>
-              <span className={'current-air-state current-air-state-' + co2BadgeClass(currentCo2).replace('badge-', '')}>
-                <span className={'status-dot status-dot-' + (currentCo2 === null ? 'neutral' : currentCo2 >= 1000 ? 'error' : currentCo2 >= 800 ? 'warning' : 'success')} />
-                {co2Label(currentCo2)}
-              </span>
+              <div className="current-air-tools">
+                <div className="current-air-status-row">
+                  <span className={'current-air-state current-air-state-' + co2BadgeClass(currentCo2).replace('badge-', '')}>
+                    <span className={'status-dot status-dot-' + (currentCo2 === null ? 'neutral' : currentCo2 >= 1000 ? 'error' : currentCo2 >= 800 ? 'warning' : 'success')} />
+                    {co2Label(currentCo2)}
+                  </span>
+                  <span className="current-air-updated" role="status" aria-live="polite">
+                    <span className={'status-dot status-dot-' + systemTone} />
+                    {error ? 'обновление не удалось' : sourceLabel}
+                  </span>
+                </div>
+                <button
+                  className="current-air-refresh button-secondary"
+                  type="button"
+                  onClick={() => void loadData()}
+                  disabled={loading}
+                  aria-busy={loading}
+                  aria-label={loading ? 'Обновление показаний' : 'Обновить показания'}
+                >
+                  <Icon name="refresh" />
+                  <span>{loading ? 'Обновление…' : 'Обновить'}</span>
+                </button>
+              </div>
             </div>
 
             <div className="current-air-body">
