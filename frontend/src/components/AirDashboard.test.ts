@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import {
+  AirComparison,
+  AirContextCards,
   AirContextMap,
   DashboardNavigation,
   SettingsPanel,
@@ -14,6 +16,27 @@ import {
 import type { ClientMeasurement } from '../lib/client-api'
 
 describe('dashboard navigation', () => {
+  it('renders photo context cards and an explainable comparison', () => {
+    const measurement: ClientMeasurement = {
+      id: 1,
+      created_at: '2026-09-09T10:00:00Z',
+      timestamp: '2026-09-09T10:00:00Z',
+      indoor: { co2: 650, temperature: 23.1, humidity: 45, pm25: 5.3 },
+      outdoor: { temperature: 17.8, humidity: 59, pm25: 9.0 },
+      window_open: false,
+    }
+    const cards = renderToStaticMarkup(createElement(AirContextCards, {
+      measurement,
+      onNavigate: () => undefined,
+    }))
+    const comparison = renderToStaticMarkup(createElement(AirComparison, { measurement }))
+
+    expect(cards).toContain('/air-context-indoor.png')
+    expect(cards).toContain('/air-context-outdoor.png')
+    expect(comparison).toContain('CO₂ не сравнивается')
+    expect(comparison).toContain('внутри чище')
+  })
+
   it('explains indoor and outdoor readings with navigable zones', () => {
     const markup = renderToStaticMarkup(createElement(AirContextMap, { onNavigate: () => undefined }))
 

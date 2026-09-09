@@ -136,6 +136,127 @@ function formatValue(value: number | null | undefined, fractionDigits = 0): stri
   }).format(value)
 }
 
+type AirComparisonMetric = {
+  key: 'temperature' | 'humidity' | 'pm25'
+  label: string
+  icon: 'temperature' | 'humidity' | 'pm25'
+  indoor: number | null
+  outdoor: number | null
+  unit: string
+  digits: number
+}
+
+type AirComparisonInsight = {
+  tone: 'success' | 'warning' | 'neutral'
+  title: string
+  detail: string
+}
+
+function formatMetricValue(
+  value: number | null | undefined,
+  fractionDigits: number,
+  unit: string,
+): string {
+  return value === null || value === undefined || !Number.isFinite(value)
+    ? '—'
+    : formatValue(value, fractionDigits) + ' ' + unit
+}
+
+function formatSignedMetric(
+  value: number | null,
+  fractionDigits: number,
+  unit: string,
+): string {
+  if (value === null || !Number.isFinite(value)) {
+    return '—'
+  }
+  if (Math.abs(value) < 0.05) {
+    return '0 ' + unit
+  }
+  return (value > 0 ? '+' : '') + formatValue(value, fractionDigits) + ' ' + unit
+}
+
+function getAirComparisonMetrics(
+  measurement: ClientMeasurement | null,
+): AirComparisonMetric[] {
+  return [
+    {
+      key: 'temperature',
+      label: 'Температура',
+      icon: 'temperature',
+      indoor: measurement?.indoor.temperature ?? null,
+      outdoor: measurement?.outdoor.temperature ?? null,
+      unit: '°C',
+      digits: 1,
+    },
+    {
+      key: 'humidity',
+      label: 'Влажность',
+      icon: 'humidity',
+      indoor: measurement?.indoor.humidity ?? null,
+      outdoor: measurement?.outdoor.humidity ?? null,
+      unit: '%',
+      digits: 0,
+    },
+    {
+      key: 'pm25',
+      label: 'PM2.5',
+      icon: 'pm25',
+      indoor: measurement?.indoor.pm25 ?? null,
+      outdoor: measurement?.outdoor.pm25 ?? null,
+      unit: 'µg/m³',
+      digits: 1,
+    },
+  ]
+}
+
+function getAirComparisonInsight(
+  measurement: ClientMeasurement | null,
+): AirComparisonInsight {
+  const indoorPm25 = measurement?.indoor.pm25
+  const outdoorPm25 = measurement?.outdoor.pm25
+  if (
+    indoorPm25 === undefined ||
+    outdoorPm25 === undefined ||
+    !Number.isFinite(indoorPm25) ||
+    !Number.isFinite(outdoorPm25)
+  ) {
+    return {
+      tone: 'neutral',
+      title: 'Сравнение появится после показаний',
+      detail: 'Нужны одновременно значения внутри комнаты и снаружи.',
+    }
+  }
+
+  const pm25Delta = indoorPm25 - outdoorPm25
+  if (pm25Delta <= -2) {
+    return {
+      tone: 'success',
+      title: 'Внутри сейчас чище',
+      detail:
+        'PM2.5 внутри ниже наружного уровня на ' +
+        formatValue(Math.abs(pm25Delta), 1) +
+        ' µg/m³. По этому показателю внешний воздух не ухудшает текущую оценку комнаты.',
+    }
+  }
+  if (pm25Delta >= 2) {
+    return {
+      tone: 'warning',
+      title: 'Внутри PM2.5 выше',
+      detail:
+        'PM2.5 внутри выше наружного уровня на ' +
+        formatValue(pm25Delta, 1) +
+        ' µg/m³. Проверьте источник загрязнения и состояние фильтра притока.',
+    }
+  }
+  return {
+    tone: 'neutral',
+    title: 'Показатели PM2.5 близки',
+    detail:
+      'Разница между комнатой и улицей меньше 2 µg/m³. Решение о проветривании лучше принимать вместе с CO₂ и прогнозом.',
+  }
+}
+
 function formatTimestamp(timestamp: string | null | undefined): string {
   if (!timestamp) {
     return 'нет данных'
@@ -629,49 +750,168 @@ function ChartCard({
 
 type SensorZone = 'indoor' | 'outdoor'
 
-export function AirContextMap({
+export function AirContextCards({
   onNavigate,
+  measurement = null,
 }: {
   onNavigate: (zone: SensorZone) => void
+  measurement?: ClientMeasurement | null
 }) {
-  return (
-    <div className="air-context-map" role="group" aria-label="Где находятся показания воздуха">
-      <button
-        className="air-context-zone air-context-zone-outdoor"
-        type="button"
-        onClick={() => onNavigate('outdoor')}
-        aria-controls="outdoor-sensors"
-        aria-label="Перейти к показаниям снаружи"
-      >
-        <span className="air-context-zone-icon"><Icon name="air" /></span>
-        <span className="air-context-zone-copy">
-          <span className="air-context-zone-label">Снаружи</span>
-          <strong>Внешний воздух</strong>
-          <span>данные до окна</span>
-        </span>
-      </button>
+  const contexts = [
+    {
+      zone: 'indoor' as const,
+      label: 'Внутри комнаты',
+      title: 'Воздух в комнате',
+      description: 'Основные показания и состояние окна',
+      image: '/air-context-indoor.png',
+      icon: 'room' as const,
+      reading: 'PM2.5 · ' + formatMetricValue(measurement?.indoor.pm25 ?? null, 1, 'µg/m³'),
+    },
+    {
+      zone: 'outdoor' as const,
+      label: 'Снаружи',
+      title: 'Внешний воздух',
+      description: 'Показания за окном для сравнения',
+      image: '/air-context-outdoor.png',
+      icon: 'air' as const,
+      reading: 'PM2.5 · ' + formatMetricValue(measurement?.outdoor.pm25 ?? null, 1, 'µg/m³'),
+    },
+  ]
 
-      <div className="air-context-boundary" aria-hidden="true">
-        <span className="air-context-flow air-context-flow-out">←</span>
-        <span className="air-context-window"><Icon name="window" /></span>
-        <span className="air-context-flow air-context-flow-in">→</span>
+  return (
+    <div className="air-context-cards" role="group" aria-label="Контексты воздуха">
+      {contexts.map((context) => (
+        <button
+          className={'air-context-card air-context-card-' + context.zone}
+          type="button"
+          key={context.zone}
+          onClick={() => onNavigate(context.zone)}
+          aria-controls={context.zone === 'indoor' ? 'indoor-sensors' : 'outdoor-sensors'}
+          aria-label={'Перейти к показаниям ' + context.label.toLowerCase()}
+        >
+          <span className="air-context-card-media" aria-hidden="true">
+            <img src={context.image} alt="" loading="lazy" decoding="async" />
+          </span>
+          <span className="air-context-card-content">
+            <span className="air-context-card-heading">
+              <span className="air-context-card-icon"><Icon name={context.icon} /></span>
+              <span className="air-context-card-copy">
+                <span className="air-context-card-label">{context.label}</span>
+                <strong>{context.title}</strong>
+              </span>
+            </span>
+            <span className="air-context-card-footer">
+              <span>{context.description}</span>
+              <span className="air-context-card-reading">{context.reading}</span>
+            </span>
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+export function AirContextMap(props: {
+  onNavigate: (zone: SensorZone) => void
+  measurement?: ClientMeasurement | null
+}) {
+  return <AirContextCards {...props} />
+}
+
+export function AirComparison({
+  measurement,
+}: {
+  measurement: ClientMeasurement | null
+}) {
+  const metrics = getAirComparisonMetrics(measurement)
+  const insight = getAirComparisonInsight(measurement)
+
+  return (
+    <section className="air-comparison" aria-labelledby="air-comparison-title">
+      <div className="air-comparison-header">
+        <div>
+          <span className="eyebrow">Сравнение</span>
+          <h3 id="air-comparison-title">Что меняется между улицей и комнатой</h3>
+        </div>
+        <span className="air-comparison-note">внутри − снаружи</span>
       </div>
 
-      <button
-        className="air-context-zone air-context-zone-indoor"
-        type="button"
-        onClick={() => onNavigate('indoor')}
-        aria-controls="indoor-sensors"
-        aria-label="Перейти к показаниям внутри комнаты"
-      >
-        <span className="air-context-zone-icon"><Icon name="room" /></span>
-        <span className="air-context-zone-copy">
-          <span className="air-context-zone-label">Внутри комнаты</span>
-          <strong>Воздух в комнате</strong>
-          <span>основные показания</span>
+      <div className="air-comparison-table" role="table" aria-label="Сравнение показателей воздуха">
+        <div className="air-comparison-row air-comparison-row-header" role="row">
+          <span role="columnheader">Показатель</span>
+          <span role="columnheader">Снаружи</span>
+          <span role="columnheader">Внутри</span>
+          <span role="columnheader">Разница</span>
+          <span role="columnheader">Интерпретация</span>
+        </div>
+        {metrics.map((metric) => {
+          const delta =
+            metric.indoor !== null && metric.outdoor !== null
+              ? metric.indoor - metric.outdoor
+              : null
+          const deltaTone =
+            metric.key === 'pm25'
+              ? delta !== null && delta <= -2
+                ? 'success'
+                : delta !== null && delta >= 2
+                  ? 'warning'
+                  : 'neutral'
+              : 'neutral'
+          const interpretation =
+            delta === null
+              ? 'нет пары для сравнения'
+              : metric.key === 'pm25'
+                ? delta <= -2
+                  ? 'внутри чище'
+                  : delta >= 2
+                    ? 'внутри выше'
+                    : 'почти одинаково'
+                : delta > 0.05
+                  ? 'внутри выше'
+                  : delta < -0.05
+                    ? 'внутри ниже'
+                    : 'почти одинаково'
+
+          return (
+            <div className="air-comparison-row" role="row" key={metric.key}>
+              <span className="air-comparison-metric" role="rowheader">
+                <span className="air-comparison-icon"><Icon name={metric.icon} /></span>
+                <strong>{metric.label}</strong>
+              </span>
+              <span role="cell" data-label="Снаружи">
+                {formatMetricValue(metric.outdoor, metric.digits, metric.unit)}
+              </span>
+              <span role="cell" data-label="Внутри">
+                {formatMetricValue(metric.indoor, metric.digits, metric.unit)}
+              </span>
+              <span
+                className={'air-comparison-delta air-comparison-delta-' + deltaTone}
+                role="cell"
+                data-label="Разница"
+              >
+                {formatSignedMetric(delta, metric.digits, metric.unit === '%' ? 'п.п.' : metric.unit)}
+              </span>
+              <span className="air-comparison-interpretation" role="cell" data-label="Интерпретация">
+                {interpretation}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      <p className="air-comparison-footnote">
+        CO₂ не сравнивается: наружный датчик CO₂ пока не подключён, поэтому показатель доступен только для комнаты.
+      </p>
+
+      <div className={'air-comparison-insight air-comparison-insight-' + insight.tone} role="status">
+        <span className="air-comparison-insight-icon"><Icon name="air" /></span>
+        <span className="air-comparison-insight-copy">
+          <span className="eyebrow">Вывод по текущим данным</span>
+          <strong>{insight.title}</strong>
+          <span>{insight.detail}</span>
         </span>
-      </button>
-    </div>
+      </div>
+    </section>
   )
 }
 
@@ -1738,12 +1978,13 @@ export default function AirDashboard() {
             <div>
               <span className="eyebrow">Показания</span>
               <h2>Воздух вокруг комнаты</h2>
-              <p>Схема показывает, какие значения относятся к комнате, а какие — к внешнему воздуху.</p>
+              <p>Две карточки сразу показывают, где находится датчик, а сравнение ниже объясняет разницу текущих значений.</p>
             </div>
             <span className="section-context"><span className={'status-dot status-dot-' + deviceConnectionTone} /> <span translate="no">{deviceId}</span> · {deviceConnectionLabel}</span>
           </div>
 
-          <AirContextMap onNavigate={handleSensorNavigation} />
+          <AirContextCards measurement={measurement} onNavigate={handleSensorNavigation} />
+          <AirComparison measurement={measurement} />
 
           <div className="sensor-zone sensor-zone-indoor" id="indoor-sensors">
             <div className="sensor-zone-heading">
