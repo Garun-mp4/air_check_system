@@ -47,6 +47,7 @@ type IconName =
   | 'temperature'
   | 'humidity'
   | 'pm25'
+  | 'room'
   | 'window'
   | 'database'
   | 'model'
@@ -374,6 +375,14 @@ function Icon({ name }: { name: IconName }) {
       </svg>
     )
   }
+  if (name === 'room') {
+    return (
+      <svg {...svgProps}>
+        <path d="m3.5 10.5 8.5-7 8.5 7v9h-17z" />
+        <path d="M9 19.5v-5h6v5" />
+      </svg>
+    )
+  }
   if (name === 'database') {
     return (
       <svg {...svgProps}>
@@ -620,6 +629,54 @@ function ChartCard({
       </div>
       <div className="chart-shell">{children}</div>
     </article>
+  )
+}
+
+type SensorZone = 'indoor' | 'outdoor'
+
+export function AirContextMap({
+  onNavigate,
+}: {
+  onNavigate: (zone: SensorZone) => void
+}) {
+  return (
+    <div className="air-context-map" role="group" aria-label="Где находятся показания воздуха">
+      <button
+        className="air-context-zone air-context-zone-outdoor"
+        type="button"
+        onClick={() => onNavigate('outdoor')}
+        aria-controls="outdoor-sensors"
+        aria-label="Перейти к показаниям снаружи"
+      >
+        <span className="air-context-zone-icon"><Icon name="air" /></span>
+        <span className="air-context-zone-copy">
+          <span className="air-context-zone-label">Снаружи</span>
+          <strong>Внешний воздух</strong>
+          <span>данные до окна</span>
+        </span>
+      </button>
+
+      <div className="air-context-boundary" aria-hidden="true">
+        <span className="air-context-flow air-context-flow-out">←</span>
+        <span className="air-context-window"><Icon name="window" /></span>
+        <span className="air-context-flow air-context-flow-in">→</span>
+      </div>
+
+      <button
+        className="air-context-zone air-context-zone-indoor"
+        type="button"
+        onClick={() => onNavigate('indoor')}
+        aria-controls="indoor-sensors"
+        aria-label="Перейти к показаниям внутри комнаты"
+      >
+        <span className="air-context-zone-icon"><Icon name="room" /></span>
+        <span className="air-context-zone-copy">
+          <span className="air-context-zone-label">Внутри комнаты</span>
+          <strong>Воздух в комнате</strong>
+          <span>основные показания</span>
+        </span>
+      </button>
+    </div>
   )
 }
 
@@ -1159,6 +1216,13 @@ export default function AirDashboard() {
     })
   }, [])
 
+  const handleSensorNavigation = useCallback((zone: SensorZone) => {
+    const targetId = zone === 'indoor' ? 'indoor-sensors' : 'outdoor-sensors'
+    window.requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [])
+
   useEffect(() => {
     if (!menuOpen) {
       return
@@ -1633,33 +1697,46 @@ export default function AirDashboard() {
           <div className="section-toolbar">
             <div>
               <span className="eyebrow">Показания</span>
-              <h2>Воздух в комнате</h2>
-              <p>Текущие значения локального набора датчиков.</p>
+              <h2>Воздух вокруг комнаты</h2>
+              <p>Схема показывает, какие значения относятся к комнате, а какие — к внешнему воздуху.</p>
             </div>
             <span className="section-context"><span className={'status-dot status-dot-' + deviceConnectionTone} /> <span translate="no">{deviceId}</span> · {deviceConnectionLabel}</span>
           </div>
 
-          <div className="metrics-grid">
-            <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.indoor.temperature, 1)} unit="°C" note="внутри · сейчас" />
-            <MetricCard icon="humidity" label="Влажность" value={formatValue(measurement?.indoor.humidity, 0)} unit="%" note="внутри · сейчас" />
-            <MetricCard
-              icon="pm25"
-              label="PM2.5"
-              value={formatValue(indoorPm25, 1)}
-              unit="µg/m³"
-              note="внутри · сейчас"
-              quality={<Pm25Scale value={indoorPm25} />}
-              className="data-card-pm25"
-            />
-            <MetricCard icon="window" label="Окно" value={windowLabel} note={measurement ? 'состояние · ' + formatTime(measurement.timestamp) : 'нет данных'} className="data-card-window" />
+          <AirContextMap onNavigate={handleSensorNavigation} />
+
+          <div className="sensor-zone sensor-zone-indoor" id="indoor-sensors">
+            <div className="sensor-zone-heading">
+              <div>
+                <span className="eyebrow">Внутри комнаты</span>
+                <h3>Показания в комнате</h3>
+              </div>
+              <span className="sensor-zone-note"><Icon name="room" /> датчики внутри</span>
+            </div>
+            <div className="metrics-grid">
+              <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.indoor.temperature, 1)} unit="°C" note="внутри · сейчас" />
+              <MetricCard icon="humidity" label="Влажность" value={formatValue(measurement?.indoor.humidity, 0)} unit="%" note="внутри · сейчас" />
+              <MetricCard
+                icon="pm25"
+                label="PM2.5"
+                value={formatValue(indoorPm25, 1)}
+                unit="µg/m³"
+                note="внутри · сейчас"
+                quality={<Pm25Scale value={indoorPm25} />}
+                className="data-card-pm25"
+              />
+              <MetricCard icon="window" label="Окно" value={windowLabel} note={measurement ? 'состояние · ' + formatTime(measurement.timestamp) : 'нет данных'} className="data-card-window" />
+            </div>
           </div>
 
-          <div className="outdoor-context">
-            <div className="outdoor-heading">
+          <div className="outdoor-context sensor-zone sensor-zone-outdoor" id="outdoor-sensors">
+            <div className="outdoor-heading sensor-zone-heading">
               <div>
-                <h3>Снаружи</h3>
-                <p>Внешние показатели для сравнения с комнатой</p>
+                <span className="eyebrow">Снаружи</span>
+                <h3>Внешний воздух</h3>
+                <p>Показания за окном для сравнения</p>
               </div>
+              <span className="sensor-zone-note"><Icon name="air" /> датчики снаружи</span>
             </div>
             <div className="outdoor-grid">
               <MetricCard icon="temperature" label="Температура" value={formatValue(measurement?.outdoor.temperature, 1)} unit="°C" note="снаружи" className="data-card-compact" />

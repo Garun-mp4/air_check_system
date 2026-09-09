@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import {
+  AirContextMap,
   DashboardNavigation,
   SettingsPanel,
   getConnectionStatusLabel,
@@ -13,6 +14,15 @@ import {
 import type { ClientMeasurement } from '../lib/client-api'
 
 describe('dashboard navigation', () => {
+  it('explains indoor and outdoor readings with navigable zones', () => {
+    const markup = renderToStaticMarkup(createElement(AirContextMap, { onNavigate: () => undefined }))
+
+    expect(markup).toContain('Снаружи')
+    expect(markup).toContain('Внутри комнаты')
+    expect(markup).toContain('aria-controls="outdoor-sensors"')
+    expect(markup).toContain('aria-controls="indoor-sensors"')
+  })
+
   it('resolves only known section hashes', () => {
     expect(getSectionIdFromHash('#controls')).toBe('controls')
     expect(getSectionIdFromHash('history')).toBe('history')
