@@ -72,6 +72,8 @@ export type ControlTarget = 'exhaust' | 'intake' | 'window'
 
 export type ControlAction = 'on' | 'off' | 'open' | 'close' | 'auto'
 
+export type VentilationAction = 'on' | 'off'
+
 export type ControlSource = 'manual' | 'automatic'
 
 export type ControlCommandStatus = 'pending' | 'applied'

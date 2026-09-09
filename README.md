@@ -238,6 +238,14 @@ docker compose --profile demo down
 
 Для новой команды сервер возвращает `202 Accepted`. Для `window:auto`, если команда устройству не нужна, возвращается `200`. Ответ содержит созданные команды и актуальный control status.
 
+`POST /api/v1/controls/ventilation` — единая ручная команда для вытяжки и притока:
+
+```json
+{"device_id":"room-01","action":"on"}
+```
+
+Допустимые значения `action`: `on` или `off`. Сервер создаёт команды для `exhaust` и `intake` в одной транзакции с общим `batch_id`, поэтому simulator и будущая ESP32 получают тот же контракт отдельных исполнительных каналов, а оператор управляет ими одной кнопкой.
+
 `GET /api/v1/controls/commands?device_id=room-01&limit=20` — очередь pending-команд для simulator/ESP32.
 
 `POST /api/v1/controls/state` — подтверждение от устройства:

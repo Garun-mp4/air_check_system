@@ -9,12 +9,14 @@ import {
   getHistory,
   getLatestDashboard,
   sendControlCommand,
+  sendVentilationCommand,
   type ClientControlAction,
   type ClientControlStatus,
   type ClientControlTarget,
   type ClientMeasurement,
   type ClientPrediction,
   type ClientRecommendation,
+  type ClientVentilationAction,
   type DashboardData,
 } from '../lib/client-api'
 import {
@@ -565,7 +567,6 @@ function ActuatorRow({
   active,
   desiredActive,
   pending,
-  onToggle,
 }: {
   target: 'exhaust' | 'intake'
   icon: 'exhaust' | 'intake'
@@ -574,7 +575,6 @@ function ActuatorRow({
   active: boolean
   desiredActive: boolean
   pending: boolean
-  onToggle: () => void
 }) {
   const desiredDiffers = active !== desiredActive
   return (
@@ -588,18 +588,13 @@ function ActuatorRow({
         {desiredDiffers ? <small>задано: {desiredActive ? 'включить' : 'выключить'}</small> : null}
       </div>
       <div className="actuator-action">
-        <span className={'control-state-badge control-state-badge-' + (active ? 'on' : 'off')}>
+        <span
+          className={'control-state-badge control-state-badge-' + (active ? 'on' : 'off')}
+          title={pending ? 'Ожидается подтверждение локального узла' : undefined}
+        >
           {controlStateLabel(target, active)}
         </span>
-        <button
-          className={'control-toggle ' + (active ? 'is-on' : '')}
-          type="button"
-          onClick={onToggle}
-          disabled={pending}
-          aria-pressed={active}
-        >
-          {pending ? 'Ожидание' : active ? 'Выключить' : 'Включить'}
-        </button>
+        {pending ? <small className="actuator-pending-label">ожидание подтверждения</small> : null}
       </div>
     </div>
   )
@@ -1031,6 +1026,35 @@ export default function AirDashboard() {
     [controls?.device_id],
   )
 
+  const executeVentilation = useCallback(
+    async (action: ClientVentilationAction) => {
+      const commandKey = 'ventilation:' + action
+      setActiveCommand(commandKey)
+      setControlError(null)
+      setControlNotice(null)
+      try {
+        const result = await sendVentilationCommand(action, controls?.device_id)
+        setControls(result.controls)
+        setControlNotice(
+          result.commands.length > 0
+            ? action === 'on'
+              ? 'Команда на запуск вытяжки и притока отправлена локальному узлу.'
+              : 'Команда на остановку вытяжки и притока отправлена локальному узлу.'
+            : 'Состояние контура уже соответствует выбранной команде.',
+        )
+      } catch (commandError) {
+        setControlError(
+          commandError instanceof ClientApiError
+            ? commandError.message
+            : 'Не удалось отправить команду управления вентиляцией',
+        )
+      } finally {
+        setActiveCommand(null)
+      }
+    },
+    [controls?.device_id],
+  )
+
   useEffect(() => {
     const controller = new AbortController()
     void loadData(controller.signal)
@@ -1317,6 +1341,31 @@ export default function AirDashboard() {
   const windowDesiredOpen = controls?.desired.window_open ?? currentWindowOpen === true
   const controlsTone = controlTone(controls)
   const controlsPending = controls?.pending_commands ?? 0
+  const ventilationActive =
+    controls?.reported.exhaust_on === true && controls?.reported.intake_on === true
+  const ventilationPending =
+    controls === null ||
+    controls.reported.exhaust_on !== controls.desired.exhaust_on ||
+    controls.reported.intake_on !== controls.desired.intake_on ||
+    activeCommand === 'ventilation:on' ||
+    activeCommand === 'ventilation:off'
+  const ventilationAction: ClientVentilationAction = ventilationActive ? 'off' : 'on'
+  const ventilationButtonLabel =
+    controls === null
+      ? 'Ожидание данных'
+      : ventilationPending
+        ? 'Ожидание устройства'
+        : ventilationActive
+          ? 'Остановить проветривание'
+          : 'Запустить проветривание'
+  const ventilationStateLabel =
+    controls === null
+      ? 'Состояние неизвестно'
+      : ventilationPending
+        ? 'Ожидается подтверждение'
+        : ventilationActive
+          ? 'Контур работает'
+          : 'Контур остановлен'
   const deviceId = controls?.device_id ?? 'локальный узел'
   const deviceConnectionStatus = controls?.connection.status ?? (measurement ? 'online' : 'offline')
   const deviceConnectionLabel = getConnectionStatusLabel(deviceConnectionStatus)
@@ -1534,7 +1583,7 @@ export default function AirDashboard() {
             <div>
               <span className="eyebrow">Команды</span>
               <h2>Управление проветриванием</h2>
-              <p>Вытяжка и приток можно включать вместе. Окно работает по автоматическому или ручному сценарию.</p>
+              <p>Вытяжка и приток запускаются одной командой. Окно работает по автоматическому или ручному сценарию.</p>
             </div>
             <span className={'section-context control-context control-context-' + controlsTone}>
               <span className={'status-dot status-dot-' + controlsTone} />
@@ -1551,7 +1600,7 @@ export default function AirDashboard() {
                 </div>
                 <span className="control-card-kicker">два канала</span>
               </div>
-              <p className="control-card-description">Каналы независимы: вытяжка выводит воздух, приток подаёт его через фильтр.</p>
+              <p className="control-card-description">Одна команда включает оба канала одновременно: вытяжка удаляет воздух, приток подаёт его через фильтр.</p>
               <div className="actuator-list">
                 <ActuatorRow
                   target="exhaust"
@@ -1564,7 +1613,6 @@ export default function AirDashboard() {
                     controls?.reported.exhaust_on !== controls?.desired.exhaust_on ||
                     activeCommand === 'exhaust:on' ||
                     activeCommand === 'exhaust:off'}
-                  onToggle={() => void executeControl('exhaust', controls?.reported.exhaust_on ? 'off' : 'on')}
                 />
                 <ActuatorRow
                   target="intake"
@@ -1577,8 +1625,24 @@ export default function AirDashboard() {
                     controls?.reported.intake_on !== controls?.desired.intake_on ||
                     activeCommand === 'intake:on' ||
                     activeCommand === 'intake:off'}
-                  onToggle={() => void executeControl('intake', controls?.reported.intake_on ? 'off' : 'on')}
                 />
+              </div>
+              <div className="ventilation-master-control">
+                <div className="ventilation-master-copy">
+                  <span className="eyebrow">Общий контур</span>
+                  <strong>{ventilationStateLabel}</strong>
+                  <span>Вытяжка и приток получают одну общую команду.</span>
+                </div>
+                <button
+                  className={'ventilation-master-button ' + (ventilationActive ? 'button-secondary' : 'button-primary')}
+                  type="button"
+                  onClick={() => void executeVentilation(ventilationAction)}
+                  disabled={ventilationPending}
+                  aria-pressed={ventilationActive}
+                >
+                  <Icon name="air" />
+                  <span>{ventilationButtonLabel}</span>
+                </button>
               </div>
               <div className="control-card-foot">
                 <span><span className={'status-dot status-dot-' + controlsTone} /> {controls?.automation.message ?? 'Ожидание состояния локального узла.'}</span>

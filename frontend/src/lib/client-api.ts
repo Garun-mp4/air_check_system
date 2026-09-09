@@ -42,6 +42,7 @@ export interface DashboardData {
 
 export type ClientControlTarget = 'exhaust' | 'intake' | 'window'
 export type ClientControlAction = 'on' | 'off' | 'open' | 'close' | 'auto'
+export type ClientVentilationAction = 'on' | 'off'
 
 export interface ClientControlCommand {
   id: number
@@ -235,18 +236,30 @@ export async function sendControlCommand(
   target: ClientControlTarget,
   action: ClientControlAction,
   deviceId?: string,
-): Promise<{
-  commands: ClientControlCommand[]
-  controls: ClientControlStatus
-}> {
+): Promise<ClientControlCommandResult> {
   const payload = await postJson<{
-    data: {
-      commands: ClientControlCommand[]
-      controls: ClientControlStatus
-    }
+    data: ClientControlCommandResult
   }>('/api/v1/controls/commands', {
     ...(deviceId ? { device_id: deviceId } : {}),
     target,
+    action,
+  })
+  return payload.data
+}
+
+export interface ClientControlCommandResult {
+  commands: ClientControlCommand[]
+  controls: ClientControlStatus
+}
+
+export async function sendVentilationCommand(
+  action: ClientVentilationAction,
+  deviceId?: string,
+): Promise<ClientControlCommandResult> {
+  const payload = await postJson<{
+    data: ClientControlCommandResult
+  }>('/api/v1/controls/ventilation', {
+    ...(deviceId ? { device_id: deviceId } : {}),
     action,
   })
   return payload.data

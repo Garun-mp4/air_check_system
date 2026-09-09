@@ -13,7 +13,11 @@ import type {
   Measurement,
   MeasurementInput,
 } from './types'
-import { ValidationError, parseMeasurementInput } from './validation'
+import {
+  ValidationError,
+  parseMeasurementInput,
+  parseVentilationCommand,
+} from './validation'
 
 const config: AppConfig = {
   databaseUrl: 'postgres://test',
@@ -97,6 +101,20 @@ describe('measurement validation', () => {
         window_open: 'yes',
       }),
     ).toThrow(ValidationError)
+  })
+})
+
+describe('ventilation command validation', () => {
+  it('accepts a composite on/off command without changing device targets', () => {
+    expect(
+      parseVentilationCommand({ device_id: 'room-01', action: 'on' }, 'fallback'),
+    ).toEqual({ deviceId: 'room-01', action: 'on' })
+  })
+
+  it('rejects window-style actions on the composite ventilation endpoint', () => {
+    expect(() => parseVentilationCommand({ action: 'open' }, 'room-01')).toThrow(
+      ValidationError,
+    )
   })
 })
 
@@ -263,6 +281,28 @@ describe('memory repository', () => {
 })
 
 describe('control service', () => {
+  it('queues one manual batch for both ventilation channels', async () => {
+    const repository = new MemoryRepository()
+    const service = new ControlService(repository, config)
+
+    const result = await service.issueVentilation({
+      deviceId: 'room-01',
+      action: 'on',
+    })
+
+    expect(result.commands.map((command) => command.target)).toEqual([
+      'exhaust',
+      'intake',
+    ])
+    expect(new Set(result.commands.map((command) => command.batchId)).size).toBe(1)
+    expect(result.commands.every((command) => command.desiredState)).toBe(true)
+    expect(result.commands.every((command) => command.source === 'manual')).toBe(true)
+    expect((await service.status()).desired).toMatchObject({
+      exhaustOn: true,
+      intakeOn: true,
+    })
+  })
+
   it('creates a synchronized automatic plan for critical CO2', async () => {
     const repository = new MemoryRepository()
     const service = new ControlService(repository, config)

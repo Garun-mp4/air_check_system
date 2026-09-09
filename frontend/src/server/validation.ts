@@ -5,6 +5,7 @@ import type {
   HistoryQuery,
   MeasurementInput,
   SensorValues,
+  VentilationAction,
 } from './types'
 
 export interface ValidationIssue {
@@ -185,6 +186,7 @@ const controlActions = new Set<ControlAction>([
   'close',
   'auto',
 ])
+const ventilationActions = new Set<VentilationAction>(['on', 'off'])
 
 export function parseDeviceId(
   value: string | null | undefined,
@@ -269,6 +271,50 @@ export function parseControlCommand(
     deviceId,
     target: target as ControlTarget,
     action: action as ControlAction,
+  }
+}
+
+export interface ParsedVentilationCommand {
+  deviceId: string
+  action: VentilationAction
+}
+
+export function parseVentilationCommand(
+  payload: unknown,
+  fallbackDeviceId: string,
+): ParsedVentilationCommand {
+  const issues: ValidationIssue[] = []
+  if (!isRecord(payload)) {
+    throw new ValidationError([{ field: 'body', message: 'требуется JSON-объект' }])
+  }
+
+  let deviceId = fallbackDeviceId
+  if (payload.device_id !== undefined) {
+    if (typeof payload.device_id !== 'string') {
+      issues.push({ field: 'device_id', message: 'должен быть строкой' })
+    } else {
+      try {
+        deviceId = parseDeviceId(payload.device_id, fallbackDeviceId)
+      } catch (error) {
+        if (error instanceof ValidationError) {
+          issues.push(...error.issues)
+        }
+      }
+    }
+  }
+
+  const action = payload.action
+  if (typeof action !== 'string' || !ventilationActions.has(action as VentilationAction)) {
+    issues.push({ field: 'action', message: 'должно быть on или off' })
+  }
+
+  if (issues.length > 0) {
+    throw new ValidationError(issues)
+  }
+
+  return {
+    deviceId,
+    action: action as VentilationAction,
   }
 }
 

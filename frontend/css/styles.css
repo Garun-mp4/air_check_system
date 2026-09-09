@@ -5983,3 +5983,93 @@ body.is-settings-open {
     padding-bottom: 0;
   }
 }
+
+/* One operator action controls both fan channels; rows remain read-only status. */
+.dashboard-shell .actuator-pending-label {
+  color: var(--color-warning);
+  font-family: var(--font-code);
+  font-size: 10px;
+  line-height: 1.35;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dashboard-shell .ventilation-master-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-md);
+}
+
+.dashboard-shell .ventilation-master-copy {
+  display: grid;
+  min-width: 0;
+  gap: var(--spacing-xxs);
+}
+
+.dashboard-shell .ventilation-master-copy strong {
+  color: var(--color-ink);
+  font-size: var(--body-sm-size);
+  font-weight: 600;
+}
+
+.dashboard-shell .ventilation-master-copy > span:last-child {
+  color: var(--color-muted);
+  font-size: var(--caption-size);
+  line-height: 1.4;
+}
+
+.dashboard-shell .ventilation-master-button {
+  gap: var(--spacing-xs);
+  min-height: 44px;
+  max-width: 100%;
+  padding-inline: var(--spacing-md);
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.dashboard-shell .ventilation-master-button:hover:not(:disabled) {
+  border-color: var(--color-ink);
+}
+
+.dashboard-shell .ventilation-master-button.button-primary:hover:not(:disabled) {
+  background: var(--color-primary-active);
+  border-color: var(--color-primary-active);
+}
+
+.dashboard-shell .ventilation-master-button.button-secondary:hover:not(:disabled) {
+  background: var(--color-surface-soft);
+}
+
+.dashboard-shell .ventilation-master-button:disabled {
+  background: var(--color-primary-disabled);
+  border-color: var(--color-primary-disabled);
+  color: var(--color-muted);
+  cursor: wait;
+}
+
+.dashboard-shell .ventilation-master-button svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 559px) {
+  .dashboard-shell .ventilation-master-control {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .dashboard-shell .ventilation-master-button {
+    width: 100%;
+  }
+
+  .dashboard-shell .actuator-pending-label {
+    text-align: left;
+  }
+}

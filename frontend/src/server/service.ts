@@ -5,7 +5,11 @@ import {
   toMlPredictionPayload,
 } from './features'
 import type { AppConfig } from './config'
-import { ControlService, type ControlRequest } from './control-service'
+import {
+  ControlService,
+  type ControlRequest,
+  type VentilationRequest,
+} from './control-service'
 import {
   InvalidMlResponseError,
   MlServiceError,
@@ -129,6 +133,10 @@ export class AirQualityService {
 
   async issueControl(request: ControlRequest): Promise<ControlCommandResult> {
     return this.controlService.issue(request)
+  }
+
+  async issueVentilation(request: VentilationRequest): Promise<ControlCommandResult> {
+    return this.controlService.issueVentilation(request)
   }
 
   async pendingControlCommands(

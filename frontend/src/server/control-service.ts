@@ -12,12 +12,18 @@ import type {
   DeviceConnectionStatus,
   Measurement,
   Prediction,
+  VentilationAction,
 } from './types'
 
 export interface ControlRequest {
   deviceId: string
   target: 'exhaust' | 'intake' | 'window'
   action: ControlAction
+}
+
+export interface VentilationRequest {
+  deviceId: string
+  action: VentilationAction
 }
 
 export type AutomationStatus =
@@ -184,6 +190,27 @@ export class ControlService {
       batchId: randomUUID(),
     }
     const commands = await this.repository.queueControlCommands([input])
+    return { commands, status: await this.status(request.deviceId) }
+  }
+
+  async issueVentilation(request: VentilationRequest): Promise<ControlCommandResult> {
+    const desiredState = request.action === 'on'
+    const actionLabel = desiredState ? 'включить' : 'выключить'
+    const reason =
+      'Ручная команда: ' +
+      actionLabel +
+      ' контур проветривания (вытяжка и приток).'
+    const batchId = randomUUID()
+    const commands = await this.repository.queueControlCommands(
+      (['exhaust', 'intake'] as const).map((target) => ({
+        deviceId: request.deviceId,
+        target,
+        desiredState,
+        source: 'manual' as const,
+        reason,
+        batchId,
+      })),
+    )
     return { commands, status: await this.status(request.deviceId) }
   }
 
