@@ -5013,6 +5013,42 @@ a:focus-visible {
   }
 }
 
+/* ECharts uses the existing chart surface; the explicit height keeps the canvas
+   measurable while the slider and tooltip remain inside the same component. */
+.dashboard-shell .interactive-chart-surface {
+  height: 280px;
+  min-height: 280px;
+  padding-top: var(--spacing-xs);
+  box-sizing: border-box;
+}
+
+.dashboard-shell .interactive-chart-surface canvas {
+  display: block;
+}
+
+.dashboard-shell .interactive-chart-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+@media (max-width: 559px) {
+  .dashboard-shell .chart-viewport-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-shell .chart-viewport-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-shell .interactive-chart-surface {
+    height: 248px;
+    min-height: 248px;
+  }
+}
+
 @media (max-width: 767px) {
   /* The intro and mobile sheet already expose connection state; leave no orphan dot. */
   .dashboard-shell .topbar-sync {

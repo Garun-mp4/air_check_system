@@ -27,7 +27,7 @@ import {
   getPm25MarkerPosition,
   getPm25Tone,
 } from '../lib/air-quality'
-import { LineChart } from './Charts'
+import { co2Thresholds, LineChart } from './Charts'
 
 type RangeKey = '6h' | '24h' | '7d'
 type SettingsTab = 'technical' | 'automation'
@@ -1764,10 +1764,16 @@ export default function AirDashboard() {
 
           <div className="chart-grid dashboard-chart-grid">
             <ChartCard title="CO₂" caption="концентрация" unit="ppm">
-              <LineChart data={co2Series} unit="ppm" ariaLabel="График изменения концентрации CO2" />
+              <LineChart
+                data={co2Series}
+                unit="ppm"
+                ariaLabel="График изменения концентрации CO2"
+                thresholds={co2Thresholds}
+                rangeKey={range}
+              />
             </ChartCard>
             <ChartCard title="Температура" caption="температура" unit="°C">
-              <LineChart data={temperatureSeries} unit="°C" ariaLabel="График температуры помещения" />
+              <LineChart data={temperatureSeries} unit="°C" ariaLabel="График температуры помещения" rangeKey={range} />
             </ChartCard>
           </div>
         </section>

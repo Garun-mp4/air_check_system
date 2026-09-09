@@ -1,21 +1,28 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import type { PointerEvent, WheelEvent } from 'react'
+'use client'
 
-const chartWidth = 720
-const chartHeight = 220
-const chartPadding = { top: 12, right: 12, bottom: 28, left: 52 }
-const maxRenderedPoints = 160
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import type { ECharts } from 'echarts/core'
+import { init, use as useECharts } from 'echarts/core'
+import { AriaComponent, DataZoomComponent, GridComponent, MarkLineComponent, TooltipComponent } from 'echarts/components'
+import { LineChart as EChartsLineSeries } from 'echarts/charts'
+import { CanvasRenderer } from 'echarts/renderers'
+import type { EChartsOption } from 'echarts'
+
+useECharts([
+  CanvasRenderer,
+  EChartsLineSeries,
+  AriaComponent,
+  DataZoomComponent,
+  GridComponent,
+  MarkLineComponent,
+  TooltipComponent,
+])
+
 const minVisiblePoints = 6
 
-interface SeriesPoint {
+export interface SeriesPoint {
   timestamp: string
   value: number
-}
-
-interface ChartProps {
-  data: SeriesPoint[]
-  unit: string
-  ariaLabel: string
 }
 
 export interface ChartViewport {
@@ -23,26 +30,61 @@ export interface ChartViewport {
   end: number
 }
 
-interface PointerPosition {
-  x: number
-  y: number
+export interface ChartThreshold {
+  value: number
+  label: string
+  color: string
 }
 
-type ChartGesture =
-  | {
-      type: 'pan'
-      pointerId: number
-      startX: number
-      initialViewport: ChartViewport
-    }
-  | {
-      type: 'pinch'
-      startDistance: number
-      startCenterX: number
-      startCenterRatio: number
-      initialViewport: ChartViewport
-    }
-  | null
+export interface ChartPalette {
+  canvas: string
+  surface: string
+  ink: string
+  muted: string
+  hairline: string
+  success: string
+  warning: string
+  error: string
+  fontBody: string
+  fontCode: string
+}
+
+export const defaultChartPalette: ChartPalette = {
+  canvas: '#ffffff',
+  surface: '#f5f5f5',
+  ink: '#111111',
+  muted: '#6b7280',
+  hairline: '#e5e7eb',
+  success: '#10b981',
+  warning: '#f59e0b',
+  error: '#ef4444',
+  fontBody: 'Inter, sans-serif',
+  fontCode: 'JetBrains Mono, monospace',
+}
+
+export const co2Thresholds: ChartThreshold[] = [
+  { value: 800, label: '800 · внимание', color: defaultChartPalette.warning },
+  { value: 1000, label: '1000 · критично', color: defaultChartPalette.error },
+]
+
+interface ChartProps {
+  data: SeriesPoint[]
+  unit: string
+  ariaLabel: string
+  thresholds?: ChartThreshold[]
+  rangeKey?: string
+}
+
+interface DataZoomRange {
+  start?: number
+  end?: number
+  startValue?: number | string | Date
+  endValue?: number | string | Date
+}
+
+interface EChartsDataZoomEvent extends DataZoomRange {
+  batch?: DataZoomRange[]
+}
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
@@ -126,28 +168,15 @@ export function panViewport(
   )
 }
 
-function sampleItems<T>(data: T[]): T[] {
-  if (data.length <= maxRenderedPoints) {
-    return data
+function formatAxisTime(timestamp: number | string | Date, includeDay: boolean): string {
+  const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) {
+    return '—'
   }
-
-  return Array.from({ length: maxRenderedPoints }, (_, index) => {
-    const sourceIndex = Math.round(
-      (index * (data.length - 1)) / (maxRenderedPoints - 1),
-    )
-    return data[sourceIndex]
-  })
-}
-
-function sampleSeries<T extends { timestamp: string }>(data: T[]): T[] {
-  return sampleItems(data)
-}
-
-function formatAxisTime(timestamp: string, includeDay: boolean): string {
   return new Intl.DateTimeFormat('ru-RU', includeDay
     ? { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }
     : { hour: '2-digit', minute: '2-digit' },
-  ).format(new Date(timestamp))
+  ).format(date)
 }
 
 function hasCalendarDayChange(firstTimestamp: string, lastTimestamp: string): boolean {
@@ -165,50 +194,87 @@ function formatChartValue(value: number, unit: string): string {
   }).format(value) + ' ' + unit
 }
 
-function lineGeometry(data: SeriesPoint[]) {
-  const values = data.map((point) => point.value)
-  const rawMin = Math.min(...values)
-  const rawMax = Math.max(...values)
-  const spread = Math.max(rawMax - rawMin, 1)
-  const min = rawMin - spread * 0.12
-  const max = rawMax + spread * 0.12
-  const innerWidth = chartWidth - chartPadding.left - chartPadding.right
-  const innerHeight = chartHeight - chartPadding.top - chartPadding.bottom
-  const points = data.map((point, index) => ({
-    ...point,
-    x:
-      chartPadding.left +
-      (data.length === 1 ? innerWidth / 2 : (index / (data.length - 1)) * innerWidth),
-    y: chartPadding.top + ((max - point.value) / (max - min)) * innerHeight,
-  }))
-  return { min, max, points, innerWidth, innerHeight }
+function validData(data: SeriesPoint[]): SeriesPoint[] {
+  return data.filter((point) => (
+    Number.isFinite(point.value) && Number.isFinite(new Date(point.timestamp).getTime())
+  ))
 }
 
-function pathFor(points: Array<{ x: number; y: number }>): string {
-  return points
-    .map((point, index) => (index === 0 ? 'M ' : 'L ') + point.x + ' ' + point.y)
-    .join(' ')
+function readCssToken(element: HTMLElement, name: string, fallback: string): string {
+  return getComputedStyle(element).getPropertyValue(name).trim() || fallback
 }
 
-function distanceBetween(first: PointerPosition, second: PointerPosition): number {
-  return Math.hypot(second.x - first.x, second.y - first.y)
-}
-
-function chartRatioFromClientX(clientX: number, element: HTMLElement): number {
-  const rect = element.getBoundingClientRect()
-  if (rect.width <= 0) {
-    return 0.5
+export function readChartPalette(element: HTMLElement): ChartPalette {
+  return {
+    canvas: readCssToken(element, '--color-canvas', defaultChartPalette.canvas),
+    surface: readCssToken(element, '--color-surface-card', defaultChartPalette.surface),
+    ink: readCssToken(element, '--color-ink', defaultChartPalette.ink),
+    muted: readCssToken(element, '--color-muted', defaultChartPalette.muted),
+    hairline: readCssToken(element, '--color-hairline', defaultChartPalette.hairline),
+    success: readCssToken(element, '--color-success', defaultChartPalette.success),
+    warning: readCssToken(element, '--color-warning', defaultChartPalette.warning),
+    error: readCssToken(element, '--color-error', defaultChartPalette.error),
+    fontBody: readCssToken(element, '--font-body', defaultChartPalette.fontBody),
+    fontCode: readCssToken(element, '--font-code', defaultChartPalette.fontCode),
   }
-  const svgX = ((clientX - rect.left) / rect.width) * chartWidth
-  const innerWidth = chartWidth - chartPadding.left - chartPadding.right
-  return clamp((svgX - chartPadding.left) / innerWidth, 0, 1)
 }
 
-function indexFromRatio(ratio: number, length: number): number | null {
-  if (length <= 0) {
+function viewportPercent(viewport: ChartViewport, dataLength: number): { start: number; end: number } {
+  const maxIndex = Math.max(1, dataLength - 1)
+  return {
+    start: (viewport.start / maxIndex) * 100,
+    end: (viewport.end / maxIndex) * 100,
+  }
+}
+
+function toFiniteNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function nearestTimestampIndex(value: unknown, data: SeriesPoint[]): number | null {
+  const target = value instanceof Date
+    ? value.getTime()
+    : typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+        ? Date.parse(value)
+        : Number.NaN
+  if (!Number.isFinite(target) || data.length === 0) {
     return null
   }
-  return Math.round(clamp(ratio, 0, 1) * (length - 1))
+
+  let closestIndex = 0
+  let closestDistance = Math.abs(Date.parse(data[0].timestamp) - target)
+  for (let index = 1; index < data.length; index += 1) {
+    const distance = Math.abs(Date.parse(data[index].timestamp) - target)
+    if (distance < closestDistance) {
+      closestIndex = index
+      closestDistance = distance
+    }
+  }
+  return closestIndex
+}
+
+function viewportFromDataZoomEvent(event: unknown, data: SeriesPoint[]): ChartViewport | null {
+  const typedEvent = event as EChartsDataZoomEvent
+  const range = typedEvent.batch?.[0] ?? typedEvent
+  const startPercent = toFiniteNumber(range.start)
+  const endPercent = toFiniteNumber(range.end)
+
+  if (startPercent !== null && endPercent !== null) {
+    const maxIndex = Math.max(0, data.length - 1)
+    return clampViewport({
+      start: (clamp(startPercent, 0, 100) / 100) * maxIndex,
+      end: (clamp(endPercent, 0, 100) / 100) * maxIndex,
+    }, data.length)
+  }
+
+  const startIndex = nearestTimestampIndex(range.startValue, data)
+  const endIndex = nearestTimestampIndex(range.endValue, data)
+  if (startIndex === null || endIndex === null) {
+    return null
+  }
+  return clampViewport({ start: startIndex, end: endIndex }, data.length)
 }
 
 function viewportStatus(viewport: ChartViewport, dataLength: number): string {
@@ -226,6 +292,190 @@ function viewportStatus(viewport: ChartViewport, dataLength: number): string {
     return 'Показаны все ' + dataLength + ' ' + pointWord(dataLength)
   }
   return 'Показано ' + visiblePoints + ' ' + pointWord(visiblePoints) + ' из ' + dataLength + ' ' + pointWord(dataLength)
+}
+
+export function buildTimeSeriesOption(
+  inputData: SeriesPoint[],
+  unit: string,
+  thresholds: ChartThreshold[] = [],
+  palette: ChartPalette = defaultChartPalette,
+): EChartsOption {
+  const data = validData(inputData)
+  const values = data.map((point) => point.value)
+  const rawMin = values.length > 0 ? Math.min(...values) : 0
+  const rawMax = values.length > 0 ? Math.max(...values) : 1
+  const spread = Math.max(rawMax - rawMin, unit === '°C' ? 0.5 : 1)
+  const includeDay = data.length > 1 && hasCalendarDayChange(data[0].timestamp, data.at(-1)?.timestamp ?? data[0].timestamp)
+  const thresholdLines = thresholds.map((threshold) => ({
+    name: threshold.label,
+    yAxis: threshold.value,
+    lineStyle: {
+      color: threshold.color,
+      type: 'dashed' as const,
+      width: 1,
+    },
+    label: {
+      color: threshold.color,
+      fontFamily: palette.fontCode,
+      fontSize: 10,
+      position: 'insideEndTop' as const,
+    },
+  }))
+
+  return {
+    animation: true,
+    animationDuration: 220,
+    animationDurationUpdate: 160,
+    aria: { enabled: true },
+    backgroundColor: 'transparent',
+    grid: {
+      top: 20,
+      right: 16,
+      bottom: 52,
+      left: 12,
+      containLabel: true,
+    },
+    tooltip: {
+      trigger: 'axis',
+      confine: true,
+      backgroundColor: palette.canvas,
+      borderColor: palette.hairline,
+      borderWidth: 1,
+      padding: [8, 10],
+      textStyle: {
+        color: palette.ink,
+        fontFamily: palette.fontCode,
+        fontSize: 11,
+      },
+      axisPointer: {
+        type: 'line',
+        lineStyle: {
+          color: palette.muted,
+          type: 'dashed',
+          width: 1,
+        },
+      },
+      formatter: (params) => {
+        const items = Array.isArray(params) ? params : [params]
+        const item = items[0] as { value?: unknown; axisValue?: string | number } | undefined
+        const rawValue = Array.isArray(item?.value) ? item.value[1] : item?.value
+        const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue)
+        const rawAxisValue = item?.axisValue
+        const axisValue = typeof rawAxisValue === 'number' || typeof rawAxisValue === 'string'
+          ? rawAxisValue
+          : ''
+        return '<strong>' + formatAxisTime(axisValue, includeDay) + '</strong><br />' + formatChartValue(numericValue, unit)
+      },
+    },
+    xAxis: {
+      type: 'time',
+      boundaryGap: [0, 0],
+      axisLine: {
+        lineStyle: { color: palette.hairline },
+      },
+      axisTick: { show: false },
+      axisLabel: {
+        color: palette.muted,
+        fontFamily: palette.fontCode,
+        fontSize: 10,
+        hideOverlap: true,
+        margin: 10,
+        formatter: (value: string | number) => formatAxisTime(value, includeDay),
+      },
+      splitLine: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      min: rawMin - spread * 0.12,
+      max: rawMax + spread * 0.12,
+      scale: true,
+      splitNumber: 3,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        color: palette.muted,
+        fontFamily: palette.fontCode,
+        fontSize: 10,
+        formatter: (value: string | number) => formatChartValue(Number(value), unit),
+        margin: 10,
+      },
+      splitLine: {
+        lineStyle: {
+          color: palette.hairline,
+          type: 'solid',
+          width: 1,
+        },
+      },
+    },
+    dataZoom: [
+      {
+        id: 'inside-zoom',
+        type: 'inside',
+        xAxisIndex: 0,
+        filterMode: 'none',
+        start: 0,
+        end: 100,
+        zoomOnMouseWheel: 'ctrl',
+        moveOnMouseMove: true,
+        moveOnMouseWheel: false,
+        preventDefaultMouseMove: true,
+        throttle: 40,
+      },
+      {
+        id: 'range-slider',
+        type: 'slider',
+        xAxisIndex: 0,
+        filterMode: 'none',
+        bottom: 8,
+        height: 18,
+        showDetail: false,
+        showDataShadow: false,
+        brushSelect: false,
+        backgroundColor: palette.surface,
+        borderColor: palette.hairline,
+        fillerColor: palette.hairline,
+        handleStyle: {
+          color: palette.ink,
+          borderColor: palette.ink,
+          borderWidth: 0,
+        },
+        moveHandleSize: 0,
+        labelFormatter: (value: number) => formatAxisTime(value, includeDay),
+      },
+    ],
+    series: [{
+      type: 'line',
+      name: unit,
+      data: data.map((point) => [point.timestamp, point.value]),
+      showSymbol: data.length <= 48,
+      symbol: 'circle',
+      symbolSize: data.length <= 48 ? 5 : 0,
+      smooth: false,
+      sampling: 'lttb',
+      connectNulls: false,
+      lineStyle: {
+        color: palette.ink,
+        width: 2,
+      },
+      itemStyle: {
+        color: palette.ink,
+      },
+      emphasis: {
+        focus: 'series',
+        scale: true,
+        itemStyle: {
+          color: palette.canvas,
+          borderColor: palette.ink,
+          borderWidth: 2,
+        },
+      },
+      markLine: thresholdLines.length > 0 ? {
+        silent: true,
+        symbol: 'none',
+        data: thresholdLines,
+      } : undefined,
+    }],
+  }
 }
 
 function ChartViewportToolbar({
@@ -296,12 +546,7 @@ function ChartViewportToolbar({
         >
           ›
         </button>
-        <button
-          className="button-secondary chart-reset-button"
-          type="button"
-          onClick={onReset}
-          disabled={isFullRange}
-        >
+        <button className="button-secondary chart-reset-button" type="button" onClick={onReset} disabled={isFullRange}>
           Сбросить
         </button>
       </div>
@@ -309,165 +554,123 @@ function ChartViewportToolbar({
   )
 }
 
-export function LineChart({ data, unit, ariaLabel }: ChartProps) {
+export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], rangeKey = 'default' }: ChartProps) {
   const instructionsId = useId()
-  const [viewport, setViewport] = useState<ChartViewport>(() => createFullViewport(data.length))
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
-  const pointersRef = useRef<Map<number, PointerPosition>>(new Map())
-  const gestureRef = useRef<ChartGesture>(null)
+  const surfaceRef = useRef<HTMLDivElement | null>(null)
+  const chartMountRef = useRef<HTMLDivElement | null>(null)
+  const chartRef = useRef<ECharts | null>(null)
+  const dataZoomHandlerRef = useRef<((event: unknown) => void) | null>(null)
+  const dataZoomBoundRef = useRef(false)
+  const hasAppliedDataRef = useRef(false)
+  const previousRangeKeyRef = useRef(rangeKey)
+  const dataRef = useRef<SeriesPoint[]>(inputData)
+  const [viewport, setViewport] = useState<ChartViewport>(() => createFullViewport(inputData.length))
+  const data = useMemo(() => validData(inputData), [inputData])
+  const dataKey = data.length === 0
+    ? 'empty'
+    : data.map((point) => point.timestamp + ':' + point.value).join('|')
+  const thresholdKey = thresholds.map((threshold) => threshold.value + ':' + threshold.label + ':' + threshold.color).join('|')
+  const hasData = data.length > 0
+  dataRef.current = data
+
+  const currentViewport = clampViewport(viewport, data.length)
 
   useEffect(() => {
-    setViewport((current) => {
-      if (data.length <= 1 || current.end === 0 || current.end >= data.length - 1) {
-        return createFullViewport(data.length)
-      }
-      return clampViewport(current, data.length)
+    const chartMount = chartMountRef.current
+    if (!chartMount || !hasData) {
+      return
+    }
+
+    const chart = init(chartMount, undefined, {
+      renderer: 'canvas',
+      useDirtyRect: true,
     })
-    setActiveIndex(null)
-  }, [data.length])
+    chartRef.current = chart
 
-  const currentViewport = data.length > 1 && viewport.end === 0
-    ? createFullViewport(data.length)
-    : clampViewport(viewport, data.length)
-  const visibleData = useMemo(() => (
-    sampleSeries(data.slice(Math.floor(currentViewport.start), Math.ceil(currentViewport.end) + 1))
-  ), [data, currentViewport.end, currentViewport.start])
-
-  if (data.length === 0) {
-    return <div className="chart-empty">Нет данных за выбранный период</div>
-  }
-
-  const safeViewport = currentViewport
-  const geometry = lineGeometry(visibleData)
-  const guideValues = [0, 0.5, 1].map(
-    (fraction) => geometry.max - (geometry.max - geometry.min) * fraction,
-  )
-  const labelIndexes = Array.from(
-    new Set([0, Math.floor((visibleData.length - 1) / 2), visibleData.length - 1]),
-  )
-  const includeDay = visibleData.length > 1 && hasCalendarDayChange(
-    visibleData[0].timestamp,
-    visibleData.at(-1)?.timestamp ?? visibleData[0].timestamp,
-  )
-  const activePoint = activeIndex === null ? null : geometry.points[activeIndex]
-
-  const updateViewport = (nextViewport: ChartViewport) => {
-    setViewport(clampViewport(nextViewport, data.length))
-    setActiveIndex(null)
-  }
-
-  const getRatio = (clientX: number, element: HTMLElement) => chartRatioFromClientX(clientX, element)
-
-  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) {
-      return
-    }
-
-    const surface = event.currentTarget
-    const pointers = pointersRef.current
-    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
-    surface.setPointerCapture(event.pointerId)
-    event.preventDefault()
-    setActiveIndex(null)
-
-    if (pointers.size >= 2) {
-      const positions = Array.from(pointers.values()).slice(0, 2)
-      const first = positions[0]
-      const second = positions[1]
-      gestureRef.current = {
-        type: 'pinch',
-        startDistance: Math.max(distanceBetween(first, second), 1),
-        startCenterX: (first.x + second.x) / 2,
-        startCenterRatio: getRatio((first.x + second.x) / 2, surface),
-        initialViewport: currentViewport,
+    const handleDataZoom = (event: unknown) => {
+      const nextViewport = viewportFromDataZoomEvent(event, dataRef.current)
+      if (nextViewport) {
+        setViewport(nextViewport)
       }
+    }
+    dataZoomHandlerRef.current = handleDataZoom
+
+    const observer = new ResizeObserver(() => chart.resize())
+    observer.observe(chartMount)
+
+    return () => {
+      observer.disconnect()
+      if (dataZoomBoundRef.current) {
+        chart.off('datazoom', handleDataZoom)
+      }
+      dataZoomBoundRef.current = false
+      dataZoomHandlerRef.current = null
+      chart.dispose()
+      chartRef.current = null
+    }
+  }, [hasData])
+
+  useEffect(() => {
+    const chart = chartRef.current
+    const surface = surfaceRef.current
+    const dataZoomHandler = dataZoomHandlerRef.current
+    if (!chart || !surface) {
       return
     }
 
-    gestureRef.current = {
-      type: 'pan',
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      initialViewport: currentViewport,
+    const palette = readChartPalette(surface)
+    chart.setOption(buildTimeSeriesOption(data, unit, thresholds, palette), { notMerge: true })
+    if (!dataZoomBoundRef.current && dataZoomHandler) {
+      chart.on('datazoom', dataZoomHandler)
+      dataZoomBoundRef.current = true
     }
+
+    const shouldResetViewport = !hasAppliedDataRef.current || previousRangeKeyRef.current !== rangeKey
+    hasAppliedDataRef.current = true
+    previousRangeKeyRef.current = rangeKey
+    setViewport((current) => shouldResetViewport
+      ? createFullViewport(data.length)
+      : clampViewport(current, data.length))
+  }, [dataKey, data, unit, thresholdKey, rangeKey])
+
+  const dispatchViewport = (nextViewport: ChartViewport) => {
+    const next = clampViewport(nextViewport, data.length)
+    setViewport(next)
+
+    const chart = chartRef.current
+    if (!chart || data.length === 0) {
+      return
+    }
+
+    const startIndex = Math.round(next.start)
+    const endIndex = Math.round(next.end)
+    chart.dispatchAction({
+      type: 'dataZoom',
+      startValue: data[startIndex]?.timestamp,
+      endValue: data[endIndex]?.timestamp,
+    })
   }
 
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    const surface = event.currentTarget
-    const pointers = pointersRef.current
-    if (!pointers.has(event.pointerId)) {
-      setActiveIndex(indexFromRatio(getRatio(event.clientX, surface), visibleData.length))
-      return
-    }
-
-    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
-    const gesture = gestureRef.current
-    if (!gesture) {
-      return
-    }
-
-    if (pointers.size >= 2 && gesture.type === 'pinch') {
-      const positions = Array.from(pointers.values()).slice(0, 2)
-      const first = positions[0]
-      const second = positions[1]
-      const currentCenterX = (first.x + second.x) / 2
-      const currentDistance = Math.max(distanceBetween(first, second), 1)
-      const zoomed = zoomViewport(
-        gesture.initialViewport,
-        gesture.startCenterRatio,
-        gesture.startDistance / currentDistance,
-        data.length,
-      )
-      const rect = surface.getBoundingClientRect()
-      const centerDelta = rect.width > 0
-        ? ((currentCenterX - gesture.startCenterX) / rect.width) * (gesture.initialViewport.end - gesture.initialViewport.start)
-        : 0
-      updateViewport(panViewport(zoomed, -centerDelta, data.length))
-      return
-    }
-
-    if (pointers.size === 1 && gesture.type === 'pan' && gesture.pointerId === event.pointerId) {
-      const rect = surface.getBoundingClientRect()
-      const span = gesture.initialViewport.end - gesture.initialViewport.start
-      const deltaPoints = rect.width > 0 ? -((event.clientX - gesture.startX) / rect.width) * span : 0
-      updateViewport(panViewport(gesture.initialViewport, deltaPoints, data.length))
-    }
-  }
-
-  const handlePointerEnd = (event: PointerEvent<HTMLDivElement>) => {
-    pointersRef.current.delete(event.pointerId)
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId)
-    }
-    gestureRef.current = null
-  }
-
-  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
-    if (!event.ctrlKey) {
-      return
-    }
-    event.preventDefault()
-    const delta = clamp(event.deltaY / 240, -1, 1)
-    const scale = Math.exp(delta)
-    updateViewport(zoomViewport(currentViewport, getRatio(event.clientX, event.currentTarget), scale, data.length))
-  }
-
-  const zoomIn = () => updateViewport(zoomViewport(currentViewport, 0.5, 0.65, data.length))
-  const zoomOut = () => updateViewport(zoomViewport(currentViewport, 0.5, 1.5, data.length))
+  const zoomIn = () => dispatchViewport(zoomViewport(currentViewport, 0.5, 0.65, data.length))
+  const zoomOut = () => dispatchViewport(zoomViewport(currentViewport, 0.5, 1.5, data.length))
   const panBackward = () => {
     const span = Math.max(1, currentViewport.end - currentViewport.start)
-    updateViewport(panViewport(currentViewport, -span * 0.65, data.length))
+    dispatchViewport(panViewport(currentViewport, -span * 0.65, data.length))
   }
   const panForward = () => {
     const span = Math.max(1, currentViewport.end - currentViewport.start)
-    updateViewport(panViewport(currentViewport, span * 0.65, data.length))
+    dispatchViewport(panViewport(currentViewport, span * 0.65, data.length))
   }
-  const reset = () => updateViewport(createFullViewport(data.length))
+  const reset = () => dispatchViewport(createFullViewport(data.length))
+
+  if (data.length === 0) {
+    return <div className="chart-empty" role="status">Нет данных за выбранный период</div>
+  }
 
   return (
     <div className="interactive-chart" role="group" aria-label={ariaLabel}>
       <ChartViewportToolbar
-        viewport={safeViewport}
+        viewport={currentViewport}
         dataLength={data.length}
         onPanBackward={panBackward}
         onPanForward={panForward}
@@ -476,93 +679,16 @@ export function LineChart({ data, unit, ariaLabel }: ChartProps) {
         onReset={reset}
       />
       <p className="chart-interaction-help" id={instructionsId}>
-        Перетаскивайте график. Для масштаба используйте Ctrl + колесо или два пальца.
+        Перетаскивайте график или нижний диапазон. Для масштаба используйте Ctrl + колесо или два пальца.
       </p>
       <div
         className="interactive-chart-surface"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerEnd}
-        onPointerCancel={handlePointerEnd}
-        onPointerLeave={() => {
-          if (pointersRef.current.size === 0) {
-            setActiveIndex(null)
-          }
-        }}
-        onWheel={handleWheel}
+        ref={surfaceRef}
+        role="img"
+        aria-label={ariaLabel}
         aria-describedby={instructionsId}
       >
-        <svg
-          className="chart-svg"
-          viewBox={'0 0 ' + chartWidth + ' ' + chartHeight}
-          role="img"
-          aria-label={ariaLabel}
-        >
-          <title>{ariaLabel}</title>
-          {guideValues.map((value, index) => {
-            const y = chartPadding.top + geometry.innerHeight * (index / 2)
-            return (
-              <g key={value}>
-                <line
-                  className="chart-grid-line"
-                  x1={chartPadding.left}
-                  x2={chartWidth - chartPadding.right}
-                  y1={y}
-                  y2={y}
-                />
-                <text className="chart-axis-label" x="0" y={y + 4}>
-                  {formatChartValue(value, unit)}
-                </text>
-              </g>
-            )
-          })}
-          <path className="chart-series" d={pathFor(geometry.points)} />
-          {visibleData.length <= 24
-            ? geometry.points.map((point, index) => (
-                <circle
-                  className="chart-point"
-                  key={point.timestamp + '-' + index}
-                  cx={point.x}
-                  cy={point.y}
-                  r="3"
-                />
-              ))
-            : null}
-          {activePoint && activeIndex !== null ? (
-            <g className="chart-focus" aria-hidden="true">
-              <line
-                className="chart-focus-line"
-                x1={activePoint.x}
-                x2={activePoint.x}
-                y1={chartPadding.top}
-                y2={chartHeight - chartPadding.bottom}
-              />
-              <circle className="chart-focus-point" cx={activePoint.x} cy={activePoint.y} r="5" />
-              <text
-                className="chart-focus-label"
-                x={clamp(activePoint.x, chartPadding.left + 34, chartWidth - chartPadding.right - 34)}
-                y={Math.max(chartPadding.top + 12, activePoint.y - 12)}
-                textAnchor="middle"
-              >
-                {formatChartValue(activePoint.value, unit)}
-              </text>
-            </g>
-          ) : null}
-          {labelIndexes.map((index) => {
-            const point = geometry.points[index]
-            return (
-              <text
-                className="chart-axis-label"
-                key={visibleData[index].timestamp + '-' + index}
-                x={point.x}
-                y={chartHeight - 4}
-                textAnchor={index === 0 ? 'start' : index === visibleData.length - 1 ? 'end' : 'middle'}
-              >
-                {formatAxisTime(visibleData[index].timestamp, includeDay)}
-              </text>
-            )
-          })}
-        </svg>
+        <div className="interactive-chart-canvas" ref={chartMountRef} aria-hidden="true" />
       </div>
     </div>
   )
