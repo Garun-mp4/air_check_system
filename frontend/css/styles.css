@@ -7560,6 +7560,25 @@ body.is-settings-open {
     width: 100%;
     min-width: 0;
   }
+
+  .dashboard-shell .dashboard-view-history .history-toolbar,
+  .dashboard-shell .dashboard-view-history .history-toolbar > div:first-child,
+  .dashboard-shell .dashboard-view-history .range-control,
+  .dashboard-shell .dashboard-view-history .range-tabs {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .dashboard-shell .dashboard-view-history .range-tabs {
+    display: flex;
+  }
+
+  .dashboard-shell .dashboard-view-history .range-tab {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 0;
+  }
 }
 
 @media (max-width: 359px) {
@@ -7631,9 +7650,12 @@ body.is-chart-expanded {
 
 .chart-card.is-expanded .chart-card-actions {
   display: inline-flex;
+  flex: 0 1 auto;
   min-width: 0;
+  max-width: 100%;
   align-items: center;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: var(--spacing-sm);
 }
 
@@ -7680,12 +7702,23 @@ body.is-chart-expanded {
 
 .chart-card.is-expanded .range-control-compact {
   display: inline-flex;
+  width: auto;
+  max-width: 100%;
   min-width: 0;
+  flex: 0 1 auto;
   align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .chart-card.is-expanded .range-control-compact .range-tabs {
-  min-width: 248px;
+  width: 248px;
+  min-width: 0;
+  flex: 0 1 248px;
+}
+
+.chart-card.is-expanded .chart-card-meta,
+.chart-card.is-expanded .chart-expand-button {
+  flex: 0 0 auto;
 }
 
 @media (max-width: 559px) {
@@ -7717,10 +7750,12 @@ body.is-chart-expanded {
   .chart-card.is-expanded .range-control-compact {
     grid-column: 1 / -1;
     grid-row: 1;
+    width: 100%;
     flex: 1 1 auto;
   }
 
   .chart-card.is-expanded .range-control-compact .range-tabs {
+    width: auto;
     min-width: 0;
     flex: 1 1 auto;
   }
