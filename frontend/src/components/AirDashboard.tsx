@@ -59,15 +59,15 @@ type IconName =
   | 'arrow'
 
 export const dashboardNavItems = [
-  { id: 'overview', label: 'Панель', icon: 'room' },
-  { id: 'controls', label: 'Управление', icon: 'air' },
-  { id: 'signals', label: 'Сенсоры', icon: 'pm25' },
-  { id: 'history', label: 'История', icon: 'clock' },
+  { id: 'overview', label: 'Панель', shortLabel: 'Панель', icon: 'room' },
+  { id: 'controls', label: 'Управление', shortLabel: 'Управл.', icon: 'air' },
+  { id: 'signals', label: 'Сенсоры', shortLabel: 'Сенсоры', icon: 'pm25' },
+  { id: 'history', label: 'История', shortLabel: 'История', icon: 'clock' },
 ] as const
 
 export const primaryNavItems = [
   ...dashboardNavItems,
-  { id: 'settings', label: 'Настройки', icon: 'settings' },
+  { id: 'settings', label: 'Настройки', shortLabel: 'Настр.', icon: 'settings' },
 ] as const
 
 type DashboardSectionId = (typeof dashboardNavItems)[number]['id']
@@ -126,7 +126,8 @@ export function DashboardNavigation({
             aria-current={isActive ? 'location' : undefined}
           >
             <span className="nav-link-icon"><Icon name={item.icon} /></span>
-            <span>{item.label}</span>
+            <span className="nav-link-label-full">{item.label}</span>
+            <span className="nav-link-label-short" aria-hidden="true">{item.shortLabel}</span>
           </a>
         )
       })}
