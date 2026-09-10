@@ -38,15 +38,6 @@ import { getCo2Thresholds, LineChart } from './Charts'
 
 export type RangeKey = '30m' | '1h' | '6h' | '24h'
 type SettingsTab = 'automation' | 'thresholds' | 'technical'
-export const dashboardNavItems = [
-  { id: 'overview', label: 'Панель' },
-  { id: 'controls', label: 'Управление' },
-  { id: 'signals', label: 'Сенсоры' },
-  { id: 'history', label: 'История' },
-] as const
-
-type DashboardSectionId = (typeof dashboardNavItems)[number]['id']
-
 type IconName =
   | 'air'
   | 'exhaust'
@@ -66,6 +57,21 @@ type IconName =
   | 'close'
   | 'clock'
   | 'arrow'
+
+export const dashboardNavItems = [
+  { id: 'overview', label: 'Панель', icon: 'room' },
+  { id: 'controls', label: 'Управление', icon: 'air' },
+  { id: 'signals', label: 'Сенсоры', icon: 'pm25' },
+  { id: 'history', label: 'История', icon: 'clock' },
+] as const
+
+export const primaryNavItems = [
+  ...dashboardNavItems,
+  { id: 'settings', label: 'Настройки', icon: 'settings' },
+] as const
+
+type DashboardSectionId = (typeof dashboardNavItems)[number]['id']
+export type DashboardViewId = DashboardSectionId | 'settings'
 
 export const rangeMinutes: Record<RangeKey, number> = {
   '30m': 30,
@@ -88,7 +94,7 @@ export function getSectionIdFromHash(hash: string): DashboardSectionId {
     : 'overview'
 }
 
-export function getViewIdFromHash(hash: string): DashboardSectionId | 'settings' {
+export function getViewIdFromHash(hash: string): DashboardViewId {
   const sectionId = hash.startsWith('#') ? hash.slice(1) : hash
   return sectionId === 'settings' ? 'settings' : getSectionIdFromHash(hash)
 }
@@ -103,22 +109,24 @@ export function DashboardNavigation({
   className?: string
   label: string
   linkClassName: string
-  activeSection: DashboardSectionId
-  onNavigate: (sectionId: DashboardSectionId, event: MouseEvent<HTMLAnchorElement>) => void
+  activeSection: DashboardViewId
+  onNavigate: (sectionId: DashboardViewId, event: MouseEvent<HTMLAnchorElement>) => void
 }) {
   return (
     <nav className={className} aria-label={label}>
-      {dashboardNavItems.map((item) => {
+      {primaryNavItems.map((item) => {
         const isActive = activeSection === item.id
         return (
           <a
+            data-navigation-item={item.id}
             className={linkClassName + (isActive ? ' is-active' : '')}
             href={'#' + item.id}
             key={item.id}
             onClick={(event) => onNavigate(item.id, event)}
             aria-current={isActive ? 'location' : undefined}
           >
-            {item.label}
+            <span className="nav-link-icon"><Icon name={item.icon} /></span>
+            <span>{item.label}</span>
           </a>
         )
       })}
@@ -1284,6 +1292,7 @@ function SettingsChoiceGroup({
 }
 
 export function SettingsPanel({
+  presentation = 'drawer',
   controls,
   deviceId,
   measurement,
@@ -1300,6 +1309,7 @@ export function SettingsPanel({
   settingsNotice,
   onSave,
 }: {
+  presentation?: 'drawer' | 'page'
   controls: ClientControlStatus | null
   deviceId: string
   measurement: ClientMeasurement | null
@@ -1316,6 +1326,7 @@ export function SettingsPanel({
   settingsNotice: string | null
   onSave: (patch: ClientNodeSettingsPatch) => Promise<void>
 }) {
+  const isPage = presentation === 'page'
   const [draft, setDraft] = useState<SettingsDraft>(() => settingsToDraft(settings))
   const [dirty, setDirty] = useState(false)
 
@@ -1392,18 +1403,18 @@ export function SettingsPanel({
 
   return (
     <div
-      className="settings-backdrop"
-      onMouseDown={(event) => {
+      className={isPage ? 'settings-page-shell' : 'settings-backdrop'}
+      onMouseDown={isPage ? undefined : (event) => {
         if (event.target === event.currentTarget) {
           onClose()
         }
       }}
     >
       <section
-        className="settings-drawer"
+        className={'settings-drawer' + (isPage ? ' settings-page-content' : '')}
         id="settings-dialog"
-        role="dialog"
-        aria-modal="true"
+        role={isPage ? 'region' : 'dialog'}
+        aria-modal={isPage ? undefined : true}
         aria-labelledby="settings-title"
       >
         <div className="settings-drawer-header">
@@ -1729,7 +1740,6 @@ export default function AirDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<DashboardSectionId>('overview')
-  const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('automation')
   const [nodeSettings, setNodeSettings] = useState<ClientNodeSettings | null>(null)
@@ -1740,27 +1750,26 @@ export default function AirDashboard() {
   const [controlError, setControlError] = useState<string | null>(null)
   const [activeCommand, setActiveCommand] = useState<string | null>(null)
   const [controlNotice, setControlNotice] = useState<string | null>(null)
-  const menuButtonRef = useRef<HTMLButtonElement>(null)
-  const settingsButtonRef = useRef<HTMLButtonElement>(null)
   const settingsCloseButtonRef = useRef<HTMLButtonElement>(null)
+  const settingsTriggerRef = useRef<HTMLElement | null>(null)
   const settingsOpenRef = useRef(false)
   const lastDashboardHashRef = useRef('#overview')
-  const navigationTargetRef = useRef<DashboardSectionId | null>(null)
-  const navigationDirectionRef = useRef<'up' | 'down' | null>(null)
-  const navigationStartScrollYRef = useRef<number | null>(null)
   const loadSequenceRef = useRef(0)
 
-  const openSettings = useCallback(() => {
+  const openSettings = useCallback((trigger?: HTMLElement) => {
+    if (trigger) {
+      settingsTriggerRef.current = trigger
+    }
     const currentHash = window.location.hash
     if (currentHash && currentHash !== '#settings') {
       lastDashboardHashRef.current = '#' + getSectionIdFromHash(currentHash)
     }
     settingsOpenRef.current = true
     setSettingsOpen(true)
-    setMenuOpen(false)
     if (currentHash !== '#settings') {
       window.history.pushState(null, '', '#settings')
     }
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }))
   }, [])
 
   const closeSettings = useCallback(() => {
@@ -1773,11 +1782,10 @@ export default function AirDashboard() {
     const nextSectionId = getSectionIdFromHash(nextHash)
     setActiveSection(nextSectionId)
     window.requestAnimationFrame(() => {
-      document.getElementById(nextSectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      if (window.matchMedia('(min-width: 768px)').matches) {
-        settingsButtonRef.current?.focus()
-      } else {
-        menuButtonRef.current?.focus()
+      window.scrollTo({ top: 0, behavior: 'auto' })
+      const trigger = settingsTriggerRef.current
+      if (trigger && document.contains(trigger)) {
+        trigger.focus()
       }
     })
   }, [])
@@ -1948,153 +1956,37 @@ export default function AirDashboard() {
   }, [loadData])
 
   useEffect(() => {
-    const sections = dashboardNavItems
-      .map(({ id }) => document.getElementById(id))
-      .filter((section): section is HTMLElement => section !== null)
-
-    if (sections.length === 0) {
-      return
-    }
-
-    const scrollMarginTop = 80
-    // Browsers can leave a section a fraction of a pixel below its scroll margin.
-    // Keep the spy tolerant of that rounding so the target tab is not replaced
-    // by the section immediately above it after a smooth scroll.
-    const scrollSpyThreshold = scrollMarginTop + 2
-    let frameId: number | null = null
-
-    const updateActiveSection = () => {
-      frameId = null
-
-      if (settingsOpenRef.current) {
-        return
-      }
-
-      const navigationTarget = navigationTargetRef.current
-      if (navigationTarget) {
-        const targetSection = sections.find((section) => section.id === navigationTarget)
-        if (targetSection) {
-          const targetTop = targetSection.getBoundingClientRect().top
-          const navigationStartScrollY = navigationStartScrollYRef.current
-          const navigationDirection = navigationDirectionRef.current ??= targetTop > scrollMarginTop ? 'down' : 'up'
-          const navigationWasInterrupted = navigationStartScrollY !== null && (
-            navigationDirection === 'down'
-              ? window.scrollY < navigationStartScrollY - 2
-              : window.scrollY > navigationStartScrollY + 2
-          )
-          const navigationOvershot = navigationDirection === 'down'
-            ? targetTop < scrollMarginTop - 12
-            : targetTop > scrollMarginTop + 12
-
-          if (Math.abs(targetTop - scrollMarginTop) > 12 && !navigationWasInterrupted && !navigationOvershot) {
-            setActiveSection((currentSection) =>
-              currentSection === navigationTarget ? currentSection : navigationTarget,
-            )
-            return
-          }
-        }
-        navigationTargetRef.current = null
-        navigationDirectionRef.current = null
-        navigationStartScrollYRef.current = null
-      }
-
-      let currentSection = sections[0]
-      for (const section of sections) {
-        if (section.getBoundingClientRect().top <= scrollSpyThreshold) {
-          currentSection = section
-        } else {
-          break
-        }
-      }
-
-      const nextSectionId = currentSection.id as DashboardSectionId
-      lastDashboardHashRef.current = '#' + nextSectionId
-      setActiveSection((currentSectionId) =>
-        currentSectionId === nextSectionId ? currentSectionId : nextSectionId,
-      )
-
-      if (window.location.hash && window.location.hash !== '#' + nextSectionId) {
-        window.history.replaceState(null, '', '#' + nextSectionId)
-      }
-    }
-
-    const scheduleActiveSectionUpdate = () => {
-      if (frameId === null) {
-        frameId = window.requestAnimationFrame(updateActiveSection)
-      }
-    }
-
-    const cancelPendingNavigation = () => {
-      navigationTargetRef.current = null
-      navigationDirectionRef.current = null
-      navigationStartScrollYRef.current = null
-    }
-
-    if (window.location.hash) {
-      const initialViewId = getViewIdFromHash(window.location.hash)
-      if (initialViewId === 'settings') {
-        settingsOpenRef.current = true
-        setSettingsOpen(true)
-      } else {
-        const initialSectionId = initialViewId
-        lastDashboardHashRef.current = '#' + initialSectionId
-        navigationTargetRef.current = initialSectionId
-        navigationStartScrollYRef.current = window.scrollY
-        setActiveSection(initialSectionId)
-        window.requestAnimationFrame(() => {
-          document.getElementById(initialSectionId)?.scrollIntoView({ behavior: 'auto', block: 'start' })
-        })
-      }
-    }
-
-    const handleHashChange = () => {
+    const applyHashView = () => {
       const nextViewId = getViewIdFromHash(window.location.hash)
       if (nextViewId === 'settings') {
         settingsOpenRef.current = true
         setSettingsOpen(true)
-        setMenuOpen(false)
+        window.scrollTo({ top: 0, behavior: 'auto' })
         return
       }
 
       settingsOpenRef.current = false
       setSettingsOpen(false)
-      const nextSectionId = nextViewId
-      lastDashboardHashRef.current = '#' + nextSectionId
-      navigationTargetRef.current = nextSectionId
-      navigationDirectionRef.current = null
-      navigationStartScrollYRef.current = window.scrollY
-      setActiveSection(nextSectionId)
-      scheduleActiveSectionUpdate()
-      window.requestAnimationFrame(() => {
-        document.getElementById(nextSectionId)?.scrollIntoView({ behavior: 'auto', block: 'start' })
-      })
+      lastDashboardHashRef.current = '#' + nextViewId
+      setActiveSection(nextViewId)
+      if (window.location.hash !== '#' + nextViewId) {
+        window.history.replaceState(null, '', '#' + nextViewId)
+      }
+      window.scrollTo({ top: 0, behavior: 'auto' })
     }
 
-    scheduleActiveSectionUpdate()
-    window.addEventListener('scroll', scheduleActiveSectionUpdate, { passive: true })
-    window.addEventListener('resize', scheduleActiveSectionUpdate)
-    window.addEventListener('wheel', cancelPendingNavigation, { passive: true })
-    window.addEventListener('touchstart', cancelPendingNavigation, { passive: true })
-    window.addEventListener('pointerdown', cancelPendingNavigation)
-    window.addEventListener('hashchange', handleHashChange)
-    window.addEventListener('popstate', handleHashChange)
+    applyHashView()
+    window.addEventListener('hashchange', applyHashView)
+    window.addEventListener('popstate', applyHashView)
 
     return () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId)
-      }
-      window.removeEventListener('scroll', scheduleActiveSectionUpdate)
-      window.removeEventListener('resize', scheduleActiveSectionUpdate)
-      window.removeEventListener('wheel', cancelPendingNavigation)
-      window.removeEventListener('touchstart', cancelPendingNavigation)
-      window.removeEventListener('pointerdown', cancelPendingNavigation)
-      window.removeEventListener('hashchange', handleHashChange)
-      window.removeEventListener('popstate', handleHashChange)
+      window.removeEventListener('hashchange', applyHashView)
+      window.removeEventListener('popstate', applyHashView)
     }
   }, [])
 
   const handleSectionNavigation = useCallback((
-    sectionId: DashboardSectionId,
+    sectionId: DashboardViewId,
     event: MouseEvent<HTMLAnchorElement>,
   ) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
@@ -2102,62 +1994,27 @@ export default function AirDashboard() {
     }
 
     event.preventDefault()
+    if (sectionId === 'settings') {
+      openSettings(event.currentTarget)
+      return
+    }
+
     settingsOpenRef.current = false
     setSettingsOpen(false)
     lastDashboardHashRef.current = '#' + sectionId
-    navigationTargetRef.current = sectionId
-    navigationDirectionRef.current = null
-    navigationStartScrollYRef.current = window.scrollY
     setActiveSection(sectionId)
-    setMenuOpen(false)
 
     const nextHash = '#' + sectionId
     if (window.location.hash !== nextHash) {
       window.history.pushState(null, '', nextHash)
     }
-    window.requestAnimationFrame(() => {
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }, [])
-
-  useEffect(() => {
-    if (!menuOpen) {
-      return
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setMenuOpen(false)
-        menuButtonRef.current?.focus()
-      }
-    }
-
-    const mediaQuery = window.matchMedia('(min-width: 768px)')
-    const handleViewportChange = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        setMenuOpen(false)
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    mediaQuery.addEventListener('change', handleViewportChange)
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      mediaQuery.removeEventListener('change', handleViewportChange)
-    }
-  }, [menuOpen])
-
-  useEffect(() => {
-    document.body.classList.toggle('is-menu-open', menuOpen)
-    return () => document.body.classList.remove('is-menu-open')
-  }, [menuOpen])
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }))
+  }, [openSettings])
 
   useEffect(() => {
     settingsOpenRef.current = settingsOpen
-    document.body.classList.toggle('is-settings-open', settingsOpen)
     if (!settingsOpen) {
-      return () => document.body.classList.remove('is-settings-open')
+      return
     }
 
     const focusFrame = window.requestAnimationFrame(() => settingsCloseButtonRef.current?.focus())
@@ -2171,7 +2028,6 @@ export default function AirDashboard() {
     return () => {
       window.cancelAnimationFrame(focusFrame)
       document.removeEventListener('keydown', handleKeyDown)
-      document.body.classList.remove('is-settings-open')
     }
   }, [closeSettings, settingsOpen])
 
@@ -2264,11 +2120,13 @@ export default function AirDashboard() {
   const deviceConnectionStatus = controls?.connection.status ?? (measurement ? 'online' : 'offline')
   const deviceConnectionLabel = getConnectionStatusLabel(deviceConnectionStatus)
   const deviceConnectionTone = controls ? controlsTone : measurement ? 'success' : 'neutral'
+  const activeNavigationItem: DashboardViewId = settingsOpen ? 'settings' : activeSection
+  const activeViewTitle = primaryNavItems.find((item) => item.id === activeNavigationItem)?.label ?? 'Панель'
 
   return (
     <div className="app-shell dashboard-shell">
       <a className="skip-link" href="#main-content">К содержимому</a>
-      <header className="app-topbar" inert={settingsOpen}>
+      <header className="app-topbar">
         <div className="container app-topbar-inner">
           <a
             className="brand dashboard-brand"
@@ -2302,69 +2160,35 @@ export default function AirDashboard() {
             className="app-nav"
             label="Навигация панели управления"
             linkClassName="app-nav-link"
-            activeSection={activeSection}
+            activeSection={activeNavigationItem}
             onNavigate={handleSectionNavigation}
           />
-
-          <div className="topbar-actions">
-            <button
-              className="settings-button"
-              type="button"
-              ref={settingsButtonRef}
-              onClick={openSettings}
-              aria-label="Открыть настройки"
-              aria-expanded={settingsOpen}
-              aria-controls="settings-dialog"
-              data-tooltip="Настройки"
-            >
-              <Icon name="settings" />
-            </button>
-            <button
-              className="menu-button"
-              type="button"
-              ref={menuButtonRef}
-              aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-navigation"
-              onClick={() => setMenuOpen((value) => !value)}
-            >
-              <Icon name={menuOpen ? 'close' : 'menu'} />
-            </button>
-          </div>
-        </div>
-
-        <div
-          className={'mobile-sheet' + (menuOpen ? ' is-open' : '')}
-          id="mobile-navigation"
-          aria-hidden={!menuOpen}
-          inert={!menuOpen}
-        >
-          <div className="mobile-sheet-context">
-            <span className="room-context-label">Комната</span>
-            <strong translate="no">{deviceId}</strong>
-            <span><span className={'status-dot status-dot-' + deviceConnectionTone} /> {deviceConnectionLabel}</span>
-          </div>
-          <DashboardNavigation
-            className="mobile-nav"
-            label="Мобильная навигация"
-            linkClassName="mobile-nav-link"
-            activeSection={activeSection}
-            onNavigate={handleSectionNavigation}
-          />
-          <button
-            className="mobile-nav-link mobile-settings-link"
-            type="button"
-            onClick={openSettings}
-            aria-controls="settings-dialog"
-          >
-            <Icon name="settings" />
-            <span>Настройки</span>
-          </button>
         </div>
       </header>
 
-      <main id="main-content" inert={settingsOpen}>
-        <h1 className="dashboard-page-title">Панель управления</h1>
+      <main id="main-content" aria-labelledby="dashboard-view-title">
+        <h1 className="dashboard-page-title" id="dashboard-view-title">{activeViewTitle}</h1>
+        {settingsOpen ? (
+          <SettingsPanel
+            presentation="page"
+            controls={controls}
+            deviceId={deviceId}
+            measurement={measurement}
+            prediction={prediction}
+            systemStatus={systemStatus}
+            systemTone={systemTone}
+            tab={settingsTab}
+            onTabChange={setSettingsTab}
+            onClose={closeSettings}
+            closeButtonRef={settingsCloseButtonRef}
+            settings={nodeSettings}
+            settingsError={settingsError}
+            settingsSaving={settingsSaving}
+            settingsNotice={settingsNotice}
+            onSave={saveNodeSettings}
+          />
+        ) : (
+          <>
         {loading && !dashboard ? (
           <div className="container">
             <div className="panel-state panel-state-loading" role="status" aria-live="polite">
@@ -2389,7 +2213,8 @@ export default function AirDashboard() {
           </div>
         ) : null}
 
-        <section className="container dashboard-section dashboard-lead-section" id="overview">
+        {activeSection === 'overview' ? (
+        <section className="container dashboard-section dashboard-lead-section dashboard-view dashboard-view-overview" id="overview" key="overview">
           <article className="dashboard-card current-air-card">
             <div className="current-air-header">
               <div>
@@ -2476,8 +2301,10 @@ export default function AirDashboard() {
           </article>
 
         </section>
+        ) : null}
 
-        <section className="container dashboard-section controls-section" id="controls">
+        {activeSection === 'controls' ? (
+        <section className="container dashboard-section controls-section dashboard-view dashboard-view-controls" id="controls" key="controls">
           <div className="section-toolbar controls-toolbar">
             <div>
               <span className="eyebrow">Команды</span>
@@ -2631,8 +2458,10 @@ export default function AirDashboard() {
           ) : null}
           {controlNotice ? <div className="control-feedback" role="status" aria-live="polite">{controlNotice}</div> : null}
         </section>
+        ) : null}
 
-        <section className="container dashboard-section" id="signals">
+        {activeSection === 'signals' ? (
+        <section className="container dashboard-section dashboard-view dashboard-view-signals" id="signals" key="signals">
           <div className="section-toolbar">
             <div>
               <span className="eyebrow">Показания</span>
@@ -2649,8 +2478,10 @@ export default function AirDashboard() {
           />
           <AirComparison measurement={measurement} />
         </section>
+        ) : null}
 
-        <section className="container dashboard-section dashboard-history" id="history">
+        {activeSection === 'history' ? (
+        <section className="container dashboard-section dashboard-history dashboard-view dashboard-view-history" id="history" key="history">
           <div className="section-toolbar history-toolbar">
             <div>
               <span className="eyebrow">История</span>
@@ -2693,26 +2524,17 @@ export default function AirDashboard() {
             </ChartCard>
           </div>
         </section>
+        ) : null}
+          </>
+        )}
       </main>
-      {settingsOpen ? (
-        <SettingsPanel
-          controls={controls}
-          deviceId={deviceId}
-          measurement={measurement}
-          prediction={prediction}
-          systemStatus={systemStatus}
-          systemTone={systemTone}
-          tab={settingsTab}
-          onTabChange={setSettingsTab}
-          onClose={closeSettings}
-          closeButtonRef={settingsCloseButtonRef}
-          settings={nodeSettings}
-          settingsError={settingsError}
-          settingsSaving={settingsSaving}
-          settingsNotice={settingsNotice}
-          onSave={saveNodeSettings}
-        />
-      ) : null}
+      <DashboardNavigation
+        className="mobile-bottom-nav"
+        label="Основная мобильная навигация"
+        linkClassName="mobile-bottom-nav-link"
+        activeSection={activeNavigationItem}
+        onNavigate={handleSectionNavigation}
+      />
     </div>
   )
 }

@@ -11,6 +11,7 @@ import {
   getSectionIdFromHash,
   getViewIdFromHash,
   getWindowHistorySummary,
+  primaryNavItems,
   rangeLabels,
   rangeMinutes,
 } from './AirDashboard'
@@ -77,6 +78,7 @@ describe('dashboard navigation', () => {
 
   it('places technical details inside the settings panel', () => {
     const markup = renderToStaticMarkup(createElement(SettingsPanel, {
+      presentation: 'page',
       controls: null,
       deviceId: 'room-01',
       measurement: null,
@@ -95,6 +97,10 @@ describe('dashboard navigation', () => {
     }))
 
     expect(markup).toContain('id="settings-dialog"')
+    expect(markup).toContain('settings-page-shell')
+    expect(markup).toContain('settings-page-content')
+    expect(markup).toContain('role="region"')
+    expect(markup).not.toContain('settings-backdrop')
     expect(markup).toContain('Технические сведения')
     expect(markup).toContain('PostgreSQL')
     expect(markup).toContain('Срок хранения')
@@ -201,6 +207,28 @@ describe('dashboard navigation', () => {
     expect(mobileMarkup.match(/class="mobile-nav-link is-active"/g)).toHaveLength(1)
     expect(desktopMarkup.match(/aria-current="location"/g)).toHaveLength(1)
     expect(mobileMarkup.match(/aria-current="location"/g)).toHaveLength(1)
+  })
+
+  it('exposes five primary destinations with a dedicated icon for each', () => {
+    expect(primaryNavItems.map((item) => item.id)).toEqual([
+      'overview',
+      'controls',
+      'signals',
+      'history',
+      'settings',
+    ])
+
+    const markup = renderToStaticMarkup(createElement(DashboardNavigation, {
+      label: 'Primary navigation',
+      linkClassName: 'mobile-bottom-nav-link',
+      activeSection: 'settings',
+      onNavigate: () => undefined,
+    }))
+
+    expect(markup.match(/href="#/g)).toHaveLength(5)
+    expect(markup.match(/<svg/g)).toHaveLength(5)
+    expect(markup).toContain('data-navigation-item="settings"')
+    expect(markup).toContain('aria-current="location"')
   })
 
   it('uses human-readable connection labels', () => {

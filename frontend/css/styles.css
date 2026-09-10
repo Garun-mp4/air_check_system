@@ -7277,3 +7277,160 @@ body.is-settings-open {
 .dashboard-shell .air-context-card:active {
   transform: none;
 }
+
+/* Primary navigation: the same five destinations are a desktop top-nav and a
+   touch-first bottom bar, while the page content stays in one client shell. */
+.dashboard-shell .nav-link-icon {
+  display: none;
+  flex: 0 0 auto;
+}
+
+.dashboard-shell .mobile-bottom-nav {
+  display: none;
+}
+
+.dashboard-shell .dashboard-view {
+  animation: dashboard-view-enter 180ms ease-out both;
+}
+
+@keyframes dashboard-view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Settings are a first-class destination on the same level as the other
+   views. The drawer presentation remains available to isolated consumers and
+   tests, but the application uses this page presentation for route parity. */
+.dashboard-shell .settings-page-shell {
+  min-height: calc(100vh - 64px);
+  background: var(--color-canvas);
+}
+
+.dashboard-shell .settings-page-content {
+  width: min(calc(100% - 48px), 960px);
+  height: auto;
+  min-height: calc(100vh - 64px);
+  margin-inline: auto;
+  padding: var(--spacing-xl) 0 var(--spacing-section);
+  overflow: visible;
+  border: 0;
+  box-shadow: none;
+  animation: dashboard-view-enter 180ms ease-out both;
+}
+
+.dashboard-shell .settings-page-content .settings-form-footer {
+  bottom: 0;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dashboard-shell .app-topbar-inner {
+    gap: var(--spacing-sm);
+  }
+
+  .dashboard-shell .app-nav {
+    gap: var(--spacing-sm);
+  }
+
+  .dashboard-shell .app-nav-link {
+    font-size: var(--caption-size);
+  }
+
+  .dashboard-shell .room-context {
+    min-width: 0;
+    padding-left: var(--spacing-sm);
+  }
+
+  .dashboard-shell .room-context-label {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard-shell {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+
+  .dashboard-shell .mobile-bottom-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--spacing-xxs);
+    padding: var(--spacing-xs) var(--spacing-xs) max(var(--spacing-xs), env(safe-area-inset-bottom));
+    background: var(--color-canvas);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .dashboard-shell .mobile-bottom-nav-link {
+    display: flex;
+    min-width: 0;
+    min-height: 56px;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: var(--spacing-xxs) var(--spacing-xxs);
+    border: 0;
+    border-radius: var(--rounded-md);
+    color: var(--color-muted);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.15;
+    text-align: center;
+    touch-action: manipulation;
+    transition: background-color 140ms ease-out, color 140ms ease-out, transform 120ms ease-out;
+  }
+
+  .dashboard-shell .mobile-bottom-nav-link .nav-link-icon {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--rounded-md);
+  }
+
+  .dashboard-shell .mobile-bottom-nav-link .nav-link-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .dashboard-shell .mobile-bottom-nav-link.is-active {
+    background: var(--color-surface-soft);
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .dashboard-shell .mobile-bottom-nav-link.is-active .nav-link-icon {
+    background: var(--color-canvas);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .dashboard-shell .mobile-bottom-nav-link:active {
+    transform: translateY(1px);
+  }
+
+  .dashboard-shell .settings-page-content {
+    width: min(calc(100% - 32px), 960px);
+    min-height: calc(100vh - 64px);
+    padding: var(--spacing-lg) 0 var(--spacing-xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell .dashboard-view,
+  .dashboard-shell .settings-page-content,
+  .dashboard-shell .mobile-bottom-nav-link {
+    animation: none;
+    transition: none;
+  }
+}
