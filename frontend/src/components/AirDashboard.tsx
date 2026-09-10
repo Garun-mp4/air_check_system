@@ -35,7 +35,7 @@ import {
   getPm25MarkerPosition,
   getPm25Tone,
 } from '../lib/air-quality'
-import { getCo2Thresholds, LineChart } from './Charts'
+import { getCo2Thresholds, LineChart, type ChartViewport } from './Charts'
 
 export type RangeKey = '30m' | '1h' | '6h' | '24h'
 type SettingsTab = 'automation' | 'thresholds' | 'technical'
@@ -699,17 +699,28 @@ function ChartCard({
 }: {
   title: string
   caption: string
-  children: ReactNode
+  children: (props: {
+    viewport: ChartViewport | null
+    onViewportChange: (viewport: ChartViewport) => void
+  }) => ReactNode
   unit?: string
   range: RangeKey
   onRangeChange: (range: RangeKey) => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [chartViewport, setChartViewport] = useState<ChartViewport | null>(null)
   const titleId = useId()
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
   const expandButtonRef = useRef<HTMLButtonElement | null>(null)
   const dialogRef = useRef<HTMLElement | null>(null)
   const previouslyFocusedRef = useRef<HTMLElement | null>(null)
+  const handleViewportChange = useCallback((nextViewport: ChartViewport) => {
+    setChartViewport((current) => (
+      current && current.start === nextViewport.start && current.end === nextViewport.end
+        ? current
+        : nextViewport
+    ))
+  }, [])
 
   useEffect(() => {
     if (!expanded) {
@@ -804,7 +815,10 @@ function ChartCard({
           </button>
         </div>
       </div>
-      <div className="chart-shell">{children}</div>
+      <div className="chart-shell">{children({
+        viewport: chartViewport,
+        onViewportChange: handleViewportChange,
+      })}</div>
     </article>
   )
 
@@ -1801,6 +1815,7 @@ export default function AirDashboard() {
   const settingsOpenRef = useRef(false)
   const lastDashboardHashRef = useRef('#overview')
   const loadSequenceRef = useRef(0)
+  const activeLoadControllerRef = useRef<AbortController | null>(null)
 
   const openSettings = useCallback((trigger?: HTMLElement) => {
     if (trigger) {
@@ -1836,7 +1851,11 @@ export default function AirDashboard() {
     })
   }, [])
 
-  const loadData = useCallback(async (signal?: AbortSignal) => {
+  const loadData = useCallback(async () => {
+    activeLoadControllerRef.current?.abort()
+    const controller = new AbortController()
+    activeLoadControllerRef.current = controller
+    const { signal } = controller
     const loadSequence = ++loadSequenceRef.current
     const isLatestLoad = () => loadSequence === loadSequenceRef.current
     const to = new Date()
@@ -1870,7 +1889,7 @@ export default function AirDashboard() {
         )
       }
       try {
-        const controlStatus = await getControlStatus()
+        const controlStatus = await getControlStatus(undefined, signal)
         if (!isLatestLoad()) {
           return
         }
@@ -1906,6 +1925,9 @@ export default function AirDashboard() {
     } finally {
       if (isLatestLoad()) {
         setLoading(false)
+      }
+      if (activeLoadControllerRef.current === controller) {
+        activeLoadControllerRef.current = null
       }
     }
   }, [range])
@@ -1989,13 +2011,13 @@ export default function AirDashboard() {
   )
 
   useEffect(() => {
-    const controller = new AbortController()
-    void loadData(controller.signal)
+    void loadData()
     const timer = window.setInterval(() => {
       void loadData()
     }, 30_000)
     return () => {
-      controller.abort()
+      activeLoadControllerRef.current?.abort()
+      activeLoadControllerRef.current = null
       loadSequenceRef.current += 1
       window.clearInterval(timer)
     }
@@ -2551,13 +2573,17 @@ export default function AirDashboard() {
               range={range}
               onRangeChange={setRange}
             >
-              <LineChart
-                data={co2Series}
-                unit="ppm"
-                ariaLabel="График изменения концентрации CO2"
-                thresholds={activeCo2ChartThresholds}
-                rangeKey={range}
-              />
+              {({ viewport, onViewportChange }) => (
+                <LineChart
+                  data={co2Series}
+                  unit="ppm"
+                  ariaLabel="График изменения концентрации CO2"
+                  thresholds={activeCo2ChartThresholds}
+                  rangeKey={range}
+                  viewport={viewport}
+                  onViewportChange={onViewportChange}
+                />
+              )}
             </ChartCard>
             <ChartCard
               title="Температура"
@@ -2566,7 +2592,16 @@ export default function AirDashboard() {
               range={range}
               onRangeChange={setRange}
             >
-              <LineChart data={temperatureSeries} unit="°C" ariaLabel="График температуры помещения" rangeKey={range} />
+              {({ viewport, onViewportChange }) => (
+                <LineChart
+                  data={temperatureSeries}
+                  unit="°C"
+                  ariaLabel="График температуры помещения"
+                  rangeKey={range}
+                  viewport={viewport}
+                  onViewportChange={onViewportChange}
+                />
+              )}
             </ChartCard>
           </div>
         </section>
