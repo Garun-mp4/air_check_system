@@ -6182,18 +6182,19 @@ body.is-settings-open {
   }
 
   .dashboard-shell .settings-tabs {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .dashboard-shell .settings-tabs::-webkit-scrollbar {
-    display: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
   }
 
   .dashboard-shell .settings-tab {
-    flex: 1 0 132px;
-    min-width: 132px;
+    display: flex;
+    min-width: 0;
+    min-height: var(--spacing-xxl);
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xs) var(--spacing-xxs);
+    text-align: center;
   }
 
   .dashboard-shell .settings-field-grid {
