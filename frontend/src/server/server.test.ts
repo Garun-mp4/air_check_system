@@ -17,6 +17,7 @@ import {
   ValidationError,
   parseHistoryQuery,
   parseMeasurementInput,
+  parseNodeSettingsPatch,
   parseVentilationCommand,
 } from './validation'
 
@@ -29,11 +30,15 @@ const config: AppConfig = {
   mlRequestTimeoutMs: 1000,
   co2NormalThreshold: 800,
   co2CriticalThreshold: 1000,
+  pm25GoodLimit: 15,
+  pm25ElevatedLimit: 35,
   deviceId: 'room-01',
   deviceHeartbeatTimeoutMs: 90_000,
   windowManualOverrideMinutes: 30,
   autoVentilationMinimumMinutes: 5,
   automationEnabled: true,
+  autoWindowEnabled: true,
+  alertsEnabled: true,
 }
 
 function inputAt(timestamp: Date, co2 = 650, windowOpen = false): MeasurementInput {
@@ -193,6 +198,66 @@ describe('recommendation engine', () => {
 
     expect(result.type).toBe('forecast_warning')
   })
+
+  it('uses the configured PM2.5 limits for air-quality recommendations', () => {
+    const measurement = measurementAt(1, new Date(), 650, false)
+    measurement.indoor.pm25 = 42
+
+    const result = evaluateRecommendation(
+      measurement,
+      null,
+      {
+        normal: 800,
+        critical: 1000,
+        pm25Good: 10,
+        pm25Elevated: 40,
+        alertsEnabled: true,
+      },
+    )
+
+    expect(result.type).toBe('monitor')
+    expect(result.reason).toContain('40')
+  })
+
+  it('does not create a PM2.5 warning when alerts are disabled', () => {
+    const measurement = measurementAt(1, new Date(), 650, false)
+    measurement.indoor.pm25 = 42
+
+    const result = evaluateRecommendation(
+      measurement,
+      null,
+      {
+        normal: 800,
+        critical: 1000,
+        pm25Good: 10,
+        pm25Elevated: 40,
+        alertsEnabled: false,
+      },
+    )
+
+    expect(result.type).toBe('normal')
+  })
+})
+
+describe('node settings', () => {
+  it('parses a partial settings update and preserves the device id', () => {
+    expect(parseNodeSettingsPatch({
+      device_id: 'room-02',
+      co2_normal_threshold: 750,
+      alerts_enabled: false,
+    }, 'room-01')).toEqual({
+      deviceId: 'room-02',
+      patch: {
+        co2NormalThreshold: 750,
+        alertsEnabled: false,
+      },
+    })
+  })
+
+  it('rejects an empty settings update and invalid numeric values', () => {
+    expect(() => parseNodeSettingsPatch({}, 'room-01')).toThrow(ValidationError)
+    expect(() => parseNodeSettingsPatch({ pm25_good_limit: -1 }, 'room-01')).toThrow(ValidationError)
+  })
 })
 
 describe('memory repository', () => {
@@ -213,6 +278,34 @@ describe('memory repository', () => {
 
     expect(history.map((item) => item.indoor.co2)).toEqual([680, 700])
     expect((await repository.getLatestMeasurement())?.indoor.co2).toBe(700)
+  })
+
+  it('persists node settings and returns defaults for a new node', async () => {
+    const repository = new MemoryRepository()
+    const defaults = {
+      automationEnabled: true,
+      autoWindowEnabled: true,
+      manualOverrideMinutes: 30,
+      autoVentilationMinimumMinutes: 5,
+      co2NormalThreshold: 800,
+      co2CriticalThreshold: 1000,
+      pm25GoodLimit: 15,
+      pm25ElevatedLimit: 35,
+      alertsEnabled: true,
+      retentionHours: 24,
+    }
+
+    const initial = await repository.getNodeSettings('room-01', defaults)
+    expect(initial.co2NormalThreshold).toBe(800)
+
+    const updated = await repository.updateNodeSettings(
+      'room-01',
+      { co2NormalThreshold: 750, co2CriticalThreshold: 950 },
+      defaults,
+    )
+
+    expect(updated.co2NormalThreshold).toBe(750)
+    expect((await repository.getNodeSettings('room-01', defaults)).co2CriticalThreshold).toBe(950)
   })
 
   it('purges expired readings and derived records but keeps pending commands', async () => {
@@ -635,6 +728,23 @@ describe('ML client', () => {
 })
 
 describe('air quality service', () => {
+  it('validates and persists operator settings for the node', async () => {
+    const repository = new MemoryRepository()
+    const service = new AirQualityService(repository, { predict: vi.fn() }, config)
+
+    const updated = await service.updateNodeSettings('room-01', {
+      automationEnabled: false,
+      co2NormalThreshold: 750,
+      co2CriticalThreshold: 950,
+    })
+
+    expect(updated.automationEnabled).toBe(false)
+    expect(updated.co2NormalThreshold).toBe(750)
+    await expect(service.updateNodeSettings('room-01', {
+      co2CriticalThreshold: 700,
+    })).rejects.toThrow(ValidationError)
+  })
+
   it('stores a measurement and prediction after enough history', async () => {
     const repository = new MemoryRepository()
     const predictor = {

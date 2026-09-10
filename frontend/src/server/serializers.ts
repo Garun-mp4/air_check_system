@@ -4,6 +4,7 @@ import type {
   DashboardResult,
   IngestResult,
   Measurement,
+  NodeSettings,
   Prediction,
   Recommendation,
 } from './types'
@@ -62,6 +63,23 @@ export function serializeControlStatus(status: ControlStatus) {
       ? serializeControlCommand(status.lastCommand)
       : null,
     updated_at: status.updatedAt.toISOString(),
+  }
+}
+
+export function serializeNodeSettings(settings: NodeSettings) {
+  return {
+    device_id: settings.deviceId,
+    automation_enabled: settings.automationEnabled,
+    auto_window_enabled: settings.autoWindowEnabled,
+    manual_override_minutes: settings.manualOverrideMinutes,
+    auto_ventilation_minimum_minutes: settings.autoVentilationMinimumMinutes,
+    co2_normal_threshold: settings.co2NormalThreshold,
+    co2_critical_threshold: settings.co2CriticalThreshold,
+    pm25_good_limit: settings.pm25GoodLimit,
+    pm25_elevated_limit: settings.pm25ElevatedLimit,
+    alerts_enabled: settings.alertsEnabled,
+    retention_hours: settings.retentionHours,
+    updated_at: settings.updatedAt.toISOString(),
   }
 }
 

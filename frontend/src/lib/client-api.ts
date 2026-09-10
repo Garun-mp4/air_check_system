@@ -94,6 +94,33 @@ export interface ClientControlStatus {
   updated_at: string
 }
 
+export interface ClientNodeSettings {
+  device_id: string
+  automation_enabled: boolean
+  auto_window_enabled: boolean
+  manual_override_minutes: number
+  auto_ventilation_minimum_minutes: number
+  co2_normal_threshold: number
+  co2_critical_threshold: number
+  pm25_good_limit: number
+  pm25_elevated_limit: number
+  alerts_enabled: boolean
+  retention_hours: number
+  updated_at: string
+}
+
+export interface ClientNodeSettingsPatch {
+  automation_enabled?: boolean
+  auto_window_enabled?: boolean
+  manual_override_minutes?: number
+  auto_ventilation_minimum_minutes?: number
+  co2_normal_threshold?: number
+  co2_critical_threshold?: number
+  pm25_good_limit?: number
+  pm25_elevated_limit?: number
+  alerts_enabled?: boolean
+}
+
 export interface HistoryMeta {
   count: number
   from: string | null
@@ -188,6 +215,42 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return payload as T
 }
 
+async function patchJson<T>(path: string, body: unknown): Promise<T> {
+  let response: Response
+  try {
+    response = await fetch(apiBaseUrl + path, {
+      method: 'PATCH',
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+  } catch {
+    throw new ClientApiError('Не удалось подключиться к серверу', 0)
+  }
+  const text = await response.text()
+  let payload: unknown = null
+  if (text.trim() !== '') {
+    try {
+      payload = JSON.parse(text) as unknown
+    } catch {
+      throw new ClientApiError('Сервер вернул невалидный ответ', response.status)
+    }
+  }
+  if (!response.ok) {
+    const message =
+      isRecord(payload) &&
+      isRecord(payload.error) &&
+      typeof payload.error.message === 'string'
+        ? payload.error.message
+        : 'Сервер временно недоступен'
+    throw new ClientApiError(message, response.status)
+  }
+  return payload as T
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -228,6 +291,34 @@ export async function getControlStatus(
     : ''
   const payload = await requestJson<{ data: ClientControlStatus }>(
     '/api/v1/controls' + params,
+  )
+  return payload.data
+}
+
+export async function getNodeSettings(
+  deviceId?: string,
+  signal?: AbortSignal,
+): Promise<ClientNodeSettings> {
+  const params = deviceId
+    ? '?' + new URLSearchParams({ device_id: deviceId }).toString()
+    : ''
+  const payload = await requestJson<{ data: ClientNodeSettings }>(
+    '/api/v1/settings' + params,
+    signal,
+  )
+  return payload.data
+}
+
+export async function updateNodeSettings(
+  patch: ClientNodeSettingsPatch,
+  deviceId?: string,
+): Promise<ClientNodeSettings> {
+  const payload = await patchJson<{ data: ClientNodeSettings }>(
+    '/api/v1/settings',
+    {
+      ...(deviceId ? { device_id: deviceId } : {}),
+      ...patch,
+    },
   )
   return payload.data
 }

@@ -7,11 +7,15 @@ export interface AppConfig {
   mlRequestTimeoutMs: number
   co2NormalThreshold: number
   co2CriticalThreshold: number
+  pm25GoodLimit: number
+  pm25ElevatedLimit: number
   deviceId: string
   deviceHeartbeatTimeoutMs: number
   windowManualOverrideMinutes: number
   autoVentilationMinimumMinutes: number
   automationEnabled: boolean
+  autoWindowEnabled: boolean
+  alertsEnabled: boolean
 }
 
 function readNumber(name: string, fallback: number, minimum: number): number {
@@ -47,6 +51,11 @@ export function getConfig(): AppConfig {
   if (critical <= normal) {
     throw new Error('CO2_CRITICAL_THRESHOLD must be greater than CO2_NORMAL_THRESHOLD')
   }
+  const pm25Good = readNumber('PM25_GOOD_LIMIT', 15, 0)
+  const pm25Elevated = readNumber('PM25_ELEVATED_LIMIT', 35, pm25Good)
+  if (pm25Elevated <= pm25Good) {
+    throw new Error('PM25_ELEVATED_LIMIT must be greater than PM25_GOOD_LIMIT')
+  }
 
   return {
     databaseUrl:
@@ -59,6 +68,8 @@ export function getConfig(): AppConfig {
     mlRequestTimeoutMs: Math.floor(readNumber('ML_REQUEST_TIMEOUT_MS', 5000, 100)),
     co2NormalThreshold: normal,
     co2CriticalThreshold: critical,
+    pm25GoodLimit: pm25Good,
+    pm25ElevatedLimit: pm25Elevated,
     deviceId: (process.env.DEVICE_ID ?? 'room-01').trim() || 'room-01',
     deviceHeartbeatTimeoutMs: Math.floor(
       readNumber('DEVICE_HEARTBEAT_TIMEOUT_MS', 90_000, 1_000),
@@ -70,5 +81,7 @@ export function getConfig(): AppConfig {
       readNumber('AUTO_VENTILATION_MINIMUM_MINUTES', 5, 1),
     ),
     automationEnabled: readBoolean('AUTOMATION_ENABLED', true),
+    autoWindowEnabled: readBoolean('AUTO_WINDOW_ENABLED', true),
+    alertsEnabled: readBoolean('ALERTS_ENABLED', true),
   }
 }

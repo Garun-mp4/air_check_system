@@ -5,14 +5,27 @@ export const PM25_SCALE_MAX = 50
 export type Pm25Level = 'good' | 'elevated' | 'high' | 'unknown'
 export type Pm25Tone = 'success' | 'warning' | 'error' | 'neutral'
 
-export function getPm25Level(value: number | null | undefined): Pm25Level {
+export interface Pm25Thresholds {
+  good: number
+  elevated: number
+}
+
+export const defaultPm25Thresholds: Pm25Thresholds = {
+  good: PM25_GOOD_LIMIT,
+  elevated: PM25_ELEVATED_LIMIT,
+}
+
+export function getPm25Level(
+  value: number | null | undefined,
+  thresholds: Pm25Thresholds = defaultPm25Thresholds,
+): Pm25Level {
   if (value === null || value === undefined || !Number.isFinite(value)) {
     return 'unknown'
   }
-  if (value <= PM25_GOOD_LIMIT) {
+  if (value <= thresholds.good) {
     return 'good'
   }
-  if (value <= PM25_ELEVATED_LIMIT) {
+  if (value <= thresholds.elevated) {
     return 'elevated'
   }
   return 'high'
@@ -44,15 +57,21 @@ export function getPm25Tone(level: Pm25Level): Pm25Tone {
   return 'neutral'
 }
 
-export function getPm25MarkerPosition(value: number | null | undefined): number | null {
+export function getPm25MarkerPosition(
+  value: number | null | undefined,
+  scaleMax = PM25_SCALE_MAX,
+): number | null {
   if (value === null || value === undefined || !Number.isFinite(value)) {
     return null
   }
-  return Math.min(97, Math.max(3, (value / PM25_SCALE_MAX) * 100))
+  return Math.min(97, Math.max(3, (value / Math.max(1, scaleMax)) * 100))
 }
 
-export function getPm25AriaLabel(value: number | null | undefined): string {
-  const level = getPm25Level(value)
+export function getPm25AriaLabel(
+  value: number | null | undefined,
+  thresholds: Pm25Thresholds = defaultPm25Thresholds,
+): string {
+  const level = getPm25Level(value, thresholds)
   const label = getPm25Label(level)
   if (value === null || value === undefined || !Number.isFinite(value)) {
     return 'PM2.5: нет данных'

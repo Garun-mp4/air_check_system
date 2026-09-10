@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import type { AppConfig } from './config'
 import type { Repository } from './repository'
+import { getNodeSettingsDefaults } from './settings'
 import type {
   ControlAction,
   ControlCommand,
@@ -11,6 +12,7 @@ import type {
   DeviceStateReport,
   DeviceConnectionStatus,
   Measurement,
+  NodeSettings,
   Prediction,
   VentilationAction,
 } from './types'
@@ -73,13 +75,13 @@ function connectionStatus(
 
 function withAutomationSummary(
   status: Omit<ControlStatus, 'automation'>,
-  config: AppConfig,
+  settings: NodeSettings,
 ): ControlStatus {
   let automationStatus: AutomationStatus
   let message: string
-  if (!config.automationEnabled) {
+  if (!settings.automationEnabled) {
     automationStatus = 'disabled'
-    message = 'Автоматическое управление отключено в конфигурации.'
+    message = 'Автоматическое управление отключено в настройках узла.'
   } else if (
     status.windowMode === 'manual' &&
     status.overrideUntil !== null &&
@@ -113,12 +115,14 @@ function withAutomationSummary(
     message = 'Контур проветривания активен.'
   } else {
     automationStatus = 'ready'
-    message = 'Автоматика готова открыть окно при необходимости.'
+    message = settings.autoWindowEnabled
+      ? 'Автоматика готова открыть окно при необходимости.'
+      : 'Автоматика готова поддерживать воздушный контур; окно открывается вручную.'
   }
   return {
     ...status,
     automation: {
-      enabled: config.automationEnabled,
+      enabled: settings.automationEnabled,
       status: automationStatus,
       message,
     },
@@ -135,7 +139,12 @@ export class ControlService {
     private readonly config: AppConfig,
   ) {}
 
+  private settings(deviceId = this.config.deviceId): Promise<NodeSettings> {
+    return this.repository.getNodeSettings(deviceId, getNodeSettingsDefaults(this.config))
+  }
+
   async status(deviceId = this.config.deviceId): Promise<ControlStatus> {
+    const settings = await this.settings(deviceId)
     let state = await this.repository.getControlState(deviceId)
     if (
       state.windowMode === 'manual' &&
@@ -154,7 +163,7 @@ export class ControlService {
           current,
         ),
       },
-      this.config,
+      settings,
     )
   }
 
@@ -163,6 +172,7 @@ export class ControlService {
   }
 
   async issue(request: ControlRequest): Promise<ControlCommandResult> {
+    const settings = await this.settings(request.deviceId)
     if (request.target === 'window' && request.action === 'auto') {
       await this.repository.setWindowControlMode(request.deviceId, 'auto', null)
       return { commands: [], status: await this.status(request.deviceId) }
@@ -177,7 +187,7 @@ export class ControlService {
       await this.repository.setWindowControlMode(
         request.deviceId,
         'manual',
-        new Date(Date.now() + this.config.windowManualOverrideMinutes * 60_000),
+        new Date(Date.now() + settings.manualOverrideMinutes * 60_000),
       )
     }
 
@@ -222,7 +232,8 @@ export class ControlService {
     measurement: Measurement,
     prediction: Prediction | null,
   ): Promise<ControlCommand[]> {
-    if (!this.config.automationEnabled) {
+    const settings = await this.settings(this.config.deviceId)
+    if (!settings.automationEnabled) {
       return []
     }
 
@@ -245,11 +256,11 @@ export class ControlService {
     const currentCo2 = measurement.indoor.co2
     const predictedCo2 = predictedValue(prediction)
     const critical =
-      currentCo2 >= this.config.co2CriticalThreshold ||
-      (predictedCo2 !== null && predictedCo2 >= this.config.co2CriticalThreshold)
+      currentCo2 >= settings.co2CriticalThreshold ||
+      (predictedCo2 !== null && predictedCo2 >= settings.co2CriticalThreshold)
     const currentlyOpen = state.reported.windowOpen || measurement.windowOpen
     const shouldSupportOpenWindow =
-      currentlyOpen && currentCo2 >= this.config.co2NormalThreshold
+      currentlyOpen && currentCo2 >= settings.co2NormalThreshold
     const commandPlans: Array<
       Pick<ControlCommandInput, 'target' | 'desiredState' | 'reason'>
     > = []
@@ -280,7 +291,10 @@ export class ControlService {
     if (critical) {
       const reason =
         'Автоматика: CO₂ достиг критического порога или прогнозирует его через 15 минут.'
-      if (!state.desired.windowOpen || !state.reported.windowOpen) {
+      if (
+        settings.autoWindowEnabled &&
+        (!state.desired.windowOpen || !state.reported.windowOpen)
+      ) {
         commandPlans.push({ target: 'window', desiredState: true, reason })
       }
       if (!state.desired.exhaustOn || !state.reported.exhaustOn) {
@@ -305,16 +319,19 @@ export class ControlService {
       ])
 
       if (
-        currentCo2 < this.config.co2NormalThreshold &&
-        (predictedCo2 === null || predictedCo2 < this.config.co2NormalThreshold) &&
+        currentCo2 < settings.co2NormalThreshold &&
+        (predictedCo2 === null || predictedCo2 < settings.co2NormalThreshold) &&
         (state.desired.windowOpen || state.reported.windowOpen) &&
         state.windowOpenSince !== null &&
         Date.now() - state.windowOpenSince.getTime() >=
-          this.config.autoVentilationMinimumMinutes * 60_000
+          settings.autoVentilationMinimumMinutes * 60_000
       ) {
         const reason =
           'Автоматика: CO₂ вернулся в комфортную зону после минимального времени проветривания.'
-        if (state.desired.windowOpen || state.reported.windowOpen) {
+        if (
+          settings.autoWindowEnabled &&
+          (state.desired.windowOpen || state.reported.windowOpen)
+        ) {
           addPlan('window', false, reason)
         }
         if (automaticExhaustOn) {
@@ -324,8 +341,8 @@ export class ControlService {
           addPlan('intake', false, reason)
         }
       } else if (
-        currentCo2 < this.config.co2NormalThreshold &&
-        (predictedCo2 === null || predictedCo2 < this.config.co2NormalThreshold) &&
+        currentCo2 < settings.co2NormalThreshold &&
+        (predictedCo2 === null || predictedCo2 < settings.co2NormalThreshold) &&
         !state.desired.windowOpen &&
         !state.reported.windowOpen
       ) {
@@ -355,6 +372,7 @@ export class ControlService {
   }
 
   private async statusFromState(state: Awaited<ReturnType<Repository['getControlState']>>): Promise<ControlStatus> {
+    const settings = await this.settings(state.deviceId)
     return withAutomationSummary(
       {
         ...state,
@@ -364,7 +382,7 @@ export class ControlService {
           new Date(),
         ),
       },
-      this.config,
+      settings,
     )
   }
 }

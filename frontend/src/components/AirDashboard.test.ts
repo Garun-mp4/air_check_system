@@ -87,12 +87,79 @@ describe('dashboard navigation', () => {
       onTabChange: () => undefined,
       onClose: () => undefined,
       closeButtonRef: createRef<HTMLButtonElement>(),
+      settings: null,
+      settingsError: null,
+      settingsSaving: false,
+      settingsNotice: null,
+      onSave: async () => undefined,
     }))
 
     expect(markup).toContain('id="settings-dialog"')
     expect(markup).toContain('Технические сведения')
     expect(markup).toContain('PostgreSQL')
+    expect(markup).toContain('Срок хранения')
     expect(markup).not.toContain('Связь и модель')
+  })
+
+  it('renders editable automation and threshold tabs', () => {
+    const settings = {
+      device_id: 'room-01',
+      automation_enabled: true,
+      auto_window_enabled: true,
+      manual_override_minutes: 30,
+      auto_ventilation_minimum_minutes: 5,
+      co2_normal_threshold: 800,
+      co2_critical_threshold: 1000,
+      pm25_good_limit: 15,
+      pm25_elevated_limit: 35,
+      alerts_enabled: true,
+      retention_hours: 24,
+      updated_at: '2026-09-09T10:00:00Z',
+    }
+    const markup = renderToStaticMarkup(createElement(SettingsPanel, {
+      controls: null,
+      deviceId: 'room-01',
+      measurement: null,
+      prediction: null,
+      systemStatus: 'в сети',
+      systemTone: 'success',
+      tab: 'automation',
+      onTabChange: () => undefined,
+      onClose: () => undefined,
+      closeButtonRef: createRef<HTMLButtonElement>(),
+      settings,
+      settingsError: null,
+      settingsSaving: false,
+      settingsNotice: null,
+      onSave: async () => undefined,
+    }))
+
+    expect(markup).toContain('Автоматическое управление')
+    expect(markup).toContain('id="settings-tab-thresholds"')
+    expect(markup).toContain('Пороги и сигналы')
+    expect(markup).toContain('Отменить')
+
+    const thresholdsMarkup = renderToStaticMarkup(createElement(SettingsPanel, {
+      controls: null,
+      deviceId: 'room-01',
+      measurement: null,
+      prediction: null,
+      systemStatus: 'в сети',
+      systemTone: 'success',
+      tab: 'thresholds',
+      onTabChange: () => undefined,
+      onClose: () => undefined,
+      closeButtonRef: createRef<HTMLButtonElement>(),
+      settings,
+      settingsError: null,
+      settingsSaving: false,
+      settingsNotice: null,
+      onSave: async () => undefined,
+    }))
+
+    expect(thresholdsMarkup).toContain('id="settings-co2-normal"')
+    expect(thresholdsMarkup).toContain('id="settings-pm25-elevated"')
+    expect(thresholdsMarkup).toContain('Восстановить рекомендуемые значения')
   })
 
   it('renders the hash section as active in both navigation variants', () => {

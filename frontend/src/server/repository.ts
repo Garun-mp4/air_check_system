@@ -8,6 +8,9 @@ import type {
   HistoryQuery,
   Measurement,
   MeasurementInput,
+  NodeSettings,
+  NodeSettingsDefaults,
+  NodeSettingsPatch,
   Prediction,
   PredictionInput,
   Recommendation,
@@ -38,6 +41,15 @@ export interface Repository {
     mode: WindowControlMode,
     overrideUntil: Date | null,
   ): Promise<ControlState>
+  getNodeSettings(
+    deviceId: string,
+    defaults: NodeSettingsDefaults,
+  ): Promise<NodeSettings>
+  updateNodeSettings(
+    deviceId: string,
+    patch: NodeSettingsPatch,
+    defaults: NodeSettingsDefaults,
+  ): Promise<NodeSettings>
   ping(): Promise<void>
   close(): Promise<void>
 }
@@ -105,12 +117,20 @@ function cloneControlState(state: ControlState): ControlState {
   }
 }
 
+function cloneNodeSettings(settings: NodeSettings): NodeSettings {
+  return {
+    ...settings,
+    updatedAt: new Date(settings.updatedAt),
+  }
+}
+
 export class MemoryRepository implements Repository {
   private measurements: Measurement[] = []
   private predictions: Prediction[] = []
   private recommendations: Recommendation[] = []
   private controlStates = new Map<string, ControlState>()
   private controlCommands: ControlCommand[] = []
+  private nodeSettings = new Map<string, NodeSettings>()
   private nextId = 1
 
   async createMeasurement(input: MeasurementInput): Promise<Measurement> {
@@ -364,6 +384,46 @@ export class MemoryRepository implements Repository {
     return this.getControlState(deviceId)
   }
 
+  private ensureNodeSettings(
+    deviceId: string,
+    defaults: NodeSettingsDefaults,
+  ): NodeSettings {
+    const existing = this.nodeSettings.get(deviceId)
+    if (existing) {
+      return existing
+    }
+    const settings: NodeSettings = {
+      deviceId,
+      ...defaults,
+      updatedAt: new Date(),
+    }
+    this.nodeSettings.set(deviceId, settings)
+    return settings
+  }
+
+  async getNodeSettings(
+    deviceId: string,
+    defaults: NodeSettingsDefaults,
+  ): Promise<NodeSettings> {
+    return cloneNodeSettings(this.ensureNodeSettings(deviceId, defaults))
+  }
+
+  async updateNodeSettings(
+    deviceId: string,
+    patch: NodeSettingsPatch,
+    defaults: NodeSettingsDefaults,
+  ): Promise<NodeSettings> {
+    const current = this.ensureNodeSettings(deviceId, defaults)
+    const next: NodeSettings = {
+      ...current,
+      ...patch,
+      deviceId,
+      updatedAt: new Date(),
+    }
+    this.nodeSettings.set(deviceId, next)
+    return cloneNodeSettings(next)
+  }
+
   async ping(): Promise<void> {}
 
   async close(): Promise<void> {}
@@ -427,6 +487,20 @@ interface ControlCommandRow {
   status: ControlCommand['status']
   created_at: Date | string
   applied_at: Date | string | null
+}
+
+interface NodeSettingsRow {
+  device_id: string
+  automation_enabled: boolean
+  auto_window_enabled: boolean
+  manual_override_minutes: number | string
+  auto_ventilation_minimum_minutes: number | string
+  co2_normal_threshold: number | string
+  co2_critical_threshold: number | string
+  pm25_good_limit: number | string
+  pm25_elevated_limit: number | string
+  alerts_enabled: boolean
+  updated_at: Date | string
 }
 
 function asDate(value: Date | string): Date {
@@ -522,6 +596,26 @@ function mapControlState(
     updatedAt: asDate(row.updated_at),
     pendingCommands,
     lastCommand,
+  }
+}
+
+function mapNodeSettings(
+  row: NodeSettingsRow,
+  defaults: NodeSettingsDefaults,
+): NodeSettings {
+  return {
+    deviceId: row.device_id,
+    automationEnabled: row.automation_enabled,
+    autoWindowEnabled: row.auto_window_enabled,
+    manualOverrideMinutes: asNumber(row.manual_override_minutes),
+    autoVentilationMinimumMinutes: asNumber(row.auto_ventilation_minimum_minutes),
+    co2NormalThreshold: asNumber(row.co2_normal_threshold),
+    co2CriticalThreshold: asNumber(row.co2_critical_threshold),
+    pm25GoodLimit: asNumber(row.pm25_good_limit),
+    pm25ElevatedLimit: asNumber(row.pm25_elevated_limit),
+    alertsEnabled: row.alerts_enabled,
+    retentionHours: defaults.retentionHours,
+    updatedAt: asDate(row.updated_at),
   }
 }
 
@@ -891,6 +985,86 @@ export class PostgresRepository implements Repository {
       [deviceId, mode, overrideUntil],
     )
     return this.readControlState(deviceId)
+  }
+
+  private async ensureNodeSettings(
+    deviceId: string,
+    defaults: NodeSettingsDefaults,
+  ): Promise<void> {
+    await this.pool.query(
+      'INSERT INTO node_settings (' +
+        'device_id, automation_enabled, auto_window_enabled, manual_override_minutes, ' +
+        'auto_ventilation_minimum_minutes, co2_normal_threshold, co2_critical_threshold, ' +
+        'pm25_good_limit, pm25_elevated_limit, alerts_enabled' +
+        ') VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) ' +
+        'ON CONFLICT (device_id) DO NOTHING',
+      [
+        deviceId,
+        defaults.automationEnabled,
+        defaults.autoWindowEnabled,
+        defaults.manualOverrideMinutes,
+        defaults.autoVentilationMinimumMinutes,
+        defaults.co2NormalThreshold,
+        defaults.co2CriticalThreshold,
+        defaults.pm25GoodLimit,
+        defaults.pm25ElevatedLimit,
+        defaults.alertsEnabled,
+      ],
+    )
+  }
+
+  private async readNodeSettings(
+    deviceId: string,
+    defaults: NodeSettingsDefaults,
+  ): Promise<NodeSettings> {
+    const result = await this.pool.query<NodeSettingsRow>(
+      'SELECT device_id, automation_enabled, auto_window_enabled, manual_override_minutes, ' +
+        'auto_ventilation_minimum_minutes, co2_normal_threshold, co2_critical_threshold, ' +
+        'pm25_good_limit, pm25_elevated_limit, alerts_enabled, updated_at ' +
+        'FROM node_settings WHERE device_id = $1',
+      [deviceId],
+    )
+    if (!result.rows[0]) {
+      throw new NotFoundError('Настройки локального узла не найдены')
+    }
+    return mapNodeSettings(result.rows[0], defaults)
+  }
+
+  async getNodeSettings(
+    deviceId: string,
+    defaults: NodeSettingsDefaults,
+  ): Promise<NodeSettings> {
+    await this.ensureNodeSettings(deviceId, defaults)
+    return this.readNodeSettings(deviceId, defaults)
+  }
+
+  async updateNodeSettings(
+    deviceId: string,
+    patch: NodeSettingsPatch,
+    defaults: NodeSettingsDefaults,
+  ): Promise<NodeSettings> {
+    const current = await this.getNodeSettings(deviceId, defaults)
+    const next = { ...current, ...patch }
+    await this.pool.query(
+      'UPDATE node_settings SET automation_enabled = $2, auto_window_enabled = $3, ' +
+        'manual_override_minutes = $4, auto_ventilation_minimum_minutes = $5, ' +
+        'co2_normal_threshold = $6, co2_critical_threshold = $7, pm25_good_limit = $8, ' +
+        'pm25_elevated_limit = $9, alerts_enabled = $10, updated_at = NOW() ' +
+        'WHERE device_id = $1',
+      [
+        deviceId,
+        next.automationEnabled,
+        next.autoWindowEnabled,
+        next.manualOverrideMinutes,
+        next.autoVentilationMinimumMinutes,
+        next.co2NormalThreshold,
+        next.co2CriticalThreshold,
+        next.pm25GoodLimit,
+        next.pm25ElevatedLimit,
+        next.alertsEnabled,
+      ],
+    )
+    return this.readNodeSettings(deviceId, defaults)
   }
 
   async ping(): Promise<void> {

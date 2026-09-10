@@ -51,6 +51,27 @@ simulator отправляет именно это тело. Поэтому бу
 
 До первого измерения вложенные значения равны null. Это позволяет frontend показать штатное empty-state.
 
+## Настройки узла
+
+`GET /api/v1/settings?device_id=room-01` возвращает постоянные правила конкретного локального узла. `PATCH /api/v1/settings` обновляет одно или несколько полей:
+
+~~~json
+{
+  "device_id": "room-01",
+  "automation_enabled": true,
+  "auto_window_enabled": true,
+  "manual_override_minutes": 30,
+  "auto_ventilation_minimum_minutes": 5,
+  "co2_normal_threshold": 800,
+  "co2_critical_threshold": 1000,
+  "pm25_good_limit": 15,
+  "pm25_elevated_limit": 35,
+  "alerts_enabled": true
+}
+~~~
+
+Сервер проверяет диапазоны и порядок порогов: критический CO₂ должен быть выше комфортного, а повышенный PM2.5 — выше нормального. Сохранённые значения применяются к автоматике, рекомендациям и шкалам показателей. `retention_hours` возвращается только для справки и не изменяется через этот endpoint.
+
 ## GET /api/v1/measurements/history
 
 Параметры from и to — необязательные RFC3339 даты, limit — число от 1 до 5000. Ответ содержит data с измерениями в порядке возрастания времени и meta. Панель использует периоды 30 минут, 1 час, 6 часов и 24 часа.

@@ -150,3 +150,25 @@ export interface ControlCommandResult {
   commands: ControlCommand[]
   status: ControlStatus
 }
+
+export interface NodeSettingsDefaults {
+  automationEnabled: boolean
+  autoWindowEnabled: boolean
+  manualOverrideMinutes: number
+  autoVentilationMinimumMinutes: number
+  co2NormalThreshold: number
+  co2CriticalThreshold: number
+  pm25GoodLimit: number
+  pm25ElevatedLimit: number
+  alertsEnabled: boolean
+  retentionHours: number
+}
+
+export interface NodeSettings extends NodeSettingsDefaults {
+  deviceId: string
+  updatedAt: Date
+}
+
+export type NodeSettingsPatch = Partial<
+  Omit<NodeSettings, 'deviceId' | 'updatedAt' | 'retentionHours'>
+>

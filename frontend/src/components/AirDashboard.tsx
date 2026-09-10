@@ -8,12 +8,16 @@ import {
   getControlStatus,
   getHistory,
   getLatestDashboard,
+  getNodeSettings,
   sendControlCommand,
   sendVentilationCommand,
+  updateNodeSettings,
   type ClientControlAction,
   type ClientControlStatus,
   type ClientControlTarget,
   type ClientMeasurement,
+  type ClientNodeSettings,
+  type ClientNodeSettingsPatch,
   type ClientPrediction,
   type ClientRecommendation,
   type ClientVentilationAction,
@@ -23,16 +27,17 @@ import {
   PM25_ELEVATED_LIMIT,
   PM25_GOOD_LIMIT,
   PM25_SCALE_MAX,
+  type Pm25Thresholds,
   getPm25AriaLabel,
   getPm25Label,
   getPm25Level,
   getPm25MarkerPosition,
   getPm25Tone,
 } from '../lib/air-quality'
-import { co2Thresholds, LineChart } from './Charts'
+import { getCo2Thresholds, LineChart } from './Charts'
 
 export type RangeKey = '30m' | '1h' | '6h' | '24h'
-type SettingsTab = 'technical' | 'automation'
+type SettingsTab = 'automation' | 'thresholds' | 'technical'
 export const dashboardNavItems = [
   { id: 'overview', label: 'Панель' },
   { id: 'controls', label: 'Управление' },
@@ -333,27 +338,43 @@ function formatTransitionCount(count: number): string {
   return count + ' изменений'
 }
 
-function co2BadgeClass(value: number | null | undefined): string {
+type Co2Thresholds = {
+  normal: number
+  critical: number
+}
+
+const defaultCo2Thresholds: Co2Thresholds = {
+  normal: 800,
+  critical: 1000,
+}
+
+function co2BadgeClass(
+  value: number | null | undefined,
+  thresholds: Co2Thresholds = defaultCo2Thresholds,
+): string {
   if (value === null || value === undefined) {
     return 'badge-neutral'
   }
-  if (value >= 1000) {
+  if (value >= thresholds.critical) {
     return 'badge-error'
   }
-  if (value >= 800) {
+  if (value >= thresholds.normal) {
     return 'badge-warning'
   }
   return 'badge-success'
 }
 
-function co2Label(value: number | null | undefined): string {
+function co2Label(
+  value: number | null | undefined,
+  thresholds: Co2Thresholds = defaultCo2Thresholds,
+): string {
   if (value === null || value === undefined) {
     return 'Ожидание данных'
   }
-  if (value >= 1000) {
+  if (value >= thresholds.critical) {
     return 'Нужна вентиляция'
   }
-  if (value >= 800) {
+  if (value >= thresholds.normal) {
     return 'Зона внимания'
   }
   return 'В комфортной зоне'
@@ -815,10 +836,25 @@ function AirContextMetric({
   )
 }
 
-function AirContextPm25Metric({ value }: { value: number | null | undefined }) {
-  const level = getPm25Level(value)
+function AirContextPm25Metric({
+  value,
+  thresholds,
+}: {
+  value: number | null | undefined
+  thresholds: Pm25Thresholds
+}) {
+  const level = getPm25Level(value, thresholds)
   const tone = getPm25Tone(level)
-  const markerPosition = getPm25MarkerPosition(value)
+  const scaleMax = Math.max(
+    PM25_SCALE_MAX,
+    Math.ceil((thresholds.elevated * 1.4) / 5) * 5,
+  )
+  const markerPosition = getPm25MarkerPosition(value, scaleMax)
+  const goodPosition = Math.min(97, Math.max(3, (thresholds.good / scaleMax) * 100))
+  const elevatedPosition = Math.min(
+    98,
+    Math.max(goodPosition + 1, (thresholds.elevated / scaleMax) * 100),
+  )
 
   return (
     <span className="air-context-card-metric air-context-card-metric-pm25">
@@ -834,11 +870,11 @@ function AirContextPm25Metric({ value }: { value: number | null | undefined }) {
         <span className={'status-dot status-dot-' + tone} />
         {getPm25Label(level)}
       </span>
-      <span className="air-context-card-pm25-scale" role="img" aria-label={getPm25AriaLabel(value)}>
+      <span className="air-context-card-pm25-scale" role="img" aria-label={getPm25AriaLabel(value, thresholds)}>
         <span className="air-context-card-pm25-track">
-          <span className="pm25-scale-zone pm25-scale-zone-good" />
-          <span className="pm25-scale-zone pm25-scale-zone-elevated" />
-          <span className="pm25-scale-zone pm25-scale-zone-high" />
+          <span className="pm25-scale-zone pm25-scale-zone-good" style={{ width: goodPosition + '%' }} />
+          <span className="pm25-scale-zone pm25-scale-zone-elevated" style={{ width: elevatedPosition - goodPosition + '%' }} />
+          <span className="pm25-scale-zone pm25-scale-zone-high" style={{ width: 100 - elevatedPosition + '%' }} />
         </span>
         {markerPosition !== null ? (
           <span
@@ -850,9 +886,9 @@ function AirContextPm25Metric({ value }: { value: number | null | undefined }) {
       </span>
       <span className="air-context-card-pm25-labels" aria-hidden="true">
         <span>0</span>
-        <span>{PM25_GOOD_LIMIT}</span>
-        <span>{PM25_ELEVATED_LIMIT}</span>
-        <span>{PM25_SCALE_MAX}+</span>
+        <span style={{ left: goodPosition + '%' }}>{thresholds.good}</span>
+        <span style={{ left: elevatedPosition + '%' }}>{thresholds.elevated}</span>
+        <span>{scaleMax}+</span>
       </span>
     </span>
   )
@@ -861,9 +897,11 @@ function AirContextPm25Metric({ value }: { value: number | null | undefined }) {
 export function AirContextCards({
   measurement = null,
   windowOpen,
+  pm25Thresholds = { good: PM25_GOOD_LIMIT, elevated: PM25_ELEVATED_LIMIT },
 }: {
   measurement?: ClientMeasurement | null
   windowOpen?: boolean | null
+  pm25Thresholds?: Pm25Thresholds
 }) {
   const resolvedWindowOpen = windowOpen ?? measurement?.window_open ?? null
   const windowLabel = resolvedWindowOpen === null ? '—' : resolvedWindowOpen ? 'Открыто' : 'Закрыто'
@@ -919,7 +957,10 @@ export function AirContextCards({
                 value={formatValue(measurement?.[context.zone].humidity, 0)}
                 unit="%"
               />
-              <AirContextPm25Metric value={measurement?.[context.zone].pm25} />
+              <AirContextPm25Metric
+                value={measurement?.[context.zone].pm25}
+                thresholds={pm25Thresholds}
+              />
               {context.zone === 'indoor' ? (
                 <AirContextMetric
                   icon="window"
@@ -1058,6 +1099,190 @@ function SettingsFact({
   )
 }
 
+type SettingsDraft = {
+  automationEnabled: boolean
+  autoWindowEnabled: boolean
+  manualOverrideMinutes: number
+  autoVentilationMinimumMinutes: number
+  co2NormalThreshold: number
+  co2CriticalThreshold: number
+  pm25GoodLimit: number
+  pm25ElevatedLimit: number
+  alertsEnabled: boolean
+}
+
+const defaultSettingsDraft: SettingsDraft = {
+  automationEnabled: true,
+  autoWindowEnabled: true,
+  manualOverrideMinutes: 30,
+  autoVentilationMinimumMinutes: 5,
+  co2NormalThreshold: 800,
+  co2CriticalThreshold: 1000,
+  pm25GoodLimit: 15,
+  pm25ElevatedLimit: 35,
+  alertsEnabled: true,
+}
+
+function settingsToDraft(settings: ClientNodeSettings | null): SettingsDraft {
+  if (!settings) {
+    return { ...defaultSettingsDraft }
+  }
+  return {
+    automationEnabled: settings.automation_enabled,
+    autoWindowEnabled: settings.auto_window_enabled,
+    manualOverrideMinutes: settings.manual_override_minutes,
+    autoVentilationMinimumMinutes: settings.auto_ventilation_minimum_minutes,
+    co2NormalThreshold: settings.co2_normal_threshold,
+    co2CriticalThreshold: settings.co2_critical_threshold,
+    pm25GoodLimit: settings.pm25_good_limit,
+    pm25ElevatedLimit: settings.pm25_elevated_limit,
+    alertsEnabled: settings.alerts_enabled,
+  }
+}
+
+function settingsDraftToPatch(draft: SettingsDraft): ClientNodeSettingsPatch {
+  return {
+    automation_enabled: draft.automationEnabled,
+    auto_window_enabled: draft.autoWindowEnabled,
+    manual_override_minutes: draft.manualOverrideMinutes,
+    auto_ventilation_minimum_minutes: draft.autoVentilationMinimumMinutes,
+    co2_normal_threshold: draft.co2NormalThreshold,
+    co2_critical_threshold: draft.co2CriticalThreshold,
+    pm25_good_limit: draft.pm25GoodLimit,
+    pm25_elevated_limit: draft.pm25ElevatedLimit,
+    alerts_enabled: draft.alertsEnabled,
+  }
+}
+
+function settingsDraftEquals(left: SettingsDraft, right: SettingsDraft): boolean {
+  return (
+    left.automationEnabled === right.automationEnabled &&
+    left.autoWindowEnabled === right.autoWindowEnabled &&
+    left.manualOverrideMinutes === right.manualOverrideMinutes &&
+    left.autoVentilationMinimumMinutes === right.autoVentilationMinimumMinutes &&
+    left.co2NormalThreshold === right.co2NormalThreshold &&
+    left.co2CriticalThreshold === right.co2CriticalThreshold &&
+    left.pm25GoodLimit === right.pm25GoodLimit &&
+    left.pm25ElevatedLimit === right.pm25ElevatedLimit &&
+    left.alertsEnabled === right.alertsEnabled
+  )
+}
+
+function SettingsSwitch({
+  id,
+  label,
+  description,
+  checked,
+  onChange,
+  disabled = false,
+}: {
+  id: string
+  label: string
+  description: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+}) {
+  return (
+    <label className={'settings-option' + (disabled ? ' is-disabled' : '')} htmlFor={id}>
+      <input
+        className="settings-checkbox"
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.currentTarget.checked)}
+        disabled={disabled}
+      />
+      <span className="settings-checkbox-visual" aria-hidden="true" />
+      <span className="settings-option-copy">
+        <strong>{label}</strong>
+        <span>{description}</span>
+      </span>
+    </label>
+  )
+}
+
+function SettingsNumberField({
+  id,
+  label,
+  description,
+  value,
+  unit,
+  min,
+  max,
+  step,
+  error,
+  onChange,
+  disabled = false,
+}: {
+  id: string
+  label: string
+  description: string
+  value: number
+  unit: string
+  min: number
+  max: number
+  step: number
+  error?: string
+  onChange: (value: number) => void
+  disabled?: boolean
+}) {
+  const descriptionId = id + '-description'
+  const errorId = id + '-error'
+  return (
+    <label className="settings-number-field" htmlFor={id}>
+      <span className="settings-field-label">{label}</span>
+      <span className="settings-field-description" id={descriptionId}>{description}</span>
+      <span className="settings-number-input-wrap">
+        <input
+          className="settings-number-input"
+          id={id}
+          type="number"
+          inputMode="decimal"
+          value={Number.isFinite(value) ? value : ''}
+          min={min}
+          max={max}
+          step={step}
+          onChange={(event) => onChange(event.currentTarget.value === '' ? Number.NaN : event.currentTarget.valueAsNumber)}
+          disabled={disabled}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? descriptionId + ' ' + errorId : descriptionId}
+        />
+        <span className="settings-number-unit">{unit}</span>
+      </span>
+      {error ? <span className="settings-field-error" id={errorId}>{error}</span> : null}
+    </label>
+  )
+}
+
+function SettingsChoiceGroup({
+  value,
+  onChange,
+  disabled = false,
+}: {
+  value: number
+  onChange: (value: number) => void
+  disabled?: boolean
+}) {
+  const choices = [15, 30, 60]
+  return (
+    <div className="settings-choice-group" role="group" aria-label="Длительность ручного режима">
+      {choices.map((choice) => (
+        <button
+          className={'settings-choice' + (value === choice ? ' is-active' : '')}
+          key={choice}
+          type="button"
+          aria-pressed={value === choice}
+          onClick={() => onChange(choice)}
+          disabled={disabled}
+        >
+          {choice} мин
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export function SettingsPanel({
   controls,
   deviceId,
@@ -1069,6 +1294,11 @@ export function SettingsPanel({
   onTabChange,
   onClose,
   closeButtonRef,
+  settings,
+  settingsError,
+  settingsSaving,
+  settingsNotice,
+  onSave,
 }: {
   controls: ClientControlStatus | null
   deviceId: string
@@ -1080,7 +1310,73 @@ export function SettingsPanel({
   onTabChange: (nextTab: SettingsTab) => void
   onClose: () => void
   closeButtonRef: React.RefObject<HTMLButtonElement | null>
+  settings: ClientNodeSettings | null
+  settingsError: string | null
+  settingsSaving: boolean
+  settingsNotice: string | null
+  onSave: (patch: ClientNodeSettingsPatch) => Promise<void>
 }) {
+  const [draft, setDraft] = useState<SettingsDraft>(() => settingsToDraft(settings))
+  const [dirty, setDirty] = useState(false)
+
+  useEffect(() => {
+    setDraft(settingsToDraft(settings))
+    setDirty(false)
+  }, [settings?.updated_at])
+
+  const setDraftValue = <K extends keyof SettingsDraft>(key: K, value: SettingsDraft[K]) => {
+    setDraft((current) => ({ ...current, [key]: value }))
+    setDirty(true)
+  }
+
+  const validationErrors = useMemo(() => {
+    const errors: Record<string, string> = {}
+    if (!Number.isInteger(draft.manualOverrideMinutes) || draft.manualOverrideMinutes < 1 || draft.manualOverrideMinutes > 240) {
+      errors.manualOverrideMinutes = 'От 1 до 240 минут.'
+    }
+    if (!Number.isInteger(draft.autoVentilationMinimumMinutes) || draft.autoVentilationMinimumMinutes < 1 || draft.autoVentilationMinimumMinutes > 120) {
+      errors.autoVentilationMinimumMinutes = 'От 1 до 120 минут.'
+    }
+    if (!Number.isFinite(draft.co2NormalThreshold) || draft.co2NormalThreshold < 250 || draft.co2NormalThreshold > 10000) {
+      errors.co2NormalThreshold = 'От 250 до 10 000 ppm.'
+    }
+    if (!Number.isFinite(draft.co2CriticalThreshold) || draft.co2CriticalThreshold < 250 || draft.co2CriticalThreshold > 10000) {
+      errors.co2CriticalThreshold = 'От 250 до 10 000 ppm.'
+    }
+    if (Number.isFinite(draft.co2NormalThreshold) && Number.isFinite(draft.co2CriticalThreshold) && draft.co2CriticalThreshold <= draft.co2NormalThreshold) {
+      errors.co2CriticalThreshold = 'Должен быть выше комфортного порога CO₂.'
+    }
+    if (!Number.isFinite(draft.pm25GoodLimit) || draft.pm25GoodLimit < 0 || draft.pm25GoodLimit > 1000) {
+      errors.pm25GoodLimit = 'От 0 до 1 000 µg/m³.'
+    }
+    if (!Number.isFinite(draft.pm25ElevatedLimit) || draft.pm25ElevatedLimit < 0 || draft.pm25ElevatedLimit > 1000) {
+      errors.pm25ElevatedLimit = 'От 0 до 1 000 µg/m³.'
+    }
+    if (Number.isFinite(draft.pm25GoodLimit) && Number.isFinite(draft.pm25ElevatedLimit) && draft.pm25ElevatedLimit <= draft.pm25GoodLimit) {
+      errors.pm25ElevatedLimit = 'Должен быть выше нормального порога PM2.5.'
+    }
+    return errors
+  }, [draft])
+
+  const handleReset = () => {
+    setDraft(settingsToDraft(settings))
+    setDirty(false)
+  }
+
+  const handleRestoreRecommended = () => {
+    const recommended = { ...defaultSettingsDraft }
+    setDraft(recommended)
+    setDirty(!settingsDraftEquals(recommended, settingsToDraft(settings)))
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (Object.keys(validationErrors).length > 0 || settingsSaving) {
+      return
+    }
+    await onSave(settingsDraftToPatch(draft))
+  }
+
   const automationLabel = controls
     ? controls.automation.enabled ? 'Включена' : 'Выключена'
     : 'нет данных'
@@ -1111,7 +1407,7 @@ export function SettingsPanel({
           <div>
             <span className="eyebrow">Настройки узла</span>
             <h2 id="settings-title">Настройки</h2>
-            <p>Служебные сведения и состояние автоматики для {deviceId}.</p>
+            <p>Постоянные правила поведения локального узла {deviceId}.</p>
           </div>
           <button
             className="settings-close"
@@ -1127,17 +1423,6 @@ export function SettingsPanel({
 
         <div className="settings-tabs" role="tablist" aria-label="Разделы настроек">
           <button
-            className={'settings-tab ' + (tab === 'technical' ? 'is-active' : '')}
-            id="settings-tab-technical"
-            type="button"
-            role="tab"
-            aria-selected={tab === 'technical'}
-            aria-controls="settings-panel-technical"
-            onClick={() => onTabChange('technical')}
-          >
-            Технические сведения
-          </button>
-          <button
             className={'settings-tab ' + (tab === 'automation' ? 'is-active' : '')}
             id="settings-tab-automation"
             type="button"
@@ -1148,7 +1433,33 @@ export function SettingsPanel({
           >
             Автоматика
           </button>
+          <button
+            className={'settings-tab ' + (tab === 'thresholds' ? 'is-active' : '')}
+            id="settings-tab-thresholds"
+            type="button"
+            role="tab"
+            aria-selected={tab === 'thresholds'}
+            aria-controls="settings-panel-thresholds"
+            onClick={() => onTabChange('thresholds')}
+          >
+            Пороги и сигналы
+          </button>
+          <button
+            className={'settings-tab ' + (tab === 'technical' ? 'is-active' : '')}
+            id="settings-tab-technical"
+            type="button"
+            role="tab"
+            aria-selected={tab === 'technical'}
+            aria-controls="settings-panel-technical"
+            onClick={() => onTabChange('technical')}
+          >
+            Технические сведения
+          </button>
         </div>
+
+        {tab === 'technical' && settingsError ? (
+          <div className="settings-feedback settings-feedback-error" role="alert">{settingsError}</div>
+        ) : null}
 
         {tab === 'technical' ? (
           <div
@@ -1199,54 +1510,207 @@ export function SettingsPanel({
                 value={formatTimestamp(measurement?.timestamp)}
                 note="Время измерения от локального узла."
               />
+              <SettingsFact
+                icon="clock"
+                label="Срок хранения"
+                value={(settings?.retention_hours ?? 24) + ' часа'}
+                note="Старые измерения, прогнозы и рекомендации удаляются автоматически."
+              />
             </dl>
           </div>
         ) : (
           <div
             className="settings-panel"
-            id="settings-panel-automation"
+            id={'settings-panel-' + tab}
             role="tabpanel"
-            aria-labelledby="settings-tab-automation"
+            aria-labelledby={'settings-tab-' + tab}
             tabIndex={0}
           >
             <div className="settings-panel-heading">
               <div>
-                <h3>Автоматика</h3>
-                <p>Текущая политика управления и подтверждение от локального узла.</p>
+                <h3>{tab === 'automation' ? 'Автоматика' : 'Пороги и сигналы'}</h3>
+                <p>{tab === 'automation'
+                  ? 'Постоянные правила, по которым узел принимает решения о проветривании.'
+                  : 'Границы, которые используются в рекомендациях, шкалах и предупреждениях.'}</p>
               </div>
-              <span className={'settings-status settings-status-' + (controls ? 'success' : 'neutral')}>
-                <span className={'status-dot status-dot-' + (controls ? 'success' : 'neutral')} />
-                {automationLabel}
+              <span className={'settings-status settings-status-' + (settings ? 'success' : 'neutral')}>
+                <span className={'status-dot status-dot-' + (settings ? 'success' : 'neutral')} />
+                {settings ? (draft.automationEnabled ? 'Включена' : 'Выключена') : 'Загрузка'}
               </span>
             </div>
-            <dl className="settings-facts">
-              <SettingsFact
-                icon="air"
-                label="Состояние автоматики"
-                value={automationLabel}
-                note={controls?.automation.message ?? 'Состояние автоматики пока не получено.'}
-              />
-              <SettingsFact
-                icon="window"
-                label="Режим окна"
-                value={windowModeLabel}
-                note={overrideLabel}
-              />
-              <SettingsFact
-                icon="clock"
-                label="Очередь команд"
-                value={controls ? String(controls.pending_commands) : 'нет данных'}
-                note={controls?.pending_commands ? 'Локальный узел ещё подтверждает команды.' : 'Неподтверждённых команд нет.'}
-              />
-            </dl>
-            <div className="settings-policy">
-              <h3>Как работает автоматика</h3>
-              <ul>
-                <li>При критическом CO₂ окно открывается автоматически.</li>
-                <li>Вытяжка и приток могут работать одновременно.</li>
-                <li>Ручная команда временно передаёт управление оператору.</li>
-              </ul>
-            </div>
+
+            {settingsError ? <div className="settings-feedback settings-feedback-error" role="alert">{settingsError}</div> : null}
+            {settingsNotice && !dirty ? <div className="settings-feedback" role="status" aria-live="polite">{settingsNotice}</div> : null}
+
+            <form className="settings-form" onSubmit={(event) => void handleSubmit(event)}>
+              {tab === 'automation' ? (
+                <>
+                  <div className="settings-form-section">
+                    <span className="eyebrow">Поведение узла</span>
+                    <SettingsSwitch
+                      id="settings-automation-enabled"
+                      label="Автоматическое управление"
+                      description="Система сама реагирует на текущий и прогнозируемый CO₂."
+                      checked={draft.automationEnabled}
+                      onChange={(checked) => setDraftValue('automationEnabled', checked)}
+                      disabled={!settings || settingsSaving}
+                    />
+                    <SettingsSwitch
+                      id="settings-auto-window-enabled"
+                      label="Автоматически открывать окно"
+                      description="При критическом CO₂; вытяжка и приток при этом получают общую команду."
+                      checked={draft.autoWindowEnabled}
+                      onChange={(checked) => setDraftValue('autoWindowEnabled', checked)}
+                      disabled={!settings || settingsSaving}
+                    />
+                  </div>
+
+                  <div className="settings-form-section">
+                    <span className="eyebrow">Временные правила</span>
+                    <div className="settings-form-row">
+                      <div>
+                        <strong className="settings-form-label">Ручной режим окна</strong>
+                        <span className="settings-field-description">После ручной команды автоматика вернётся сама.</span>
+                      </div>
+                      <SettingsChoiceGroup
+                        value={draft.manualOverrideMinutes}
+                        onChange={(value) => setDraftValue('manualOverrideMinutes', value)}
+                        disabled={!settings || settingsSaving}
+                      />
+                    </div>
+                    <SettingsNumberField
+                      id="settings-auto-ventilation-minimum"
+                      label="Минимальное проветривание"
+                      description="Не выключать автоматический контур раньше этого времени."
+                      value={draft.autoVentilationMinimumMinutes}
+                      unit="мин"
+                      min={1}
+                      max={120}
+                      step={1}
+                      error={validationErrors.autoVentilationMinimumMinutes}
+                      onChange={(value) => setDraftValue('autoVentilationMinimumMinutes', value)}
+                      disabled={!settings || settingsSaving}
+                    />
+                  </div>
+
+                  <div className="settings-rule-preview">
+                    <span className="eyebrow">Логика решения</span>
+                    <strong>CO₂ ≥ {formatValue(draft.co2CriticalThreshold)} ppm</strong>
+                    <span className="settings-rule-arrow">→</span>
+                    <span>{draft.autoWindowEnabled ? 'открыть окно' : 'не открывать окно автоматически'}</span>
+                    <span className="settings-rule-arrow">→</span>
+                    <span>включить вытяжку и приток</span>
+                    <small>После снижения ниже {formatValue(draft.co2NormalThreshold)} ppm контур остановится не раньше чем через {formatValue(draft.autoVentilationMinimumMinutes)} мин.</small>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="settings-form-section">
+                    <span className="eyebrow">CO₂</span>
+                    <div className="settings-field-grid">
+                      <SettingsNumberField
+                        id="settings-co2-normal"
+                        label="Комфортный уровень"
+                        description="Ниже этого значения воздух считается комфортным."
+                        value={draft.co2NormalThreshold}
+                        unit="ppm"
+                        min={250}
+                        max={10000}
+                        step={1}
+                        error={validationErrors.co2NormalThreshold}
+                        onChange={(value) => setDraftValue('co2NormalThreshold', value)}
+                        disabled={!settings || settingsSaving}
+                      />
+                      <SettingsNumberField
+                        id="settings-co2-critical"
+                        label="Критический уровень"
+                        description="На этом уровне автоматика запускает проветривание."
+                        value={draft.co2CriticalThreshold}
+                        unit="ppm"
+                        min={250}
+                        max={10000}
+                        step={1}
+                        error={validationErrors.co2CriticalThreshold}
+                        onChange={(value) => setDraftValue('co2CriticalThreshold', value)}
+                        disabled={!settings || settingsSaving}
+                      />
+                    </div>
+                  </div>
+                  <div className="settings-form-section">
+                    <span className="eyebrow">PM2.5</span>
+                    <div className="settings-field-grid">
+                      <SettingsNumberField
+                        id="settings-pm25-good"
+                        label="Нормальный уровень"
+                        description="До этого значения шкала показывает зелёную зону."
+                        value={draft.pm25GoodLimit}
+                        unit="µg/m³"
+                        min={0}
+                        max={1000}
+                        step={0.1}
+                        error={validationErrors.pm25GoodLimit}
+                        onChange={(value) => setDraftValue('pm25GoodLimit', value)}
+                        disabled={!settings || settingsSaving}
+                      />
+                      <SettingsNumberField
+                        id="settings-pm25-elevated"
+                        label="Повышенный уровень"
+                        description="После этого значения начинается красная зона."
+                        value={draft.pm25ElevatedLimit}
+                        unit="µg/m³"
+                        min={0}
+                        max={1000}
+                        step={0.1}
+                        error={validationErrors.pm25ElevatedLimit}
+                        onChange={(value) => setDraftValue('pm25ElevatedLimit', value)}
+                        disabled={!settings || settingsSaving}
+                      />
+                    </div>
+                  </div>
+                  <div className="settings-form-section">
+                    <span className="eyebrow">Сигналы</span>
+                    <SettingsSwitch
+                      id="settings-alerts-enabled"
+                      label="Показывать предупреждения"
+                      description="Отмечать превышение порогов в панели и в рекомендациях."
+                      checked={draft.alertsEnabled}
+                      onChange={(checked) => setDraftValue('alertsEnabled', checked)}
+                      disabled={!settings || settingsSaving}
+                    />
+                    <button
+                      className="button-secondary settings-recommended-button"
+                      type="button"
+                      onClick={handleRestoreRecommended}
+                      disabled={!settings || settingsSaving}
+                    >
+                      Восстановить рекомендуемые значения
+                    </button>
+                  </div>
+                </>
+              )}
+
+              <div className="settings-form-footer">
+                <span className="settings-form-state" aria-live="polite">
+                  {settingsSaving ? 'Сохраняем…' : dirty ? 'Есть несохранённые изменения' : 'Все изменения сохранены'}
+                </span>
+                <div className="settings-form-actions">
+                  <button className="button-secondary" type="button" onClick={handleReset} disabled={!dirty || settingsSaving}>
+                    Отменить
+                  </button>
+                  <button className="button-primary" type="submit" disabled={!settings || !dirty || settingsSaving || Object.keys(validationErrors).length > 0}>
+                    {settingsSaving ? 'Сохранение…' : 'Сохранить'}
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            {tab === 'automation' ? (
+              <div className="settings-current-state">
+                <span className="eyebrow">Сейчас на узле</span>
+                <span>{windowModeLabel} · {overrideLabel}</span>
+                <span>{controls ? 'неподтверждённых команд: ' + controls.pending_commands : 'состояние узла пока не получено'}</span>
+              </div>
+            ) : null}
           </div>
         )}
       </section>
@@ -1264,7 +1728,11 @@ export default function AirDashboard() {
   const [activeSection, setActiveSection] = useState<DashboardSectionId>('overview')
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [settingsTab, setSettingsTab] = useState<SettingsTab>('technical')
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('automation')
+  const [nodeSettings, setNodeSettings] = useState<ClientNodeSettings | null>(null)
+  const [settingsError, setSettingsError] = useState<string | null>(null)
+  const [settingsSaving, setSettingsSaving] = useState(false)
+  const [settingsNotice, setSettingsNotice] = useState<string | null>(null)
   const [controls, setControls] = useState<ClientControlStatus | null>(null)
   const [controlError, setControlError] = useState<string | null>(null)
   const [activeCommand, setActiveCommand] = useState<string | null>(null)
@@ -1318,9 +1786,10 @@ export default function AirDashboard() {
     const from = new Date(to.getTime() - rangeMinutes[range] * 60 * 1000)
     setLoading(true)
     try {
-      const [latestResult, historyResult] = await Promise.allSettled([
+      const [latestResult, historyResult, settingsResult] = await Promise.allSettled([
         getLatestDashboard(signal),
         getHistory(from, to, 5000, signal),
+        getNodeSettings(undefined, signal),
       ])
       if (!isLatestLoad()) {
         return
@@ -1333,6 +1802,16 @@ export default function AirDashboard() {
       }
       setDashboard(latestResult.value)
       setHistory(historyResult.value.data)
+      if (settingsResult.status === 'fulfilled') {
+        setNodeSettings(settingsResult.value)
+        setSettingsError(null)
+      } else if (!(settingsResult.reason instanceof Error && settingsResult.reason.name === 'AbortError')) {
+        setSettingsError(
+          settingsResult.reason instanceof ClientApiError
+            ? settingsResult.reason.message
+            : 'Не удалось загрузить настройки узла',
+        )
+      }
       try {
         const controlStatus = await getControlStatus()
         if (!isLatestLoad()) {
@@ -1373,6 +1852,26 @@ export default function AirDashboard() {
       }
     }
   }, [range])
+
+  const saveNodeSettings = useCallback(async (patch: ClientNodeSettingsPatch) => {
+    setSettingsSaving(true)
+    setSettingsError(null)
+    setSettingsNotice(null)
+    try {
+      const saved = await updateNodeSettings(patch, nodeSettings?.device_id ?? controls?.device_id)
+      setNodeSettings(saved)
+      setSettingsNotice('Настройки сохранены и применены к локальному узлу.')
+      void loadData()
+    } catch (saveError) {
+      setSettingsError(
+        saveError instanceof ClientApiError
+          ? saveError.message
+          : 'Не удалось сохранить настройки узла',
+      )
+    } finally {
+      setSettingsSaving(false)
+    }
+  }, [controls?.device_id, loadData, nodeSettings?.device_id])
 
   const executeControl = useCallback(
     async (target: ClientControlTarget, action: ClientControlAction) => {
@@ -1677,14 +2176,37 @@ export default function AirDashboard() {
   const prediction: ClientPrediction | null = dashboard?.prediction ?? null
   const recommendation: ClientRecommendation | null = dashboard?.recommendation ?? null
   const currentCo2 = measurement?.indoor.co2 ?? null
+  const activeCo2Thresholds = useMemo(
+    () => ({
+      normal: nodeSettings?.co2_normal_threshold ?? 800,
+      critical: nodeSettings?.co2_critical_threshold ?? 1000,
+    }),
+    [nodeSettings],
+  )
+  const activePm25Thresholds = useMemo(
+    () => ({
+      good: nodeSettings?.pm25_good_limit ?? PM25_GOOD_LIMIT,
+      elevated: nodeSettings?.pm25_elevated_limit ?? PM25_ELEVATED_LIMIT,
+    }),
+    [nodeSettings],
+  )
+  const activeCo2ChartThresholds = useMemo(
+    () => getCo2Thresholds(activeCo2Thresholds.normal, activeCo2Thresholds.critical),
+    [activeCo2Thresholds],
+  )
+  const co2ScaleMin = Math.min(400, activeCo2Thresholds.normal)
+  const co2ScaleMax = Math.max(2000, Math.ceil(activeCo2Thresholds.critical * 1.5 / 100) * 100)
+  const co2ScaleRange = Math.max(1, co2ScaleMax - co2ScaleMin)
+  const co2NormalPosition = Math.min(100, Math.max(0, ((activeCo2Thresholds.normal - co2ScaleMin) / co2ScaleRange) * 100))
+  const co2CriticalPosition = Math.min(100, Math.max(co2NormalPosition, ((activeCo2Thresholds.critical - co2ScaleMin) / co2ScaleRange) * 100))
   const change5 = useMemo(() => getCo2Change(history, 5), [history])
   const change10 = useMemo(() => getCo2Change(history, 10), [history])
   const markerPosition = useMemo(() => {
     if (currentCo2 === null) {
       return 8
     }
-    return Math.min(97, Math.max(3, ((currentCo2 - 400) / 1600) * 100))
-  }, [currentCo2])
+    return Math.min(97, Math.max(3, ((currentCo2 - co2ScaleMin) / co2ScaleRange) * 100))
+  }, [co2ScaleMin, co2ScaleRange, currentCo2])
 
   const co2Series = history.map((item) => ({
     timestamp: item.timestamp,
@@ -1873,9 +2395,9 @@ export default function AirDashboard() {
               </div>
               <div className="current-air-tools">
                 <div className="current-air-status-row">
-                  <span className={'current-air-state current-air-state-' + co2BadgeClass(currentCo2).replace('badge-', '')}>
-                    <span className={'status-dot status-dot-' + (currentCo2 === null ? 'neutral' : currentCo2 >= 1000 ? 'error' : currentCo2 >= 800 ? 'warning' : 'success')} />
-                    {co2Label(currentCo2)}
+                  <span className={'current-air-state current-air-state-' + co2BadgeClass(currentCo2, activeCo2Thresholds).replace('badge-', '')}>
+                    <span className={'status-dot status-dot-' + (currentCo2 === null ? 'neutral' : currentCo2 >= activeCo2Thresholds.critical ? 'error' : currentCo2 >= activeCo2Thresholds.normal ? 'warning' : 'success')} />
+                    {co2Label(currentCo2, activeCo2Thresholds)}
                   </span>
                   <span className="current-air-updated" role="status" aria-live="polite">
                     <span className={'status-dot status-dot-' + systemTone} />
@@ -1921,14 +2443,19 @@ export default function AirDashboard() {
               </div>
             </div>
 
-            <div className="co2-meter" aria-label="Шкала уровня CO2">
+            <div className="co2-meter" aria-label={'Шкала уровня CO₂ от ' + formatValue(co2ScaleMin) + ' до ' + formatValue(co2ScaleMax) + ' ppm'}>
               <div className="co2-meter-segments">
-                <span className="meter-normal" />
-                <span className="meter-attention" />
-                <span className="meter-risk" />
+                <span className="meter-normal" style={{ width: co2NormalPosition + '%' }} />
+                <span className="meter-attention" style={{ width: co2CriticalPosition - co2NormalPosition + '%' }} />
+                <span className="meter-risk" style={{ width: 100 - co2CriticalPosition + '%' }} />
               </div>
               <span className="co2-meter-marker" style={{ left: markerPosition + '%' }} />
-              <div className="co2-meter-labels"><span>400</span><span>800</span><span>1000</span><span>2000+ ppm</span></div>
+              <div className="co2-meter-labels">
+                <span style={{ left: '0%' }}>{formatValue(co2ScaleMin)}</span>
+                <span style={{ left: co2NormalPosition + '%' }}>{formatValue(activeCo2Thresholds.normal)}</span>
+                <span style={{ left: co2CriticalPosition + '%' }}>{formatValue(activeCo2Thresholds.critical)}</span>
+                <span style={{ left: '100%' }}>{formatValue(co2ScaleMax)}+ ppm</span>
+              </div>
             </div>
 
             <div className={'action-strip action-strip-' + recommendationTone(recommendation)}>
@@ -2115,6 +2642,7 @@ export default function AirDashboard() {
           <AirContextCards
             measurement={measurement}
             windowOpen={currentWindowOpen}
+            pm25Thresholds={activePm25Thresholds}
           />
           <AirComparison measurement={measurement} />
         </section>
@@ -2147,7 +2675,7 @@ export default function AirDashboard() {
                 data={co2Series}
                 unit="ppm"
                 ariaLabel="График изменения концентрации CO2"
-                thresholds={co2Thresholds}
+                thresholds={activeCo2ChartThresholds}
                 rangeKey={range}
               />
             </ChartCard>
@@ -2175,6 +2703,11 @@ export default function AirDashboard() {
           onTabChange={setSettingsTab}
           onClose={closeSettings}
           closeButtonRef={settingsCloseButtonRef}
+          settings={nodeSettings}
+          settingsError={settingsError}
+          settingsSaving={settingsSaving}
+          settingsNotice={settingsNotice}
+          onSave={saveNodeSettings}
         />
       ) : null}
     </div>

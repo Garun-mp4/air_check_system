@@ -18,6 +18,8 @@ import {
 } from './ml-client'
 import { evaluateRecommendation } from './recommendation'
 import type { Repository } from './repository'
+import { getNodeSettingsDefaults } from './settings'
+import { ValidationError } from './validation'
 import type {
   ControlCommand,
   ControlCommandResult,
@@ -28,6 +30,8 @@ import type {
   IngestResult,
   Measurement,
   MeasurementInput,
+  NodeSettings,
+  NodeSettingsPatch,
   Prediction,
   Recommendation,
   PredictionStatus,
@@ -43,6 +47,7 @@ export class AirQualityService {
   ) {}
 
   async ingest(input: MeasurementInput): Promise<IngestResult> {
+    const settings = await this.nodeSettings()
     const measurement = await this.repository.createMeasurement(input)
     let prediction: Prediction | null = null
     let predictionStatus: PredictionStatus = 'insufficient_history'
@@ -81,8 +86,11 @@ export class AirQualityService {
         measurement,
         prediction,
         {
-          normal: this.config.co2NormalThreshold,
-          critical: this.config.co2CriticalThreshold,
+          normal: settings.co2NormalThreshold,
+          critical: settings.co2CriticalThreshold,
+          pm25Good: settings.pm25GoodLimit,
+          pm25Elevated: settings.pm25ElevatedLimit,
+          alertsEnabled: settings.alertsEnabled,
         },
       ),
     )
@@ -137,6 +145,72 @@ export class AirQualityService {
 
   async controlsStatus(deviceId = this.config.deviceId): Promise<ControlStatus> {
     return this.controlService.status(deviceId)
+  }
+
+  async nodeSettings(deviceId = this.config.deviceId): Promise<NodeSettings> {
+    return this.repository.getNodeSettings(deviceId, getNodeSettingsDefaults(this.config))
+  }
+
+  async updateNodeSettings(
+    deviceId: string,
+    patch: NodeSettingsPatch,
+  ): Promise<NodeSettings> {
+    const current = await this.nodeSettings(deviceId)
+    const next = { ...current, ...patch }
+    const numericRules: Array<[
+      keyof NodeSettings,
+      string,
+      number,
+      number,
+      boolean,
+    ]> = [
+      ['manualOverrideMinutes', 'manual_override_minutes', 1, 240, true],
+      ['autoVentilationMinimumMinutes', 'auto_ventilation_minimum_minutes', 1, 120, true],
+      ['co2NormalThreshold', 'co2_normal_threshold', 250, 10000, false],
+      ['co2CriticalThreshold', 'co2_critical_threshold', 250, 10000, false],
+      ['pm25GoodLimit', 'pm25_good_limit', 0, 1000, false],
+      ['pm25ElevatedLimit', 'pm25_elevated_limit', 0, 1000, false],
+    ]
+    for (const [key, field, minimum, maximum, integer] of numericRules) {
+      const value = next[key]
+      if (
+        typeof value !== 'number' ||
+        !Number.isFinite(value) ||
+        value < minimum ||
+        value > maximum ||
+        (integer && !Number.isInteger(value))
+      ) {
+        throw new ValidationError([
+          {
+            field,
+            message: integer
+              ? 'должно быть целым числом в диапазоне ' + minimum + '–' + maximum
+              : 'должно быть в диапазоне ' + minimum + '–' + maximum,
+          },
+        ])
+      }
+    }
+    if (next.co2CriticalThreshold <= next.co2NormalThreshold) {
+      throw new ValidationError([
+        {
+          field: 'co2_critical_threshold',
+          message: 'должен быть выше комфортного порога CO₂',
+        },
+      ])
+    }
+    if (next.pm25ElevatedLimit <= next.pm25GoodLimit) {
+      throw new ValidationError([
+        {
+          field: 'pm25_elevated_limit',
+          message: 'должен быть выше нормального порога PM2.5',
+        },
+      ])
+    }
+    return this.repository.updateNodeSettings(
+      deviceId,
+      patch,
+      getNodeSettingsDefaults(this.config),
+    )
   }
 
   async issueControl(request: ControlRequest): Promise<ControlCommandResult> {

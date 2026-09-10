@@ -62,10 +62,17 @@ export const defaultChartPalette: ChartPalette = {
   fontCode: 'JetBrains Mono, monospace',
 }
 
-export const co2Thresholds: ChartThreshold[] = [
-  { value: 800, label: '800 · внимание', color: defaultChartPalette.warning },
-  { value: 1000, label: '1000 · критично', color: defaultChartPalette.error },
-]
+export function getCo2Thresholds(
+  normal = 800,
+  critical = 1000,
+): ChartThreshold[] {
+  return [
+    { value: normal, label: normal + ' · внимание', color: defaultChartPalette.warning },
+    { value: critical, label: critical + ' · критично', color: defaultChartPalette.error },
+  ]
+}
+
+export const co2Thresholds = getCo2Thresholds()
 
 interface ChartProps {
   data: SeriesPoint[]

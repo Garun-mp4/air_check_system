@@ -4,6 +4,7 @@ import type {
   DeviceStateReport,
   HistoryQuery,
   MeasurementInput,
+  NodeSettingsPatch,
   SensorValues,
   VentilationAction,
 } from './types'
@@ -208,6 +209,159 @@ export function parseDeviceId(
     ])
   }
   return candidate
+}
+
+function optionalBooleanField(
+  object: Record<string, unknown>,
+  inputKey: string,
+  patchKey: 'automationEnabled' | 'autoWindowEnabled' | 'alertsEnabled',
+  field: string,
+  patch: NodeSettingsPatch,
+  issues: ValidationIssue[],
+): void {
+  if (object[inputKey] === undefined) {
+    return
+  }
+  if (typeof object[inputKey] !== 'boolean') {
+    issues.push({ field, message: 'должно быть boolean' })
+    return
+  }
+  patch[patchKey] = object[inputKey]
+}
+
+type NumericNodeSettingsKey =
+  | 'manualOverrideMinutes'
+  | 'autoVentilationMinimumMinutes'
+  | 'co2NormalThreshold'
+  | 'co2CriticalThreshold'
+  | 'pm25GoodLimit'
+  | 'pm25ElevatedLimit'
+
+function optionalNumberField<K extends NumericNodeSettingsKey>(
+  object: Record<string, unknown>,
+  inputKey: string,
+  patchKey: K,
+  field: string,
+  minimum: number,
+  maximum: number,
+  patch: NodeSettingsPatch,
+  issues: ValidationIssue[],
+  integer = false,
+): void {
+  if (object[inputKey] === undefined) {
+    return
+  }
+  const value = object[inputKey]
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    issues.push({ field, message: 'должно быть конечным числом' })
+    return
+  }
+  if (value < minimum || value > maximum || (integer && !Number.isInteger(value))) {
+    issues.push({
+      field,
+      message: integer
+        ? 'должно быть целым числом в диапазоне ' + minimum + '–' + maximum
+        : 'должно быть в диапазоне ' + minimum + '–' + maximum,
+    })
+    return
+  }
+  patch[patchKey] = value
+}
+
+export interface ParsedNodeSettingsPatch {
+  deviceId: string
+  patch: NodeSettingsPatch
+}
+
+export function parseNodeSettingsPatch(
+  payload: unknown,
+  fallbackDeviceId: string,
+): ParsedNodeSettingsPatch {
+  const issues: ValidationIssue[] = []
+  if (!isRecord(payload)) {
+    throw new ValidationError([{ field: 'body', message: 'требуется JSON-объект' }])
+  }
+
+  let deviceId = fallbackDeviceId
+  if (payload.device_id !== undefined) {
+    if (typeof payload.device_id !== 'string') {
+      issues.push({ field: 'device_id', message: 'должен быть строкой' })
+    } else {
+      try {
+        deviceId = parseDeviceId(payload.device_id, fallbackDeviceId)
+      } catch (error) {
+        if (error instanceof ValidationError) {
+          issues.push(...error.issues)
+        }
+      }
+    }
+  }
+
+  const patch: NodeSettingsPatch = {}
+  optionalBooleanField(payload, 'automation_enabled', 'automationEnabled', 'automation_enabled', patch, issues)
+  optionalBooleanField(payload, 'auto_window_enabled', 'autoWindowEnabled', 'auto_window_enabled', patch, issues)
+  optionalBooleanField(payload, 'alerts_enabled', 'alertsEnabled', 'alerts_enabled', patch, issues)
+  optionalNumberField(
+    payload,
+    'manual_override_minutes',
+    'manualOverrideMinutes',
+    'manual_override_minutes',
+    1,
+    240,
+    patch,
+    issues,
+    true,
+  )
+  optionalNumberField(
+    payload,
+    'auto_ventilation_minimum_minutes',
+    'autoVentilationMinimumMinutes',
+    'auto_ventilation_minimum_minutes',
+    1,
+    120,
+    patch,
+    issues,
+    true,
+  )
+  optionalNumberField(
+    payload,
+    'co2_normal_threshold',
+    'co2NormalThreshold',
+    'co2_normal_threshold',
+    250,
+    10000,
+    patch,
+    issues,
+  )
+  optionalNumberField(
+    payload,
+    'co2_critical_threshold',
+    'co2CriticalThreshold',
+    'co2_critical_threshold',
+    250,
+    10000,
+    patch,
+    issues,
+  )
+  optionalNumberField(payload, 'pm25_good_limit', 'pm25GoodLimit', 'pm25_good_limit', 0, 1000, patch, issues)
+  optionalNumberField(
+    payload,
+    'pm25_elevated_limit',
+    'pm25ElevatedLimit',
+    'pm25_elevated_limit',
+    0,
+    1000,
+    patch,
+    issues,
+  )
+
+  if (Object.keys(patch).length === 0 && issues.length === 0) {
+    issues.push({ field: 'body', message: 'нужно указать хотя бы одну настройку' })
+  }
+  if (issues.length > 0) {
+    throw new ValidationError(issues)
+  }
+  return { deviceId, patch }
 }
 
 export interface ParsedControlCommand {

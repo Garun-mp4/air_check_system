@@ -7,6 +7,9 @@ import type {
 export interface RecommendationThresholds {
   normal: number
   critical: number
+  pm25Good?: number
+  pm25Elevated?: number
+  alertsEnabled?: boolean
 }
 
 function predictionValue(prediction: Prediction | number | null): number | null {
@@ -23,6 +26,9 @@ export function evaluateRecommendation(
 ): RecommendationDraft {
   const currentCo2 = measurement.indoor.co2
   const predictedCo2 = predictionValue(prediction)
+  const pm25Good = thresholds.pm25Good ?? 15
+  const pm25Elevated = thresholds.pm25Elevated ?? 35
+  const alertsEnabled = thresholds.alertsEnabled ?? true
 
   if (currentCo2 >= thresholds.critical) {
     if (measurement.windowOpen) {
@@ -92,6 +98,30 @@ export function evaluateRecommendation(
       durationMinutes: 5,
       reason:
         'Прогноз на 15 минут выше комфортного порога, хотя текущий уровень ещё в норме.',
+    }
+  }
+
+  if (alertsEnabled && measurement.indoor.pm25 >= pm25Elevated) {
+    return {
+      type: 'monitor',
+      message: 'Проверьте фильтр и проветривание',
+      durationMinutes: null,
+      reason:
+        'PM2.5 выше заданной границы ' +
+        pm25Elevated +
+        ' µg/m³. Проверьте состояние фильтра притока.',
+    }
+  }
+
+  if (alertsEnabled && measurement.indoor.pm25 >= pm25Good) {
+    return {
+      type: 'monitor',
+      message: 'Следите за уровнем PM2.5',
+      durationMinutes: null,
+      reason:
+        'PM2.5 выше нормальной границы ' +
+        pm25Good +
+        ' µg/m³, но ещё ниже повышенной.',
     }
   }
 
