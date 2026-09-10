@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 import {
   ClientApiError,
@@ -707,6 +708,7 @@ function ChartCard({
   const titleId = useId()
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
   const expandButtonRef = useRef<HTMLButtonElement | null>(null)
+  const dialogRef = useRef<HTMLElement | null>(null)
   const previouslyFocusedRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -717,43 +719,69 @@ function ChartCard({
     previouslyFocusedRef.current = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null
+    document.documentElement.classList.add('is-chart-expanded')
     document.body.classList.add('is-chart-expanded')
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
         setExpanded(false)
+        return
+      }
+      if (event.key !== 'Tab') {
+        return
+      }
+      const dialog = dialogRef.current
+      if (!dialog) {
+        return
+      }
+      const focusableElements = Array.from(dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ))
+      if (focusableElements.length === 0) {
+        event.preventDefault()
+        dialog.focus()
+        return
+      }
+      const firstFocusable = focusableElements[0]
+      const lastFocusable = focusableElements[focusableElements.length - 1]
+      if (event.shiftKey && (document.activeElement === firstFocusable || !dialog.contains(document.activeElement))) {
+        event.preventDefault()
+        lastFocusable?.focus()
+      } else if (!event.shiftKey && (document.activeElement === lastFocusable || !dialog.contains(document.activeElement))) {
+        event.preventDefault()
+        firstFocusable?.focus()
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
-    requestAnimationFrame(() => closeButtonRef.current?.focus())
+    const focusFrame = requestAnimationFrame(() => closeButtonRef.current?.focus({ preventScroll: true }))
 
     return () => {
+      cancelAnimationFrame(focusFrame)
       document.removeEventListener('keydown', handleKeyDown)
+      document.documentElement.classList.remove('is-chart-expanded')
       document.body.classList.remove('is-chart-expanded')
-      previouslyFocusedRef.current?.focus()
+      const focusTarget = previouslyFocusedRef.current
       previouslyFocusedRef.current = null
+      requestAnimationFrame(() => {
+        const nextFocusTarget = expandButtonRef.current ?? focusTarget
+        if (nextFocusTarget?.isConnected) {
+          nextFocusTarget.focus({ preventScroll: true })
+        }
+      })
     }
   }, [expanded])
 
-  return (
-    <>
-      {expanded ? (
-        <button
-          className="chart-modal-backdrop"
-          type="button"
-          tabIndex={-1}
-          aria-label={'Закрыть график «' + title + '»'}
-          onClick={() => setExpanded(false)}
-        />
-      ) : null}
-      <article
-        className={'dashboard-card chart-card' + (expanded ? ' is-expanded' : '')}
-        role={expanded ? 'dialog' : undefined}
-        aria-modal={expanded ? true : undefined}
-        aria-labelledby={titleId}
-      >
+  const chartCard = (
+    <article
+      className={'dashboard-card chart-card' + (expanded ? ' is-expanded' : '')}
+      ref={dialogRef}
+      role={expanded ? 'dialog' : undefined}
+      aria-modal={expanded ? true : undefined}
+      aria-labelledby={titleId}
+      tabIndex={expanded ? -1 : undefined}
+    >
       <div className="chart-card-header">
         <div>
           <span className="chart-card-context">{caption}</span>
@@ -777,8 +805,25 @@ function ChartCard({
         </div>
       </div>
       <div className="chart-shell">{children}</div>
-      </article>
-    </>
+    </article>
+  )
+
+  if (!expanded || typeof document === 'undefined') {
+    return chartCard
+  }
+
+  return createPortal(
+    <>
+      <button
+        className="chart-modal-backdrop"
+        type="button"
+        tabIndex={-1}
+        aria-label={'Закрыть график «' + title + '»'}
+        onClick={() => setExpanded(false)}
+      />
+      {chartCard}
+    </>,
+    document.body,
   )
 }
 

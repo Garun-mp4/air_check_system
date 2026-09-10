@@ -234,6 +234,20 @@ function viewportPercent(viewport: ChartViewport, dataLength: number): { start: 
   }
 }
 
+function viewportsEqual(first: ChartViewport, second: ChartViewport): boolean {
+  return Math.abs(first.start - second.start) < 0.01 && Math.abs(first.end - second.end) < 0.01
+}
+
+export function createDataZoomAction(viewport: ChartViewport, dataLength: number) {
+  const range = viewportPercent(clampViewport(viewport, dataLength), dataLength)
+  return {
+    type: 'dataZoom' as const,
+    start: range.start,
+    end: range.end,
+    animation: { duration: 0 },
+  }
+}
+
 function toFiniteNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
@@ -307,6 +321,7 @@ export function buildTimeSeriesOption(
   thresholds: ChartThreshold[] = [],
   palette: ChartPalette = defaultChartPalette,
   viewport: ChartViewport = createFullViewport(inputData.length),
+  animate = true,
 ): EChartsOption {
   const data = validData(inputData)
   const appliedViewport = clampViewport(viewport, data.length)
@@ -333,9 +348,9 @@ export function buildTimeSeriesOption(
   }))
 
   return {
-    animation: true,
-    animationDuration: 220,
-    animationDurationUpdate: 160,
+    animation: animate,
+    animationDuration: animate ? 220 : 0,
+    animationDurationUpdate: animate ? 160 : 0,
     aria: { enabled: true },
     backgroundColor: 'transparent',
     grid: {
@@ -365,6 +380,8 @@ export function buildTimeSeriesOption(
           width: 1,
         },
       },
+      transitionDuration: 0,
+      hideDelay: 0,
       formatter: (params) => {
         const items = Array.isArray(params) ? params : [params]
         const item = items[0] as { value?: unknown; axisValue?: string | number } | undefined
@@ -425,11 +442,12 @@ export function buildTimeSeriesOption(
         filterMode: 'none',
         start: zoomRange.start,
         end: zoomRange.end,
-        zoomOnMouseWheel: 'ctrl',
-        moveOnMouseMove: true,
+        disabled: true,
+        zoomOnMouseWheel: false,
+        moveOnMouseMove: false,
         moveOnMouseWheel: false,
-        preventDefaultMouseMove: true,
-        throttle: 40,
+        preventDefaultMouseMove: false,
+        throttle: 16,
       },
       {
         id: 'range-slider',
@@ -437,7 +455,7 @@ export function buildTimeSeriesOption(
         xAxisIndex: 0,
         filterMode: 'none',
         bottom: 8,
-        height: 18,
+        height: 22,
         showDetail: false,
         showDataShadow: false,
         brushSelect: false,
@@ -473,12 +491,12 @@ export function buildTimeSeriesOption(
         color: palette.ink,
       },
       emphasis: {
-        focus: 'series',
-        scale: true,
+        focus: 'none',
+        scale: false,
         itemStyle: {
-          color: palette.canvas,
+          color: palette.ink,
           borderColor: palette.ink,
-          borderWidth: 2,
+          borderWidth: 1,
         },
       },
       markLine: thresholdLines.length > 0 ? {
@@ -575,17 +593,24 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
   const dataZoomBoundRef = useRef(false)
   const hasAppliedDataRef = useRef(false)
   const previousRangeKeyRef = useRef(rangeKey)
+  const previousDataLengthRef = useRef(0)
   const dataRef = useRef<SeriesPoint[]>(inputData)
+  const viewportRef = useRef<ChartViewport>(createFullViewport(inputData.length))
+  const dispatchViewportRef = useRef<(nextViewport: ChartViewport) => void>(() => undefined)
   const [viewport, setViewport] = useState<ChartViewport>(() => createFullViewport(inputData.length))
   const data = useMemo(() => validData(inputData), [inputData])
-  const dataKey = data.length === 0
+  const dataKey = useMemo(() => data.length === 0
     ? 'empty'
-    : data.map((point) => point.timestamp + ':' + point.value).join('|')
-  const thresholdKey = thresholds.map((threshold) => threshold.value + ':' + threshold.label + ':' + threshold.color).join('|')
+    : data.map((point) => point.timestamp + ':' + point.value).join('|'), [data])
+  const thresholdKey = useMemo(
+    () => thresholds.map((threshold) => threshold.value + ':' + threshold.label + ':' + threshold.color).join('|'),
+    [thresholds],
+  )
   const hasData = data.length > 0
   dataRef.current = data
 
   const currentViewport = clampViewport(viewport, data.length)
+  viewportRef.current = currentViewport
 
   useEffect(() => {
     const chartMount = chartMountRef.current
@@ -595,19 +620,20 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
 
     const chart = init(chartMount, undefined, {
       renderer: 'canvas',
-      useDirtyRect: true,
+      useDirtyRect: false,
     })
     chartRef.current = chart
 
     const handleDataZoom = (event: unknown) => {
       const nextViewport = viewportFromDataZoomEvent(event, dataRef.current)
       if (nextViewport) {
-        setViewport(nextViewport)
+        viewportRef.current = nextViewport
+        setViewport((current) => viewportsEqual(current, nextViewport) ? current : nextViewport)
       }
     }
     dataZoomHandlerRef.current = handleDataZoom
 
-    const observer = new ResizeObserver(() => chart.resize())
+    const observer = new ResizeObserver(() => chart.resize({ animation: { duration: 0 }, silent: true }))
     observer.observe(chartMount)
 
     return () => {
@@ -630,12 +656,30 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
       return
     }
 
+    const previousDataLength = previousDataLengthRef.current
+    const previousViewport = clampViewport(viewportRef.current, previousDataLength)
     const shouldResetViewport = !hasAppliedDataRef.current || previousRangeKeyRef.current !== rangeKey
-    const nextViewport = shouldResetViewport
-      ? createFullViewport(data.length)
-      : clampViewport(currentViewport, data.length)
+    const dataGrew = data.length > previousDataLength
+    const wasFullRange = previousDataLength <= 1
+      || Math.round(previousViewport.end - previousViewport.start) >= previousDataLength - 1
+    const wasAtEnd = previousDataLength > 0 && previousViewport.end >= previousDataLength - 1.5
+    let nextViewport: ChartViewport
+    if (shouldResetViewport || wasFullRange) {
+      nextViewport = createFullViewport(data.length)
+    } else if (dataGrew && wasAtEnd) {
+      const addedPoints = data.length - previousDataLength
+      nextViewport = clampViewport({
+        start: previousViewport.start + addedPoints,
+        end: previousViewport.end + addedPoints,
+      }, data.length)
+    } else {
+      nextViewport = clampViewport(viewportRef.current, data.length)
+    }
     const palette = readChartPalette(surface)
-    chart.setOption(buildTimeSeriesOption(data, unit, thresholds, palette, nextViewport), { notMerge: true })
+    chart.setOption(
+      buildTimeSeriesOption(data, unit, thresholds, palette, nextViewport, !hasAppliedDataRef.current || previousRangeKeyRef.current !== rangeKey),
+      { notMerge: true, silent: true },
+    )
     if (!dataZoomBoundRef.current && dataZoomHandler) {
       chart.on('datazoom', dataZoomHandler)
       dataZoomBoundRef.current = true
@@ -643,28 +687,456 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
 
     hasAppliedDataRef.current = true
     previousRangeKeyRef.current = rangeKey
-    setViewport((current) => shouldResetViewport
-      ? createFullViewport(data.length)
-      : clampViewport(current, data.length))
+    previousDataLengthRef.current = data.length
+    viewportRef.current = nextViewport
+    setViewport((current) => viewportsEqual(current, nextViewport) ? current : nextViewport)
   }, [dataKey, data, unit, thresholdKey, rangeKey])
 
   const dispatchViewport = (nextViewport: ChartViewport) => {
     const next = clampViewport(nextViewport, data.length)
-    setViewport(next)
+    viewportRef.current = next
+    setViewport((current) => viewportsEqual(current, next) ? current : next)
 
     const chart = chartRef.current
     if (!chart || data.length === 0) {
       return
     }
 
-    const startIndex = Math.round(next.start)
-    const endIndex = Math.round(next.end)
-    chart.dispatchAction({
-      type: 'dataZoom',
-      startValue: data[startIndex]?.timestamp,
-      endValue: data[endIndex]?.timestamp,
-    })
+    chart.dispatchAction(createDataZoomAction(next, data.length))
   }
+
+  dispatchViewportRef.current = dispatchViewport
+
+  useEffect(() => {
+    const surface = surfaceRef.current
+    if (!surface || !hasData) {
+      return
+    }
+
+    type InteractionState =
+      | { kind: 'mouse-pending' | 'mouse-pan' | 'mouse-ignored'; startX: number; startY: number; lastX: number; lastY: number }
+      | { kind: 'touch-pending' | 'touch-pan' | 'touch-scroll'; startX: number; startY: number; lastX: number }
+      | { kind: 'touch-pinch'; previousDistance: number }
+      | {
+        kind: 'mouse-slider' | 'touch-slider'
+        startX: number
+        initialViewport: ChartViewport
+        handle: 'start' | 'end' | 'window'
+      }
+
+    let state: InteractionState | null = null
+    let lastTouchAt = 0
+    let pendingViewport: ChartViewport | null = null
+    let animationFrame = 0
+
+    const isSliderArea = (clientY: number, rect: DOMRect): boolean => (
+      clientY >= rect.bottom - 44
+    )
+
+    const getTouchDistance = (first: Touch, second: Touch): number => (
+      Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY)
+    )
+
+    const hideTooltip = () => {
+      chartRef.current?.dispatchAction({ type: 'hideTip' })
+    }
+
+    const setInteracting = (interacting: boolean) => {
+      surface.classList.toggle('is-interacting', interacting)
+    }
+
+    const flushViewport = () => {
+      if (animationFrame) {
+        window.cancelAnimationFrame(animationFrame)
+        animationFrame = 0
+      }
+      const next = pendingViewport
+      pendingViewport = null
+      if (next) {
+        dispatchViewportRef.current(next)
+      }
+    }
+
+    const scheduleViewport = (next: ChartViewport) => {
+      const dataLength = dataRef.current.length
+      pendingViewport = clampViewport(next, dataLength)
+      viewportRef.current = pendingViewport
+      if (animationFrame) {
+        return
+      }
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = 0
+        const scheduled = pendingViewport
+        pendingViewport = null
+        if (scheduled) {
+          dispatchViewportRef.current(scheduled)
+        }
+      })
+    }
+
+    const finishGesture = () => {
+      flushViewport()
+      state = null
+      setInteracting(false)
+    }
+
+    const startPan = () => {
+      hideTooltip()
+      setInteracting(true)
+    }
+
+    const panByPixels = (deltaX: number) => {
+      const rect = surface.getBoundingClientRect()
+      const dataLength = dataRef.current.length
+      const current = viewportRef.current
+      const span = Math.max(1, current.end - current.start)
+      if (rect.width <= 0 || dataLength <= 1) {
+        return
+      }
+      scheduleViewport(panViewport(current, -(deltaX / rect.width) * span, dataLength))
+    }
+
+    const pickSliderHandle = (clientX: number, rect: DOMRect): 'start' | 'end' | 'window' => {
+      const dataLength = dataRef.current.length
+      const maxIndex = Math.max(1, dataLength - 1)
+      const current = clampViewport(viewportRef.current, dataLength)
+      const ratio = rect.width > 0 ? clamp((clientX - rect.left) / rect.width, 0, 1) : 0.5
+      const startRatio = current.start / maxIndex
+      const endRatio = current.end / maxIndex
+      const startDistance = Math.abs(ratio - startRatio)
+      const endDistance = Math.abs(ratio - endRatio)
+      if (startDistance <= 0.08 || endDistance <= 0.08) {
+        return startDistance <= endDistance ? 'start' : 'end'
+      }
+      if (ratio > startRatio && ratio < endRatio) {
+        return 'window'
+      }
+      return startDistance <= endDistance ? 'start' : 'end'
+    }
+
+    const moveSlider = (clientX: number, sliderState: Extract<InteractionState, { kind: 'mouse-slider' | 'touch-slider' }>) => {
+      const dataLength = dataRef.current.length
+      const rect = surface.getBoundingClientRect()
+      const maxIndex = Math.max(1, dataLength - 1)
+      if (rect.width <= 0 || dataLength <= 1) {
+        return
+      }
+      const ratio = clamp((clientX - rect.left) / rect.width, 0, 1)
+      const targetIndex = ratio * maxIndex
+      const current = viewportRef.current
+      const minimumSpan = Math.min(maxIndex, Math.max(1, minVisiblePoints - 1))
+      let next: ChartViewport
+      if (sliderState.handle === 'window') {
+        const initialRatio = clamp((sliderState.startX - rect.left) / rect.width, 0, 1)
+        next = panViewport(sliderState.initialViewport, (ratio - initialRatio) * maxIndex, dataLength)
+      } else if (sliderState.handle === 'start') {
+        next = {
+          start: clamp(targetIndex, 0, current.end - minimumSpan),
+          end: current.end,
+        }
+      } else {
+        next = {
+          start: current.start,
+          end: clamp(targetIndex, current.start + minimumSpan, maxIndex),
+        }
+      }
+      scheduleViewport(next)
+    }
+
+    const handleMouseDown = (event: MouseEvent) => {
+      if (event.button !== 0 || performance.now() - lastTouchAt < 700) {
+        return
+      }
+      const rect = surface.getBoundingClientRect()
+      if (isSliderArea(event.clientY, rect)) {
+        state = {
+          kind: 'mouse-slider',
+          startX: event.clientX,
+          initialViewport: viewportRef.current,
+          handle: pickSliderHandle(event.clientX, rect),
+        }
+        hideTooltip()
+        setInteracting(true)
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+      state = {
+        kind: 'mouse-pending',
+        startX: event.clientX,
+        startY: event.clientY,
+        lastX: event.clientX,
+        lastY: event.clientY,
+      }
+    }
+
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!state) {
+        return
+      }
+      if (state.kind === 'mouse-slider') {
+        event.preventDefault()
+        event.stopPropagation()
+        moveSlider(event.clientX, state)
+        return
+      }
+      if (state.kind !== 'mouse-pending' && state.kind !== 'mouse-pan') {
+        return
+      }
+      const deltaFromStartX = event.clientX - state.startX
+      const deltaFromStartY = event.clientY - state.startY
+      if (state.kind === 'mouse-pending') {
+        if (Math.hypot(deltaFromStartX, deltaFromStartY) < 8) {
+          return
+        }
+        if (Math.abs(deltaFromStartY) > Math.abs(deltaFromStartX) * 1.25) {
+          state = { ...state, kind: 'mouse-ignored' }
+          return
+        }
+        state = { ...state, kind: 'mouse-pan' }
+        startPan()
+      }
+      if (state.kind !== 'mouse-pan') {
+        return
+      }
+      event.preventDefault()
+      event.stopPropagation()
+      panByPixels(event.clientX - state.lastX)
+      state.lastX = event.clientX
+      state.lastY = event.clientY
+    }
+
+    const handleMouseUp = (event: MouseEvent) => {
+      if (state?.kind === 'mouse-pan') {
+        event.preventDefault()
+        event.stopPropagation()
+        finishGesture()
+      } else if (state?.kind === 'mouse-pending' || state?.kind === 'mouse-ignored') {
+        state = null
+      } else if (state?.kind === 'mouse-slider') {
+        event.preventDefault()
+        event.stopPropagation()
+        finishGesture()
+      }
+    }
+
+    const handleTouchStart = (event: TouchEvent) => {
+      lastTouchAt = performance.now()
+      const rect = surface.getBoundingClientRect()
+      if (event.touches.length >= 2) {
+        const first = event.touches[0]
+        const second = event.touches[1]
+        if (!first || !second) {
+          return
+        }
+        if (isSliderArea(first.clientY, rect) || isSliderArea(second.clientY, rect)) {
+          state = {
+            kind: 'touch-slider',
+            startX: first.clientX,
+            initialViewport: viewportRef.current,
+            handle: pickSliderHandle(first.clientX, rect),
+          }
+          hideTooltip()
+          setInteracting(true)
+          event.preventDefault()
+          event.stopPropagation()
+          return
+        }
+        state = { kind: 'touch-pinch', previousDistance: getTouchDistance(first, second) }
+        hideTooltip()
+        setInteracting(true)
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+      const touch = event.touches[0]
+      if (!touch) {
+        return
+      }
+      if (isSliderArea(touch.clientY, rect)) {
+        state = {
+          kind: 'touch-slider',
+          startX: touch.clientX,
+          initialViewport: viewportRef.current,
+          handle: pickSliderHandle(touch.clientX, rect),
+        }
+        hideTooltip()
+        setInteracting(true)
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+      state = {
+        kind: 'touch-pending',
+        startX: touch.clientX,
+        startY: touch.clientY,
+        lastX: touch.clientX,
+      }
+    }
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!state) {
+        return
+      }
+      if (state.kind === 'touch-slider') {
+        const touch = event.touches[0]
+        if (!touch) {
+          return
+        }
+        event.preventDefault()
+        event.stopPropagation()
+        moveSlider(touch.clientX, state)
+        return
+      }
+
+      if (event.touches.length >= 2) {
+        const first = event.touches[0]
+        const second = event.touches[1]
+        if (!first || !second) {
+          return
+        }
+        const distance = getTouchDistance(first, second)
+        if (state.kind !== 'touch-pinch') {
+          state = { kind: 'touch-pinch', previousDistance: distance }
+          hideTooltip()
+          setInteracting(true)
+        }
+        if (state.kind !== 'touch-pinch' || distance <= 0 || state.previousDistance <= 0) {
+          return
+        }
+        const rect = surface.getBoundingClientRect()
+        const centerX = (first.clientX + second.clientX) / 2
+        const anchorRatio = rect.width > 0 ? (centerX - rect.left) / rect.width : 0.5
+        scheduleViewport(zoomViewport(
+          viewportRef.current,
+          anchorRatio,
+          state.previousDistance / distance,
+          dataRef.current.length,
+        ))
+        state.previousDistance = distance
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+
+      if (state.kind === 'touch-pinch') {
+        const remainingTouch = event.touches[0]
+        if (!remainingTouch) {
+          return
+        }
+        state = { kind: 'touch-pan', startX: remainingTouch.clientX, startY: remainingTouch.clientY, lastX: remainingTouch.clientX }
+      }
+
+      const touch = event.touches[0]
+      if (!touch) {
+        return
+      }
+      if (state.kind === 'touch-pending') {
+        const deltaX = touch.clientX - state.startX
+        const deltaY = touch.clientY - state.startY
+        if (Math.hypot(deltaX, deltaY) < 8) {
+          return
+        }
+        if (Math.abs(deltaY) > Math.abs(deltaX) * 1.15) {
+          state = { kind: 'touch-scroll', startX: state.startX, startY: state.startY, lastX: touch.clientX }
+          return
+        }
+        state = { kind: 'touch-pan', startX: state.startX, startY: state.startY, lastX: state.lastX }
+        startPan()
+      }
+      if (state.kind !== 'touch-pan') {
+        return
+      }
+      event.preventDefault()
+      event.stopPropagation()
+      panByPixels(touch.clientX - state.lastX)
+      state.lastX = touch.clientX
+    }
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      lastTouchAt = performance.now()
+      if (state?.kind === 'touch-pinch' && event.touches.length === 1) {
+        const remainingTouch = event.touches[0]
+        if (remainingTouch) {
+          state = { kind: 'touch-pan', startX: remainingTouch.clientX, startY: remainingTouch.clientY, lastX: remainingTouch.clientX }
+          event.preventDefault()
+          event.stopPropagation()
+          return
+        }
+      }
+      if (state?.kind === 'touch-slider') {
+        event.preventDefault()
+        event.stopPropagation()
+        if (event.touches.length === 0) {
+          finishGesture()
+        }
+        return
+      }
+      if (state?.kind === 'touch-pan' || state?.kind === 'touch-pinch') {
+        event.preventDefault()
+        event.stopPropagation()
+        if (event.touches.length > 0) {
+          return
+        }
+        finishGesture()
+        return
+      }
+      if (event.touches.length === 0) {
+        state = null
+        setInteracting(false)
+      }
+    }
+
+    const handleTouchCancel = () => {
+      lastTouchAt = performance.now()
+      finishGesture()
+    }
+
+    const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey) {
+        return
+      }
+      const rect = surface.getBoundingClientRect()
+      const normalizedDelta = event.deltaMode === 1
+        ? event.deltaY * 16
+        : event.deltaMode === 2
+          ? event.deltaY * window.innerHeight
+          : event.deltaY
+      const anchorRatio = rect.width > 0 ? (event.clientX - rect.left) / rect.width : 0.5
+      const scale = Math.pow(1.12, clamp(normalizedDelta / 100, -4, 4))
+      hideTooltip()
+      scheduleViewport(zoomViewport(viewportRef.current, anchorRatio, scale, dataRef.current.length))
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
+    const handleWindowBlur = () => {
+      finishGesture()
+    }
+
+    surface.addEventListener('mousedown', handleMouseDown, true)
+    window.addEventListener('mousemove', handleMouseMove, true)
+    window.addEventListener('mouseup', handleMouseUp, true)
+    surface.addEventListener('touchstart', handleTouchStart, { capture: true, passive: false })
+    surface.addEventListener('touchmove', handleTouchMove, { capture: true, passive: false })
+    surface.addEventListener('touchend', handleTouchEnd, { capture: true, passive: false })
+    surface.addEventListener('touchcancel', handleTouchCancel, { capture: true, passive: false })
+    surface.addEventListener('wheel', handleWheel, { capture: true, passive: false })
+    window.addEventListener('blur', handleWindowBlur)
+
+    return () => {
+      finishGesture()
+      surface.removeEventListener('mousedown', handleMouseDown, true)
+      window.removeEventListener('mousemove', handleMouseMove, true)
+      window.removeEventListener('mouseup', handleMouseUp, true)
+      surface.removeEventListener('touchstart', handleTouchStart, true)
+      surface.removeEventListener('touchmove', handleTouchMove, true)
+      surface.removeEventListener('touchend', handleTouchEnd, true)
+      surface.removeEventListener('touchcancel', handleTouchCancel, true)
+      surface.removeEventListener('wheel', handleWheel, true)
+      window.removeEventListener('blur', handleWindowBlur)
+    }
+  }, [hasData])
 
   const zoomIn = () => dispatchViewport(zoomViewport(currentViewport, 0.5, 0.65, data.length))
   const zoomOut = () => dispatchViewport(zoomViewport(currentViewport, 0.5, 1.5, data.length))

@@ -7571,3 +7571,176 @@ body.is-settings-open {
     display: block;
   }
 }
+
+/* Final chart interaction layer. Chart focus mode is portaled to body so its
+   viewport and safe-area geometry are independent from animated page views. */
+html.is-chart-expanded,
+body.is-chart-expanded {
+  overflow: hidden;
+}
+
+.dashboard-shell .interactive-chart-surface,
+.interactive-chart-surface {
+  touch-action: pan-y;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+}
+
+.dashboard-shell .interactive-chart-surface.is-interacting,
+.interactive-chart-surface.is-interacting {
+  cursor: grabbing;
+}
+
+.chart-modal-backdrop {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  border: 0;
+  background: rgba(16, 16, 16, 0.32);
+  cursor: default;
+  animation: chart-backdrop-in 160ms ease-out both;
+}
+
+.chart-card.is-expanded {
+  position: fixed;
+  z-index: 100;
+  top: max(var(--spacing-lg), env(safe-area-inset-top));
+  right: max(var(--spacing-lg), env(safe-area-inset-right));
+  bottom: max(var(--spacing-lg), env(safe-area-inset-bottom));
+  left: max(var(--spacing-lg), env(safe-area-inset-left));
+  display: flex;
+  min-height: 0;
+  max-height: calc(100vh - (var(--spacing-lg) * 2));
+  max-height: calc(100dvh - (var(--spacing-lg) * 2));
+  flex-direction: column;
+  padding: var(--spacing-lg);
+  background: var(--color-canvas);
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-card), 0 16px 40px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  animation: chart-dialog-in 180ms ease-out both;
+}
+
+.chart-card.is-expanded .chart-card-header {
+  flex: 0 0 auto;
+}
+
+.chart-card.is-expanded .chart-card-actions {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+.chart-card.is-expanded .chart-card-meta {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.chart-card.is-expanded .chart-card-unit {
+  padding-top: 0;
+}
+
+.chart-card.is-expanded .chart-shell {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-items: stretch;
+  margin-top: var(--spacing-md);
+  padding-top: 0;
+  overflow: visible;
+}
+
+.chart-card.is-expanded .interactive-chart {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.chart-card.is-expanded .interactive-chart-surface {
+  min-height: 0;
+  height: auto;
+  flex: 1 1 auto;
+}
+
+.chart-card.is-expanded .interactive-chart-canvas {
+  min-height: 0;
+  height: 100%;
+}
+
+.chart-card.is-expanded .range-control-compact {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.chart-card.is-expanded .range-control-compact .range-tabs {
+  min-width: 248px;
+}
+
+@media (max-width: 559px) {
+  .chart-card.is-expanded {
+    top: max(var(--spacing-sm), env(safe-area-inset-top));
+    right: max(var(--spacing-sm), env(safe-area-inset-right));
+    bottom: max(var(--spacing-sm), env(safe-area-inset-bottom));
+    left: max(var(--spacing-sm), env(safe-area-inset-left));
+    max-height: calc(100vh - (var(--spacing-sm) * 2));
+    max-height: calc(100dvh - (var(--spacing-sm) * 2));
+    padding: var(--spacing-md);
+  }
+
+  .chart-card.is-expanded .chart-card-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .chart-card.is-expanded .chart-card-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    justify-content: initial;
+    column-gap: var(--spacing-sm);
+    row-gap: var(--spacing-xs);
+  }
+
+  .chart-card.is-expanded .range-control-compact {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    flex: 1 1 auto;
+  }
+
+  .chart-card.is-expanded .range-control-compact .range-tabs {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .chart-card.is-expanded .chart-card-meta {
+    grid-column: 1;
+    grid-row: 2;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .chart-card.is-expanded .chart-expand-button {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-modal-backdrop,
+  .chart-card.is-expanded {
+    animation: none;
+  }
+}

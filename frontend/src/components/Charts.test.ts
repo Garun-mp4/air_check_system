@@ -4,6 +4,7 @@ import {
   buildTimeSeriesOption,
   clampViewport,
   co2Thresholds,
+  createDataZoomAction,
   createFullViewport,
   panViewport,
   zoomViewport,
@@ -46,6 +47,8 @@ describe('chart viewport controls', () => {
 
     expect(option.aria).toEqual({ enabled: true })
     expect(option.dataZoom).toHaveLength(2)
+    expect((option.dataZoom as Array<{ disabled?: boolean }>)[0]?.disabled).toBe(true)
+    expect((option.dataZoom as Array<{ zoomOnMouseWheel?: boolean }>)[0]?.zoomOnMouseWheel).toBe(false)
     expect(series?.type).toBe('line')
     expect(series?.sampling).toBe('lttb')
     expect(series?.markLine?.data).toHaveLength(2)
@@ -70,5 +73,14 @@ describe('chart viewport controls', () => {
     expect(zoom[0]?.end).toBeCloseTo(66.667, 3)
     expect(zoom[1]?.start).toBeCloseTo(11.111, 3)
     expect(zoom[1]?.end).toBeCloseTo(66.667, 3)
+  })
+
+  it('dispatches a viewport as percentages without an animated action', () => {
+    expect(createDataZoomAction({ start: 0, end: 99 }, 100)).toEqual({
+      type: 'dataZoom',
+      start: 0,
+      end: 100,
+      animation: { duration: 0 },
+    })
   })
 })
