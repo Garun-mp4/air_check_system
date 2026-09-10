@@ -1380,6 +1380,9 @@ export function SettingsPanel({
   const automationLabel = controls
     ? controls.automation.enabled ? 'Включена' : 'Выключена'
     : 'нет данных'
+  const automationStatusTone = settings
+    ? draft.automationEnabled ? 'success' : 'warning'
+    : 'neutral'
   const windowModeLabel = controls
     ? controls.window.mode === 'manual' ? 'Ручной режим' : 'Автоматический режим'
     : 'нет данных'
@@ -1533,8 +1536,8 @@ export function SettingsPanel({
                   ? 'Постоянные правила, по которым узел принимает решения о проветривании.'
                   : 'Границы, которые используются в рекомендациях, шкалах и предупреждениях.'}</p>
               </div>
-              <span className={'settings-status settings-status-' + (settings ? 'success' : 'neutral')}>
-                <span className={'status-dot status-dot-' + (settings ? 'success' : 'neutral')} />
+              <span className={'settings-status settings-status-' + automationStatusTone}>
+                <span className={'status-dot status-dot-' + automationStatusTone} />
                 {settings ? (draft.automationEnabled ? 'Включена' : 'Выключена') : 'Загрузка'}
               </span>
             </div>

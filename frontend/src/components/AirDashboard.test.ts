@@ -139,6 +139,27 @@ describe('dashboard navigation', () => {
     expect(markup).toContain('Пороги и сигналы')
     expect(markup).toContain('Отменить')
 
+    const disabledMarkup = renderToStaticMarkup(createElement(SettingsPanel, {
+      controls: null,
+      deviceId: 'room-01',
+      measurement: null,
+      prediction: null,
+      systemStatus: 'в сети',
+      systemTone: 'success',
+      tab: 'automation',
+      onTabChange: () => undefined,
+      onClose: () => undefined,
+      closeButtonRef: createRef<HTMLButtonElement>(),
+      settings: { ...settings, automation_enabled: false },
+      settingsError: null,
+      settingsSaving: false,
+      settingsNotice: null,
+      onSave: async () => undefined,
+    }))
+
+    expect(disabledMarkup).toContain('settings-status-warning')
+    expect(disabledMarkup).toContain('status-dot-warning')
+
     const thresholdsMarkup = renderToStaticMarkup(createElement(SettingsPanel, {
       controls: null,
       deviceId: 'room-01',
