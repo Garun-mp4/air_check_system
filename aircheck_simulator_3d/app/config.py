@@ -94,6 +94,44 @@ class GraphicsConfig:
     background_rgb: tuple[float, float, float]
     text_rgb: tuple[float, float, float]
     text_scale: float
+    ui_font_path: str
+    multisample_enabled: bool
+    multisamples: int
+    shadows_enabled: bool
+    shadow_map_size: int
+    ambient_rgb: tuple[float, float, float]
+    sun_rgb: tuple[float, float, float]
+
+
+@dataclass(frozen=True)
+class SceneConfig:
+    room_width_m: float
+    room_depth_m: float
+    room_height_m: float
+    wall_thickness_m: float
+    platform_margin_m: float
+    window_width_m: float
+    window_height_m: float
+    window_sill_height_m: float
+    outdoor_depth_m: float
+
+
+@dataclass(frozen=True)
+class CameraConfig:
+    start_position: tuple[float, float, float]
+    start_target: tuple[float, float, float]
+    move_speed_m_s: float
+    fast_move_multiplier: float
+    acceleration: float
+    mouse_sensitivity: float
+    wheel_step_m: float
+    transition_seconds: float
+    min_pitch_degrees: float
+    max_pitch_degrees: float
+    field_of_view_degrees: float
+    near_plane_m: float
+    far_plane_m: float
+    focus_distance_min_m: float
 
 
 @dataclass(frozen=True)
@@ -111,6 +149,8 @@ class AppConfig:
     physics: PhysicsConfig
     backend: BackendConfig
     graphics: GraphicsConfig
+    scene: SceneConfig
+    camera: CameraConfig
     logging: LoggingConfig
 
 
@@ -167,11 +207,29 @@ def _color(section: dict[str, object], key: str, source: str) -> tuple[float, fl
     value = section.get(key)
     if not isinstance(value, list) or len(value) != 3:
         raise ConfigurationError(f"{source}: {key} must contain three color components")
-    components = tuple(float(component) for component in value if isinstance(component, (int, float)))
+    components = tuple(
+        float(component)
+        for component in value
+        if isinstance(component, (int, float)) and not isinstance(component, bool)
+    )
     if len(components) != 3 or any(
         not math.isfinite(component) or not 0 <= component <= 1 for component in components
     ):
         raise ConfigurationError(f"{source}: {key} components must be between 0 and 1")
+    return components
+
+
+def _vector3(section: dict[str, object], key: str, source: str) -> tuple[float, float, float]:
+    value = section.get(key)
+    if not isinstance(value, list) or len(value) != 3:
+        raise ConfigurationError(f"{source}: {key} must contain three numbers")
+    components = tuple(
+        float(component)
+        for component in value
+        if isinstance(component, (int, float)) and not isinstance(component, bool)
+    )
+    if len(components) != 3 or any(not math.isfinite(component) for component in components):
+        raise ConfigurationError(f"{source}: {key} must contain three finite numbers")
     return components
 
 
@@ -332,6 +390,36 @@ def _validate(config: AppConfig) -> None:
         raise ConfigurationError("backend retries, retry delay or command limit is invalid")
     if config.graphics.width < 1 or config.graphics.height < 1 or config.graphics.text_scale <= 0:
         raise ConfigurationError("graphics dimensions and text scale must be positive")
+    if not config.graphics.ui_font_path:
+        raise ConfigurationError("graphics.ui_font_path must not be empty")
+    if config.graphics.multisamples < 0 or config.graphics.shadow_map_size < 0:
+        raise ConfigurationError("multisample count and shadow map size cannot be negative")
+    if config.graphics.multisample_enabled and config.graphics.multisamples < 2:
+        raise ConfigurationError("multisamples must be at least 2 when multisampling is enabled")
+    if config.graphics.shadows_enabled and config.graphics.shadow_map_size < 128:
+        raise ConfigurationError("shadow map size must be at least 128 when shadows are enabled")
+    scene = config.scene
+    if min(scene.room_width_m, scene.room_depth_m, scene.room_height_m, scene.wall_thickness_m) <= 0:
+        raise ConfigurationError("room dimensions and wall thickness must be positive")
+    if min(scene.platform_margin_m, scene.outdoor_depth_m) < 0:
+        raise ConfigurationError("platform margin and outdoor depth cannot be negative")
+    if not 0 < scene.window_width_m < scene.room_width_m or not 0 < scene.window_height_m < scene.room_height_m:
+        raise ConfigurationError("window dimensions must fit inside the room")
+    if not 0 < scene.window_sill_height_m < scene.room_height_m - scene.window_height_m:
+        raise ConfigurationError("window sill and height must fit inside the room")
+    camera = config.camera
+    if min(camera.move_speed_m_s, camera.fast_move_multiplier, camera.acceleration, camera.wheel_step_m) <= 0:
+        raise ConfigurationError("camera speed, acceleration and wheel step must be positive")
+    if camera.mouse_sensitivity <= 0 or camera.transition_seconds <= 0:
+        raise ConfigurationError("camera sensitivity and transition time must be positive")
+    if not -89 < camera.min_pitch_degrees < camera.max_pitch_degrees < 89:
+        raise ConfigurationError("camera pitch limits must be ordered within -89 and 89 degrees")
+    if (
+        not 20 <= camera.field_of_view_degrees <= 110
+        or not 0 < camera.near_plane_m < camera.far_plane_m
+        or camera.focus_distance_min_m <= 0
+    ):
+        raise ConfigurationError("camera field of view or clipping planes are invalid")
     if config.logging.level.upper() not in {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}:
         raise ConfigurationError("logging level is not a standard Python log level")
     if config.logging.max_bytes < 1 or config.logging.backup_count < 0:
@@ -343,7 +431,7 @@ def load_config(
     environ: Mapping[str, str] | None = None,
 ) -> AppConfig:
     directory = (config_dir or DEFAULT_CONFIG_DIR).expanduser().resolve()
-    config_names = ("room", "devices", "physics", "backend", "graphics", "logging")
+    config_names = ("room", "devices", "physics", "backend", "graphics", "camera", "scene", "logging")
     paths = {name: directory / f"{name}.toml" for name in config_names}
     raw = {name: _read_toml(path) for name, path in paths.items()}
 
@@ -356,6 +444,9 @@ def load_config(
     physics_table = _section(raw["physics"], "physics", paths["physics"])
     backend_table = _section(raw["backend"], "backend", paths["backend"])
     graphics_table = _section(raw["graphics"], "graphics", paths["graphics"])
+    lighting_table = _section(raw["graphics"], "lighting", paths["graphics"])
+    camera_table = _section(raw["camera"], "camera", paths["camera"])
+    scene_table = _section(raw["scene"], "scene", paths["scene"])
     logging_table = _section(raw["logging"], "logging", paths["logging"])
     indoor_table = _section(raw["room"], "initial_indoor", paths["room"])
     outdoor_table = _section(raw["room"], "initial_outdoor", paths["room"])
@@ -411,6 +502,40 @@ def load_config(
             background_rgb=_color(graphics_table, "background_rgb", "graphics.toml [graphics]"),
             text_rgb=_color(graphics_table, "text_rgb", "graphics.toml [graphics]"),
             text_scale=_number(graphics_table, "text_scale", "graphics.toml [graphics]"),
+            ui_font_path=_text(graphics_table, "ui_font_path", "graphics.toml [graphics]"),
+            multisample_enabled=_boolean(lighting_table, "multisample_enabled", "graphics.toml [lighting]"),
+            multisamples=_integer(lighting_table, "multisamples", "graphics.toml [lighting]"),
+            shadows_enabled=_boolean(lighting_table, "shadows_enabled", "graphics.toml [lighting]"),
+            shadow_map_size=_integer(lighting_table, "shadow_map_size", "graphics.toml [lighting]"),
+            ambient_rgb=_color(lighting_table, "ambient_rgb", "graphics.toml [lighting]"),
+            sun_rgb=_color(lighting_table, "sun_rgb", "graphics.toml [lighting]"),
+        )
+        camera = CameraConfig(
+            start_position=_vector3(camera_table, "start_position", "camera.toml [camera]"),
+            start_target=_vector3(camera_table, "start_target", "camera.toml [camera]"),
+            move_speed_m_s=_number(camera_table, "move_speed_m_s", "camera.toml [camera]"),
+            fast_move_multiplier=_number(camera_table, "fast_move_multiplier", "camera.toml [camera]"),
+            acceleration=_number(camera_table, "acceleration", "camera.toml [camera]"),
+            mouse_sensitivity=_number(camera_table, "mouse_sensitivity", "camera.toml [camera]"),
+            wheel_step_m=_number(camera_table, "wheel_step_m", "camera.toml [camera]"),
+            transition_seconds=_number(camera_table, "transition_seconds", "camera.toml [camera]"),
+            min_pitch_degrees=_number(camera_table, "min_pitch_degrees", "camera.toml [camera]"),
+            max_pitch_degrees=_number(camera_table, "max_pitch_degrees", "camera.toml [camera]"),
+            field_of_view_degrees=_number(camera_table, "field_of_view_degrees", "camera.toml [camera]"),
+            near_plane_m=_number(camera_table, "near_plane_m", "camera.toml [camera]"),
+            far_plane_m=_number(camera_table, "far_plane_m", "camera.toml [camera]"),
+            focus_distance_min_m=_number(camera_table, "focus_distance_min_m", "camera.toml [camera]"),
+        )
+        scene = SceneConfig(
+            room_width_m=_number(scene_table, "room_width_m", "scene.toml [scene]"),
+            room_depth_m=_number(scene_table, "room_depth_m", "scene.toml [scene]"),
+            room_height_m=_number(scene_table, "room_height_m", "scene.toml [scene]"),
+            wall_thickness_m=_number(scene_table, "wall_thickness_m", "scene.toml [scene]"),
+            platform_margin_m=_number(scene_table, "platform_margin_m", "scene.toml [scene]"),
+            window_width_m=_number(scene_table, "window_width_m", "scene.toml [scene]"),
+            window_height_m=_number(scene_table, "window_height_m", "scene.toml [scene]"),
+            window_sill_height_m=_number(scene_table, "window_sill_height_m", "scene.toml [scene]"),
+            outdoor_depth_m=_number(scene_table, "outdoor_depth_m", "scene.toml [scene]"),
         )
         log_directory = Path(_text(logging_table, "directory", "logging.toml [logging]"))
         if not log_directory.is_absolute():
@@ -435,6 +560,8 @@ def load_config(
         physics=physics,
         backend=backend,
         graphics=graphics,
+        scene=scene,
+        camera=camera,
         logging=logging_config,
     )
     _validate(config)

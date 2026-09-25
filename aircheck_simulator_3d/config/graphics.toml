@@ -6,3 +6,12 @@ fullscreen = false
 background_rgb = [0.035, 0.055, 0.075]
 text_rgb = [0.84, 0.93, 0.96]
 text_scale = 0.08
+ui_font_path = "C:/Windows/Fonts/arial.ttf"
+
+[lighting]
+multisample_enabled = true
+multisamples = 4
+shadows_enabled = true
+shadow_map_size = 1024
+ambient_rgb = [0.48, 0.56, 0.66]
+sun_rgb = [0.96, 0.91, 0.79]
