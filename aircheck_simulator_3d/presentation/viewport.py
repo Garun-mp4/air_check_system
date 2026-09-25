@@ -4,7 +4,9 @@ import logging
 from typing import Any
 
 from aircheck_simulator_3d.app.config import CameraConfig, GraphicsConfig, SceneConfig
+from aircheck_simulator_3d.devices.presentation_state import DevicePresentationState
 from aircheck_simulator_3d.presentation.camera_controller import CameraController
+from aircheck_simulator_3d.presentation.device_bindings import DeviceVisualBindings
 from aircheck_simulator_3d.presentation.input_controller import InputController
 from aircheck_simulator_3d.scene.cutaway import CutawayController
 from aircheck_simulator_3d.scene.picking import ScenePicker
@@ -24,12 +26,15 @@ class SimulatorViewport:
         graphics: GraphicsConfig,
         scene_config: SceneConfig,
         camera_config: CameraConfig,
+        initial_device_state: DevicePresentationState,
     ) -> None:
         self._base = base
         from panda3d.core import ClockObject
 
         self._clock = ClockObject.getGlobalClock()
         self._scene = StandScene(base, scene_config)
+        self._device_bindings = DeviceVisualBindings(self._scene.device_scene)
+        self.apply_device_state(initial_device_state, 0.0)
         self._overlay = SceneOverlay(base, graphics)
         self._cutaway = CutawayController(self._scene.cutaway_wall)
         self._picker = ScenePicker(base, self._scene.objects)
@@ -51,6 +56,9 @@ class SimulatorViewport:
         self._closed = False
         self._task = base.taskMgr.add(self._update, "aircheck-viewport-update", sort=20)
         LOGGER.info("Built 3D stand with %d interactive scene targets", len(self._scene.objects))
+
+    def apply_device_state(self, state: DevicePresentationState, delta_seconds: float) -> None:
+        self._device_bindings.apply(state, delta_seconds)
 
     def _update(self, task: Any) -> Any:
         dt = min(max(float(self._clock.getDt()), 0.0), 0.1)

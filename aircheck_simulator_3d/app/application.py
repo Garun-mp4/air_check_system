@@ -7,6 +7,8 @@ from typing import Protocol
 
 from aircheck_simulator_3d.app.config import AppConfig, CameraConfig, GraphicsConfig, SceneConfig
 from aircheck_simulator_3d.app.lifecycle import Lifecycle
+from aircheck_simulator_3d.app.runtime import ApplicationRuntime
+from aircheck_simulator_3d.devices.device_layer import DeviceLayer
 from aircheck_simulator_3d.devices.models import (
     FanState,
     SensorDeviceState,
@@ -41,6 +43,7 @@ class Application:
         self.config = config
         self._window_factory = window_factory
         self.state = self._create_initial_state()
+        self.device_layer = DeviceLayer(self.state, self.config.devices)
 
     def _create_initial_state(self) -> SimulationState:
         room = self.config.room
@@ -116,7 +119,7 @@ class Application:
         lifecycle = Lifecycle()
         try:
             if self._window_factory is None:
-                view = PandaWindow(self.config.graphics, self.config.scene, self.config.camera)
+                view = PandaWindow(self.config.graphics, self.config.scene, self.config.camera, self.device_layer)
             else:
                 view = self._window_factory(self.config.graphics)
             lifecycle.add_cleanup(view.close)
