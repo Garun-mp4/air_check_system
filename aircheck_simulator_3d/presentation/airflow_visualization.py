@@ -21,23 +21,53 @@ class _Track:
 class AirflowVisualization:
     """Lightweight particles whose visibility and speed follow modeled room flows."""
 
-    _PARTICLES_PER_TRACK = 7
+    _PARTICLES_PER_TRACK = 12
 
     def __init__(self, parent: Any, scene: SceneConfig, devices: DeviceConfig, physics: PhysicsConfig) -> None:
-        from panda3d.core import PandaNode
+        from panda3d.core import PandaNode, TransparencyAttrib
 
         self._root = parent.attachNewNode(PandaNode("aircheck-airflow-overlay"))
         self._root.hide()
+        self._transparency = TransparencyAttrib.MAlpha
         width = scene.room_width_m
         depth = scene.room_depth_m
         height = scene.room_height_m
         back_y = depth / 2
         fan_z = height * 0.73
+        outside_y = back_y + scene.outdoor_depth_m / 5
+        inside_y = back_y - depth / 6
+        window_x_offset = scene.window_width_m / 3
+        window_center_z = scene.window_sill_height_m + scene.window_height_m / 2
+        window_vertical_offset = scene.window_height_m / 6
         self._tracks = (
-            self._make_track("window-in", (0, back_y + 0.90, 1.65), (0, back_y - 0.80, 1.65), physics.window_max_airflow_m3_h, (0.21, 0.94, 0.79, 1)),
-            self._make_track("window-out", (0.18, back_y - 0.80, 1.55), (0.18, back_y + 0.90, 1.55), physics.window_max_airflow_m3_h, (0.48, 0.76, 1.0, 1)),
-            self._make_track("intake", (-width * 0.37, back_y + 0.90, fan_z), (-width * 0.37, back_y - 0.65, fan_z), devices.intake_airflow_m3_h, (0.25, 0.94, 0.66, 1)),
-            self._make_track("exhaust", (width * 0.37, back_y - 0.65, fan_z), (width * 0.37, back_y + 0.90, fan_z), devices.exhaust_airflow_m3_h, (1.0, 0.65, 0.28, 1)),
+            self._make_track(
+                "window-in",
+                (-window_x_offset, outside_y, window_center_z - window_vertical_offset),
+                (-window_x_offset, inside_y, window_center_z - window_vertical_offset),
+                physics.window_max_airflow_m3_h,
+                (0.21, 0.94, 0.79, 1),
+            ),
+            self._make_track(
+                "window-out",
+                (window_x_offset, inside_y, window_center_z + window_vertical_offset),
+                (window_x_offset, outside_y, window_center_z + window_vertical_offset),
+                physics.window_max_airflow_m3_h,
+                (0.48, 0.76, 1.0, 1),
+            ),
+            self._make_track(
+                "intake",
+                (-width * 0.37, outside_y, fan_z),
+                (-width * 0.37, inside_y, fan_z),
+                devices.intake_airflow_m3_h,
+                (0.25, 0.94, 0.66, 1),
+            ),
+            self._make_track(
+                "exhaust",
+                (width * 0.37, inside_y, fan_z),
+                (width * 0.37, outside_y, fan_z),
+                devices.exhaust_airflow_m3_h,
+                (1.0, 0.65, 0.28, 1),
+            ),
         )
         self._flow: AirflowState | None = None
         self._visible = False
@@ -50,8 +80,9 @@ class AirflowVisualization:
         maximum_flow_m3_h: float,
         color: tuple[float, float, float, float],
     ) -> _Track:
-        particles = tuple(
-            make_cylinder(
+        particles = []
+        for index in range(self._PARTICLES_PER_TRACK):
+            particle = make_cylinder(
                 self._root,
                 f"airflow-{name}-{index + 1}",
                 start,
@@ -61,11 +92,15 @@ class AirflowVisualization:
                 axis="y",
                 segments=8,
             )
-            for index in range(self._PARTICLES_PER_TRACK)
-        )
+            particle.setTwoSided(True)
+            particle.setLightOff(1)
+            particle.setDepthTest(False)
+            particle.setDepthWrite(False)
+            particle.setTransparency(self._transparency)
+            particles.append(particle)
         for particle in particles:
             particle.hide()
-        return _Track(name, start, end, maximum_flow_m3_h, particles)
+        return _Track(name, start, end, maximum_flow_m3_h, tuple(particles))
 
     def set_visible(self, visible: bool) -> None:
         self._visible = visible
