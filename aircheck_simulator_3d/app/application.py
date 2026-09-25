@@ -19,11 +19,13 @@ from aircheck_simulator_3d.devices.models import (
 )
 from aircheck_simulator_3d.scene.window import PandaWindow
 from aircheck_simulator_3d.simulation.state import (
+    AirflowState,
     AirQualityState,
     EnergyState,
     EnvironmentState,
     SimulationState,
 )
+from aircheck_simulator_3d.simulation.engine import SimulationEngine
 
 LOGGER = logging.getLogger("aircheck.application")
 
@@ -44,6 +46,12 @@ class Application:
         self._window_factory = window_factory
         self.state = self._create_initial_state()
         self.device_layer = DeviceLayer(self.state, self.config.devices)
+        self.simulation_engine = SimulationEngine(
+            self.state,
+            self.device_layer,
+            self.config.physics,
+            self.config.scene,
+        )
 
     def _create_initial_state(self) -> SimulationState:
         room = self.config.room
@@ -65,6 +73,7 @@ class Application:
                 nominal_rpm=devices.intake_nominal_rpm,
                 nominal_airflow_m3_h=devices.intake_airflow_m3_h,
                 rated_power_w=devices.intake_power_w,
+                efficiency=devices.intake_efficiency,
             ),
             exhaust=FanState(
                 enabled=False,
@@ -73,8 +82,10 @@ class Application:
                 nominal_rpm=devices.exhaust_nominal_rpm,
                 nominal_airflow_m3_h=devices.exhaust_airflow_m3_h,
                 rated_power_w=devices.exhaust_power_w,
+                efficiency=devices.exhaust_efficiency,
             ),
             filter_efficiency=devices.filter_efficiency,
+            filter_enabled=devices.filter_enabled,
         )
         indoor = room.initial_indoor
         outdoor = room.initial_outdoor
@@ -104,7 +115,7 @@ class Application:
             ),
             environment=EnvironmentState(
                 occupancy=room.occupancy,
-                co2_generation_l_min=room.co2_generation_l_min,
+                co2_generation_l_min_per_person=room.co2_generation_l_min_per_person,
                 pm25_generation_ug_min=room.pm25_generation_ug_min,
                 infiltration_ach=room.infiltration_ach,
                 weather=room.weather,
@@ -112,6 +123,7 @@ class Application:
                 wind_direction_degrees=room.wind_direction_degrees,
             ),
             energy=EnergyState(),
+            airflow=AirflowState(),
         )
 
     def run(self, smoke_test_seconds: float | None = None) -> None:
@@ -119,7 +131,13 @@ class Application:
         lifecycle = Lifecycle()
         try:
             if self._window_factory is None:
-                view = PandaWindow(self.config.graphics, self.config.scene, self.config.camera, self.device_layer)
+                view = PandaWindow(
+                    self.config.graphics,
+                    self.config.scene,
+                    self.config.camera,
+                    self.device_layer,
+                    self.simulation_engine,
+                )
             else:
                 view = self._window_factory(self.config.graphics)
             lifecycle.add_cleanup(view.close)

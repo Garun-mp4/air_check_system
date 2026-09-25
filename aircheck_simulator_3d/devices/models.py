@@ -39,11 +39,14 @@ class FanState:
     nominal_rpm: float
     nominal_airflow_m3_h: float
     rated_power_w: float
+    efficiency: float
 
     def __post_init__(self) -> None:
         values = (self.rpm, self.airflow_m3_h, self.nominal_rpm, self.nominal_airflow_m3_h, self.rated_power_w)
         if any(not math.isfinite(value) or value < 0 for value in values):
             raise ValueError("fan speed, airflow and rated values cannot be negative")
+        if not math.isfinite(self.efficiency) or not 0 < self.efficiency <= 1:
+            raise ValueError("fan efficiency must be in (0, 1]")
 
 
 @dataclass
@@ -51,6 +54,7 @@ class VentilationState:
     intake: FanState
     exhaust: FanState
     filter_efficiency: float
+    filter_enabled: bool = True
 
     def __post_init__(self) -> None:
         if not 0 <= self.filter_efficiency <= 1:

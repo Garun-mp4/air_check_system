@@ -14,6 +14,7 @@ CONFIG_DIR = Path(__file__).parents[1] / "config"
 def test_clock_advances_fixed_simulation_time_independent_of_frame_rate() -> None:
     state = Application(load_config(CONFIG_DIR, {})).state
     state.simulated_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    state.fixed_step_seconds = 1.0
     state.simulation_speed = 2
     clock = SimulationClock(state, max_substeps_per_frame=5)
 
@@ -25,6 +26,7 @@ def test_clock_advances_fixed_simulation_time_independent_of_frame_rate() -> Non
 
 def test_clock_limits_substeps_and_carries_remaining_time() -> None:
     state = Application(load_config(CONFIG_DIR, {})).state
+    state.fixed_step_seconds = 1.0
     clock = SimulationClock(state, max_substeps_per_frame=2)
 
     assert clock.advance(5) == 2
@@ -39,3 +41,17 @@ def test_clock_rejects_invalid_elapsed_time(delta: float) -> None:
 
     with pytest.raises(ValueError, match="finite and non-negative"):
         SimulationClock(state, max_substeps_per_frame=1).advance(delta)
+
+
+def test_clock_does_not_advance_while_paused_even_with_pending_fraction() -> None:
+    state = Application(load_config(CONFIG_DIR, {})).state
+    clock = SimulationClock(state, max_substeps_per_frame=5)
+
+    assert clock.advance(0.05) == 0
+    state.simulation_speed = 0
+    assert clock.advance(10) == 0
+    assert state.elapsed_seconds == 0
+
+    state.simulation_speed = 1
+    assert clock.advance(0.05) == 1
+    assert state.elapsed_seconds == pytest.approx(state.fixed_step_seconds)

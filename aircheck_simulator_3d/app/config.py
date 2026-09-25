@@ -32,7 +32,7 @@ class RoomConfig:
     initial_indoor: AirReadingConfig
     initial_outdoor: AirReadingConfig
     occupancy: int
-    co2_generation_l_min: float
+    co2_generation_l_min_per_person: float
     pm25_generation_ug_min: float
     infiltration_ach: float
     weather: str
@@ -59,8 +59,11 @@ class DeviceConfig:
     intake_airflow_m3_h: float
     exhaust_airflow_m3_h: float
     filter_efficiency: float
+    filter_enabled: bool
     intake_power_w: float
     exhaust_power_w: float
+    intake_efficiency: float
+    exhaust_efficiency: float
     window_reed_open_threshold_percent: float
 
 
@@ -68,6 +71,33 @@ class DeviceConfig:
 class PhysicsConfig:
     fixed_step_seconds: float
     max_substeps_per_frame: int
+    simulation_speeds: tuple[float, ...]
+    window_discharge_coefficient: float
+    window_effective_area_factor: float
+    window_opening_exponent: float
+    window_max_airflow_m3_h: float
+    wind_pressure_coefficient: float
+    window_facade_normal_degrees: float
+    window_stack_height_m: float
+    gravity_m_s2: float
+    air_density_kg_m3: float
+    air_specific_heat_j_kg_k: float
+    thermal_conductance_w_k: float
+    thermal_capacity_j_k: float
+    sensible_heat_w_per_person: float
+    pm25_deposition_rate_per_hour: float
+    moisture_generation_kg_h_per_person: float
+    atmospheric_pressure_pa: float
+    humidity_ratio_constant: float
+    saturation_vapor_pressure_reference_pa: float
+    saturation_pressure_exponent: float
+    saturation_pressure_offset_c: float
+    minimum_humidity_percent: float
+    maximum_humidity_percent: float
+    minimum_room_temperature_c: float
+    maximum_room_temperature_c: float
+    fan_airflow_speed_exponent: float
+    fan_power_speed_exponent: float
 
 
 @dataclass(frozen=True)
@@ -234,6 +264,18 @@ def _vector3(section: dict[str, object], key: str, source: str) -> tuple[float, 
     return components
 
 
+def _number_tuple(section: dict[str, object], key: str, source: str) -> tuple[float, ...]:
+    value = section.get(key)
+    if not isinstance(value, list) or not value:
+        raise ConfigurationError(f"{source}: {key} must be a non-empty list of numbers")
+    if any(isinstance(item, bool) or not isinstance(item, (int, float)) for item in value):
+        raise ConfigurationError(f"{source}: {key} must contain only numbers")
+    values = tuple(float(item) for item in value)
+    if any(not math.isfinite(item) for item in values):
+        raise ConfigurationError(f"{source}: {key} values must be finite")
+    return values
+
+
 def _air_reading(section: dict[str, object], source: str) -> AirReadingConfig:
     values = AirReadingConfig(
         co2_ppm=_number(section, "co2_ppm", source),
@@ -344,9 +386,9 @@ def _validate(config: AppConfig) -> None:
         parsed = urlparse(url)
         if parsed.scheme not in {"http", "https"} or not parsed.netloc:
             raise ConfigurationError(f"{field} must be an absolute HTTP(S) URL")
-    if config.room.volume_m3 <= 0 or config.room.simulation_speed <= 0:
-        raise ConfigurationError("room volume and simulation speed must be positive")
-    if config.room.occupancy < 0 or config.room.co2_generation_l_min < 0 or config.room.pm25_generation_ug_min < 0:
+    if config.room.volume_m3 <= 0:
+        raise ConfigurationError("room volume must be positive")
+    if config.room.occupancy < 0 or config.room.co2_generation_l_min_per_person < 0 or config.room.pm25_generation_ug_min < 0:
         raise ConfigurationError("occupancy and generation rates cannot be negative")
     for zone, reading in (("indoor", config.room.initial_indoor), ("outdoor", config.room.initial_outdoor)):
         temperature_min = -60 if zone == "outdoor" else -40
@@ -373,12 +415,53 @@ def _validate(config: AppConfig) -> None:
         raise ConfigurationError("fan airflow and power cannot be negative")
     if config.room.infiltration_ach < 0 or config.room.wind_speed_m_s < 0:
         raise ConfigurationError("infiltration and wind speed cannot be negative")
-    if config.physics.fixed_step_seconds <= 0 or config.physics.max_substeps_per_frame < 1:
+    physics = config.physics
+    if physics.fixed_step_seconds <= 0 or physics.max_substeps_per_frame < 1:
         raise ConfigurationError("physics step and maximum substeps must be positive")
+    if physics.simulation_speeds != (1.0, 2.0, 5.0, 10.0, 30.0, 60.0):
+        raise ConfigurationError("simulation_speeds must define 1x, 2x, 5x, 10x, 30x and 60x")
+    if config.room.simulation_speed not in (0.0, *physics.simulation_speeds):
+        raise ConfigurationError("simulation_speed must be Pause or one of the configured speeds")
+    if not 0 < physics.window_discharge_coefficient <= 1:
+        raise ConfigurationError("window discharge coefficient must be in (0, 1]")
+    if not 0 < physics.window_effective_area_factor <= 1 or physics.window_opening_exponent <= 0:
+        raise ConfigurationError("window effective area factor and opening exponent are invalid")
+    if min(
+        physics.window_max_airflow_m3_h,
+        physics.window_stack_height_m,
+        physics.gravity_m_s2,
+        physics.air_density_kg_m3,
+        physics.air_specific_heat_j_kg_k,
+        physics.thermal_conductance_w_k,
+        physics.thermal_capacity_j_k,
+        physics.atmospheric_pressure_pa,
+        physics.humidity_ratio_constant,
+        physics.saturation_vapor_pressure_reference_pa,
+        physics.saturation_pressure_exponent,
+        physics.saturation_pressure_offset_c,
+        physics.fan_airflow_speed_exponent,
+        physics.fan_power_speed_exponent,
+    ) <= 0:
+        raise ConfigurationError("physics flow, heat, pressure and psychrometric coefficients must be positive")
+    if min(
+        physics.wind_pressure_coefficient,
+        physics.sensible_heat_w_per_person,
+        physics.pm25_deposition_rate_per_hour,
+        physics.moisture_generation_kg_h_per_person,
+    ) < 0:
+        raise ConfigurationError("physics source, wind and deposition rates cannot be negative")
+    if not 0 <= physics.minimum_humidity_percent < physics.maximum_humidity_percent <= 100:
+        raise ConfigurationError("humidity limits must be ordered between 0 and 100 percent")
+    if physics.minimum_room_temperature_c >= physics.maximum_room_temperature_c:
+        raise ConfigurationError("room temperature limits must be ordered")
+    if physics.minimum_room_temperature_c <= -physics.saturation_pressure_offset_c:
+        raise ConfigurationError("minimum room temperature is outside the saturation-pressure model range")
     if not 0 <= config.devices.initial_window_position_percent <= 100:
         raise ConfigurationError("initial window position must be between 0 and 100")
     if not 0 <= config.devices.filter_efficiency <= 1:
         raise ConfigurationError("filter efficiency must be between 0 and 1")
+    if not 0 < config.devices.intake_efficiency <= 1 or not 0 < config.devices.exhaust_efficiency <= 1:
+        raise ConfigurationError("fan efficiencies must be in (0, 1]")
     if not 0 <= config.devices.window_reed_open_threshold_percent <= 100:
         raise ConfigurationError("reed switch threshold must be between 0 and 100")
     if config.backend.telemetry_interval_seconds <= 0 or config.backend.request_timeout_seconds <= 0:
@@ -445,6 +528,12 @@ def load_config(
     window_table = _section(raw["devices"], "window", paths["devices"])
     ventilation_table = _section(raw["devices"], "ventilation", paths["devices"])
     physics_table = _section(raw["physics"], "physics", paths["physics"])
+    window_flow_table = _section(raw["physics"], "window_flow", paths["physics"])
+    air_table = _section(raw["physics"], "air", paths["physics"])
+    thermal_table = _section(raw["physics"], "thermal", paths["physics"])
+    particles_table = _section(raw["physics"], "particles", paths["physics"])
+    moisture_table = _section(raw["physics"], "moisture", paths["physics"])
+    fans_table = _section(raw["physics"], "fans", paths["physics"])
     backend_table = _section(raw["backend"], "backend", paths["backend"])
     graphics_table = _section(raw["graphics"], "graphics", paths["graphics"])
     lighting_table = _section(raw["graphics"], "lighting", paths["graphics"])
@@ -461,7 +550,9 @@ def load_config(
             initial_indoor=_air_reading(indoor_table, "room.toml [initial_indoor]"),
             initial_outdoor=_air_reading(outdoor_table, "room.toml [initial_outdoor]"),
             occupancy=_integer(environment_table, "occupancy", "room.toml [environment]"),
-            co2_generation_l_min=_number(environment_table, "co2_generation_l_min", "room.toml [environment]"),
+            co2_generation_l_min_per_person=_number(
+                environment_table, "co2_generation_l_min_per_person", "room.toml [environment]"
+            ),
             pm25_generation_ug_min=_number(environment_table, "pm25_generation_ug_min", "room.toml [environment]"),
             infiltration_ach=_number(environment_table, "infiltration_ach", "room.toml [environment]"),
             weather=_text(environment_table, "weather", "room.toml [environment]"),
@@ -481,12 +572,82 @@ def load_config(
             intake_airflow_m3_h=_number(ventilation_table, "intake_airflow_m3_h", "devices.toml [ventilation]"),
             exhaust_airflow_m3_h=_number(ventilation_table, "exhaust_airflow_m3_h", "devices.toml [ventilation]"),
             filter_efficiency=_number(ventilation_table, "filter_efficiency", "devices.toml [ventilation]"),
+            filter_enabled=_boolean(ventilation_table, "filter_enabled", "devices.toml [ventilation]"),
             intake_power_w=_number(ventilation_table, "intake_power_w", "devices.toml [ventilation]"),
             exhaust_power_w=_number(ventilation_table, "exhaust_power_w", "devices.toml [ventilation]"),
+            intake_efficiency=_number(ventilation_table, "intake_efficiency", "devices.toml [ventilation]"),
+            exhaust_efficiency=_number(ventilation_table, "exhaust_efficiency", "devices.toml [ventilation]"),
         )
         physics = PhysicsConfig(
             fixed_step_seconds=_number(physics_table, "fixed_step_seconds", "physics.toml [physics]"),
             max_substeps_per_frame=_integer(physics_table, "max_substeps_per_frame", "physics.toml [physics]"),
+            simulation_speeds=_number_tuple(physics_table, "simulation_speeds", "physics.toml [physics]"),
+            window_discharge_coefficient=_number(
+                window_flow_table, "discharge_coefficient", "physics.toml [window_flow]"
+            ),
+            window_effective_area_factor=_number(
+                window_flow_table, "effective_area_factor", "physics.toml [window_flow]"
+            ),
+            window_opening_exponent=_number(
+                window_flow_table, "opening_exponent", "physics.toml [window_flow]"
+            ),
+            window_max_airflow_m3_h=_number(
+                window_flow_table, "maximum_airflow_m3_h", "physics.toml [window_flow]"
+            ),
+            wind_pressure_coefficient=_number(
+                window_flow_table, "wind_pressure_coefficient", "physics.toml [window_flow]"
+            ),
+            window_facade_normal_degrees=_number(
+                window_flow_table, "facade_normal_degrees", "physics.toml [window_flow]"
+            ),
+            window_stack_height_m=_number(
+                window_flow_table, "stack_height_m", "physics.toml [window_flow]"
+            ),
+            gravity_m_s2=_number(air_table, "gravity_m_s2", "physics.toml [air]"),
+            air_density_kg_m3=_number(air_table, "density_kg_m3", "physics.toml [air]"),
+            air_specific_heat_j_kg_k=_number(air_table, "specific_heat_j_kg_k", "physics.toml [air]"),
+            thermal_conductance_w_k=_number(
+                thermal_table, "envelope_conductance_w_k", "physics.toml [thermal]"
+            ),
+            thermal_capacity_j_k=_number(
+                thermal_table, "effective_heat_capacity_j_k", "physics.toml [thermal]"
+            ),
+            sensible_heat_w_per_person=_number(
+                thermal_table, "sensible_heat_w_per_person", "physics.toml [thermal]"
+            ),
+            minimum_room_temperature_c=_number(
+                thermal_table, "minimum_room_temperature_c", "physics.toml [thermal]"
+            ),
+            maximum_room_temperature_c=_number(
+                thermal_table, "maximum_room_temperature_c", "physics.toml [thermal]"
+            ),
+            pm25_deposition_rate_per_hour=_number(
+                particles_table, "deposition_rate_per_hour", "physics.toml [particles]"
+            ),
+            moisture_generation_kg_h_per_person=_number(
+                moisture_table, "generation_kg_h_per_person", "physics.toml [moisture]"
+            ),
+            atmospheric_pressure_pa=_number(moisture_table, "pressure_pa", "physics.toml [moisture]"),
+            humidity_ratio_constant=_number(
+                moisture_table, "humidity_ratio_constant", "physics.toml [moisture]"
+            ),
+            saturation_vapor_pressure_reference_pa=_number(
+                moisture_table, "saturation_reference_pa", "physics.toml [moisture]"
+            ),
+            saturation_pressure_exponent=_number(
+                moisture_table, "saturation_exponent", "physics.toml [moisture]"
+            ),
+            saturation_pressure_offset_c=_number(
+                moisture_table, "saturation_offset_c", "physics.toml [moisture]"
+            ),
+            minimum_humidity_percent=_number(
+                moisture_table, "minimum_relative_humidity_percent", "physics.toml [moisture]"
+            ),
+            maximum_humidity_percent=_number(
+                moisture_table, "maximum_relative_humidity_percent", "physics.toml [moisture]"
+            ),
+            fan_airflow_speed_exponent=_number(fans_table, "airflow_speed_exponent", "physics.toml [fans]"),
+            fan_power_speed_exponent=_number(fans_table, "power_speed_exponent", "physics.toml [fans]"),
         )
         backend = BackendConfig(
             backend_url=_text(backend_table, "backend_url", "backend.toml [backend]").rstrip("/"),

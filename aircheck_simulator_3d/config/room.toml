@@ -16,7 +16,8 @@ humidity_percent = 60.0
 
 [environment]
 occupancy = 1
-co2_generation_l_min = 0.005
+# Adult at light indoor activity: configurable baseline, L/min per occupant.
+co2_generation_l_min_per_person = 0.30
 pm25_generation_ug_min = 0.0
 infiltration_ach = 0.3
 weather = "clear"

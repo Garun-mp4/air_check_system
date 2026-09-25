@@ -5,6 +5,7 @@ import logging
 from aircheck_simulator_3d.app.runtime import ApplicationRuntime
 from aircheck_simulator_3d.app.config import CameraConfig, GraphicsConfig, SceneConfig
 from aircheck_simulator_3d.devices.device_layer import DeviceLayer
+from aircheck_simulator_3d.simulation.engine import SimulationEngine
 from aircheck_simulator_3d.scene.lighting import SceneLighting
 from aircheck_simulator_3d.presentation.viewport import SimulatorViewport
 
@@ -15,7 +16,14 @@ LOGGER = logging.getLogger("aircheck.application.scene.window")
 class PandaWindow:
     """Panda3D window and graphics host. Scene composition lives in SimulatorViewport."""
 
-    def __init__(self, config: GraphicsConfig, scene: SceneConfig, camera: CameraConfig, devices: DeviceLayer) -> None:
+    def __init__(
+        self,
+        config: GraphicsConfig,
+        scene: SceneConfig,
+        camera: CameraConfig,
+        devices: DeviceLayer,
+        simulation: SimulationEngine,
+    ) -> None:
         try:
             from panda3d.core import AntialiasAttrib, WindowProperties, loadPrcFileData
             from direct.showbase.ShowBase import ShowBase
@@ -44,8 +52,15 @@ class PandaWindow:
         self._runtime = None
         try:
             self._lighting = SceneLighting(self._base, config)
-            self._viewport = SimulatorViewport(self._base, config, scene, camera, devices.presentation_state)
-            self._runtime = ApplicationRuntime(self._base, devices, self._viewport)
+            self._viewport = SimulatorViewport(
+                self._base,
+                config,
+                scene,
+                camera,
+                devices.presentation_state,
+                simulation.state.simulation_speed,
+            )
+            self._runtime = ApplicationRuntime(self._base, devices, self._viewport, simulation)
             framebuffer_samples = self._base.win.getFbProperties().getMultisamples()
             if config.multisample_enabled and framebuffer_samples > 0:
                 self._base.render.setAntialias(AntialiasAttrib.MMultisample)

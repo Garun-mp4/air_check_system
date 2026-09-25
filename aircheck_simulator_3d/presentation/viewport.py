@@ -27,6 +27,7 @@ class SimulatorViewport:
         scene_config: SceneConfig,
         camera_config: CameraConfig,
         initial_device_state: DevicePresentationState,
+        initial_simulation_speed: float,
     ) -> None:
         self._base = base
         from panda3d.core import ClockObject
@@ -36,6 +37,7 @@ class SimulatorViewport:
         self._device_bindings = DeviceVisualBindings(self._scene.device_scene)
         self.apply_device_state(initial_device_state, 0.0)
         self._overlay = SceneOverlay(base, graphics)
+        self._overlay.set_simulation_speed(initial_simulation_speed)
         self._cutaway = CutawayController(self._scene.cutaway_wall)
         self._picker = ScenePicker(base, self._scene.objects)
         self._camera = CameraController(base, camera_config)
@@ -59,6 +61,9 @@ class SimulatorViewport:
 
     def apply_device_state(self, state: DevicePresentationState, delta_seconds: float) -> None:
         self._device_bindings.apply(state, delta_seconds)
+
+    def set_simulation_speed(self, speed: float) -> None:
+        self._overlay.set_simulation_speed(speed)
 
     def _update(self, task: Any) -> Any:
         dt = min(max(float(self._clock.getDt()), 0.0), 0.1)

@@ -32,5 +32,10 @@ exhaust_nominal_rpm = 1200.0
 intake_airflow_m3_h = 60.0
 exhaust_airflow_m3_h = 60.0
 filter_efficiency = 0.82
+# Filter is active by default whenever the intake path is used.
+filter_enabled = true
+# Fan power values are shaft-output estimates; electrical input is power / efficiency.
 intake_power_w = 5.0
 exhaust_power_w = 5.0
+intake_efficiency = 0.60
+exhaust_efficiency = 0.60
