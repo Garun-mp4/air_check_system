@@ -42,7 +42,12 @@ class SceneOverlay:
         )
         self._controls = DirectLabel(
             parent=self._left_frame,
-            text="W A S D   move\nQ / E      vertical\nShift       fast move\nRMB         look\nWheel       dolly\nLMB         select\nF           focus\nR           reset camera\nC           cutaway wall\nO           open window\nK           close window\n1           intake fan\n2           exhaust fan\nEsc         menu / release",
+            text=(
+                "W A S D   move\nQ / E      vertical\nShift       fast move\nRMB         look\nWheel       dolly\n"
+                "LMB         select\nF           focus\nR           reset camera\nC           cutaway wall\nO / K       window open / close\n"
+                "I / X       intake / exhaust\nV           filter on / off\nSpace       pause / resume\n"
+                "1-6         1x / 2x / 5x / 10x / 30x / 60x\nEsc         menu / release"
+            ),
             text_fg=(0.71, 0.83, 0.86, 1),
             text_scale=0.032,
             text_align=TextNode.ALeft,
@@ -59,7 +64,7 @@ class SceneOverlay:
             text_align=TextNode.ALeft,
             text_font=self._font,
             frameColor=(0, 0, 0, 0),
-            pos=(-0.37, 0, -0.88),
+            pos=(-0.37, 0, -0.82),
             relief=DGG.FLAT,
         )
         self._right_frame = DirectFrame(
@@ -135,7 +140,10 @@ class SceneOverlay:
                 "R           — исходное положение камеры\n"
                 "C           — переключить режим передней стены\n"
                 "O / K       — открыть / закрыть окно\n"
-                "1 / 2       — приточный / вытяжной вентилятор\n\n"
+                "I / X       — приточный / вытяжной вентилятор\n"
+                "V           — фильтр притока вкл. / выкл.\n"
+                "Space       — пауза / продолжить время\n"
+                "1…6         — 1× / 2× / 5× / 10× / 30× / 60×\n\n"
                 "Esc — закрыть подсказку и продолжить"
             ),
             text_fg=(*config.text_rgb, 1),
@@ -148,7 +156,23 @@ class SceneOverlay:
             relief=DGG.FLAT,
         )
         self._help_frame.hide()
+        self._simulation_label = DirectLabel(
+            parent=self._left_frame,
+            text="SIMULATION  /  1×",
+            text_fg=(0.43, 0.9, 0.82, 1),
+            text_scale=0.032,
+            text_align=TextNode.ALeft,
+            text_font=self._font,
+            frameColor=(0, 0, 0, 0),
+            pos=(-0.37, 0, -0.89),
+            relief=DGG.FLAT,
+        )
         self._layout(self._aspect)
+
+    def set_simulation_speed(self, speed: float) -> None:
+        self._simulation_label["text"] = (
+            "SIMULATION  /  PAUSED" if speed == 0 else f"SIMULATION  /  {speed:g}×"
+        )
 
     def update(
         self,

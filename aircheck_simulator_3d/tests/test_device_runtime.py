@@ -48,6 +48,9 @@ class _Viewport:
     def apply_device_state(self, state: object, delta_seconds: float) -> None:
         self.snapshots.append((state, delta_seconds))
 
+    def set_simulation_speed(self, speed: float) -> None:
+        self.speed = speed
+
 
 class _Clock:
     def getDt(self) -> float:
@@ -57,13 +60,13 @@ class _Clock:
 def test_runtime_routes_debug_keys_and_publishes_device_snapshots() -> None:
     config = load_config(CONFIG_DIR, {})
     app = Application(config)
-    devices = DeviceLayer(app.state, config.devices)
+    devices = app.device_layer
     base, viewport = _Base(), _Viewport()
-    runtime = ApplicationRuntime(base, devices, viewport, clock=_Clock())
+    runtime = ApplicationRuntime(base, devices, viewport, app.simulation_engine, clock=_Clock())
 
-    assert set(base.handlers) == {"o", "k", "1", "2"}
+    assert set(base.handlers) == {"o", "k", "i", "x", "v", "space", "1", "2", "3", "4", "5", "6"}
     base.handlers["o"]()
-    base.handlers["1"]()
+    base.handlers["i"]()
     assert devices.simulation_state.window.motor_state is WindowMotorState.OPENING
     assert devices.presentation_state.intake.enabled
 
@@ -76,8 +79,17 @@ def test_runtime_routes_debug_keys_and_publishes_device_snapshots() -> None:
 
     base.handlers["k"]()
     assert devices.simulation_state.window.motor_state is WindowMotorState.CLOSING
-    base.handlers["2"]()
+    base.handlers["x"]()
     assert devices.presentation_state.exhaust.enabled
+    base.handlers["2"]()
+    assert app.state.simulation_speed == 2
+    assert viewport.speed == 2
+    base.handlers["space"]()
+    assert app.state.simulation_speed == 0
+    base.handlers["space"]()
+    assert app.state.simulation_speed == 2
+    base.handlers["v"]()
+    assert not app.state.ventilation.filter_enabled
 
     runtime.close()
     assert not base.handlers

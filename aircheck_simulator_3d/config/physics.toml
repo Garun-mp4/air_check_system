@@ -1,3 +1,44 @@
 [physics]
-fixed_step_seconds = 1.0
-max_substeps_per_frame = 5
+fixed_step_seconds = 0.1
+max_substeps_per_frame = 128
+simulation_speeds = [1.0, 2.0, 5.0, 10.0, 30.0, 60.0]
+
+[window_flow]
+# Effective opening area is a fraction of the geometric sash area; the cap avoids implausible room-scale flows.
+discharge_coefficient = 0.62
+effective_area_factor = 0.025
+opening_exponent = 1.0
+maximum_airflow_m3_h = 900.0
+wind_pressure_coefficient = 0.60
+facade_normal_degrees = 0.0
+stack_height_m = 2.5
+
+[air]
+gravity_m_s2 = 9.80665
+density_kg_m3 = 1.204
+specific_heat_j_kg_k = 1005.0
+
+[thermal]
+envelope_conductance_w_k = 45.0
+effective_heat_capacity_j_k = 5000000.0
+sensible_heat_w_per_person = 75.0
+minimum_room_temperature_c = -40.0
+maximum_room_temperature_c = 80.0
+
+[particles]
+deposition_rate_per_hour = 0.30
+
+[moisture]
+generation_kg_h_per_person = 0.05
+pressure_pa = 101325.0
+humidity_ratio_constant = 0.62198
+saturation_reference_pa = 610.94
+saturation_exponent = 17.625
+saturation_offset_c = 243.04
+minimum_relative_humidity_percent = 0.0
+maximum_relative_humidity_percent = 100.0
+
+[fans]
+# Standard fan affinity assumptions; power exponent 3 approximates variable-speed electrical load.
+airflow_speed_exponent = 1.0
+power_speed_exponent = 3.0

@@ -43,6 +43,11 @@ def test_dashboard_defaults_to_configured_backend() -> None:
     config = load_config(CONFIG_DIR, {})
 
     assert config.backend.resolved_dashboard_url == config.backend.backend_url
+    assert config.room.co2_generation_l_min_per_person == pytest.approx(0.30)
+    assert config.physics.fixed_step_seconds == pytest.approx(0.1)
+    assert config.physics.simulation_speeds == (1.0, 2.0, 5.0, 10.0, 30.0, 60.0)
+    assert config.devices.filter_enabled
+    assert 0 < config.devices.intake_efficiency <= 1
 
 
 def test_invalid_backend_url_is_rejected(tmp_path: Path) -> None:
