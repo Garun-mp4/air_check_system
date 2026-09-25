@@ -1,23 +1,37 @@
 from __future__ import annotations
 
+import logging
+import webbrowser
+from collections.abc import Callable
 from typing import Any
 
 from aircheck_simulator_3d.app.config import GraphicsConfig
+from aircheck_simulator_3d.networking.contracts import BackendForecast
 from aircheck_simulator_3d.scene.cutaway import CutawayMode
 from aircheck_simulator_3d.scene.objects import SceneObject
+
+LOGGER = logging.getLogger("aircheck.application.ui")
 
 
 class SceneOverlay:
     """Small scene-control and selection panels; not a simulation dashboard."""
 
-    def __init__(self, base: Any, config: GraphicsConfig) -> None:
-        from direct.gui.DirectGui import DirectFrame, DirectLabel
+    def __init__(
+        self,
+        base: Any,
+        config: GraphicsConfig,
+        dashboard_url: str = "",
+        browser_open: Callable[[str], bool] | None = None,
+    ) -> None:
+        from direct.gui.DirectGui import DirectButton, DirectFrame, DirectLabel
         from direct.gui import DirectGuiGlobals as DGG
         from direct.gui.OnscreenText import OnscreenText
         from panda3d.core import Filename, TextNode
 
         self._base = base
         self._aspect = base.getAspectRatio()
+        self._dashboard_url = dashboard_url
+        self._browser_open = browser_open or webbrowser.open
         self._font = base.loader.loadFont(str(Filename.fromOsSpecific(config.ui_font_path)))
         if self._font is None:
             raise RuntimeError(f"could not load UI font: {config.ui_font_path}")
@@ -70,7 +84,7 @@ class SceneOverlay:
         self._right_frame = DirectFrame(
             parent=base.aspect2d,
             frameColor=(0.025, 0.07, 0.1, 0.88),
-            frameSize=(-0.43, 0.43, -0.58, 0.04),
+            frameSize=(-0.43, 0.43, -0.72, 0.04),
             pos=(0, 0, 0),
             relief=DGG.FLAT,
             state=DGG.DISABLED,
@@ -98,6 +112,28 @@ class SceneOverlay:
             pos=(-0.37, 0, -0.18),
             relief=DGG.FLAT,
         )
+        self._backend_status = DirectLabel(
+            parent=self._right_frame,
+            text="BACKEND / CONNECTING",
+            text_fg=(0.94, 0.72, 0.38, 1),
+            text_scale=0.031,
+            text_align=TextNode.ALeft,
+            text_font=self._font,
+            frameColor=(0, 0, 0, 0),
+            pos=(-0.37, 0, -0.56),
+            relief=DGG.FLAT,
+        )
+        self._forecast = DirectLabel(
+            parent=self._right_frame,
+            text="CO2 +15 MIN / —",
+            text_fg=(0.71, 0.83, 0.86, 1),
+            text_scale=0.031,
+            text_align=TextNode.ALeft,
+            text_font=self._font,
+            frameColor=(0, 0, 0, 0),
+            pos=(-0.37, 0, -0.64),
+            relief=DGG.FLAT,
+        )
         self._status = OnscreenText(
             parent=base.aspect2d,
             text="",
@@ -117,6 +153,19 @@ class SceneOverlay:
             scale=0.055,
             mayChange=True,
             font=self._font,
+        )
+        self._dashboard_button = DirectButton(
+            parent=base.aspect2d,
+            text="Открыть панель AirCheck",
+            text_fg=(*config.text_rgb, 1),
+            text_scale=0.029,
+            text_font=self._font,
+            frameColor=(0.035, 0.18, 0.2, 0.96),
+            frameSize=(-0.27, 0.27, -0.045, 0.045),
+            command=self.open_dashboard,
+            pos=(0, 0, -0.93),
+            relief=DGG.RAISED,
+            state=DGG.NORMAL if dashboard_url else DGG.DISABLED,
         )
         self._help_frame = DirectFrame(
             parent=base.aspect2d,
@@ -174,6 +223,28 @@ class SceneOverlay:
             "SIMULATION  /  PAUSED" if speed == 0 else f"SIMULATION  /  {speed:g}×"
         )
 
+    def set_backend_status(self, online: bool, forecast: BackendForecast | None) -> None:
+        if online:
+            self._backend_status["text"] = "BACKEND ONLINE"
+            self._backend_status["text_fg"] = (0.43, 0.9, 0.72, 1)
+        else:
+            self._backend_status["text"] = "BACKEND OFFLINE"
+            self._backend_status["text_fg"] = (1.0, 0.42, 0.34, 1)
+        self._forecast["text"] = (
+            f"CO2 +15 MIN / {forecast.predicted_co2_15min:.0f} ppm"
+            if forecast is not None
+            else "CO2 +15 MIN / —"
+        )
+
+    def open_dashboard(self) -> None:
+        if not self._dashboard_url:
+            return
+        try:
+            if not self._browser_open(self._dashboard_url):
+                LOGGER.warning("could not open AirCheck dashboard URL: %s", self._dashboard_url)
+        except Exception:
+            LOGGER.exception("failed to open AirCheck dashboard URL")
+
     def update(
         self,
         cutaway_mode: CutawayMode,
@@ -220,9 +291,11 @@ class SceneOverlay:
         side_offset = max(aspect - 0.45, 0.48)
         self._left_frame.setPos(-side_offset, 0, 0.93)
         self._right_frame.setPos(side_offset, 0, 0.93)
+        self._dashboard_button.setPos(max(aspect - 0.34, 0.34), 0, -0.93)
 
     def close(self) -> None:
         for element in (
             self._left_frame, self._right_frame, self._status, self._cursor, self._help_frame,
+            self._dashboard_button,
         ):
             element.destroy()

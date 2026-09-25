@@ -22,6 +22,8 @@ def test_load_config_and_legacy_environment_names() -> None:
             "BASE_HUMIDITY": "50",
             "RETRY_ATTEMPTS": "5",
             "RETRY_BASE_DELAY_SECONDS": "2",
+            "COMMAND_POLL_INTERVAL_SECONDS": "1.5",
+            "BACKEND_HEALTH_CHECK_INTERVAL_SECONDS": "9",
             "LOG_LEVEL": "DEBUG",
         },
     )
@@ -33,6 +35,8 @@ def test_load_config_and_legacy_environment_names() -> None:
     assert config.backend.request_timeout_seconds == 3
     assert config.backend.retry_attempts == 5
     assert config.backend.retry_base_delay_seconds == 2
+    assert config.backend.command_poll_interval_seconds == 1.5
+    assert config.backend.health_check_interval_seconds == 9
     assert config.room.initial_indoor.co2_ppm == 720
     assert config.room.initial_indoor.temperature_c == 24
     assert config.room.initial_indoor.humidity_percent == 50

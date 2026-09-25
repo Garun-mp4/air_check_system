@@ -17,6 +17,7 @@ from aircheck_simulator_3d.devices.models import (
     WindowDeviceState,
     WindowMotorState,
 )
+from aircheck_simulator_3d.networking.workers import NetworkIntegration
 from aircheck_simulator_3d.scene.window import PandaWindow
 from aircheck_simulator_3d.simulation.state import (
     AirflowState,
@@ -131,12 +132,16 @@ class Application:
         lifecycle = Lifecycle()
         try:
             if self._window_factory is None:
+                network = NetworkIntegration(self.config.backend, self.config.devices.device_id)
+                lifecycle.add_cleanup(network.close)
+                network.start()
                 view = PandaWindow(
                     self.config.graphics,
                     self.config.scene,
                     self.config.camera,
                     self.device_layer,
                     self.simulation_engine,
+                    network,
                 )
             else:
                 view = self._window_factory(self.config.graphics)
