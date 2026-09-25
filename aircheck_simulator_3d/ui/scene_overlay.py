@@ -24,7 +24,7 @@ class SceneOverlay:
         self._left_frame = DirectFrame(
             parent=base.aspect2d,
             frameColor=(0.025, 0.07, 0.1, 0.88),
-            frameSize=(-0.43, 0.43, -0.73, 0.04),
+            frameSize=(-0.43, 0.43, -0.93, 0.04),
             pos=(0, 0, 0),
             relief=DGG.FLAT,
             state=DGG.DISABLED,
@@ -42,9 +42,9 @@ class SceneOverlay:
         )
         self._controls = DirectLabel(
             parent=self._left_frame,
-            text="W A S D   move\nQ / E      vertical\nShift       fast move\nRMB         look\nWheel       dolly\nLMB         select\nF           focus\nR           reset camera\nC           cutaway wall\nEsc         menu / release",
+            text="W A S D   move\nQ / E      vertical\nShift       fast move\nRMB         look\nWheel       dolly\nLMB         select\nF           focus\nR           reset camera\nC           cutaway wall\nO           open window\nK           close window\n1           intake fan\n2           exhaust fan\nEsc         menu / release",
             text_fg=(0.71, 0.83, 0.86, 1),
-            text_scale=0.035,
+            text_scale=0.032,
             text_align=TextNode.ALeft,
             text_font=self._font,
             frameColor=(0, 0, 0, 0),
@@ -59,7 +59,7 @@ class SceneOverlay:
             text_align=TextNode.ALeft,
             text_font=self._font,
             frameColor=(0, 0, 0, 0),
-            pos=(-0.37, 0, -0.67),
+            pos=(-0.37, 0, -0.88),
             relief=DGG.FLAT,
         )
         self._right_frame = DirectFrame(
@@ -116,7 +116,7 @@ class SceneOverlay:
         self._help_frame = DirectFrame(
             parent=base.aspect2d,
             frameColor=(0.025, 0.07, 0.1, 0.96),
-            frameSize=(-0.72, 0.72, -0.49, 0.49),
+            frameSize=(-0.72, 0.72, -0.56, 0.56),
             pos=(0, 0, 0),
             relief=DGG.FLAT,
             state=DGG.DISABLED,
@@ -133,7 +133,9 @@ class SceneOverlay:
                 "ЛКМ         — выбрать объект\n"
                 "F           — фокус на выборе\n"
                 "R           — исходное положение камеры\n"
-                "C           — переключить режим передней стены\n\n"
+                "C           — переключить режим передней стены\n"
+                "O / K       — открыть / закрыть окно\n"
+                "1 / 2       — приточный / вытяжной вентилятор\n\n"
                 "Esc — закрыть подсказку и продолжить"
             ),
             text_fg=(*config.text_rgb, 1),

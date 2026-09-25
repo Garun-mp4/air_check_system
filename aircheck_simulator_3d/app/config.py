@@ -114,6 +114,7 @@ class SceneConfig:
     window_height_m: float
     window_sill_height_m: float
     outdoor_depth_m: float
+    window_open_angle_degrees: float
 
 
 @dataclass(frozen=True)
@@ -407,6 +408,8 @@ def _validate(config: AppConfig) -> None:
         raise ConfigurationError("window dimensions must fit inside the room")
     if not 0 < scene.window_sill_height_m < scene.room_height_m - scene.window_height_m:
         raise ConfigurationError("window sill and height must fit inside the room")
+    if not 10 <= scene.window_open_angle_degrees <= 80:
+        raise ConfigurationError("window open angle must be between 10 and 80 degrees")
     camera = config.camera
     if min(camera.move_speed_m_s, camera.fast_move_multiplier, camera.acceleration, camera.wheel_step_m) <= 0:
         raise ConfigurationError("camera speed, acceleration and wheel step must be positive")
@@ -536,6 +539,7 @@ def load_config(
             window_height_m=_number(scene_table, "window_height_m", "scene.toml [scene]"),
             window_sill_height_m=_number(scene_table, "window_sill_height_m", "scene.toml [scene]"),
             outdoor_depth_m=_number(scene_table, "outdoor_depth_m", "scene.toml [scene]"),
+            window_open_angle_degrees=_number(scene_table, "window_open_angle_degrees", "scene.toml [scene]"),
         )
         log_directory = Path(_text(logging_table, "directory", "logging.toml [logging]"))
         if not log_directory.is_absolute():

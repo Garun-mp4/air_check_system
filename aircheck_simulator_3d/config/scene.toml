@@ -8,3 +8,4 @@ window_width_m = 1.8
 window_height_m = 1.25
 window_sill_height_m = 0.9
 outdoor_depth_m = 4.5
+window_open_angle_degrees = 55.0

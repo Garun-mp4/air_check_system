@@ -38,7 +38,7 @@ def test_default_camera_and_stand_config_are_externalized() -> None:
     assert config.graphics.shadows_enabled
 
 
-def test_stand_contains_required_spatial_zones_without_equipment_models() -> None:
+def test_stand_contains_physical_aircheck_devices_and_pick_targets() -> None:
     config = load_config()
     base = type("SceneBase", (), {})()
     base.render = NodePath(PandaNode("render"))
@@ -51,19 +51,88 @@ def test_stand_contains_required_spatial_zones_without_equipment_models() -> Non
         "wall.cutaway",
         "window.assembly",
         "environment.outdoor",
-        "zone.ventilation.intake",
-        "zone.ventilation.exhaust",
-        "zone.indoor-node",
-        "zone.window-node",
-        "zone.outdoor-node",
-        "zone.electronics",
+        "device.esp32",
+        "sensor.scd41.indoor",
+        "sensor.sps30.indoor",
+        "sensor.sht45.outdoor",
+        "sensor.sps30.outdoor",
+        "window.reed_switch",
+        "window.magnet",
+        "window.actuator",
+        "window.limit_open",
+        "window.limit_close",
+        "fan.intake",
+        "fan.exhaust",
+        "power.psu_12v",
+        "power.dc_dc",
+        "power.mosfet_module",
+        "power.h_bridge",
+        "power.fuses",
+        "power.terminal_blocks",
     }
     try:
         assert required.issubset(scene.objects)
-        assert scene.root.find("**/window-glass").isEmpty() is False
-        assert scene.root.find("**/back-wall-section-1").isEmpty() is False
-        assert not any("SCD41" in object_id or "ESP32" in object_id for object_id in scene.objects)
+        assert scene.root.find("**/window-movable-glass").isEmpty() is False
+        assert scene.root.find("**/rear-wall-section-1").isEmpty() is False
+        assert scene.root.find("**/intake-filter-pleat-1").isEmpty() is False
+        assert scene.root.find("**/outdoor-weather-hood").isEmpty() is False
+        assert scene.root.find("**/power-12v-intake").isEmpty() is False
     finally:
+        scene.close()
+
+
+def test_mouse_ray_can_select_each_required_device_target() -> None:
+    config = load_config()
+    render = NodePath(PandaNode("render"))
+    lens = PerspectiveLens()
+    lens.setFov(52)
+    camera_path = render.attachNewNode(Camera("camera", lens))
+    base = type("SceneBase", (), {})()
+    base.render = render
+    base.camera = camera_path
+    base.camNode = camera_path
+    base.mouseWatcherNode = _MouseWatcher()
+    scene = StandScene(base, config.scene)
+    cutaway = CutawayController(scene.cutaway_wall)
+    picker = ScenePicker(base, scene.objects)
+    required = (
+        "device.esp32",
+        "sensor.scd41.indoor",
+        "sensor.sps30.indoor",
+        "sensor.sht45.outdoor",
+        "sensor.sps30.outdoor",
+        "window.reed_switch",
+        "window.magnet",
+        "window.actuator",
+        "window.limit_open",
+        "window.limit_close",
+        "fan.intake",
+        "fan.exhaust",
+        "power.psu_12v",
+        "power.dc_dc",
+        "power.mosfet_module",
+        "power.h_bridge",
+    )
+    try:
+        for object_id in required:
+            target = scene.objects[object_id]
+            position = target.node.getPos(render)
+            point = Point3(position.getX(), position.getY(), position.getZ())
+            if object_id == "window.magnet":
+                camera_offset = Point3(-2.0, 0, 0)
+            elif object_id.endswith(".outdoor"):
+                camera_offset = Point3(0, 2.0, 0)
+            else:
+                camera_offset = Point3(0, -2.0, 0)
+            camera_path.setPos(render, point + camera_offset)
+            camera_path.lookAt(render, point)
+            projected = Point2()
+            assert lens.project(camera_path.getRelativePoint(render, point), projected)
+            base.mouseWatcherNode.point = projected
+            selected = picker.update()
+            assert selected is not None and selected.object_id == object_id
+    finally:
+        picker.close()
         scene.close()
 
 

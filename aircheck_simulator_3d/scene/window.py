@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 
+from aircheck_simulator_3d.app.runtime import ApplicationRuntime
 from aircheck_simulator_3d.app.config import CameraConfig, GraphicsConfig, SceneConfig
+from aircheck_simulator_3d.devices.device_layer import DeviceLayer
 from aircheck_simulator_3d.scene.lighting import SceneLighting
 from aircheck_simulator_3d.presentation.viewport import SimulatorViewport
 
@@ -13,7 +15,7 @@ LOGGER = logging.getLogger("aircheck.application.scene.window")
 class PandaWindow:
     """Panda3D window and graphics host. Scene composition lives in SimulatorViewport."""
 
-    def __init__(self, config: GraphicsConfig, scene: SceneConfig, camera: CameraConfig) -> None:
+    def __init__(self, config: GraphicsConfig, scene: SceneConfig, camera: CameraConfig, devices: DeviceLayer) -> None:
         try:
             from panda3d.core import AntialiasAttrib, WindowProperties, loadPrcFileData
             from direct.showbase.ShowBase import ShowBase
@@ -39,9 +41,11 @@ class PandaWindow:
         self._closed = False
         self._lighting = None
         self._viewport = None
+        self._runtime = None
         try:
             self._lighting = SceneLighting(self._base, config)
-            self._viewport = SimulatorViewport(self._base, config, scene, camera)
+            self._viewport = SimulatorViewport(self._base, config, scene, camera, devices.presentation_state)
+            self._runtime = ApplicationRuntime(self._base, devices, self._viewport)
             framebuffer_samples = self._base.win.getFbProperties().getMultisamples()
             if config.multisample_enabled and framebuffer_samples > 0:
                 self._base.render.setAntialias(AntialiasAttrib.MMultisample)
@@ -53,6 +57,8 @@ class PandaWindow:
                 self._base.win.getXSize(), self._base.win.getYSize(), self._base.getAspectRatio(),
             )
         except Exception:
+            if self._runtime is not None:
+                self._runtime.close()
             if self._viewport is not None:
                 self._viewport.close()
             if self._lighting is not None:
@@ -77,6 +83,8 @@ class PandaWindow:
         if self._closed:
             return
         self._closed = True
+        if self._runtime is not None:
+            self._runtime.close()
         if self._viewport is not None:
             self._viewport.close()
         if self._lighting is not None:
