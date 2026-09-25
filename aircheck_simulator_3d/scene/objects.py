@@ -18,14 +18,24 @@ class SceneObject:
     focus_point: tuple[float, float, float]
     is_hovered: bool = False
     is_selected: bool = False
+    is_mode_highlighted: bool = False
 
     def set_highlight(self, hovered: bool, selected: bool) -> None:
         self.is_hovered = hovered
         self.is_selected = selected
-        if selected:
+        self._apply_highlight()
+
+    def set_mode_highlight(self, enabled: bool) -> None:
+        self.is_mode_highlighted = enabled
+        self._apply_highlight()
+
+    def _apply_highlight(self) -> None:
+        if self.is_selected:
             self.node.setColorScale(0.58, 0.91, 1.28, 1)
-        elif hovered:
+        elif self.is_hovered:
             self.node.setColorScale(1.22, 1.08, 0.62, 1)
+        elif self.is_mode_highlighted:
+            self.node.setColorScale(0.9, 1.18, 1.12, 1)
         else:
             self.node.clearColorScale()
 

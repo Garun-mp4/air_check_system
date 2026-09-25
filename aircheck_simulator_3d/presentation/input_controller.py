@@ -18,12 +18,16 @@ class InputController:
         picker: ScenePicker,
         cutaway: CutawayController,
         on_menu_change: Callable[[bool], None],
+        ui_modal_open: Callable[[], bool] | None = None,
+        pointer_over_ui: Callable[[], bool] | None = None,
     ) -> None:
         self._base = base
         self._camera = camera
         self._picker = picker
         self._cutaway = cutaway
         self._on_menu_change = on_menu_change
+        self._ui_modal_open = ui_modal_open or (lambda: False)
+        self._pointer_over_ui = pointer_over_ui or (lambda: False)
         self.menu_open = False
         self._events: list[str] = []
 
@@ -49,29 +53,33 @@ class InputController:
         self._cutaway.set_mode(mode)
 
     def _set_key(self, key: str, pressed: bool) -> None:
-        self._camera.set_key(key, pressed)
+        self._camera.set_key(key, pressed and not self.interaction_blocked)
 
     def _set_looking(self, looking: bool) -> None:
-        if not self.menu_open:
+        if not self.interaction_blocked:
             self._camera.set_looking(looking)
 
     def _select(self) -> None:
-        if not self.menu_open:
+        if not self.interaction_blocked and not self._pointer_over_ui():
             self._picker.select_at_mouse()
 
     def _cycle_cutaway(self) -> None:
-        if not self.menu_open:
+        if not self.interaction_blocked:
             self._cutaway.cycle()
 
     def _focus_selection(self) -> None:
-        if not self.menu_open and self._picker.selected is not None:
+        if not self.interaction_blocked and self._picker.selected is not None:
             target = self._picker.selected
             point = target.node.getPos(self._base.render) + target.focus_point
             self._camera.focus(tuple(point))
 
     def _reset_camera(self) -> None:
-        if not self.menu_open:
+        if not self.interaction_blocked:
             self._camera.reset()
+
+    @property
+    def interaction_blocked(self) -> bool:
+        return self.menu_open or self._ui_modal_open()
 
     def _toggle_menu(self) -> None:
         self.menu_open = not self.menu_open

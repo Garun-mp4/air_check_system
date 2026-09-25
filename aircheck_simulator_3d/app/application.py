@@ -110,6 +110,7 @@ class Application:
                     sensor_id=sensor.sensor_id,
                     model=sensor.model,
                     zone=sensor.zone,
+                    interface=sensor.interface,
                     measurements=sensor.measurements,
                 )
                 for sensor in devices.sensors
@@ -136,9 +137,7 @@ class Application:
                 lifecycle.add_cleanup(network.close)
                 network.start()
                 view = PandaWindow(
-                    self.config.graphics,
-                    self.config.scene,
-                    self.config.camera,
+                    self.config,
                     self.device_layer,
                     self.simulation_engine,
                     network,

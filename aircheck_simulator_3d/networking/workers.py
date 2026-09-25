@@ -48,7 +48,13 @@ class AcknowledgementAccepted:
     command_ids: tuple[int, ...]
 
 
-NetworkEvent = BackendStatusUpdate | CommandReceived | AcknowledgementAccepted
+@dataclass(frozen=True)
+class TelemetryAccepted:
+    forecast: BackendForecast | None
+    accepted_at: str
+
+
+NetworkEvent = BackendStatusUpdate | CommandReceived | AcknowledgementAccepted | TelemetryAccepted
 
 
 class TelemetrySender:
@@ -105,6 +111,8 @@ class NetworkIntegration:
         self._health_monitor = BackendHealthMonitor(self._backend)
         self._monotonic = monotonic
         self._stop = threading.Event()
+        self._demo_offline = threading.Event()
+        self._resume_after_demo_offline = threading.Event()
         self._events: queue.SimpleQueue[NetworkEvent] = queue.SimpleQueue()
         self._ack_inbox: queue.SimpleQueue[ControlStateReport] = queue.SimpleQueue()
         self._pending_acks: deque[ControlStateReport] = deque()
@@ -158,6 +166,17 @@ class NetworkIntegration:
         if report.applied_command_ids:
             self._ack_inbox.put(report)
 
+    def set_demo_offline(self, offline: bool) -> None:
+        if offline:
+            if not self._demo_offline.is_set():
+                self._demo_offline.set()
+                self._events.put(
+                    BackendStatusUpdate(False, self._last_seen_at, self._forecast, "OFFLINE · DEMO SCENARIO")
+                )
+        elif self._demo_offline.is_set():
+            self._demo_offline.clear()
+            self._resume_after_demo_offline.set()
+
     def drain_events(self) -> list[NetworkEvent]:
         events: list[NetworkEvent] = []
         while True:
@@ -175,6 +194,13 @@ class NetworkIntegration:
         consecutive_health_failures = 0
 
         while not self._stop.is_set():
+            if self._demo_offline.is_set():
+                self._stop.wait(0.1)
+                continue
+            if self._resume_after_demo_offline.is_set():
+                self._resume_after_demo_offline.clear()
+                online = False
+                next_health = self._monotonic()
             now = self._monotonic()
             self._take_acknowledgements()
 
@@ -207,7 +233,7 @@ class NetworkIntegration:
                     next_health = now + self.config.health_check_interval_seconds
                     self._set_status(False, message="Unexpected backend health check failure")
 
-            if online and not self._stop.is_set():
+            if online and not self._stop.is_set() and not self._demo_offline.is_set():
                 if self._pending_acks:
                     report = self._pending_acks[0]
                     try:
@@ -274,6 +300,12 @@ class NetworkIntegration:
                     else:
                         self._clear_telemetry_if_current(revision)
                         self._set_status(True, forecast=forecast)
+                        self._events.put(
+                            TelemetryAccepted(
+                                forecast,
+                                datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                            )
+                        )
 
                 if online and now >= next_heartbeat and not self._stop.is_set():
                     report = self._latest_control_state()
@@ -370,6 +402,9 @@ class NetworkIntegration:
         forecast: BackendForecast | None | object = _PRESERVE_FORECAST,
         message: str | None = None,
     ) -> None:
+        if self._demo_offline.is_set():
+            online = False
+            message = "OFFLINE · DEMO SCENARIO"
         if forecast is not _PRESERVE_FORECAST:
             if forecast is not None and not isinstance(forecast, BackendForecast):
                 raise TypeError("forecast update must be a BackendForecast or null")

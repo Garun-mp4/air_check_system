@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 from aircheck_simulator_3d.app.runtime import ApplicationRuntime
-from aircheck_simulator_3d.app.config import CameraConfig, GraphicsConfig, SceneConfig
+from aircheck_simulator_3d.app.config import AppConfig
 from aircheck_simulator_3d.devices.device_layer import DeviceLayer
 from aircheck_simulator_3d.networking.workers import NetworkIntegration
 from aircheck_simulator_3d.simulation.engine import SimulationEngine
@@ -19,9 +19,7 @@ class PandaWindow:
 
     def __init__(
         self,
-        config: GraphicsConfig,
-        scene: SceneConfig,
-        camera: CameraConfig,
+        config: AppConfig,
         devices: DeviceLayer,
         simulation: SimulationEngine,
         network: NetworkIntegration | None = None,
@@ -34,43 +32,47 @@ class PandaWindow:
                 "Panda3D is not installed. Install aircheck_simulator_3d/requirements.txt first."
             ) from exc
 
-        loadPrcFileData("", f"window-title {config.window_title}")
-        loadPrcFileData("", f"win-size {config.width} {config.height}")
-        loadPrcFileData("", f"fullscreen {'true' if config.fullscreen else 'false'}")
+        graphics = config.graphics
+        loadPrcFileData("", f"window-title {graphics.window_title}")
+        loadPrcFileData("", f"win-size {graphics.width} {graphics.height}")
+        loadPrcFileData("", f"fullscreen {'true' if graphics.fullscreen else 'false'}")
         loadPrcFileData("", "audio-library-name null")
-        loadPrcFileData("", f"framebuffer-multisample {'1' if config.multisample_enabled else '0'}")
-        loadPrcFileData("", f"multisamples {config.multisamples}")
+        loadPrcFileData("", f"framebuffer-multisample {'1' if graphics.multisample_enabled else '0'}")
+        loadPrcFileData("", f"multisamples {graphics.multisamples}")
         self._base = ShowBase(windowType="onscreen")
         if self._base.win is None:
             self._base.destroy()
             raise RuntimeError("Panda3D could not create an onscreen window")
         window_properties = WindowProperties()
-        window_properties.setTitle(config.window_title)
+        window_properties.setTitle(graphics.window_title)
         self._base.win.requestProperties(window_properties)
-        self._base.setBackgroundColor(*config.background_rgb, 1)
+        self._base.setBackgroundColor(*graphics.background_rgb, 1)
         self._closed = False
         self._lighting = None
         self._viewport = None
         self._runtime = None
         try:
-            self._lighting = SceneLighting(self._base, config)
+            self._lighting = SceneLighting(self._base, graphics)
             self._viewport = SimulatorViewport(
                 self._base,
-                config,
-                scene,
-                camera,
+                graphics,
+                config.scene,
+                config.camera,
                 devices.presentation_state,
                 simulation.state.simulation_speed,
+                config.devices,
+                config.physics,
+                config.demo,
                 dashboard_url=network.config.resolved_dashboard_url if network else "",
             )
             self._runtime = ApplicationRuntime(
-                self._base, devices, self._viewport, simulation, network=network
+                self._base, devices, self._viewport, simulation, config=config, network=network
             )
             framebuffer_samples = self._base.win.getFbProperties().getMultisamples()
-            if config.multisample_enabled and framebuffer_samples > 0:
+            if graphics.multisample_enabled and framebuffer_samples > 0:
                 self._base.render.setAntialias(AntialiasAttrib.MMultisample)
                 LOGGER.info("Multisampling active (%d samples)", framebuffer_samples)
-            elif config.multisample_enabled:
+            elif graphics.multisample_enabled:
                 LOGGER.warning("Requested MSAA is unavailable; running without multisample antialiasing")
             LOGGER.info(
                 "Panda3D window ready at %dx%d (%.2f aspect)",

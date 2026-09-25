@@ -57,6 +57,11 @@ class DeviceLayer:
     def set_filter_enabled(self, enabled: bool) -> None:
         self._state.ventilation = replace(self._state.ventilation, filter_enabled=enabled)
 
+    def set_filter_efficiency(self, efficiency: float) -> None:
+        if not math.isfinite(efficiency) or not 0 <= efficiency <= 1:
+            raise ValueError("filter efficiency must be between zero and one")
+        self._state.ventilation = replace(self._state.ventilation, filter_efficiency=efficiency)
+
     def toggle_filter(self) -> None:
         self.set_filter_enabled(not self._state.ventilation.filter_enabled)
 
@@ -71,6 +76,12 @@ class DeviceLayer:
             self._state.ventilation,
             exhaust=self._fan_with_speed(self._state.ventilation.exhaust, rpm),
         )
+
+    def set_intake_airflow(self, airflow_m3_h: float) -> None:
+        self._set_fan_airflow("intake", airflow_m3_h)
+
+    def set_exhaust_airflow(self, airflow_m3_h: float) -> None:
+        self._set_fan_airflow("exhaust", airflow_m3_h)
 
     def advance(self, delta_seconds: float) -> None:
         self._state.window = self._window.advance(delta_seconds)
@@ -93,3 +104,15 @@ class DeviceLayer:
             state.nominal_airflow_m3_h * rpm / state.nominal_rpm
         )
         return replace(state, enabled=enabled, rpm=rpm, airflow_m3_h=airflow)
+
+    def _set_fan_airflow(self, name: str, airflow_m3_h: float) -> None:
+        fan = getattr(self._state.ventilation, name)
+        if not math.isfinite(airflow_m3_h) or not 0 <= airflow_m3_h <= fan.nominal_airflow_m3_h:
+            raise ValueError("fan airflow must be finite and within the configured nominal range")
+        rpm = (
+            0.0
+            if airflow_m3_h == 0 or fan.nominal_airflow_m3_h == 0
+            else fan.nominal_rpm * airflow_m3_h / fan.nominal_airflow_m3_h
+        )
+        updated = self._fan_with_speed(fan, rpm)
+        self._state.ventilation = replace(self._state.ventilation, **{name: updated})
