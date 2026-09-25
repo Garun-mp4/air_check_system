@@ -1,0 +1,3 @@
+[physics]
+fixed_step_seconds = 1.0
+max_substeps_per_frame = 5
