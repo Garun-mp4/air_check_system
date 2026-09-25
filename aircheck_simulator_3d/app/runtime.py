@@ -1,9 +1,19 @@
 from __future__ import annotations
 
 import math
+import time
+from datetime import datetime, timezone
 from typing import Any
 
+from aircheck_simulator_3d.devices.command_executor import DeviceCommandExecutor
 from aircheck_simulator_3d.devices.device_layer import DeviceLayer
+from aircheck_simulator_3d.networking.contracts import ControlStateReport, MeasurementPayload
+from aircheck_simulator_3d.networking.workers import (
+    AcknowledgementAccepted,
+    BackendStatusUpdate,
+    CommandReceived,
+    NetworkIntegration,
+)
 from aircheck_simulator_3d.simulation.engine import SimulationEngine
 
 
@@ -17,11 +27,15 @@ class ApplicationRuntime:
         viewport: Any,
         simulation: SimulationEngine,
         clock: Any | None = None,
+        network: NetworkIntegration | None = None,
     ) -> None:
         self._base = base
         self._devices = devices
         self._viewport = viewport
         self._simulation = simulation
+        self._network = network
+        self._command_executor = DeviceCommandExecutor(devices)
+        self._next_telemetry_at = time.monotonic()
         if clock is None:
             from panda3d.core import ClockObject
 
@@ -58,9 +72,48 @@ class ApplicationRuntime:
     def _update(self, task: Any) -> Any:
         raw_delta = float(self._clock.getDt())
         delta_seconds = max(raw_delta, 0.0) if math.isfinite(raw_delta) else 0.0
+        self._drain_network_events()
         self._simulation.advance(delta_seconds)
+        completed_ids = self._command_executor.update()
+        if self._network is not None:
+            now = datetime.now(timezone.utc)
+            if completed_ids:
+                report = ControlStateReport.from_state(
+                    self._network.device_id,
+                    now,
+                    self._devices.simulation_state,
+                    completed_ids,
+                )
+                self._network.acknowledge(report)
+            self._network.publish_actual_state(
+                ControlStateReport.from_state(
+                    self._network.device_id,
+                    now,
+                    self._devices.simulation_state,
+                )
+            )
+            monotonic_now = time.monotonic()
+            if monotonic_now >= self._next_telemetry_at:
+                self._network.publish_telemetry(
+                    MeasurementPayload.from_state(self._simulation.state, now)
+                )
+                self._next_telemetry_at = monotonic_now + self._network.config.telemetry_interval_seconds
         self._viewport.apply_device_state(self._devices.presentation_state, delta_seconds)
         return task.cont
+
+    def _drain_network_events(self) -> None:
+        if self._network is None:
+            return
+        state = self._devices.simulation_state
+        for event in self._network.drain_events():
+            if isinstance(event, CommandReceived):
+                self._command_executor.enqueue(event.command)
+            elif isinstance(event, AcknowledgementAccepted):
+                self._command_executor.acknowledgement_accepted(event.command_ids)
+            elif isinstance(event, BackendStatusUpdate):
+                state.controller.online = event.online
+                state.controller.last_seen_at = event.last_seen_at
+                self._viewport.set_backend_status(event.online, event.forecast)
 
     def close(self) -> None:
         if self._closed:

@@ -109,6 +109,8 @@ class BackendConfig:
     retry_attempts: int
     retry_base_delay_seconds: float
     command_limit: int
+    command_poll_interval_seconds: float = 2.0
+    health_check_interval_seconds: float = 10.0
 
     @property
     def resolved_dashboard_url(self) -> str:
@@ -350,6 +352,12 @@ def _apply_environment_overrides(
             environ, "RETRY_BASE_DELAY_SECONDS", backend.retry_base_delay_seconds
         ),
         command_limit=backend.command_limit,
+        command_poll_interval_seconds=_environment_float(
+            environ, "COMMAND_POLL_INTERVAL_SECONDS", backend.command_poll_interval_seconds
+        ),
+        health_check_interval_seconds=_environment_float(
+            environ, "BACKEND_HEALTH_CHECK_INTERVAL_SECONDS", backend.health_check_interval_seconds
+        ),
     )
     indoor = AirReadingConfig(
         co2_ppm=_environment_float(environ, "INITIAL_CO2", room.initial_indoor.co2_ppm),
@@ -386,6 +394,16 @@ def _validate(config: AppConfig) -> None:
         parsed = urlparse(url)
         if parsed.scheme not in {"http", "https"} or not parsed.netloc:
             raise ConfigurationError(f"{field} must be an absolute HTTP(S) URL")
+    if (
+        config.backend.telemetry_interval_seconds <= 0
+        or config.backend.command_poll_interval_seconds <= 0
+        or config.backend.health_check_interval_seconds <= 0
+        or config.backend.request_timeout_seconds <= 0
+        or config.backend.retry_attempts < 1
+        or config.backend.retry_base_delay_seconds <= 0
+        or config.backend.command_limit < 1
+    ):
+        raise ConfigurationError("backend intervals, timeout, retry policy and command limit are invalid")
     if config.room.volume_m3 <= 0:
         raise ConfigurationError("room volume must be positive")
     if config.room.occupancy < 0 or config.room.co2_generation_l_min_per_person < 0 or config.room.pm25_generation_ug_min < 0:
@@ -657,6 +675,12 @@ def load_config(
             retry_attempts=_integer(backend_table, "retry_attempts", "backend.toml [backend]"),
             retry_base_delay_seconds=_number(backend_table, "retry_base_delay_seconds", "backend.toml [backend]"),
             command_limit=_integer(backend_table, "command_limit", "backend.toml [backend]"),
+            command_poll_interval_seconds=_number(
+                backend_table, "command_poll_interval_seconds", "backend.toml [backend]"
+            ),
+            health_check_interval_seconds=_number(
+                backend_table, "health_check_interval_seconds", "backend.toml [backend]"
+            ),
         )
         graphics = GraphicsConfig(
             window_title=_text(graphics_table, "window_title", "graphics.toml [graphics]"),

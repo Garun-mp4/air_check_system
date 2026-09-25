@@ -7,6 +7,7 @@ from aircheck_simulator_3d.app.application import Application
 from aircheck_simulator_3d.app.config import load_config
 from aircheck_simulator_3d.networking.contracts import (
     ApiRoutes,
+    BackendForecast,
     CommandTarget,
     ControlStateReport,
     MeasurementPayload,
@@ -55,6 +56,25 @@ def test_pending_command_uses_existing_backend_fields() -> None:
     assert command.target is CommandTarget.WINDOW
     assert command.desired_state is True
     assert command.batch_id == "batch-1"
+
+
+def test_backend_forecast_uses_the_ml_response_fields() -> None:
+    forecast = BackendForecast.from_mapping(
+        {
+            "predicted_co2_15min": 917.5,
+            "target_time": "2026-09-06T10:15:00Z",
+            "model_name": "random_forest",
+            "model_version": "1.0",
+        }
+    )
+
+    assert forecast is not None
+    assert forecast.predicted_co2_15min == 917.5
+    assert forecast.target_time == "2026-09-06T10:15:00Z"
+
+
+def test_no_forecast_is_not_replaced_with_a_local_prediction() -> None:
+    assert BackendForecast.from_mapping(None) is None
 
 
 @pytest.mark.parametrize(

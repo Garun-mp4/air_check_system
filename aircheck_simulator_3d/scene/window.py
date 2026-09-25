@@ -5,6 +5,7 @@ import logging
 from aircheck_simulator_3d.app.runtime import ApplicationRuntime
 from aircheck_simulator_3d.app.config import CameraConfig, GraphicsConfig, SceneConfig
 from aircheck_simulator_3d.devices.device_layer import DeviceLayer
+from aircheck_simulator_3d.networking.workers import NetworkIntegration
 from aircheck_simulator_3d.simulation.engine import SimulationEngine
 from aircheck_simulator_3d.scene.lighting import SceneLighting
 from aircheck_simulator_3d.presentation.viewport import SimulatorViewport
@@ -23,6 +24,7 @@ class PandaWindow:
         camera: CameraConfig,
         devices: DeviceLayer,
         simulation: SimulationEngine,
+        network: NetworkIntegration | None = None,
     ) -> None:
         try:
             from panda3d.core import AntialiasAttrib, WindowProperties, loadPrcFileData
@@ -59,8 +61,11 @@ class PandaWindow:
                 camera,
                 devices.presentation_state,
                 simulation.state.simulation_speed,
+                dashboard_url=network.config.resolved_dashboard_url if network else "",
             )
-            self._runtime = ApplicationRuntime(self._base, devices, self._viewport, simulation)
+            self._runtime = ApplicationRuntime(
+                self._base, devices, self._viewport, simulation, network=network
+            )
             framebuffer_samples = self._base.win.getFbProperties().getMultisamples()
             if config.multisample_enabled and framebuffer_samples > 0:
                 self._base.render.setAntialias(AntialiasAttrib.MMultisample)

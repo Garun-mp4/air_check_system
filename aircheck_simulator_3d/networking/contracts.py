@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+import math
 from typing import Mapping, Protocol
 from urllib.parse import urlencode
 
@@ -151,11 +152,42 @@ class ControlStateReport:
         }
 
 
+@dataclass(frozen=True)
+class BackendForecast:
+    """Prediction produced and stored by the AirCheck ML service."""
+
+    predicted_co2_15min: float
+    target_time: str | None = None
+    model_name: str | None = None
+    model_version: str | None = None
+
+    @classmethod
+    def from_mapping(cls, raw: object) -> BackendForecast | None:
+        if raw is None:
+            return None
+        if not isinstance(raw, Mapping):
+            raise ValueError("prediction response must be an object or null")
+        co2 = raw.get("predicted_co2_15min")
+        if isinstance(co2, bool) or not isinstance(co2, (int, float)):
+            raise ValueError("prediction must contain numeric predicted_co2_15min")
+        value = float(co2)
+        if not math.isfinite(value) or value < 0:
+            raise ValueError("predicted CO2 must be finite and non-negative")
+        return cls(
+            predicted_co2_15min=value,
+            target_time=_optional_text(raw.get("target_time")),
+            model_name=_optional_text(raw.get("model_name")),
+            model_version=_optional_text(raw.get("model_version")),
+        )
+
+
 class AirCheckBackend(Protocol):
-    """Transport port for a later networking milestone; no HTTP is performed here."""
+    """Synchronous HTTP port; callers keep all requests off the render thread."""
 
-    def pending_commands(self, device_id: str, limit: int) -> list[PendingControlCommand]: ...
+    def pending_commands(self) -> list[PendingControlCommand]: ...
 
-    def send_measurement(self, payload: MeasurementPayload) -> None: ...
+    def send_measurement(self, payload: MeasurementPayload) -> BackendForecast | None: ...
 
     def report_control_state(self, report: ControlStateReport) -> None: ...
+
+    def latest_snapshot(self) -> BackendForecast | None: ...

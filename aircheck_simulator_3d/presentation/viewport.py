@@ -5,6 +5,7 @@ from typing import Any
 
 from aircheck_simulator_3d.app.config import CameraConfig, GraphicsConfig, SceneConfig
 from aircheck_simulator_3d.devices.presentation_state import DevicePresentationState
+from aircheck_simulator_3d.networking.contracts import BackendForecast
 from aircheck_simulator_3d.presentation.camera_controller import CameraController
 from aircheck_simulator_3d.presentation.device_bindings import DeviceVisualBindings
 from aircheck_simulator_3d.presentation.input_controller import InputController
@@ -28,6 +29,7 @@ class SimulatorViewport:
         camera_config: CameraConfig,
         initial_device_state: DevicePresentationState,
         initial_simulation_speed: float,
+        dashboard_url: str = "",
     ) -> None:
         self._base = base
         from panda3d.core import ClockObject
@@ -36,7 +38,7 @@ class SimulatorViewport:
         self._scene = StandScene(base, scene_config)
         self._device_bindings = DeviceVisualBindings(self._scene.device_scene)
         self.apply_device_state(initial_device_state, 0.0)
-        self._overlay = SceneOverlay(base, graphics)
+        self._overlay = SceneOverlay(base, graphics, dashboard_url)
         self._overlay.set_simulation_speed(initial_simulation_speed)
         self._cutaway = CutawayController(self._scene.cutaway_wall)
         self._picker = ScenePicker(base, self._scene.objects)
@@ -64,6 +66,9 @@ class SimulatorViewport:
 
     def set_simulation_speed(self, speed: float) -> None:
         self._overlay.set_simulation_speed(speed)
+
+    def set_backend_status(self, online: bool, forecast: BackendForecast | None) -> None:
+        self._overlay.set_backend_status(online, forecast)
 
     def _update(self, task: Any) -> Any:
         dt = min(max(float(self._clock.getDt()), 0.0), 0.1)
