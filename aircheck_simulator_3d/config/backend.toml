@@ -1,0 +1,8 @@
+[backend]
+backend_url = "http://localhost:3000"
+dashboard_url = ""
+telemetry_interval_seconds = 30.0
+request_timeout_seconds = 5.0
+retry_attempts = 4
+retry_base_delay_seconds = 1.0
+command_limit = 20

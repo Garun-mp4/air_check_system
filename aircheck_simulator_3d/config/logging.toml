@@ -1,0 +1,5 @@
+[logging]
+directory = "logs"
+level = "INFO"
+max_bytes = 1048576
+backup_count = 3

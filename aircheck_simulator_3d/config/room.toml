@@ -1,0 +1,24 @@
+[room]
+volume_m3 = 48.0
+simulation_speed = 1.0
+
+[initial_indoor]
+co2_ppm = 650.0
+pm25_ug_m3 = 5.0
+temperature_c = 23.0
+humidity_percent = 45.0
+
+[initial_outdoor]
+co2_ppm = 420.0
+pm25_ug_m3 = 8.0
+temperature_c = 18.0
+humidity_percent = 60.0
+
+[environment]
+occupancy = 1
+co2_generation_l_min = 0.005
+pm25_generation_ug_min = 0.0
+infiltration_ach = 0.3
+weather = "clear"
+wind_speed_m_s = 1.0
+wind_direction_degrees = 0.0
