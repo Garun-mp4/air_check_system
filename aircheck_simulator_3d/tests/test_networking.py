@@ -296,6 +296,104 @@ def test_worker_offline_reconnect_telemetry_commands_execution_and_ack() -> None
     assert any(event.online for event in statuses)
 
 
+def test_demo_backend_offline_scenario_pauses_http_and_reconnects() -> None:
+    class CountingBackend:
+        def __init__(self) -> None:
+            self.health_checks = 0
+
+        def latest_snapshot(self):
+            self.health_checks += 1
+            return BackendForecast.from_mapping(PREDICTION)
+
+        def pending_commands(self):
+            return []
+
+        def send_measurement(self, _payload):
+            return BackendForecast.from_mapping(PREDICTION)
+
+        def report_control_state(self, _report):
+            return None
+
+    backend = CountingBackend()
+    network = NetworkIntegration(_config(), "room-01", backend)
+    network.start()
+    assert _wait_for(lambda: backend.health_checks > 0)
+    checks_before_offline = backend.health_checks
+
+    network.set_demo_offline(True)
+    assert _wait_for(
+        lambda: any(
+            isinstance(event, BackendStatusUpdate)
+            and not event.online
+            and event.message == "OFFLINE · DEMO SCENARIO"
+            for event in network.drain_events()
+        )
+    )
+    time.sleep(0.08)
+    assert backend.health_checks == checks_before_offline
+
+    network.set_demo_offline(False)
+    assert _wait_for(lambda: backend.health_checks > checks_before_offline)
+    online_status: list[BackendStatusUpdate] = []
+    assert _wait_for(
+        lambda: _collect_commands(network, [], online_status)
+        or any(event.online for event in online_status)
+    )
+    assert any(event.online for event in online_status)
+    network.close()
+    assert not network.running
+
+
+def test_demo_offline_remains_visible_when_health_request_is_already_in_flight() -> None:
+    entered_health = Event()
+    release_health = Event()
+
+    class BlockingBackend:
+        def __init__(self) -> None:
+            self.health_checks = 0
+
+        def latest_snapshot(self):
+            self.health_checks += 1
+            if self.health_checks == 1:
+                entered_health.set()
+                assert release_health.wait(timeout=1.0)
+            return BackendForecast.from_mapping(PREDICTION)
+
+        def pending_commands(self):
+            return []
+
+        def send_measurement(self, _payload):
+            return BackendForecast.from_mapping(PREDICTION)
+
+        def report_control_state(self, _report):
+            return None
+
+    backend = BlockingBackend()
+    network = NetworkIntegration(_config(), "room-01", backend)
+    network.start()
+    assert entered_health.wait(timeout=1.0)
+    network.set_demo_offline(True)
+    release_health.set()
+
+    offline_events: list[BackendStatusUpdate] = []
+    assert _wait_for(
+        lambda: _collect_commands(network, [], offline_events)
+        or any(event.message == "OFFLINE · DEMO SCENARIO" for event in offline_events)
+    )
+    time.sleep(0.08)
+    offline_events.extend(
+        event for event in network.drain_events() if isinstance(event, BackendStatusUpdate)
+    )
+    assert offline_events
+    assert all(not event.online for event in offline_events)
+    assert backend.health_checks == 1
+
+    network.set_demo_offline(False)
+    assert _wait_for(lambda: backend.health_checks > 1)
+    network.close()
+    assert not network.running
+
+
 def _collect_commands(
     network: NetworkIntegration,
     found: list[CommandReceived],

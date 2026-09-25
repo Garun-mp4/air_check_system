@@ -4,21 +4,25 @@ device_id = "room-01"
 [sensors.indoor_climate]
 model = "Sensirion SCD41"
 zone = "indoor"
+interface = "I²C"
 measurements = ["co2", "temperature", "humidity"]
 
 [sensors.indoor_particles]
 model = "Sensirion SPS30"
 zone = "indoor"
+interface = "UART"
 measurements = ["pm25"]
 
 [sensors.outdoor_climate]
 model = "Sensirion SHT45"
 zone = "outdoor"
+interface = "I²C"
 measurements = ["temperature", "humidity"]
 
 [sensors.outdoor_particles]
 model = "Sensirion SPS30"
 zone = "outdoor"
+interface = "UART"
 measurements = ["pm25"]
 
 [window]

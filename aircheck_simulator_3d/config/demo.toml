@@ -1,0 +1,203 @@
+[automatic]
+# Time in this section is simulated time. Equipment is still actuated only by backend commands.
+simulation_speed = 60.0
+occupancy = 4
+build_up_simulation_seconds = 240.0
+co2_drop_ppm = 25.0
+sensor_noise_max_percent = 5.0
+
+[developer.occupancy]
+minimum = 0
+maximum = 8
+step = 1
+integral = true
+
+[developer.outdoor_co2_ppm]
+minimum = 350
+maximum = 2000
+step = 50
+
+[developer.outdoor_pm25_ug_m3]
+minimum = 0
+maximum = 300
+step = 5
+
+[developer.outdoor_temperature_c]
+minimum = -20
+maximum = 45
+step = 1
+
+[developer.outdoor_humidity_percent]
+minimum = 0
+maximum = 100
+step = 5
+
+[developer.indoor_pm25_generation_ug_min]
+minimum = 0
+maximum = 1200
+step = 25
+
+[developer.wind_speed_m_s]
+minimum = 0
+maximum = 15
+step = 0.5
+
+[developer.infiltration_ach]
+minimum = 0
+maximum = 2
+step = 0.1
+
+[developer.filter_efficiency]
+minimum = 0
+maximum = 1
+step = 0.05
+
+[developer.intake_airflow_m3_h]
+minimum = 0
+maximum = 60
+step = 5
+
+[developer.exhaust_airflow_m3_h]
+minimum = 0
+maximum = 60
+step = 5
+
+[developer.sensor_noise_percent]
+minimum = 0
+maximum = 5
+step = 0.25
+
+[scenarios.normal_room]
+title = "Normal Room"
+occupancy = 1
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 8
+outdoor_temperature_c = 18
+outdoor_humidity_percent = 60
+indoor_pm25_generation_ug_min = 0
+wind_speed_m_s = 1
+infiltration_ach = 0.3
+filter_efficiency = 0.82
+simulation_speed = 1
+failed_sensor_ids = []
+backend_offline = false
+
+[scenarios.co2_buildup]
+title = "CO2 Buildup"
+occupancy = 3
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 8
+outdoor_temperature_c = 18
+outdoor_humidity_percent = 60
+indoor_pm25_generation_ug_min = 0
+wind_speed_m_s = 0.2
+infiltration_ach = 0.08
+filter_efficiency = 0.82
+simulation_speed = 10
+failed_sensor_ids = []
+backend_offline = false
+
+[scenarios.high_occupancy]
+title = "High Occupancy"
+occupancy = 6
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 8
+outdoor_temperature_c = 18
+outdoor_humidity_percent = 60
+indoor_pm25_generation_ug_min = 0
+wind_speed_m_s = 1
+infiltration_ach = 0.3
+filter_efficiency = 0.82
+simulation_speed = 5
+failed_sensor_ids = []
+backend_offline = false
+
+[scenarios.clean_outdoor_air]
+title = "Clean Outdoor Air"
+occupancy = 1
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 1
+outdoor_temperature_c = 18
+outdoor_humidity_percent = 60
+indoor_pm25_generation_ug_min = 0
+wind_speed_m_s = 1
+infiltration_ach = 0.3
+filter_efficiency = 0.82
+simulation_speed = 5
+failed_sensor_ids = []
+backend_offline = false
+
+[scenarios.polluted_outdoor_air]
+title = "Polluted Outdoor Air"
+occupancy = 1
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 120
+outdoor_temperature_c = 18
+outdoor_humidity_percent = 60
+indoor_pm25_generation_ug_min = 0
+wind_speed_m_s = 2
+infiltration_ach = 0.3
+filter_efficiency = 0.82
+simulation_speed = 5
+failed_sensor_ids = []
+backend_offline = false
+
+[scenarios.cold_weather]
+title = "Cold Weather"
+occupancy = 1
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 8
+outdoor_temperature_c = -5
+outdoor_humidity_percent = 75
+indoor_pm25_generation_ug_min = 0
+wind_speed_m_s = 1
+infiltration_ach = 0.3
+filter_efficiency = 0.82
+simulation_speed = 5
+failed_sensor_ids = []
+backend_offline = false
+
+[scenarios.high_indoor_pm25]
+title = "High Indoor PM2.5"
+occupancy = 1
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 8
+outdoor_temperature_c = 18
+outdoor_humidity_percent = 60
+indoor_pm25_generation_ug_min = 300
+wind_speed_m_s = 1
+infiltration_ach = 0.3
+filter_efficiency = 0.82
+simulation_speed = 5
+failed_sensor_ids = []
+backend_offline = false
+
+[scenarios.sensor_failure]
+title = "Sensor Failure"
+occupancy = 1
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 8
+outdoor_temperature_c = 18
+outdoor_humidity_percent = 60
+indoor_pm25_generation_ug_min = 0
+wind_speed_m_s = 1
+infiltration_ach = 0.3
+filter_efficiency = 0.82
+simulation_speed = 1
+failed_sensor_ids = ["indoor_climate"]
+backend_offline = false
+
+[scenarios.backend_offline]
+title = "Backend Offline"
+occupancy = 1
+outdoor_co2_ppm = 420
+outdoor_pm25_ug_m3 = 8
+outdoor_temperature_c = 18
+outdoor_humidity_percent = 60
+indoor_pm25_generation_ug_min = 0
+wind_speed_m_s = 1
+infiltration_ach = 0.3
+filter_efficiency = 0.82
+simulation_speed = 1
+failed_sensor_ids = []
+backend_offline = true

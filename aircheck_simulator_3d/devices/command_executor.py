@@ -24,6 +24,10 @@ class DeviceCommandExecutor:
     def active_commands(self) -> tuple[PendingControlCommand, ...]:
         return tuple(self._active[target] for target in self._TARGETS if target in self._active)
 
+    @property
+    def pending_count(self) -> int:
+        return len(self._active) + sum(len(commands) for commands in self._queued.values())
+
     def enqueue(self, command: PendingControlCommand) -> None:
         if command.command_id in self._seen_command_ids:
             if command.command_id in self._completed_unacknowledged:

@@ -110,6 +110,7 @@ class SimulationState:
     environment: EnvironmentState
     energy: EnergyState = field(default_factory=EnergyState)
     airflow: AirflowState = field(default_factory=AirflowState)
+    sensor_noise_percent: float = 0.0
 
     def __post_init__(self) -> None:
         if self.simulated_at.tzinfo is None:
@@ -129,3 +130,5 @@ class SimulationState:
             or self.room_volume_m3 <= 0
         ):
             raise ValueError("elapsed time, simulation speed, fixed timestep or room volume is invalid")
+        if not math.isfinite(self.sensor_noise_percent) or not 0 <= self.sensor_noise_percent <= 100:
+            raise ValueError("sensor noise percentage must be finite and between 0 and 100")

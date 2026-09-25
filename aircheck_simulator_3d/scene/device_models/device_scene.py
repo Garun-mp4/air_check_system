@@ -17,6 +17,7 @@ class DeviceScene:
     objects: dict[str, SceneObject]
     window: WindowVisualRig
     fans: dict[str, FanVisualRig]
+    wiring: Any | None = None
 
 
 def build_device_scene(parent: Any, config: SceneConfig) -> DeviceScene:
@@ -34,7 +35,10 @@ def build_device_scene(parent: Any, config: SceneConfig) -> DeviceScene:
         **electronics.positions,
     }
     window_center = tuple(window.rig.root.getPos(parent))
-    build_wire_routes(parent, config, positions=positions, window_center=window_center)
+    from panda3d.core import PandaNode
+
+    wiring = parent.attachNewNode(PandaNode("aircheck-wiring-overlay"))
+    build_wire_routes(wiring, config, positions=positions, window_center=window_center)
 
     objects = {
         window.scene_object.object_id: window.scene_object,
@@ -44,4 +48,4 @@ def build_device_scene(parent: Any, config: SceneConfig) -> DeviceScene:
         **ventilation.objects,
         **electronics.objects,
     }
-    return DeviceScene(objects=objects, window=window.rig, fans=ventilation.fans)
+    return DeviceScene(objects=objects, window=window.rig, fans=ventilation.fans, wiring=wiring)

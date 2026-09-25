@@ -31,7 +31,7 @@ def build_indoor_sensors(parent: Any, config: SceneConfig) -> tuple[dict[str, Sc
         assembly,
         object_id=INDOOR_SENSOR,
         title="Sensirion SCD41 · внутренний",
-        description="Модуль измерения CO₂, температуры и влажности воздуха в комнате. Установлен на вентилируемом внутреннем кронштейне.",
+        description="Модуль измерения CO2, температуры и влажности воздуха в комнате. Установлен на вентилируемом внутреннем кронштейне.",
         position=(-0.17, -0.125, 0.24),
         half_extents=(0.21, 0.08, 0.12),
     )

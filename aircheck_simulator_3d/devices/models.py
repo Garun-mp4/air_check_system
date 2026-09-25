@@ -77,4 +77,6 @@ class SensorDeviceState:
     sensor_id: str
     model: str
     zone: str
+    interface: str
     measurements: tuple[str, ...]
+    online: bool = True

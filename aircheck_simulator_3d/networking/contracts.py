@@ -8,6 +8,7 @@ from typing import Mapping, Protocol
 from urllib.parse import urlencode
 
 from aircheck_simulator_3d.simulation.state import SimulationState
+from aircheck_simulator_3d.simulation.virtual_sensors import read_zone_values
 
 
 class CommandTarget(StrEnum):
@@ -90,19 +91,16 @@ class MeasurementPayload:
 
     @classmethod
     def from_state(cls, state: SimulationState, timestamp: datetime) -> MeasurementPayload:
+        indoor = read_zone_values(state, "indoor")
+        outdoor = read_zone_values(state, "outdoor")
+        expected_indoor = {"co2", "temperature", "humidity", "pm25"}
+        expected_outdoor = {"temperature", "humidity", "pm25"}
+        if not expected_indoor <= set(indoor) or not expected_outdoor <= set(outdoor):
+            raise ValueError("one or more AirCheck telemetry measurements are unavailable")
         return cls(
             timestamp=_iso_timestamp(timestamp),
-            indoor={
-                "co2": state.indoor.co2_ppm,
-                "temperature": state.indoor.temperature_c,
-                "humidity": state.indoor.humidity_percent,
-                "pm25": state.indoor.pm25_ug_m3,
-            },
-            outdoor={
-                "temperature": state.outdoor.temperature_c,
-                "humidity": state.outdoor.humidity_percent,
-                "pm25": state.outdoor.pm25_ug_m3,
-            },
+            indoor={key: indoor[key] for key in expected_indoor},
+            outdoor={key: outdoor[key] for key in expected_outdoor},
             window_open=state.window.reed_switch,
         )
 

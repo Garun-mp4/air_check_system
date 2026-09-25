@@ -45,6 +45,7 @@ class SensorConfig:
     sensor_id: str
     model: str
     zone: str
+    interface: str
     measurements: tuple[str, ...]
 
 
@@ -176,6 +177,43 @@ class LoggingConfig:
 
 
 @dataclass(frozen=True)
+class ScenarioPreset:
+    scenario_id: str
+    title: str
+    occupancy: int
+    outdoor_co2_ppm: float
+    outdoor_pm25_ug_m3: float
+    outdoor_temperature_c: float
+    outdoor_humidity_percent: float
+    indoor_pm25_generation_ug_min: float
+    wind_speed_m_s: float
+    infiltration_ach: float
+    filter_efficiency: float
+    simulation_speed: float
+    failed_sensor_ids: tuple[str, ...]
+    backend_offline: bool
+
+
+@dataclass(frozen=True)
+class DeveloperParameter:
+    minimum: float
+    maximum: float
+    step: float
+    integral: bool = False
+
+
+@dataclass(frozen=True)
+class DemoConfig:
+    scenarios: tuple[ScenarioPreset, ...]
+    developer_parameters: Mapping[str, DeveloperParameter]
+    automatic_speed: float
+    automatic_occupancy: int
+    automatic_build_up_seconds: float
+    automatic_co2_drop_ppm: float
+    sensor_noise_max_percent: float
+
+
+@dataclass(frozen=True)
 class AppConfig:
     room: RoomConfig
     devices: DeviceConfig
@@ -185,6 +223,7 @@ class AppConfig:
     scene: SceneConfig
     camera: CameraConfig
     logging: LoggingConfig
+    demo: DemoConfig
 
 
 def _read_toml(path: Path) -> dict[str, object]:
@@ -305,10 +344,66 @@ def _sensor_configs(section: dict[str, object], source: str) -> tuple[SensorConf
                 sensor_id=sensor_id,
                 model=_text(value, "model", source),
                 zone=_text(value, "zone", source),
+                interface=_text(value, "interface", source),
                 measurements=tuple(item.strip() for item in measurements),
             )
         )
     return tuple(sensors)
+
+
+def _demo_config(raw: dict[str, object], path: Path) -> DemoConfig:
+    automatic = _section(raw, "automatic", path)
+    scenarios_table = _section(raw, "scenarios", path)
+    developer_table = _section(raw, "developer", path)
+    scenarios: list[ScenarioPreset] = []
+    for scenario_id, value in scenarios_table.items():
+        if not isinstance(value, dict):
+            raise ConfigurationError(f"{path.name}: scenarios.{scenario_id} must be a table")
+        failed_sensor_ids = value.get("failed_sensor_ids", [])
+        if not isinstance(failed_sensor_ids, list) or not all(
+            isinstance(sensor_id, str) and sensor_id.strip() for sensor_id in failed_sensor_ids
+        ):
+            raise ConfigurationError(f"{path.name}: scenarios.{scenario_id}.failed_sensor_ids must be strings")
+        scenarios.append(
+            ScenarioPreset(
+                scenario_id=scenario_id,
+                title=_text(value, "title", f"{path.name} [scenarios.{scenario_id}]"),
+                occupancy=_integer(value, "occupancy", f"{path.name} [scenarios.{scenario_id}]"),
+                outdoor_co2_ppm=_number(value, "outdoor_co2_ppm", f"{path.name} [scenarios.{scenario_id}]"),
+                outdoor_pm25_ug_m3=_number(value, "outdoor_pm25_ug_m3", f"{path.name} [scenarios.{scenario_id}]"),
+                outdoor_temperature_c=_number(value, "outdoor_temperature_c", f"{path.name} [scenarios.{scenario_id}]"),
+                outdoor_humidity_percent=_number(value, "outdoor_humidity_percent", f"{path.name} [scenarios.{scenario_id}]"),
+                indoor_pm25_generation_ug_min=_number(value, "indoor_pm25_generation_ug_min", f"{path.name} [scenarios.{scenario_id}]"),
+                wind_speed_m_s=_number(value, "wind_speed_m_s", f"{path.name} [scenarios.{scenario_id}]"),
+                infiltration_ach=_number(value, "infiltration_ach", f"{path.name} [scenarios.{scenario_id}]"),
+                filter_efficiency=_number(value, "filter_efficiency", f"{path.name} [scenarios.{scenario_id}]"),
+                simulation_speed=_number(value, "simulation_speed", f"{path.name} [scenarios.{scenario_id}]"),
+                failed_sensor_ids=tuple(failed_sensor_ids),
+                backend_offline=_boolean(value, "backend_offline", f"{path.name} [scenarios.{scenario_id}]"),
+            )
+        )
+    developer_parameters: dict[str, DeveloperParameter] = {}
+    for key, value in developer_table.items():
+        if not isinstance(value, dict):
+            raise ConfigurationError(f"{path.name}: developer.{key} must be a table")
+        integral = value.get("integral", False)
+        if not isinstance(integral, bool):
+            raise ConfigurationError(f"{path.name}: developer.{key}.integral must be a boolean")
+        developer_parameters[key] = DeveloperParameter(
+            minimum=_number(value, "minimum", f"{path.name} [developer.{key}]"),
+            maximum=_number(value, "maximum", f"{path.name} [developer.{key}]"),
+            step=_number(value, "step", f"{path.name} [developer.{key}]"),
+            integral=integral,
+        )
+    return DemoConfig(
+        scenarios=tuple(scenarios),
+        developer_parameters=developer_parameters,
+        automatic_speed=_number(automatic, "simulation_speed", f"{path.name} [automatic]"),
+        automatic_occupancy=_integer(automatic, "occupancy", f"{path.name} [automatic]"),
+        automatic_build_up_seconds=_number(automatic, "build_up_simulation_seconds", f"{path.name} [automatic]"),
+        automatic_co2_drop_ppm=_number(automatic, "co2_drop_ppm", f"{path.name} [automatic]"),
+        sensor_noise_max_percent=_number(automatic, "sensor_noise_max_percent", f"{path.name} [automatic]"),
+    )
 
 
 def _environment_float(environ: Mapping[str, str], name: str, default: float) -> float:
@@ -382,10 +477,67 @@ def _validate(config: AppConfig) -> None:
     if len(set(sensor_ids)) != len(sensor_ids):
         raise ConfigurationError("sensor identifiers must be unique")
     if any(
-        not sensor.model or sensor.zone not in {"indoor", "window", "outdoor"}
+        not sensor.model or not sensor.interface or sensor.zone not in {"indoor", "window", "outdoor"}
         for sensor in config.devices.sensors
     ):
         raise ConfigurationError("sensor model or placement zone is invalid")
+    expected_scenarios = {
+        "normal_room", "co2_buildup", "high_occupancy", "clean_outdoor_air",
+        "polluted_outdoor_air", "cold_weather", "high_indoor_pm25", "sensor_failure", "backend_offline",
+    }
+    scenarios = {scenario.scenario_id: scenario for scenario in config.demo.scenarios}
+    if set(scenarios) != expected_scenarios:
+        raise ConfigurationError("demo.toml must define all nine Milestone 6 scenarios exactly once")
+    sensor_ids_set = set(sensor_ids)
+    for scenario in scenarios.values():
+        values = (
+            scenario.outdoor_co2_ppm,
+            scenario.outdoor_pm25_ug_m3,
+            scenario.outdoor_temperature_c,
+            scenario.outdoor_humidity_percent,
+            scenario.indoor_pm25_generation_ug_min,
+            scenario.wind_speed_m_s,
+            scenario.infiltration_ach,
+            scenario.filter_efficiency,
+            scenario.simulation_speed,
+        )
+        if (
+            not scenario.title.strip()
+            or scenario.occupancy < 0
+            or any(not math.isfinite(value) for value in values)
+            or scenario.outdoor_co2_ppm <= 0
+            or scenario.outdoor_pm25_ug_m3 < 0
+            or not -60 <= scenario.outdoor_temperature_c <= 80
+            or not 0 <= scenario.outdoor_humidity_percent <= 100
+            or scenario.indoor_pm25_generation_ug_min < 0
+            or scenario.wind_speed_m_s < 0
+            or scenario.infiltration_ach < 0
+            or not 0 <= scenario.filter_efficiency <= 1
+            or scenario.simulation_speed not in (0.0, *config.physics.simulation_speeds)
+            or not set(scenario.failed_sensor_ids) <= sensor_ids_set
+        ):
+            raise ConfigurationError(f"demo scenario {scenario.scenario_id} contains invalid settings")
+    for name, parameter in config.demo.developer_parameters.items():
+        if parameter.minimum >= parameter.maximum or parameter.step <= 0:
+            raise ConfigurationError(f"developer parameter {name} has invalid bounds or step")
+    required_parameters = {
+        "occupancy", "outdoor_co2_ppm", "outdoor_pm25_ug_m3", "outdoor_temperature_c",
+        "outdoor_humidity_percent", "indoor_pm25_generation_ug_min", "wind_speed_m_s",
+        "infiltration_ach", "filter_efficiency", "intake_airflow_m3_h", "exhaust_airflow_m3_h",
+        "sensor_noise_percent",
+    }
+    if set(config.demo.developer_parameters) != required_parameters:
+        raise ConfigurationError("demo.toml must define all supported Developer Panel controls")
+    if (
+        config.demo.automatic_speed not in config.physics.simulation_speeds
+        or config.demo.automatic_occupancy < 1
+        or config.demo.automatic_build_up_seconds <= 0
+        or config.demo.automatic_co2_drop_ppm <= 0
+        or config.demo.sensor_noise_max_percent <= 0
+        or config.demo.developer_parameters["sensor_noise_percent"].maximum
+        != config.demo.sensor_noise_max_percent
+    ):
+        raise ConfigurationError("automatic demonstration settings are invalid")
     urls = (
         ("backend_url", config.backend.backend_url),
         ("dashboard_url", config.backend.resolved_dashboard_url),
@@ -535,7 +687,7 @@ def load_config(
     environ: Mapping[str, str] | None = None,
 ) -> AppConfig:
     directory = (config_dir or DEFAULT_CONFIG_DIR).expanduser().resolve()
-    config_names = ("room", "devices", "physics", "backend", "graphics", "camera", "scene", "logging")
+    config_names = ("room", "devices", "physics", "backend", "graphics", "camera", "scene", "logging", "demo")
     paths = {name: directory / f"{name}.toml" for name in config_names}
     raw = {name: _read_toml(path) for name, path in paths.items()}
 
@@ -560,6 +712,7 @@ def load_config(
     logging_table = _section(raw["logging"], "logging", paths["logging"])
     indoor_table = _section(raw["room"], "initial_indoor", paths["room"])
     outdoor_table = _section(raw["room"], "initial_outdoor", paths["room"])
+    demo = _demo_config(raw["demo"], paths["demo"])
 
     try:
         room = RoomConfig(
@@ -752,6 +905,7 @@ def load_config(
         scene=scene,
         camera=camera,
         logging=logging_config,
+        demo=demo,
     )
     _validate(config)
     return config
