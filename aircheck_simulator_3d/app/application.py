@@ -5,7 +5,7 @@ from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Protocol
 
-from aircheck_simulator_3d.app.config import AppConfig, GraphicsConfig
+from aircheck_simulator_3d.app.config import AppConfig, CameraConfig, GraphicsConfig, SceneConfig
 from aircheck_simulator_3d.app.lifecycle import Lifecycle
 from aircheck_simulator_3d.devices.models import (
     FanState,
@@ -39,7 +39,7 @@ class Application:
         window_factory: Callable[[GraphicsConfig], WindowView] | None = None,
     ) -> None:
         self.config = config
-        self._window_factory = window_factory or PandaWindow
+        self._window_factory = window_factory
         self.state = self._create_initial_state()
 
     def _create_initial_state(self) -> SimulationState:
@@ -115,7 +115,10 @@ class Application:
         LOGGER.info("Opening Panda3D window for device %s", self.config.devices.device_id)
         lifecycle = Lifecycle()
         try:
-            view = self._window_factory(self.config.graphics)
+            if self._window_factory is None:
+                view = PandaWindow(self.config.graphics, self.config.scene, self.config.camera)
+            else:
+                view = self._window_factory(self.config.graphics)
             lifecycle.add_cleanup(view.close)
             view.run(smoke_test_seconds=smoke_test_seconds)
         finally:

@@ -1,15 +1,21 @@
 from __future__ import annotations
 
-from aircheck_simulator_3d.app.config import GraphicsConfig
-from aircheck_simulator_3d.ui.status_overlay import StatusOverlay
+import logging
+
+from aircheck_simulator_3d.app.config import CameraConfig, GraphicsConfig, SceneConfig
+from aircheck_simulator_3d.scene.lighting import SceneLighting
+from aircheck_simulator_3d.presentation.viewport import SimulatorViewport
+
+
+LOGGER = logging.getLogger("aircheck.application.scene.window")
 
 
 class PandaWindow:
-    """Minimal Panda3D host; scene geometry and camera controls are deferred."""
+    """Panda3D window and graphics host. Scene composition lives in SimulatorViewport."""
 
-    def __init__(self, config: GraphicsConfig) -> None:
+    def __init__(self, config: GraphicsConfig, scene: SceneConfig, camera: CameraConfig) -> None:
         try:
-            from panda3d.core import WindowProperties, loadPrcFileData
+            from panda3d.core import AntialiasAttrib, WindowProperties, loadPrcFileData
             from direct.showbase.ShowBase import ShowBase
         except ImportError as exc:
             raise RuntimeError(
@@ -20,6 +26,8 @@ class PandaWindow:
         loadPrcFileData("", f"win-size {config.width} {config.height}")
         loadPrcFileData("", f"fullscreen {'true' if config.fullscreen else 'false'}")
         loadPrcFileData("", "audio-library-name null")
+        loadPrcFileData("", f"framebuffer-multisample {'1' if config.multisample_enabled else '0'}")
+        loadPrcFileData("", f"multisamples {config.multisamples}")
         self._base = ShowBase(windowType="onscreen")
         if self._base.win is None:
             self._base.destroy()
@@ -28,8 +36,29 @@ class PandaWindow:
         window_properties.setTitle(config.window_title)
         self._base.win.requestProperties(window_properties)
         self._base.setBackgroundColor(*config.background_rgb, 1)
-        self._overlay = StatusOverlay(self._base.aspect2d, config)
         self._closed = False
+        self._lighting = None
+        self._viewport = None
+        try:
+            self._lighting = SceneLighting(self._base, config)
+            self._viewport = SimulatorViewport(self._base, config, scene, camera)
+            framebuffer_samples = self._base.win.getFbProperties().getMultisamples()
+            if config.multisample_enabled and framebuffer_samples > 0:
+                self._base.render.setAntialias(AntialiasAttrib.MMultisample)
+                LOGGER.info("Multisampling active (%d samples)", framebuffer_samples)
+            elif config.multisample_enabled:
+                LOGGER.warning("Requested MSAA is unavailable; running without multisample antialiasing")
+            LOGGER.info(
+                "Panda3D window ready at %dx%d (%.2f aspect)",
+                self._base.win.getXSize(), self._base.win.getYSize(), self._base.getAspectRatio(),
+            )
+        except Exception:
+            if self._viewport is not None:
+                self._viewport.close()
+            if self._lighting is not None:
+                self._lighting.close()
+            self._base.destroy()
+            raise
 
     def run(self, smoke_test_seconds: float | None = None) -> None:
         if smoke_test_seconds is not None:
@@ -48,5 +77,8 @@ class PandaWindow:
         if self._closed:
             return
         self._closed = True
-        self._overlay.close()
+        if self._viewport is not None:
+            self._viewport.close()
+        if self._lighting is not None:
+            self._lighting.close()
         self._base.destroy()

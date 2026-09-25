@@ -1,0 +1,10 @@
+[scene]
+room_width_m = 6.0
+room_depth_m = 4.2
+room_height_m = 3.2
+wall_thickness_m = 0.16
+platform_margin_m = 0.55
+window_width_m = 1.8
+window_height_m = 1.25
+window_sill_height_m = 0.9
+outdoor_depth_m = 4.5
