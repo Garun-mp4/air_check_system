@@ -51,7 +51,13 @@ class SimulatorViewport:
         self._clock = ClockObject.getGlobalClock()
         self._scene = StandScene(base, scene_config)
         self._device_bindings = DeviceVisualBindings(self._scene.device_scene)
-        self._airflow_visualization = AirflowVisualization(self._scene.root, scene_config, device_config, physics_config)
+        self._airflow_visualization = AirflowVisualization(
+            self._scene.root,
+            scene_config,
+            device_config,
+            physics_config,
+            graphics.airflow_particles_per_track,
+        )
         self.apply_device_state(initial_device_state, 0.0)
         self._overlay = SceneOverlay(
             base,

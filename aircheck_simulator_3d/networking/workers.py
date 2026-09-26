@@ -259,6 +259,7 @@ class NetworkIntegration:
                     else:
                         self._forget_command_ids(report.applied_command_ids)
                         self._pending_acks.popleft()
+                        LOGGER.info("Actual-state acknowledgement accepted: command_ids=%s", report.applied_command_ids)
                         self._events.put(AcknowledgementAccepted(report.applied_command_ids))
 
                 if online and now >= next_poll and not self._stop.is_set():
@@ -267,6 +268,10 @@ class NetworkIntegration:
                             if command.command_id in self._known_command_ids:
                                 continue
                             self._known_command_ids.add(command.command_id)
+                            LOGGER.info(
+                                "Backend command queued: id=%s target=%s desired_state=%s",
+                                command.command_id, command.target.value, command.desired_state,
+                            )
                             self._events.put(CommandReceived(command))
                         next_poll = self._monotonic() + self.config.command_poll_interval_seconds
                     except (BackendTransportError, BackendHttpError) as exc:
@@ -300,6 +305,11 @@ class NetworkIntegration:
                     else:
                         self._clear_telemetry_if_current(revision)
                         self._set_status(True, forecast=forecast)
+                        LOGGER.info(
+                            "Telemetry accepted by backend: indoor_co2=%.1f ppm indoor_pm25=%.2f ug/m3 forecast=%s",
+                            payload.indoor["co2"], payload.indoor["pm25"],
+                            f"{forecast.predicted_co2_15min:.1f} ppm" if forecast else "unavailable",
+                        )
                         self._events.put(
                             TelemetryAccepted(
                                 forecast,

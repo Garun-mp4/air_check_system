@@ -56,9 +56,27 @@ class SceneOverlay:
         self._speed_display = 1.0
         self._scenario_name = "Normal Room"
         self._demo_status = None
-        self._font = base.loader.loadFont(str(Filename.fromOsSpecific(config.ui_font_path)))
+        font_candidates = (
+            config.ui_font_path,
+            "C:/Windows/Fonts/segoeui.ttf",
+            "C:/Windows/Fonts/arial.ttf",
+        )
+        self._font = None
+        attempted: set[str] = set()
+        for font_path in font_candidates:
+            if font_path in attempted:
+                continue
+            attempted.add(font_path)
+            try:
+                self._font = base.loader.loadFont(str(Filename.fromOsSpecific(font_path)))
+            except Exception:
+                LOGGER.warning("Could not load UI font candidate %s", font_path, exc_info=True)
+            if self._font is not None:
+                if font_path != config.ui_font_path:
+                    LOGGER.warning("Configured UI font unavailable; using fallback %s", font_path)
+                break
         if self._font is None:
-            raise RuntimeError(f"could not load UI font: {config.ui_font_path}")
+            raise RuntimeError(f"could not load a UI font (configured: {config.ui_font_path})")
 
         self._hud = HudPanel(base, config, self._font)
         self._device_panel = DevicePanel(base, config, self._font)

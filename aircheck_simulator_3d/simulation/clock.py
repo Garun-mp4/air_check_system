@@ -23,7 +23,11 @@ class SimulationClock:
             raise ValueError("simulation_speed must be finite and non-negative")
         if self.state.simulation_speed == 0:
             return 0
-        self._accumulated_real_seconds += real_delta_seconds * self.state.simulation_speed
+        scaled_delta = real_delta_seconds * self.state.simulation_speed
+        accumulated = self._accumulated_real_seconds + scaled_delta
+        if not math.isfinite(scaled_delta) or not math.isfinite(accumulated):
+            raise ValueError("scaled simulation time must remain finite")
+        self._accumulated_real_seconds = accumulated
         step_seconds = self.state.fixed_step_seconds
         elapsed_steps = 0
         while (

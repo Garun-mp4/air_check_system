@@ -94,14 +94,14 @@ class AutomaticDemoController:
         if not self._active:
             return
         self._applied_ids.update(set(command_ids) & self._command_ids)
-        if self._applied_ids:
+        if self._applied_ids and not self._acknowledged_ids:
             self._phase = self.WAITING_ACK
 
     def acknowledgement_accepted(self, command_ids: tuple[int, ...]) -> None:
         if not self._active:
             return
         self._acknowledged_ids.update(set(command_ids) & self._applied_ids)
-        if self._acknowledged_ids:
+        if self._command_ids and self._command_ids <= self._acknowledged_ids:
             self._phase = self.ACKNOWLEDGED
             self._peak_co2 = max(self._peak_co2, self._baseline_co2)
 

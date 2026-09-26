@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import os
+import sys
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -11,6 +12,18 @@ from urllib.parse import urlparse
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG_DIR = PACKAGE_ROOT / "config"
+
+
+def _default_config_directory() -> Path:
+    if not getattr(sys, "frozen", False):
+        return DEFAULT_CONFIG_DIR
+    executable_directory = Path(sys.executable).resolve().parent
+    candidates = (
+        executable_directory / "aircheck_simulator_3d" / "config",
+        executable_directory / "config",
+        DEFAULT_CONFIG_DIR,
+    )
+    return next((candidate for candidate in candidates if candidate.is_dir()), candidates[0])
 
 
 class ConfigurationError(ValueError):
@@ -134,6 +147,9 @@ class GraphicsConfig:
     shadow_map_size: int
     ambient_rgb: tuple[float, float, float]
     sun_rgb: tuple[float, float, float]
+    quality_preset: str
+    target_fps: int
+    airflow_particles_per_track: int
 
 
 @dataclass(frozen=True)
@@ -644,6 +660,8 @@ def _validate(config: AppConfig) -> None:
         raise ConfigurationError("backend retries, retry delay or command limit is invalid")
     if config.graphics.width < 1 or config.graphics.height < 1 or config.graphics.text_scale <= 0:
         raise ConfigurationError("graphics dimensions and text scale must be positive")
+    if config.graphics.target_fps < 1 or config.graphics.airflow_particles_per_track < 1:
+        raise ConfigurationError("graphics target FPS and airflow particle count must be positive")
     if not config.graphics.ui_font_path:
         raise ConfigurationError("graphics.ui_font_path must not be empty")
     if config.graphics.multisamples < 0 or config.graphics.shadow_map_size < 0:
@@ -685,8 +703,9 @@ def _validate(config: AppConfig) -> None:
 def load_config(
     config_dir: Path | None = None,
     environ: Mapping[str, str] | None = None,
+    quality_preset: str | None = None,
 ) -> AppConfig:
-    directory = (config_dir or DEFAULT_CONFIG_DIR).expanduser().resolve()
+    directory = (config_dir or _default_config_directory()).expanduser().resolve()
     config_names = ("room", "devices", "physics", "backend", "graphics", "camera", "scene", "logging", "demo")
     paths = {name: directory / f"{name}.toml" for name in config_names}
     raw = {name: _read_toml(path) for name, path in paths.items()}
@@ -707,6 +726,7 @@ def load_config(
     backend_table = _section(raw["backend"], "backend", paths["backend"])
     graphics_table = _section(raw["graphics"], "graphics", paths["graphics"])
     lighting_table = _section(raw["graphics"], "lighting", paths["graphics"])
+    quality_table = _section(raw["graphics"], "quality", paths["graphics"])
     camera_table = _section(raw["camera"], "camera", paths["camera"])
     scene_table = _section(raw["scene"], "scene", paths["scene"])
     logging_table = _section(raw["logging"], "logging", paths["logging"])
@@ -835,6 +855,14 @@ def load_config(
                 backend_table, "health_check_interval_seconds", "backend.toml [backend]"
             ),
         )
+        selected_quality = (
+            quality_preset.strip().lower()
+            if quality_preset is not None
+            else _text(graphics_table, "quality_preset", "graphics.toml [graphics]").lower()
+        )
+        profile = quality_table.get(selected_quality)
+        if selected_quality not in {"low", "medium", "high"} or not isinstance(profile, dict):
+            raise ConfigurationError("graphics quality must be one of: low, medium, high")
         graphics = GraphicsConfig(
             window_title=_text(graphics_table, "window_title", "graphics.toml [graphics]"),
             width=_integer(graphics_table, "width", "graphics.toml [graphics]"),
@@ -844,12 +872,17 @@ def load_config(
             text_rgb=_color(graphics_table, "text_rgb", "graphics.toml [graphics]"),
             text_scale=_number(graphics_table, "text_scale", "graphics.toml [graphics]"),
             ui_font_path=_text(graphics_table, "ui_font_path", "graphics.toml [graphics]"),
-            multisample_enabled=_boolean(lighting_table, "multisample_enabled", "graphics.toml [lighting]"),
-            multisamples=_integer(lighting_table, "multisamples", "graphics.toml [lighting]"),
-            shadows_enabled=_boolean(lighting_table, "shadows_enabled", "graphics.toml [lighting]"),
-            shadow_map_size=_integer(lighting_table, "shadow_map_size", "graphics.toml [lighting]"),
+            multisample_enabled=_boolean(profile, "multisample_enabled", f"graphics.toml [quality.{selected_quality}]"),
+            multisamples=_integer(profile, "multisamples", f"graphics.toml [quality.{selected_quality}]"),
+            shadows_enabled=_boolean(profile, "shadows_enabled", f"graphics.toml [quality.{selected_quality}]"),
+            shadow_map_size=_integer(profile, "shadow_map_size", f"graphics.toml [quality.{selected_quality}]"),
             ambient_rgb=_color(lighting_table, "ambient_rgb", "graphics.toml [lighting]"),
             sun_rgb=_color(lighting_table, "sun_rgb", "graphics.toml [lighting]"),
+            quality_preset=selected_quality,
+            target_fps=_integer(graphics_table, "target_fps", "graphics.toml [graphics]"),
+            airflow_particles_per_track=_integer(
+                profile, "airflow_particles_per_track", f"graphics.toml [quality.{selected_quality}]"
+            ),
         )
         camera = CameraConfig(
             start_position=_vector3(camera_table, "start_position", "camera.toml [camera]"),
@@ -881,7 +914,11 @@ def load_config(
         )
         log_directory = Path(_text(logging_table, "directory", "logging.toml [logging]"))
         if not log_directory.is_absolute():
-            log_directory = directory.parent / log_directory
+            if getattr(sys, "frozen", False):
+                app_data = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+                log_directory = app_data / "AirCheck3D" / "logs"
+            else:
+                log_directory = directory.parent / log_directory
         logging_config = LoggingConfig(
             directory=log_directory,
             level=_text(logging_table, "level", "logging.toml [logging]"),

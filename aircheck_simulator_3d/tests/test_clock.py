@@ -55,3 +55,17 @@ def test_clock_does_not_advance_while_paused_even_with_pending_fraction() -> Non
     state.simulation_speed = 1
     assert clock.advance(0.05) == 1
     assert state.elapsed_seconds == pytest.approx(state.fixed_step_seconds)
+
+
+def test_clock_rejects_scaled_overflow_without_corrupting_accumulator() -> None:
+    state = Application(load_config(CONFIG_DIR, {})).state
+    state.fixed_step_seconds = 1.0
+    state.simulation_speed = 60.0
+    clock = SimulationClock(state, max_substeps_per_frame=1)
+
+    with pytest.raises(ValueError, match="scaled simulation time must remain finite"):
+        clock.advance(1e308)
+
+    assert state.elapsed_seconds == 0
+    assert clock.advance(1.0 / 60.0) == 1
+    assert state.elapsed_seconds == 1

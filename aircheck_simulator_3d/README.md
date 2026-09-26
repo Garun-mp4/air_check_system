@@ -52,7 +52,7 @@ py -3.12 -m venv .venv
 
 Меню `SCENARIOS` содержит `Normal Room`, `CO2 Buildup`, `High Occupancy`, `Clean Outdoor Air`, `Polluted Outdoor Air`, `Cold Weather`, `High Indoor PM2.5`, `Sensor Failure` и `Backend Offline`. Условия заданы в `config/demo.toml`; они обновляют текущее состояние Simulation Core и Device Layer. `Sensor Failure` отмечает SCD41 недоступным и приостанавливает публикацию неполных или недостоверных readings. `Backend Offline` включает оффлайн-статус для демо, не трогая реальный backend.
 
-Кнопка `AUTO DEMO` готовит сценарий роста CO2 и ждёт новую телеметрию, прогноз, команду от backend, фактическое исполнение устройством, ACK и снижение CO2. Simulator не создаёт команду сам; если backend или автоматика не выдаст команду, индикатор останется на этом шаге.
+Кнопка `AUTO DEMO` готовит сценарий роста CO2 и ждёт новую телеметрию, прогноз, команду от backend, фактическое исполнение устройством, ACK и снижение CO2. Сценарий CO₂ buildup использует наружный ветер 3 м/с при закрытом окне для воспроизводимого проветривания после открытия створки. Simulator не создаёт команду сам; если backend или автоматика не выдаст команду, индикатор останется на этом шаге.
 
 ### Состояния устройств
 
@@ -120,4 +120,24 @@ CO₂, PM2.5 и влагосодержание интегрируются точ
 .\.venv\Scripts\python.exe -m pytest aircheck_simulator_3d/tests -q
 ```
 
-Виртуальный узел использует существующие REST-контракты AirCheck и не изменяет backend, dashboard или старый `sensor-simulator`. Интеграция сетевых запросов, виртуального Device Layer, прогноза, панелей и демо-режима описана выше. Для доводки остаётся отдельный финальный этап плана.
+Сетевые сообщения записываются в `network.log`; команды подтверждаются после сверки actual state Device Layer. Долгие accelerated-тесты проверяют одни сутки и семь суток моделируемого времени, а тест Automatic Demo проверяет, что пустые обновления не сбрасывают этап ACK.
+
+## Частоты и профили качества
+
+Рендер ограничен `target_fps` (по умолчанию 60), Simulation Core работает фиксированным шагом 0,1 с (10 Гц), UI обновляется каждые 0,1 с (10 Гц), Network Layer использует собственный поток и интервалы из `config/backend.toml`. Изменение FPS не меняет физический timestep.
+
+В `config/graphics.toml` доступны `quality_preset = "low"`, `"medium"` и `"high"`; при запуске профиль можно переопределить через `--quality low|medium|high`. Low отключает тени и MSAA, Medium включает 2x MSAA и тени 512 px, High использует 4x MSAA и тени 1024 px. При отсутствии поддержки MSAA приложение запускается без него.
+
+## Standalone Windows-сборка
+
+Для сборки нужен 64-битный Python 3.12:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r aircheck_simulator_3d/requirements-dev.txt
+.\scripts\build-windows.ps1
+.\scripts\smoke-windows-build.ps1
+```
+
+Сборка и runtime лежат в `build/win_amd64/`; переносить нужно каталог целиком. В standalone-режиме журналы сохраняются в `%LOCALAPPDATA%\AirCheck3D\logs`, журнал Panda3D — в `%LOCALAPPDATA%\AirCheck3D\panda.log`.
+
+Дополнительные документы: [архитектура](docs/architecture.md), [управление](docs/controls.md), [модель помещения](docs/simulation-model.md), [backend-интеграция](docs/backend-integration.md), [демо-сценарии](docs/demo-scenarios.md), [сборка и troubleshooting](docs/troubleshooting.md).
