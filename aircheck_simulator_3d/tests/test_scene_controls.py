@@ -81,6 +81,73 @@ def test_stand_contains_physical_aircheck_devices_and_pick_targets() -> None:
         scene.close()
 
 
+def test_sensor_nodes_are_wall_mounted_and_each_sensor_is_wired_from_esp32() -> None:
+    config = load_config()
+    base = type("SceneBase", (), {})()
+    base.render = NodePath(PandaNode("render"))
+    scene = StandScene(base, config.scene)
+    try:
+        inner_y = config.scene.room_depth_m / 2
+        outer_y = inner_y + config.scene.wall_thickness_m
+        indoor_node = scene.root.find("**/indoor-sensor-assembly")
+        outdoor_node = scene.root.find("**/outdoor-weather-station")
+        cabinet_node = scene.root.find("**/technical-electronics-cabinet")
+        assert not indoor_node.isEmpty()
+        assert not outdoor_node.isEmpty()
+        assert not cabinet_node.isEmpty()
+
+        indoor_position = indoor_node.getPos(scene.root)
+        outdoor_position = outdoor_node.getPos(scene.root)
+        cabinet_position = cabinet_node.getPos(scene.root)
+        assert indoor_position.getX() < 0 < outdoor_position.getX() < cabinet_position.getX()
+        assert inner_y - 0.10 < indoor_position.getY() < inner_y
+        assert outdoor_position.getY() > outer_y
+        assert abs(outdoor_node.getH(scene.root) - 180) < 1e-4
+
+        cabinet_backplate = scene.root.find("**/electronics-backplate")
+        backplate_position = cabinet_backplate.getPos(scene.root)
+        assert abs(backplate_position.getY() + 0.12 / 2 - inner_y) < 1e-4
+        assert not scene.root.find("**/indoor-sensor-mount-plate").isEmpty()
+        assert not scene.root.find("**/outdoor-wall-bolt-1-1").isEmpty()
+        assert not scene.root.find("**/raceway.rear-horizontal").isEmpty()
+        assert not scene.root.find("**/raceway.outdoor-wall-penetration").isEmpty()
+        outdoor_standoff = scene.root.find("**/outdoor-wall-standoff-1")
+        standoff_position = outdoor_standoff.getPos(scene.root)
+        assert abs(standoff_position.getY() - (outer_y + 0.05)) < 1e-4
+
+        expected_routes = {
+            "i2c-indoor-climate": "sensor.scd41.indoor",
+            "uart-indoor-particles": "sensor.sps30.indoor",
+            "i2c-outdoor-climate": "sensor.sht45.outdoor",
+            "uart-outdoor-particles": "sensor.sps30.outdoor",
+        }
+        for route_name, target_id in expected_routes.items():
+            route = scene.root.find(f"**/{route_name}")
+            assert not route.isEmpty()
+            assert route.getTag("aircheck.wire_source") == "device.esp32"
+            assert route.getTag("aircheck.wire_target") == target_id
+            assert route.getTag("aircheck.wire_type") in {"i2c", "uart"}
+            route_points = route.getPythonTag("aircheck.route_points")
+            target_position = scene.objects[target_id].node.getPos(scene.root)
+            expected_target = tuple(float(target_position[index]) for index in range(3))
+            assert all(abs(actual - expected) < 1e-5 for actual, expected in zip(route_points[-1], expected_target))
+
+            gland_name = "indoor-cable-gland" if "indoor" in target_id else "outdoor-cable-gland"
+            gland_node = scene.root.find(f"**/{gland_name}")
+            gland_position = gland_node.getPos(scene.root)
+            expected_gland = tuple(float(gland_position[index]) for index in range(3))
+            assert any(
+                all(abs(actual - expected) < 1e-5 for actual, expected in zip(point, expected_gland))
+                for point in route_points
+            )
+
+        assert scene.root.find("**/i2c-outdoor-climate").getTag("aircheck.routed_via_wall_trunk") == "true"
+        assert scene.root.find("**/power-5v-indoor-sensors").getTag("aircheck.wire_source") == "power.dc_dc"
+        assert scene.root.find("**/power-5v-outdoor-sensors").getTag("aircheck.wire_target") == "sensor.group.outdoor"
+    finally:
+        scene.close()
+
+
 def test_mouse_ray_can_select_each_required_device_target() -> None:
     config = load_config()
     render = NodePath(PandaNode("render"))

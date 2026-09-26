@@ -5,6 +5,7 @@ from typing import Any
 
 from aircheck_simulator_3d.app.config import SceneConfig
 from aircheck_simulator_3d.scene.device_models.electronics import build_electronics_block
+from aircheck_simulator_3d.scene.device_models.layout import world_position
 from aircheck_simulator_3d.scene.device_models.sensors import build_indoor_sensors, build_outdoor_sensors
 from aircheck_simulator_3d.scene.device_models.ventilation import FanVisualRig, build_ventilation
 from aircheck_simulator_3d.scene.device_models.window import WindowVisualRig, build_window_assembly
@@ -34,6 +35,13 @@ def build_device_scene(parent: Any, config: SceneConfig) -> DeviceScene:
         **ventilation.positions,
         **electronics.positions,
     }
+    positions[window.scene_object.object_id] = world_position(window.scene_object.node, parent)
+    positions.update(
+        {
+            object_id: world_position(scene_object.node, parent)
+            for object_id, scene_object in window.extra_objects.items()
+        }
+    )
     window_center = tuple(window.rig.root.getPos(parent))
     from panda3d.core import PandaNode
 

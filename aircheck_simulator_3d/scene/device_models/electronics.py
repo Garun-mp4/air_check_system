@@ -5,6 +5,14 @@ from typing import Any
 
 from aircheck_simulator_3d.app.config import SceneConfig
 from aircheck_simulator_3d.scene.device_models.geometry import create_pickable_part, make_cylinder
+from aircheck_simulator_3d.scene.device_models.layout import (
+    CONTROL_CABINET_HEIGHT_M,
+    CONTROL_CABINET_WIDTH_M,
+    ESP32_CABLE_EXIT_Z_M,
+    ESP32_PANEL_X_M,
+    EquipmentLayout,
+    world_position,
+)
 from aircheck_simulator_3d.scene.objects import SceneObject, add_world_label, make_box
 
 
@@ -17,10 +25,11 @@ class ElectronicsAssembly:
 def build_electronics_block(parent: Any, config: SceneConfig) -> ElectronicsAssembly:
     from panda3d.core import PandaNode
 
-    center = (config.room_width_m * 0.31, -config.room_depth_m * 0.23, 1.38)
+    layout = EquipmentLayout.from_config(config)
+    center = layout.control_cabinet_center
     cabinet = parent.attachNewNode(PandaNode("technical-electronics-cabinet"))
     cabinet.setPos(*center)
-    width, height = 1.55, 1.78
+    width, height = CONTROL_CABINET_WIDTH_M, CONTROL_CABINET_HEIGHT_M
     make_box(cabinet, "electronics-backplate", (0, 0.02, 0), (width, 0.12, height), (0.48, 0.52, 0.49, 1), specular=(0.32, 0.35, 0.32), shininess=28)
     rail_color = (0.19, 0.24, 0.26, 1)
     for index, (position, size) in enumerate((
@@ -31,14 +40,19 @@ def build_electronics_block(parent: Any, config: SceneConfig) -> ElectronicsAsse
     )):
         make_box(cabinet, f"electronics-cabinet-rail-{index + 1}", position, size, rail_color, specular=(0.43, 0.47, 0.47), shininess=50)
     for x in (-0.62, 0.62):
-        for z in (-0.81, 0.81):
-            make_cylinder(cabinet, f"cabinet-mount-{x}-{z}", (x, -0.19, z), 0.045, 0.11, (0.75, 0.77, 0.72, 1), axis="y", segments=12)
+        for z in (-0.75, 0.75):
+            make_cylinder(cabinet, f"cabinet-mount-{x}-{z}", (x, -0.05, z), 0.027, 0.035, (0.75, 0.77, 0.72, 1), axis="y", segments=12)
     make_box(cabinet, "electronics-din-rail-top", (0, -0.08, 0.37), (1.30, 0.08, 0.035), (0.65, 0.69, 0.66, 1))
     make_box(cabinet, "electronics-din-rail-bottom", (0, -0.08, -0.44), (1.30, 0.08, 0.035), (0.65, 0.69, 0.66, 1))
-    add_world_label(cabinet, "CONTROL  /  12 V POWER", (0, -0.18, 0.98), 0.084)
+    add_world_label(cabinet, "CONTROL  /  12 V POWER", (-0.36, -0.18, 0.86), 0.068)
 
     objects: dict[str, SceneObject] = {}
     positions: dict[str, tuple[float, float, float]] = {}
+
+    wire_exit = cabinet.attachNewNode(PandaNode("cabinet-wire-exit"))
+    wire_exit.setPos(ESP32_PANEL_X_M, -0.17, ESP32_CABLE_EXIT_Z_M)
+    make_cylinder(wire_exit, "cabinet-wire-gland", (0, 0, 0), 0.045, 0.10, (0.17, 0.22, 0.23, 1), axis="z", segments=12)
+    positions["wire.esp32_exit"] = world_position(wire_exit, parent)
 
     def part(
         object_id: str,
@@ -56,14 +70,14 @@ def build_electronics_block(parent: Any, config: SceneConfig) -> ElectronicsAsse
             half_extents=half_extents,
         )
         objects[object_id] = obj
-        positions[object_id] = tuple(center[index] + local_position[index] for index in range(3))
+        positions[object_id] = world_position(obj.node, parent)
         return visual
 
     esp = part(
         "device.esp32",
         "ESP32-DevKitC V4 · ESP32-WROOM-32E",
         "Контроллер AirCheck. На нём сходятся цифровые линии датчиков, управление вентиляторами и сигналы H-моста оконного привода.",
-        (-0.39, -0.17, 0.59),
+        (ESP32_PANEL_X_M, -0.17, 0.59),
         (0.24, 0.07, 0.13),
     )
     make_box(esp, "esp32-pcb", (0, 0, 0), (0.45, 0.045, 0.24), (0.05, 0.39, 0.28, 1), specular=(0.34, 0.48, 0.37), shininess=46)
