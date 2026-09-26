@@ -25,7 +25,7 @@ class PandaWindow:
         network: NetworkIntegration | None = None,
     ) -> None:
         try:
-            from panda3d.core import AntialiasAttrib, WindowProperties, loadPrcFileData
+            from panda3d.core import AntialiasAttrib, ClockObject, WindowProperties, loadPrcFileData
             from direct.showbase.ShowBase import ShowBase
         except ImportError as exc:
             raise RuntimeError(
@@ -47,6 +47,9 @@ class PandaWindow:
         window_properties.setTitle(graphics.window_title)
         self._base.win.requestProperties(window_properties)
         self._base.setBackgroundColor(*graphics.background_rgb, 1)
+        frame_clock = ClockObject.getGlobalClock()
+        frame_clock.setMode(ClockObject.MLimited)
+        frame_clock.setFrameRate(float(graphics.target_fps))
         self._closed = False
         self._lighting = None
         self._viewport = None
@@ -75,8 +78,9 @@ class PandaWindow:
             elif graphics.multisample_enabled:
                 LOGGER.warning("Requested MSAA is unavailable; running without multisample antialiasing")
             LOGGER.info(
-                "Panda3D window ready at %dx%d (%.2f aspect)",
+                "Panda3D window ready at %dx%d (%.2f aspect), quality=%s, render cap=%d FPS",
                 self._base.win.getXSize(), self._base.win.getYSize(), self._base.getAspectRatio(),
+                graphics.quality_preset, graphics.target_fps,
             )
         except Exception:
             if self._runtime is not None:

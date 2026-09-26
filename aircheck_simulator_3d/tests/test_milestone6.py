@@ -222,15 +222,55 @@ def test_automatic_demo_waits_for_real_backend_forecast_command_execution_ack_an
     demo.forecast_received(forecast)
     assert demo.status.phase == demo.FORECAST
     demo.command_received(77)
+    demo.command_received(78)
     assert demo.status.phase == demo.COMMAND
     demo.command_started(77)
     assert demo.status.phase == demo.EXECUTING
     demo.command_applied((77,))
     assert demo.status.phase == demo.WAITING_ACK
     demo.acknowledgement_accepted((77,))
+    assert demo.status.phase == demo.WAITING_ACK
+    demo.command_applied(())
+    demo.command_applied((78,))
+    demo.acknowledgement_accepted((78,))
+    assert demo.status.phase == demo.ACKNOWLEDGED
+    demo.command_applied(())
     assert demo.status.phase == demo.ACKNOWLEDGED
 
     state.indoor.co2_ppm = 970
     completed = demo.update(state, backend_online=True)
     assert completed.phase == demo.COMPLETE
     assert not completed.active
+
+
+def test_automatic_demo_weather_allows_real_ventilation_to_reduce_co2() -> None:
+    app = _app()
+    scenario = ScenarioController(app.config, app.simulation_engine, app.device_layer, None)
+    scenario.prepare_automatic_demo()
+    state = app.state
+    app.simulation_engine.set_speed(60.0)
+    baseline = state.indoor.co2_ppm
+
+    _run_simulated_seconds(app, app.config.demo.automatic_build_up_seconds)
+    peak = state.indoor.co2_ppm
+    assert peak > baseline
+    assert state.window.close_limit_switch
+
+    app.device_layer.request_window_open()
+    app.device_layer.set_intake_enabled(True)
+    app.device_layer.set_exhaust_enabled(True)
+    _run_simulated_seconds(app, app.config.devices.window_travel_seconds + 1)
+    assert state.window.open_limit_switch
+    _run_simulated_seconds(app, 15 * 60)
+
+    assert state.indoor.co2_ppm <= peak - app.config.demo.automatic_co2_drop_ppm
+
+
+def _run_simulated_seconds(app: Application, simulated_seconds: float) -> None:
+    state = app.state
+    remaining_ticks = round(simulated_seconds / state.fixed_step_seconds)
+    while remaining_ticks:
+        ticks = min(remaining_ticks, app.config.physics.max_substeps_per_frame)
+        real_seconds = ticks * state.fixed_step_seconds / state.simulation_speed
+        assert app.simulation_engine.advance(real_seconds) == ticks
+        remaining_ticks -= ticks

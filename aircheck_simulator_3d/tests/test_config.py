@@ -54,6 +54,27 @@ def test_dashboard_defaults_to_configured_backend() -> None:
     assert 0 < config.devices.intake_efficiency <= 1
 
 
+@pytest.mark.parametrize(
+    ("profile", "shadows", "samples", "particles"),
+    (("low", False, 0, 4), ("medium", True, 2, 8), ("high", True, 4, 12)),
+)
+def test_graphics_quality_profiles_are_configurable(
+    profile: str, shadows: bool, samples: int, particles: int
+) -> None:
+    config = load_config(CONFIG_DIR, {}, quality_preset=profile)
+
+    assert config.graphics.quality_preset == profile
+    assert config.graphics.shadows_enabled is shadows
+    assert config.graphics.multisamples == samples
+    assert config.graphics.airflow_particles_per_track == particles
+    assert config.graphics.target_fps == 60
+
+
+def test_unknown_graphics_quality_profile_is_rejected() -> None:
+    with pytest.raises(ConfigurationError, match="graphics quality"):
+        load_config(CONFIG_DIR, {}, quality_preset="ultra")
+
+
 def test_invalid_backend_url_is_rejected(tmp_path: Path) -> None:
     for source in CONFIG_DIR.glob("*.toml"):
         (tmp_path / source.name).write_bytes(source.read_bytes())

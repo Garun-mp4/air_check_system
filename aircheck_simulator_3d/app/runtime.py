@@ -159,6 +159,14 @@ class ApplicationRuntime:
         if self._network is not None:
             now = datetime.now(timezone.utc)
             if completed_ids:
+                LOGGER.info(
+                    "Backend command(s) completed from actual device state: ids=%s window=%.1f%% reed=%s intake=%s exhaust=%s",
+                    completed_ids,
+                    self._devices.simulation_state.window.actual_position_percent,
+                    self._devices.simulation_state.window.reed_switch,
+                    self._devices.simulation_state.ventilation.intake.enabled,
+                    self._devices.simulation_state.ventilation.exhaust.enabled,
+                )
                 report = ControlStateReport.from_state(
                     self._network.device_id,
                     now,
@@ -195,6 +203,13 @@ class ApplicationRuntime:
         for event in self._network.drain_events():
             if isinstance(event, CommandReceived):
                 self._command_executor.enqueue(event.command)
+                LOGGER.info(
+                    "Backend command received: id=%s target=%s desired_state=%s source=%s",
+                    event.command.command_id,
+                    event.command.target.value,
+                    event.command.desired_state,
+                    event.command.source or "unknown",
+                )
                 if self._automatic_demo is not None:
                     self._automatic_demo.command_received(event.command.command_id)
             elif isinstance(event, AcknowledgementAccepted):

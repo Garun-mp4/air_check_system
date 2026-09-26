@@ -21,13 +21,21 @@ class _Track:
 class AirflowVisualization:
     """Lightweight particles whose visibility and speed follow modeled room flows."""
 
-    _PARTICLES_PER_TRACK = 12
-
-    def __init__(self, parent: Any, scene: SceneConfig, devices: DeviceConfig, physics: PhysicsConfig) -> None:
+    def __init__(
+        self,
+        parent: Any,
+        scene: SceneConfig,
+        devices: DeviceConfig,
+        physics: PhysicsConfig,
+        particles_per_track: int = 12,
+    ) -> None:
         from panda3d.core import PandaNode, TransparencyAttrib
 
         self._root = parent.attachNewNode(PandaNode("aircheck-airflow-overlay"))
         self._root.hide()
+        if particles_per_track < 1:
+            raise ValueError("particles_per_track must be positive")
+        self._particles_per_track = particles_per_track
         self._transparency = TransparencyAttrib.MAlpha
         width = scene.room_width_m
         depth = scene.room_depth_m
@@ -81,7 +89,7 @@ class AirflowVisualization:
         color: tuple[float, float, float, float],
     ) -> _Track:
         particles = []
-        for index in range(self._PARTICLES_PER_TRACK):
+        for index in range(self._particles_per_track):
             particle = make_cylinder(
                 self._root,
                 f"airflow-{name}-{index + 1}",
@@ -119,13 +127,13 @@ class AirflowVisualization:
         for track in self._tracks:
             flow = values[track.name]
             ratio = flow_ratio(flow, track.maximum_flow_m3_h)
-            active_count = active_particle_count(flow, track.maximum_flow_m3_h, self._PARTICLES_PER_TRACK)
+            active_count = active_particle_count(flow, track.maximum_flow_m3_h, self._particles_per_track)
             track.phase = (track.phase + max(0.0, delta_seconds) * (0.15 + 3.0 * ratio)) % 1.0
             for index, particle in enumerate(track.particles):
                 if index >= active_count:
                     particle.hide()
                     continue
-                t = (track.phase + index / self._PARTICLES_PER_TRACK) % 1.0
+                t = (track.phase + index / self._particles_per_track) % 1.0
                 position = tuple(
                     start + (end - start) * t
                     for start, end in zip(track.start, track.end, strict=True)

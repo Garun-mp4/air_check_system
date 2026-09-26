@@ -11,6 +11,7 @@ def test_logging_creates_separate_rotating_files(tmp_path: Path) -> None:
         logging.getLogger("aircheck.application").info("application marker")
         logging.getLogger("aircheck.simulation").info("simulation marker")
         logging.getLogger("aircheck.api").info("api marker")
+        logging.getLogger("aircheck.networking.http").warning("network marker")
     finally:
         close_logging()
 
@@ -18,6 +19,7 @@ def test_logging_creates_separate_rotating_files(tmp_path: Path) -> None:
         "application.log": "application marker",
         "simulation.log": "simulation marker",
         "api.log": "api marker",
+        "network.log": "network marker",
     }
     for filename, marker in expected.items():
         assert marker in (tmp_path / filename).read_text(encoding="utf-8")

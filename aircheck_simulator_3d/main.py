@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import math
 from pathlib import Path
 from typing import Sequence
 
@@ -15,7 +16,7 @@ def _positive_seconds(value: str) -> float:
         seconds = float(value)
     except ValueError as exc:
         raise argparse.ArgumentTypeError("must be a number") from exc
-    if seconds <= 0:
+    if not math.isfinite(seconds) or seconds <= 0:
         raise argparse.ArgumentTypeError("must be greater than zero")
     return seconds
 
@@ -32,6 +33,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=_positive_seconds,
         help="open the Panda3D window and close it after this many seconds",
     )
+    parser.add_argument(
+        "--quality",
+        choices=("low", "medium", "high"),
+        help="override the graphics quality profile from graphics.toml",
+    )
     return parser
 
 
@@ -39,7 +45,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     logging_configured = False
     try:
-        config = load_config(args.config_dir)
+        config = load_config(args.config_dir, quality_preset=args.quality)
         configure_logging(config.logging)
         logging_configured = True
         logging.getLogger("aircheck.application").info("Starting AirCheck 3D Simulator")

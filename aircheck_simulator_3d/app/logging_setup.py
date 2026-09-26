@@ -10,13 +10,21 @@ LOGGER_NAMES = (
     "aircheck.application",
     "aircheck.simulation",
     "aircheck.api",
+    "aircheck.networking",
+)
+
+LOG_FILENAMES = (
+    "application.log",
+    "simulation.log",
+    "api.log",
+    "network.log",
 )
 
 
 def configure_logging(config: LoggingConfig) -> None:
     config.directory.mkdir(parents=True, exist_ok=True)
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
-    for logger_name, filename in zip(LOGGER_NAMES, ("application.log", "simulation.log", "api.log"), strict=True):
+    for logger_name, filename in zip(LOGGER_NAMES, LOG_FILENAMES, strict=True):
         logger = logging.getLogger(logger_name)
         logger.setLevel(config.level.upper())
         logger.propagate = False
