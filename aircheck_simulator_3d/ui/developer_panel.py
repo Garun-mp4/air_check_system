@@ -4,21 +4,22 @@ from collections.abc import Callable, Mapping
 from typing import Any
 
 from aircheck_simulator_3d.app.config import DeveloperParameter, GraphicsConfig
+from aircheck_simulator_3d.ui.theme import THEME
 
 
 PARAMETER_LABELS = {
-    "occupancy": "Occupants",
-    "outdoor_co2_ppm": "Outdoor CO2 ppm",
-    "outdoor_pm25_ug_m3": "Outdoor PM2.5",
-    "outdoor_temperature_c": "Outdoor temp °C",
-    "outdoor_humidity_percent": "Outdoor RH %",
-    "indoor_pm25_generation_ug_min": "Indoor PM source",
-    "wind_speed_m_s": "Wind m/s",
-    "infiltration_ach": "Infiltration ACH",
-    "filter_efficiency": "Filter efficiency",
-    "intake_airflow_m3_h": "Intake m³/h",
-    "exhaust_airflow_m3_h": "Exhaust m³/h",
-    "sensor_noise_percent": "Sensor noise %",
+    "occupancy": "Людей в комнате",
+    "outdoor_co2_ppm": "CO₂ снаружи, ppm",
+    "outdoor_pm25_ug_m3": "PM2.5 снаружи",
+    "outdoor_temperature_c": "Температура снаружи",
+    "outdoor_humidity_percent": "Влажность снаружи",
+    "indoor_pm25_generation_ug_min": "Источник PM2.5 в комнате",
+    "wind_speed_m_s": "Скорость ветра, м/с",
+    "infiltration_ach": "Инфильтрация, ACH",
+    "filter_efficiency": "Эффективность фильтра",
+    "intake_airflow_m3_h": "Приток, м³/ч",
+    "exhaust_airflow_m3_h": "Вытяжка, м³/ч",
+    "sensor_noise_percent": "Шум датчиков, %",
 }
 
 
@@ -38,7 +39,7 @@ class DeveloperPanel:
 
         self._frame = DirectFrame(
             parent=base.aspect2d,
-            frameColor=(0.018, 0.052, 0.078, 0.98),
+            frameColor=THEME.panel,
             frameSize=(-1.00, 1.00, -0.75, 0.75),
             pos=(0, 0, 0),
             relief=DGG.FLAT,
@@ -46,9 +47,9 @@ class DeveloperPanel:
         )
         DirectLabel(
             parent=self._frame,
-            text="DEVELOPER PANEL  /  bounded live controls",
-            text_fg=(*graphics.text_rgb, 1),
-            text_scale=0.038,
+            text="ОТЛАДКА СИМУЛЯЦИИ  /  ограниченные настройки среды",
+            text_fg=THEME.ink,
+            text_scale=0.042,
             text_align=TextNode.ALeft,
             text_font=font,
             frameColor=(0, 0, 0, 0),
@@ -65,8 +66,8 @@ class DeveloperPanel:
             DirectLabel(
                 parent=self._frame,
                 text=PARAMETER_LABELS[name],
-                text_fg=(0.68, 0.82, 0.86, 1),
-                text_scale=0.024,
+                text_fg=THEME.secondary,
+                text_scale=0.030,
                 text_align=TextNode.ALeft,
                 text_font=font,
                 frameColor=(0, 0, 0, 0),
@@ -76,8 +77,8 @@ class DeveloperPanel:
             self._values[name] = DirectLabel(
                 parent=self._frame,
                 text="—",
-                text_fg=(0.44, 0.93, 0.79, 1),
-                text_scale=0.024,
+                text_fg=THEME.accent,
+                text_scale=0.031,
                 text_align=TextNode.ACenter,
                 text_font=font,
                 frameColor=(0, 0, 0, 0),
@@ -88,21 +89,21 @@ class DeveloperPanel:
                 DirectButton(
                     parent=self._frame,
                     text=sign,
-                    text_fg=(*graphics.text_rgb, 1),
-                    text_scale=0.025,
+                    text_fg=THEME.ink,
+                    text_scale=0.031,
                     text_font=font,
-                    frameColor=(0.055, 0.18, 0.22, 0.96),
+                    frameColor=(THEME.control, THEME.control_hover, THEME.control_pressed, THEME.control_disabled),
                     frameSize=(-0.075, 0.075, -0.045, 0.045),
                     command=on_adjust,
                     extraArgs=[name, direction],
                     pos=(x, 0, z),
-                    relief=DGG.RAISED,
+                    relief=DGG.FLAT,
                 )
         self._speed_value = DirectLabel(
             parent=self._frame,
-            text="Simulation speed · 1×",
-            text_fg=(0.44, 0.93, 0.79, 1),
-            text_scale=0.027,
+            text="Скорость симуляции · 1×",
+            text_fg=THEME.accent,
+            text_scale=0.032,
             text_font=font,
             frameColor=(0, 0, 0, 0),
             pos=(0, 0, -0.61),
@@ -112,15 +113,15 @@ class DeveloperPanel:
             DirectButton(
                 parent=self._frame,
                 text=sign,
-                text_fg=(*graphics.text_rgb, 1),
-                text_scale=0.025,
+                text_fg=THEME.ink,
+                text_scale=0.031,
                 text_font=font,
-                frameColor=(0.055, 0.18, 0.22, 0.96),
+                frameColor=(THEME.control, THEME.control_hover, THEME.control_pressed, THEME.control_disabled),
                 frameSize=(-0.12, 0.12, -0.05, 0.05),
                 command=on_speed_step,
                 extraArgs=[direction],
                 pos=(x, 0, -0.61),
-                relief=DGG.RAISED,
+                relief=DGG.FLAT,
             )
         self._frame.hide()
 
@@ -129,7 +130,7 @@ class DeveloperPanel:
             value = values.get(name, 0.0)
             digits = 0 if name in {"occupancy", "outdoor_co2_ppm"} else 1
             label["text"] = f"{value:.{digits}f}"
-        self._speed_value["text"] = "Simulation speed · PAUSED" if speed == 0 else f"Simulation speed · {speed:g}×"
+        self._speed_value["text"] = "Скорость симуляции · ПАУЗА" if speed == 0 else f"Скорость симуляции · {speed:g}×"
 
     def show(self) -> None:
         self._frame.show()

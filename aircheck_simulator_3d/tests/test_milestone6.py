@@ -107,9 +107,9 @@ def test_sensor_panels_and_hud_read_live_virtual_sensor_values() -> None:
     forecast = BackendForecast(1030, model_name="linear_regression")
     expected = {
         "sensor.scd41.indoor": ("Sensirion SCD41", "I²C", "910.0 ppm"),
-        "sensor.sps30.indoor": ("Sensirion SPS30", "UART", "6.5 µg/m³"),
+        "sensor.sps30.indoor": ("Sensirion SPS30", "UART", "6.5 мкг/м³"),
         "sensor.sht45.outdoor": ("Sensirion SHT45", "I²C", "18.0 °C"),
-        "sensor.sps30.outdoor": ("Sensirion SPS30", "UART", "8.0 µg/m³"),
+        "sensor.sps30.outdoor": ("Sensirion SPS30", "UART", "8.0 мкг/м³"),
     }
     for object_id, (model, interface, value) in expected.items():
         _, details = device_details(
@@ -123,13 +123,13 @@ def test_sensor_panels_and_hud_read_live_virtual_sensor_values() -> None:
         assert model in details
         assert interface in details
         assert value in details
-        assert "Status: ONLINE" in details
+        assert "Состояние: В СЕТИ" in details
 
     hud = format_hud(state, forecast, True, "Normal Room", "READY")
     assert "910 ppm" in hud
     assert "6.5" in hud
     assert "1030 ppm" in hud
-    assert "ONLINE" in hud
+    assert "В СЕТИ" in hud
 
 
 @pytest.mark.parametrize(
@@ -167,11 +167,11 @@ def test_every_key_device_has_a_live_details_panel(object_id: str) -> None:
     assert title == object_id
     assert details.strip()
     if object_id == "device.esp32":
-        assert "room-01" in details and "Commands executing: 1" in details
+        assert "room-01" in details and "Команд выполняется: 1" in details
     if object_id == "window.actuator":
-        assert "Target / actual" in details and "Close limit" in details
+        assert "Задано / фактически" in details and "Концевик закрытия" in details
     if object_id == "fan.intake":
-        assert "Airflow:" in details and "Filter:" in details
+        assert "Расход воздуха:" in details and "Фильтр:" in details
 
 
 def test_sensor_failure_marks_readings_unavailable_and_withholds_telemetry() -> None:
@@ -187,7 +187,7 @@ def test_sensor_failure_marks_readings_unavailable_and_withholds_telemetry() -> 
         last_telemetry_at=None,
         pending_commands=0,
     )
-    assert "OFFLINE" in details
+    assert "НЕТ СВЯЗИ" in details
     with pytest.raises(SensorReadingUnavailable, match="is offline"):
         read_sensor_value(app.state, "indoor", "co2")
     with pytest.raises(SensorReadingUnavailable):

@@ -7,6 +7,7 @@ from aircheck_simulator_3d.networking.contracts import BackendForecast
 from aircheck_simulator_3d.scene.objects import SceneObject
 from aircheck_simulator_3d.simulation.state import SimulationState
 from aircheck_simulator_3d.ui.presentation_data import device_details
+from aircheck_simulator_3d.ui.theme import THEME
 
 
 class DevicePanel:
@@ -18,32 +19,32 @@ class DevicePanel:
         self._base = base
         self._frame = DirectFrame(
             parent=base.aspect2d,
-            frameColor=(0.025, 0.07, 0.1, 0.88),
-            frameSize=(-0.40, 0.40, -0.83, 0.0),
+            frameColor=THEME.panel,
+            frameSize=(-0.48, 0.48, -0.76, 0.10),
             relief=DGG.FLAT,
             state=DGG.DISABLED,
         )
         self._title = DirectLabel(
             parent=self._frame,
-            text="DEVICE DETAILS",
-            text_fg=(0.43, 0.9, 0.82, 1),
-            text_scale=0.033,
+            text="УСТРОЙСТВО",
+            text_fg=THEME.accent,
+            text_scale=0.038,
             text_align=TextNode.ALeft,
             text_font=font,
             frameColor=(0, 0, 0, 0),
-            pos=(-0.34, 0, -0.07),
+            pos=(-0.40, 0, 0.025),
             relief=DGG.FLAT,
         )
         self._detail = DirectLabel(
             parent=self._frame,
-            text="Выберите устройство ЛКМ",
-            text_fg=(*graphics.text_rgb, 1),
-            text_scale=0.027,
+            text="Выберите узел на стенде",
+            text_fg=THEME.ink,
+            text_scale=0.031,
             text_align=TextNode.ALeft,
             text_font=font,
-            text_wordwrap=23,
+            text_wordwrap=34,
             frameColor=(0, 0, 0, 0),
-            pos=(-0.34, 0, -0.16),
+            pos=(-0.40, 0, -0.075),
             relief=DGG.FLAT,
         )
         self._aspect = base.getAspectRatio()
@@ -80,7 +81,7 @@ class DevicePanel:
 
     def on_resize(self, aspect: float) -> None:
         self._aspect = aspect
-        self._frame.setPos(aspect - 0.43, 0, 0.68)
+        self._frame.setPos(aspect - 0.60, 0, 0.37)
 
     def close(self) -> None:
         self._frame.destroy()

@@ -16,6 +16,31 @@ SENSOR_OBJECT_IDS = {
     "sensor.sps30.outdoor": "outdoor_particles",
 }
 
+SCENARIO_LABELS_RU = {
+    "Normal Room": "Обычная комната",
+    "CO2 Buildup": "Рост CO₂",
+    "High Occupancy": "Много людей",
+    "Clean Outdoor Air": "Чистый наружный воздух",
+    "Polluted Outdoor Air": "Загрязнённый наружный воздух",
+    "Cold Weather": "Холодная погода",
+    "High Indoor PM2.5": "Повышенный PM2.5",
+    "Sensor Failure": "Отказ датчика",
+    "Backend Offline": "Backend недоступен",
+    "Automatic demo": "Автодемонстрация",
+}
+
+DEMO_PHASES_RU = {
+    "READY": "ГОТОВО",
+    "CO2 BUILD-UP": "РОСТ CO₂",
+    "BACKEND ML FORECAST": "ПРОГНОЗ BACKEND",
+    "BACKEND COMMAND": "КОМАНДА BACKEND",
+    "ACTUATOR EXECUTION": "РАБОТА ПРИВОДА",
+    "WAITING FOR ACK": "ОЖИДАЕТСЯ ACK",
+    "ACKNOWLEDGED · OBSERVING AIR": "ACK ПОЛУЧЕН · НАБЛЮДЕНИЕ",
+    "DEMO COMPLETE": "ДЕМОНСТРАЦИЯ ЗАВЕРШЕНА",
+    "WAITING FOR BACKEND FORECAST": "ОЖИДАЕТСЯ ПРОГНОЗ",
+}
+
 
 def format_hud(
     state: SimulationState,
@@ -24,6 +49,25 @@ def format_hud(
     scenario_name: str,
     demo_phase: str,
 ) -> str:
+    data = hud_data(state, forecast, backend_online, scenario_name, demo_phase)
+    return (
+        f"ВОЗДУХ  /  {data['scenario'].upper()}\n"
+        f"В ПОМЕЩЕНИИ  CO₂ {data['co2']}   PM2.5 {data['pm25']}\n"
+        f"ТЕМПЕРАТУРА {data['temperature']}   ВЛАЖНОСТЬ {data['humidity']}\n"
+        f"СНАРУЖИ  PM2.5 {data['outdoor_pm25']}   {data['outdoor_temperature']}   ВЛАЖНОСТЬ {data['outdoor_humidity']}\n"
+        f"ОКНО {data['window']}  ·  ПРИТОК {data['intake']}  ·  ВЫТЯЖКА {data['exhaust']}\n"
+        f"ПРОГНОЗ +15 МИН {data['forecast']}  ·  СВЯЗЬ {data['backend']}  ·  {data['speed']}\n"
+        f"ДЕМО  {data['demo']}"
+    )
+
+
+def hud_data(
+    state: SimulationState,
+    forecast: BackendForecast | None,
+    backend_online: bool,
+    scenario_name: str,
+    demo_phase: str,
+) -> dict[str, str]:
     indoor = _zone_summary(state, "indoor")
     outdoor = _zone_summary(state, "outdoor")
     window = state.window
@@ -34,18 +78,23 @@ def format_hud(
         if forecast is not None
         else "ожидается backend"
     )
-    sim = "PAUSE" if state.simulation_speed == 0 else f"{state.simulation_speed:g}×"
-    return (
-        f"AIR  /  {scenario_name.upper()}\n"
-        f"INDOOR  CO2 {indoor['co2']}   PM2.5 {indoor['pm25']}\n"
-        f"         {indoor['temperature']}   RH {indoor['humidity']}\n"
-        f"OUTDOOR PM2.5 {outdoor['pm25']}   {outdoor['temperature']}   RH {outdoor['humidity']}\n"
-        f"WINDOW {window.motor_state.value.upper()} {window.actual_position_percent:.0f}%  ·  "
-        f"IN { _on_off(intake.enabled) } {intake.airflow_m3_h:.0f} m³/h  ·  "
-        f"OUT { _on_off(exhaust.enabled) } {exhaust.airflow_m3_h:.0f} m³/h\n"
-        f"CO2 +15 min  {forecast_value}  ·  { 'ONLINE' if backend_online else 'OFFLINE' }  ·  {sim}\n"
-        f"DEMO  {demo_phase}"
-    )
+    return {
+        "scenario": SCENARIO_LABELS_RU.get(scenario_name, scenario_name),
+        "co2": indoor["co2"],
+        "pm25": f"{indoor['pm25']} мкг/м³",
+        "temperature": indoor["temperature"],
+        "humidity": indoor["humidity"],
+        "outdoor_pm25": f"{outdoor['pm25']} мкг/м³",
+        "outdoor_temperature": outdoor["temperature"],
+        "outdoor_humidity": outdoor["humidity"],
+        "window": f"{_window_state(window.motor_state.value)} · {window.actual_position_percent:.0f}%",
+        "intake": f"{_on_off(intake.enabled)} · {intake.airflow_m3_h:.0f} м³/ч",
+        "exhaust": f"{_on_off(exhaust.enabled)} · {exhaust.airflow_m3_h:.0f} м³/ч",
+        "forecast": forecast_value,
+        "backend": "В СЕТИ" if backend_online else "НЕТ СВЯЗИ",
+        "speed": "ПАУЗА" if state.simulation_speed == 0 else f"{state.simulation_speed:g}×",
+        "demo": DEMO_PHASES_RU.get(demo_phase, demo_phase),
+    }
 
 
 def device_details(
@@ -58,7 +107,7 @@ def device_details(
     pending_commands: int,
 ) -> tuple[str, str]:
     if selected is None:
-        return "DEVICE DETAILS", "Выберите устройство ЛКМ — показания и состояние будут обновляться в реальном времени."
+        return "ВЫБЕРИТЕ УЗЕЛ", "Выберите оборудование на стенде — здесь появятся его состояние и текущие показания."
 
     object_id = selected.object_id
     title = selected.title
@@ -67,77 +116,77 @@ def device_details(
     if sensor_id:
         sensor = _find_sensor(state, sensor_id)
         if sensor is None:
-            return title, f"{description}\n\nДатчик не найден в Device Layer."
+            return title, f"{description}\n\nДатчик не найден в слое устройств."
         return title, _sensor_details(sensor, state)
     if object_id == "device.esp32":
         last = _age_label(last_telemetry_at)
-        link = "ONLINE" if backend_online else "OFFLINE"
+        link = "В СЕТИ" if backend_online else "НЕТ СВЯЗИ"
         if backend_message:
             link += f" · {backend_message}"
         return title, (
-            f"Virtual ESP32 · {state.controller.device_id}\n"
-            "Wi-Fi: эмулируется сетевым подключением приложения\n"
-            f"AirCheck backend: {link}\n"
-            f"Last telemetry: {last}\n"
-            f"Commands executing: {pending_commands}\n"
-            f"Sensors online: {sum(item.online for item in state.sensors)}/{len(state.sensors)}"
+            f"Виртуальный ESP32 · {state.controller.device_id}\n"
+            "Wi-Fi: связь эмулируется сетевым подключением приложения\n"
+            f"Сервер AirCheck: {link}\n"
+            f"Последняя телеметрия: {last}\n"
+            f"Команд выполняется: {pending_commands}\n"
+            f"Датчики в сети: {sum(item.online for item in state.sensors)}/{len(state.sensors)}"
         )
     if object_id in {"window.assembly", "window.actuator", "window.reed_switch", "window.magnet", "window.limit_open", "window.limit_close"}:
         window = state.window
         detail = (
-            f"Actuator: {window.motor_state.value.upper()}\n"
-            f"Target / actual: {window.target_position_percent:.0f}% / {window.actual_position_percent:.0f}%\n"
-            f"Reed switch: {'OPEN' if window.reed_switch else 'CLOSED'}\n"
-            f"Open limit: {_on_off(window.open_limit_switch)}\n"
-            f"Close limit: {_on_off(window.close_limit_switch)}"
+            f"Привод: {_window_state(window.motor_state.value)}\n"
+            f"Задано / фактически: {window.target_position_percent:.0f}% / {window.actual_position_percent:.0f}%\n"
+            f"Геркон: {'ОТКРЫТО' if window.reed_switch else 'ЗАКРЫТО'}\n"
+            f"Концевик открытия: {_on_off(window.open_limit_switch)}\n"
+            f"Концевик закрытия: {_on_off(window.close_limit_switch)}"
         )
         return title, f"{description}\n\n{detail}"
     if object_id in {"fan.intake", "fan.exhaust"}:
         intake_side = object_id == "fan.intake"
         fan = state.ventilation.intake if intake_side else state.ventilation.exhaust
-        flow_path = "OUTSIDE → FILTER → ROOM" if intake_side else "ROOM → OUTSIDE"
+        flow_path = "УЛИЦА → ФИЛЬТР → КОМНАТА" if intake_side else "КОМНАТА → УЛИЦА"
         filter_status = (
-            f"Filter: {'ON' if state.ventilation.filter_enabled else 'OFF'} · "
-            f"efficiency {state.ventilation.filter_efficiency * 100:.0f}%\n"
+            f"Фильтр: {'ВКЛ' if state.ventilation.filter_enabled else 'ВЫКЛ'} · "
+            f"эффективность {state.ventilation.filter_efficiency * 100:.0f}%\n"
             if intake_side
             else ""
         )
         return title, (
-            f"{description}\n\nState: {_on_off(fan.enabled)}\n"
-            f"Airflow: {fan.airflow_m3_h:.1f} m³/h\nRPM: {fan.rpm:.0f}\n"
-            f"Path: {flow_path}\n{filter_status}"
+            f"{description}\n\nСостояние: {_on_off(fan.enabled)}\n"
+            f"Расход воздуха: {fan.airflow_m3_h:.1f} м³/ч\nОбороты: {fan.rpm:.0f} об/мин\n"
+            f"Направление потока: {flow_path}\n{filter_status}"
         )
     if object_id.startswith("power."):
-        return title, f"{description}\n\nВиртуальный узел: установлен. Состояние отображается схемой стенда; силовая модель не рассчитывается."
+        return title, f"{description}\n\nСиловой узел стенда. Его состояние показано схемой; электрический режим не рассчитывается."
     return title, f"{description}\n\nУзел сцены: {object_id}"
 
 
 def _sensor_details(sensor: SensorDeviceState, state: SimulationState) -> str:
     if not sensor.online:
         return (
-            f"Type: {sensor.model}\nInterface: {sensor.interface}\n"
-            f"Node: {sensor.zone.upper()}\nStatus: OFFLINE · нет достоверных показаний\n"
-            "Telemetry для AirCheck приостановлена до восстановления всех виртуальных датчиков."
+            f"Модель: {sensor.model}\nИнтерфейс: {sensor.interface}\n"
+            f"Узел: { _zone_label(sensor.zone) }\nСостояние: НЕТ СВЯЗИ · показания недостоверны\n"
+            "Передача телеметрии приостановлена до восстановления датчика."
         )
     values = []
     for measurement in sensor.measurements:
         label, unit = {
-            "co2": ("CO2", "ppm"),
-            "pm25": ("PM2.5", "µg/m³"),
-            "temperature": ("Temperature", "°C"),
-            "humidity": ("Humidity", "%"),
+            "co2": ("CO₂", "ppm"),
+            "pm25": ("PM2.5", "мкг/м³"),
+            "temperature": ("Температура", "°C"),
+            "humidity": ("Влажность", "%"),
         }.get(measurement, (measurement, ""))
         try:
             value = read_sensor_value(state, sensor.zone, measurement)
         except SensorReadingUnavailable:
-            formatted = "NO SIGNAL"
+            formatted = "НЕТ СИГНАЛА"
         else:
             formatted = f"{value:.1f} {unit}".rstrip()
         values.append(f"{label}: {formatted}")
-    extra = "\nPM1.0 / PM4 / PM10: not modeled in this room model" if sensor.model.endswith("SPS30") else ""
+    extra = "\nPM1.0 / PM4 / PM10: в модели помещения не рассчитываются" if sensor.model.endswith("SPS30") else ""
     return (
-        f"Type: {sensor.model}\nInterface: {sensor.interface}\nNode: {sensor.zone.upper()}\n"
-        f"Status: ONLINE\nCurrent values:\n" + "\n".join(values) + extra
+        f"Модель: {sensor.model}\nИнтерфейс: {sensor.interface}\nУзел: {_zone_label(sensor.zone)}\n"
+        f"Состояние: В СЕТИ\nТекущие показания:\n" + "\n".join(values) + extra
     )
 
 
@@ -168,19 +217,33 @@ def _find_sensor(state: SimulationState, sensor_id: str) -> SensorDeviceState | 
 
 
 def _on_off(value: bool) -> str:
-    return "ON" if value else "OFF"
+    return "ВКЛ" if value else "ВЫКЛ"
+
+
+def _zone_label(zone: str) -> str:
+    return "ВНУТРЕННИЙ" if zone == "indoor" else "НАРУЖНЫЙ"
+
+
+def _window_state(state: str) -> str:
+    return {
+        "opening": "ОТКРЫВАЕТСЯ",
+        "closing": "ЗАКРЫВАЕТСЯ",
+        "stopped": "ОСТАНОВЛЕНО",
+        "open": "ОТКРЫТО",
+        "closed": "ЗАКРЫТО",
+    }.get(state.lower(), state.upper())
 
 
 def _age_label(timestamp: str | None) -> str:
     if not timestamp:
-        return "no successful telemetry yet"
+        return "ещё не отправлялась"
     try:
         sent_at = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
     except ValueError:
-        return "timestamp unavailable"
+        return "время недоступно"
     age = max(0.0, (datetime.now(timezone.utc) - sent_at).total_seconds())
     if age < 10:
-        return f"{age:.1f} s ago"
+        return f"{age:.1f} с назад"
     if age < 60:
-        return f"{age:.0f} s ago"
-    return f"{age / 60:.1f} min ago"
+        return f"{age:.0f} с назад"
+    return f"{age / 60:.1f} мин назад"

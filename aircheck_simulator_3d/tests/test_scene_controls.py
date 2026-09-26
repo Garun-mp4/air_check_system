@@ -428,7 +428,17 @@ def test_input_bindings_route_escape_cutaway_and_camera_actions() -> None:
     selected_object = type("Selected", (), {"node": camera_path, "focus_point": (0, 0, 0)})()
     picker = type("Picker", (), {"selected": selected_object, "select_at_mouse": lambda self: selected_object})()
     menu_changes: list[bool] = []
-    controls = InputController(base, camera, picker, cutaway, menu_changes.append)
+    pointer_over_ui = [False]
+    wheel_steps: list[int] = []
+    camera.add_wheel_step = wheel_steps.append
+    controls = InputController(
+        base,
+        camera,
+        picker,
+        cutaway,
+        menu_changes.append,
+        pointer_over_ui=lambda: pointer_over_ui[0],
+    )
 
     callback, args = handlers["w"]
     callback(*args)
@@ -437,6 +447,14 @@ def test_input_bindings_route_escape_cutaway_and_camera_actions() -> None:
     callback(*args)
     assert camera_path.getPos(base.render) != Point3(*config.camera.start_position)
 
+    pointer_over_ui[0] = True
+    handlers["mouse3"][0](*handlers["mouse3"][1])
+    handlers["wheel_up"][0](*handlers["wheel_up"][1])
+    assert not camera.looking and not wheel_steps
+
+    pointer_over_ui[0] = False
+    handlers["wheel_up"][0](*handlers["wheel_up"][1])
+    assert wheel_steps == [1]
     handlers["mouse3"][0](*handlers["mouse3"][1])
     assert camera.looking and window.cursor_hidden
     handlers["mouse3-up"][0](*handlers["mouse3-up"][1])
@@ -452,3 +470,38 @@ def test_input_bindings_route_escape_cutaway_and_camera_actions() -> None:
 
     controls.close()
     assert not handlers
+
+
+def test_escape_closes_an_open_overlay_without_leaving_controls_paused() -> None:
+    from aircheck_simulator_3d.presentation.camera_controller import CameraController
+    from aircheck_simulator_3d.presentation.input_controller import InputController
+
+    base, _, _ = _fake_camera_base()
+    handlers: dict[str, tuple[object, list[object]]] = {}
+    base.accept = lambda event, callback, extra_args: handlers.__setitem__(event, (callback, extra_args))
+    base.ignore = lambda event: handlers.pop(event, None)
+    camera = CameraController(base, load_config().camera)
+    wall, _ = _wall()
+    overlay_open = [True]
+    changes: list[bool] = []
+
+    def change_overlay(open_: bool) -> None:
+        changes.append(open_)
+        overlay_open[0] = open_
+
+    controls = InputController(
+        base,
+        camera,
+        type("Picker", (), {"selected": None})(),
+        CutawayController(wall),
+        change_overlay,
+        ui_modal_open=lambda: overlay_open[0],
+    )
+
+    handlers["escape"][0](*handlers["escape"][1])
+
+    assert not controls.menu_open
+    assert not controls.interaction_blocked
+    assert changes == [False]
+    controls.close()
+    wall.node.removeNode()
