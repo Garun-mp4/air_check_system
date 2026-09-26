@@ -6,11 +6,25 @@ import {
   co2Thresholds,
   createDataZoomAction,
   createFullViewport,
+  insertChartDataGaps,
   panViewport,
   zoomViewport,
 } from './Charts'
 
 describe('chart viewport controls', () => {
+  it('leaves a visible gap instead of connecting readings across a long outage', () => {
+    expect(insertChartDataGaps([
+      { timestamp: '2026-09-09T10:00:00Z', value: 650 },
+      { timestamp: '2026-09-09T10:01:00Z', value: 652 },
+      { timestamp: '2026-09-09T10:30:00Z', value: 680 },
+    ], 10 * 60 * 1000)).toEqual([
+      ['2026-09-09T10:00:00Z', 650],
+      ['2026-09-09T10:01:00Z', 652],
+      ['2026-09-09T10:15:30.000Z', null],
+      ['2026-09-09T10:30:00Z', 680],
+    ])
+  })
+
   it('creates a complete viewport and keeps it within the data bounds', () => {
     expect(createFullViewport(100)).toEqual({ start: 0, end: 99 })
     expect(clampViewport({ start: -20, end: 140 }, 100)).toEqual({ start: 0, end: 99 })
@@ -46,6 +60,9 @@ describe('chart viewport controls', () => {
     } | undefined
 
     expect(option.aria).toEqual({ enabled: true })
+    expect(option.animation).toBe(false)
+    expect(option.animationDuration).toBe(0)
+    expect(option.animationDurationUpdate).toBe(0)
     expect(option.dataZoom).toHaveLength(2)
     expect((option.dataZoom as Array<{ disabled?: boolean }>)[0]?.disabled).toBe(true)
     expect((option.dataZoom as Array<{ zoomOnMouseWheel?: boolean }>)[0]?.zoomOnMouseWheel).toBe(false)

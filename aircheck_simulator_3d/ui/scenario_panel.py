@@ -4,6 +4,8 @@ from collections.abc import Callable, Sequence
 from typing import Any
 
 from aircheck_simulator_3d.app.config import GraphicsConfig, ScenarioPreset
+from aircheck_simulator_3d.ui.presentation_data import SCENARIO_LABELS_RU
+from aircheck_simulator_3d.ui.theme import THEME
 
 
 class ScenarioPanel:
@@ -21,7 +23,7 @@ class ScenarioPanel:
 
         self._frame = DirectFrame(
             parent=base.aspect2d,
-            frameColor=(0.018, 0.052, 0.078, 0.98),
+            frameColor=THEME.panel,
             frameSize=(-0.88, 0.88, -0.68, 0.68),
             pos=(0, 0, 0),
             relief=DGG.FLAT,
@@ -29,9 +31,9 @@ class ScenarioPanel:
         )
         DirectLabel(
             parent=self._frame,
-            text="DEMO SCENARIOS  /  выберите исходные условия",
-            text_fg=(*graphics.text_rgb, 1),
-            text_scale=0.038,
+            text="СЦЕНАРИИ ДЕМОНСТРАЦИИ  /  выберите исходные условия",
+            text_fg=THEME.ink,
+            text_scale=0.042,
             text_align=TextNode.ALeft,
             text_font=font,
             frameColor=(0, 0, 0, 0),
@@ -47,16 +49,16 @@ class ScenarioPanel:
             self._buttons.append(
                 DirectButton(
                     parent=self._frame,
-                    text=scenario.title,
-                    text_fg=(*graphics.text_rgb, 1),
-                    text_scale=0.025,
+                    text=SCENARIO_LABELS_RU.get(scenario.title, scenario.title),
+                    text_fg=THEME.ink,
+                    text_scale=0.030,
                     text_font=font,
-                    frameColor=(0.055, 0.18, 0.22, 0.96),
+                    frameColor=(THEME.control, THEME.control_hover, THEME.control_pressed, THEME.control_disabled),
                     frameSize=(-0.25, 0.25, -0.055, 0.055),
                     command=on_select,
                     extraArgs=[scenario.scenario_id],
                     pos=(x, 0, z),
-                    relief=DGG.RAISED,
+                    relief=DGG.FLAT,
                 )
             )
         self._frame.hide()

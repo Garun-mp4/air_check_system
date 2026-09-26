@@ -19,6 +19,7 @@ useECharts([
 ])
 
 const minVisiblePoints = 6
+const chartDataGapThresholdMs = 10 * 60 * 1000
 
 export interface SeriesPoint {
   timestamp: string
@@ -80,6 +81,8 @@ interface ChartProps {
   ariaLabel: string
   thresholds?: ChartThreshold[]
   rangeKey?: string
+  viewport?: ChartViewport | null
+  onViewportChange?: (viewport: ChartViewport) => void
 }
 
 interface DataZoomRange {
@@ -207,6 +210,31 @@ function validData(data: SeriesPoint[]): SeriesPoint[] {
   ))
 }
 
+export function insertChartDataGaps(
+  inputData: SeriesPoint[],
+  maxGapMs = chartDataGapThresholdMs,
+): Array<[string, number | null]> {
+  const data = validData(inputData)
+  const renderData: Array<[string, number | null]> = []
+
+  data.forEach((point, index) => {
+    const previous = data[index - 1]
+    if (previous) {
+      const previousTime = Date.parse(previous.timestamp)
+      const currentTime = Date.parse(point.timestamp)
+      if (currentTime - previousTime > maxGapMs) {
+        renderData.push([
+          new Date(previousTime + (currentTime - previousTime) / 2).toISOString(),
+          null,
+        ])
+      }
+    }
+    renderData.push([point.timestamp, point.value])
+  })
+
+  return renderData
+}
+
 function readCssToken(element: HTMLElement, name: string, fallback: string): string {
   return getComputedStyle(element).getPropertyValue(name).trim() || fallback
 }
@@ -321,7 +349,6 @@ export function buildTimeSeriesOption(
   thresholds: ChartThreshold[] = [],
   palette: ChartPalette = defaultChartPalette,
   viewport: ChartViewport = createFullViewport(inputData.length),
-  animate = true,
 ): EChartsOption {
   const data = validData(inputData)
   const appliedViewport = clampViewport(viewport, data.length)
@@ -346,11 +373,15 @@ export function buildTimeSeriesOption(
       position: 'insideEndTop' as const,
     },
   }))
+  const renderData = insertChartDataGaps(data)
 
   return {
-    animation: animate,
-    animationDuration: animate ? 220 : 0,
-    animationDurationUpdate: animate ? 160 : 0,
+    // A period change replaces the whole series and can also change its length.
+    // ECharts' index-based data animation then connects unrelated old/new points
+    // for a frame. Keep data replacement atomic; chart gestures stay immediate.
+    animation: false,
+    animationDuration: 0,
+    animationDurationUpdate: 0,
     aria: { enabled: true },
     backgroundColor: 'transparent',
     grid: {
@@ -386,7 +417,13 @@ export function buildTimeSeriesOption(
         const items = Array.isArray(params) ? params : [params]
         const item = items[0] as { value?: unknown; axisValue?: string | number } | undefined
         const rawValue = Array.isArray(item?.value) ? item.value[1] : item?.value
+        if (rawValue === null || rawValue === undefined) {
+          return ''
+        }
         const numericValue = typeof rawValue === 'number' ? rawValue : Number(rawValue)
+        if (!Number.isFinite(numericValue)) {
+          return ''
+        }
         const rawAxisValue = item?.axisValue
         const axisValue = typeof rawAxisValue === 'number' || typeof rawAxisValue === 'string'
           ? rawAxisValue
@@ -476,7 +513,7 @@ export function buildTimeSeriesOption(
     series: [{
       type: 'line',
       name: unit,
-      data: data.map((point) => [point.timestamp, point.value]),
+      data: renderData,
       showSymbol: data.length <= 48,
       symbol: 'circle',
       symbolSize: data.length <= 48 ? 5 : 0,
@@ -584,12 +621,21 @@ function ChartViewportToolbar({
   )
 }
 
-export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], rangeKey = 'default' }: ChartProps) {
+export function LineChart({
+  data: inputData,
+  unit,
+  ariaLabel,
+  thresholds = [],
+  rangeKey = 'default',
+  viewport: controlledViewport,
+  onViewportChange,
+}: ChartProps) {
   const instructionsId = useId()
   const surfaceRef = useRef<HTMLDivElement | null>(null)
   const chartMountRef = useRef<HTMLDivElement | null>(null)
   const chartRef = useRef<ECharts | null>(null)
   const dataZoomHandlerRef = useRef<((event: unknown) => void) | null>(null)
+  const onViewportChangeRef = useRef(onViewportChange)
   const dataZoomBoundRef = useRef(false)
   const hasAppliedDataRef = useRef(false)
   const previousRangeKeyRef = useRef(rangeKey)
@@ -597,7 +643,7 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
   const dataRef = useRef<SeriesPoint[]>(inputData)
   const viewportRef = useRef<ChartViewport>(createFullViewport(inputData.length))
   const dispatchViewportRef = useRef<(nextViewport: ChartViewport) => void>(() => undefined)
-  const [viewport, setViewport] = useState<ChartViewport>(() => createFullViewport(inputData.length))
+  const [internalViewport, setInternalViewport] = useState<ChartViewport>(() => createFullViewport(inputData.length))
   const data = useMemo(() => validData(inputData), [inputData])
   const dataKey = useMemo(() => data.length === 0
     ? 'empty'
@@ -608,9 +654,18 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
   )
   const hasData = data.length > 0
   dataRef.current = data
+  onViewportChangeRef.current = onViewportChange
 
-  const currentViewport = clampViewport(viewport, data.length)
+  const currentViewport = clampViewport(controlledViewport ?? internalViewport, data.length)
   viewportRef.current = currentViewport
+
+  const commitViewport = (nextViewport: ChartViewport): ChartViewport => {
+    const next = clampViewport(nextViewport, dataRef.current.length)
+    viewportRef.current = next
+    setInternalViewport((current) => viewportsEqual(current, next) ? current : next)
+    onViewportChangeRef.current?.(next)
+    return next
+  }
 
   useEffect(() => {
     const chartMount = chartMountRef.current
@@ -627,8 +682,7 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
     const handleDataZoom = (event: unknown) => {
       const nextViewport = viewportFromDataZoomEvent(event, dataRef.current)
       if (nextViewport) {
-        viewportRef.current = nextViewport
-        setViewport((current) => viewportsEqual(current, nextViewport) ? current : nextViewport)
+        commitViewport(nextViewport)
       }
     }
     dataZoomHandlerRef.current = handleDataZoom
@@ -658,13 +712,17 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
 
     const previousDataLength = previousDataLengthRef.current
     const previousViewport = clampViewport(viewportRef.current, previousDataLength)
-    const shouldResetViewport = !hasAppliedDataRef.current || previousRangeKeyRef.current !== rangeKey
+    const shouldResetViewport =
+      previousRangeKeyRef.current !== rangeKey ||
+      (!hasAppliedDataRef.current && (controlledViewport === null || controlledViewport === undefined))
+    const hasInitialControlledViewport =
+      !hasAppliedDataRef.current && controlledViewport !== null && controlledViewport !== undefined
     const dataGrew = data.length > previousDataLength
     const wasFullRange = previousDataLength <= 1
       || Math.round(previousViewport.end - previousViewport.start) >= previousDataLength - 1
     const wasAtEnd = previousDataLength > 0 && previousViewport.end >= previousDataLength - 1.5
     let nextViewport: ChartViewport
-    if (shouldResetViewport || wasFullRange) {
+    if (shouldResetViewport || (wasFullRange && !hasInitialControlledViewport)) {
       nextViewport = createFullViewport(data.length)
     } else if (dataGrew && wasAtEnd) {
       const addedPoints = data.length - previousDataLength
@@ -677,7 +735,7 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
     }
     const palette = readChartPalette(surface)
     chart.setOption(
-      buildTimeSeriesOption(data, unit, thresholds, palette, nextViewport, !hasAppliedDataRef.current || previousRangeKeyRef.current !== rangeKey),
+      buildTimeSeriesOption(data, unit, thresholds, palette, nextViewport),
       { notMerge: true, silent: true },
     )
     if (!dataZoomBoundRef.current && dataZoomHandler) {
@@ -688,14 +746,11 @@ export function LineChart({ data: inputData, unit, ariaLabel, thresholds = [], r
     hasAppliedDataRef.current = true
     previousRangeKeyRef.current = rangeKey
     previousDataLengthRef.current = data.length
-    viewportRef.current = nextViewport
-    setViewport((current) => viewportsEqual(current, nextViewport) ? current : nextViewport)
+    commitViewport(nextViewport)
   }, [dataKey, data, unit, thresholdKey, rangeKey])
 
   const dispatchViewport = (nextViewport: ChartViewport) => {
-    const next = clampViewport(nextViewport, data.length)
-    viewportRef.current = next
-    setViewport((current) => viewportsEqual(current, next) ? current : next)
+    const next = commitViewport(nextViewport)
 
     const chart = chartRef.current
     if (!chart || data.length === 0) {

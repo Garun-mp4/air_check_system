@@ -37,8 +37,8 @@ class InputController:
         self._accept("mouse3", self._set_looking, [True])
         self._accept("mouse3-up", self._set_looking, [False])
         self._accept("mouse1", self._select)
-        self._accept("wheel_up", self._camera.add_wheel_step, [1])
-        self._accept("wheel_down", self._camera.add_wheel_step, [-1])
+        self._accept("wheel_up", self._wheel_step, [1])
+        self._accept("wheel_down", self._wheel_step, [-1])
         self._accept("escape", self._toggle_menu)
         self._accept("c", self._cycle_cutaway)
         self._accept("f", self._focus_selection)
@@ -56,8 +56,15 @@ class InputController:
         self._camera.set_key(key, pressed and not self.interaction_blocked)
 
     def _set_looking(self, looking: bool) -> None:
-        if not self.interaction_blocked:
-            self._camera.set_looking(looking)
+        if self.interaction_blocked:
+            return
+        if looking and self._pointer_over_ui():
+            return
+        self._camera.set_looking(looking)
+
+    def _wheel_step(self, direction: int) -> None:
+        if not self.interaction_blocked and not self._pointer_over_ui():
+            self._camera.add_wheel_step(direction)
 
     def _select(self) -> None:
         if not self.interaction_blocked and not self._pointer_over_ui():
@@ -82,7 +89,15 @@ class InputController:
         return self.menu_open or self._ui_modal_open()
 
     def _toggle_menu(self) -> None:
+        if self._ui_modal_open():
+            self.menu_open = False
+            self._camera.set_looking(False)
+            self._camera.set_paused(False)
+            self._on_menu_change(False)
+            return
         self.menu_open = not self.menu_open
+        if self.menu_open:
+            self._camera.set_looking(False)
         self._camera.set_paused(self.menu_open)
         self._on_menu_change(self.menu_open)
 

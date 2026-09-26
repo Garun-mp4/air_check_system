@@ -76,7 +76,7 @@ class SimulatorViewport:
             self._picker,
             self._cutaway,
             self._overlay.set_menu_open,
-            lambda: self._overlay.modal_open,
+            lambda: self._overlay.interaction_overlay_open,
             self._overlay.pointer_over_ui,
         )
         self._previous_aspect = base.getAspectRatio()

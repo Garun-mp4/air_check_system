@@ -285,12 +285,14 @@ export async function getHistory(
 
 export async function getControlStatus(
   deviceId?: string,
+  signal?: AbortSignal,
 ): Promise<ClientControlStatus> {
   const params = deviceId
     ? '?' + new URLSearchParams({ device_id: deviceId }).toString()
     : ''
   const payload = await requestJson<{ data: ClientControlStatus }>(
     '/api/v1/controls' + params,
+    signal,
   )
   return payload.data
 }
