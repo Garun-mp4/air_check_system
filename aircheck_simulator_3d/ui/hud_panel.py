@@ -19,7 +19,7 @@ class HudPanel:
         self._frame = DirectFrame(
             parent=base.aspect2d,
             frameColor=THEME.panel,
-            frameSize=(-0.56, 0.56, -0.64, 0.08),
+            frameSize=(-0.56, 0.56, -0.67, 0.08),
             relief=DGG.FLAT,
             state=DGG.DISABLED,
         )
@@ -37,8 +37,8 @@ class HudPanel:
         self._indoor_metrics = self._label(DirectLabel, font, 0.02, -0.135, 0.030, THEME.ink)
         self._outdoor = self._label(DirectLabel, font, -0.47, -0.315, 0.030, THEME.secondary)
         self._devices = self._label(DirectLabel, font, -0.47, -0.405, 0.030, THEME.secondary)
-        self._forecast = self._label(DirectLabel, font, -0.47, -0.495, 0.030, THEME.secondary)
-        self._demo = self._label(DirectLabel, font, -0.47, -0.575, 0.029, THEME.muted)
+        self._forecast = self._label(DirectLabel, font, -0.47, -0.525, 0.027, THEME.secondary)
+        self._demo = self._label(DirectLabel, font, -0.47, -0.615, 0.029, THEME.muted)
         self._aspect = base.getAspectRatio()
         self.on_resize(self._aspect)
 
@@ -61,7 +61,7 @@ class HudPanel:
             text_scale=scale,
             text_align=TextNode.ALeft,
             text_font=font,
-            text_wordwrap=54,
+            text_wordwrap=34,
             frameColor=(0, 0, 0, 0),
             pos=(x, 0, z),
             relief=DGG.FLAT,
@@ -85,15 +85,16 @@ class HudPanel:
             f"ВЛАЖНОСТЬ  {data['humidity']}"
         )
         self._outdoor["text"] = (
-            f"УЛИЦА  ·  PM2.5 {data['outdoor_pm25']}  ·  "
+            f"УЛИЦА  ·  PM2.5 {data['outdoor_pm25']}\n"
             f"{data['outdoor_temperature']}  ·  ВЛАЖНОСТЬ {data['outdoor_humidity']}"
         )
         self._devices["text"] = (
-            f"ОКНО {data['window']}  ·  ПРИТОК {data['intake']}  ·  "
+            f"ОКНО {data['window']}\n"
+            f"ПРИТОК {data['intake']}\n"
             f"ВЫТЯЖКА {data['exhaust']}"
         )
         self._forecast["text"] = (
-            f"ПРОГНОЗ CO₂ +15 МИН  {data['forecast']}  ·  "
+            f"ПРОГНОЗ CO₂ +15 МИН  {data['forecast']}\n"
             f"СВЯЗЬ {data['backend']}  ·  СИМУЛЯЦИЯ {data['speed']}"
         )
         self._forecast["text_fg"] = THEME.good if backend_online else THEME.warning

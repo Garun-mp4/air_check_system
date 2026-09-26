@@ -472,6 +472,35 @@ def test_input_bindings_route_escape_cutaway_and_camera_actions() -> None:
     assert not handlers
 
 
+def test_window_resize_preserves_showbase_display_region_updates() -> None:
+    from aircheck_simulator_3d.presentation.camera_controller import CameraController
+    from aircheck_simulator_3d.presentation.input_controller import InputController
+
+    base, _, window = _fake_camera_base()
+    handlers: dict[str, tuple[object, list[object]]] = {}
+    base.accept = lambda event, callback, extra_args: handlers.__setitem__(event, (callback, extra_args))
+    base.ignore = lambda event: handlers.pop(event, None)
+    event_order: list[object] = []
+    base.windowEvent = lambda changed_window: event_order.append(("showbase", changed_window))
+    camera = CameraController(base, load_config().camera)
+    camera.on_window_resize = lambda: event_order.append("camera")
+    wall, _ = _wall()
+    controls = InputController(
+        base,
+        camera,
+        type("Picker", (), {"selected": None})(),
+        CutawayController(wall),
+        lambda _: None,
+    )
+
+    callback, args = handlers["window-event"]
+    callback(window, *args)
+
+    assert event_order == [("showbase", window), "camera"]
+    controls.close()
+    wall.node.removeNode()
+
+
 def test_escape_closes_an_open_overlay_without_leaving_controls_paused() -> None:
     from aircheck_simulator_3d.presentation.camera_controller import CameraController
     from aircheck_simulator_3d.presentation.input_controller import InputController

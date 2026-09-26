@@ -102,6 +102,11 @@ class InputController:
         self._on_menu_change(self.menu_open)
 
     def _window_event(self, window: Any) -> None:
+        # InputController shares ShowBase's event dispatcher, so accepting
+        # "window-event" here replaces ShowBase.windowEvent. Delegate explicitly
+        # to preserve aspect2d, pixel2d, and display-region resizing.
+        if window is not None:
+            self._base.windowEvent(window)
         if window is not None and window.getXSize() > 0 and window.getYSize() > 0:
             self._camera.on_window_resize()
 
