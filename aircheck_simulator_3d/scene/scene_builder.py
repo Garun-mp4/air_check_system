@@ -48,7 +48,7 @@ class StandScene:
             "Внутренний пол контролируемой комнаты.",
             (0, 0, -0.05),
         )
-        make_box(floor.visual, "room-floor-finish", (0, 0, 0), (width, depth, 0.18), (0.72, 0.76, 0.71, 1), specular=(0.16, 0.18, 0.16), shininess=18)
+        make_box(floor.visual, "room-floor-finish", (0, 0, 0), (width, depth, 0.18), (0.63, 0.69, 0.65, 1), specular=(0.16, 0.18, 0.16), shininess=18)
         self._register_existing(floor, (width / 2, depth / 2, 0.1))
 
         outdoor_depth = self.config.outdoor_depth_m

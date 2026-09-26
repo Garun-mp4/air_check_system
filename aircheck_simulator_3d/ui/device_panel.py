@@ -20,7 +20,7 @@ class DevicePanel:
         self._frame = DirectFrame(
             parent=base.aspect2d,
             frameColor=THEME.panel,
-            frameSize=(-0.48, 0.48, -0.76, 0.10),
+            frameSize=(-0.48, 0.48, -0.48, 0.10),
             relief=DGG.FLAT,
             state=DGG.DISABLED,
         )
@@ -42,7 +42,7 @@ class DevicePanel:
             text_scale=0.031,
             text_align=TextNode.ALeft,
             text_font=font,
-            text_wordwrap=34,
+            text_wordwrap=28,
             frameColor=(0, 0, 0, 0),
             pos=(-0.40, 0, -0.075),
             relief=DGG.FLAT,
