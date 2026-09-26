@@ -9,6 +9,14 @@ from aircheck_simulator_3d.scene.device_models.geometry import (
     create_pickable_part,
     make_cylinder,
 )
+from aircheck_simulator_3d.scene.device_models.layout import (
+    INDOOR_MOUNT_PANEL_HEIGHT_M,
+    INDOOR_MOUNT_PANEL_DEPTH_M,
+    INDOOR_MOUNT_PANEL_WIDTH_M,
+    OUTDOOR_BRACKET_STANDOFF_M,
+    EquipmentLayout,
+    world_position,
+)
 from aircheck_simulator_3d.scene.objects import SceneObject, add_world_label, make_box
 
 
@@ -21,11 +29,25 @@ OUTDOOR_PARTICLE = "sensor.sps30.outdoor"
 def build_indoor_sensors(parent: Any, config: SceneConfig) -> tuple[dict[str, SceneObject], dict[str, tuple[float, float, float]]]:
     from panda3d.core import PandaNode
 
-    center = (-config.room_width_m * 0.26, -config.room_depth_m * 0.17, 1.53)
+    layout = EquipmentLayout.from_config(config)
+    center = layout.indoor_sensor_center
     assembly = parent.attachNewNode(PandaNode("indoor-sensor-assembly"))
     assembly.setPos(*center)
-    add_mounting_panel(assembly, name="indoor-sensor-mount", size=(0.76, 0.10, 0.86), color=(0.2, 0.31, 0.33, 1))
-    make_box(assembly, "indoor-sensor-spacer", (0, -0.082, 0), (0.68, 0.05, 0.76), (0.74, 0.77, 0.71, 1), specular=(0.32, 0.34, 0.31), shininess=24)
+    add_mounting_panel(
+        assembly,
+        name="indoor-sensor-mount",
+        size=(INDOOR_MOUNT_PANEL_WIDTH_M, INDOOR_MOUNT_PANEL_DEPTH_M, INDOOR_MOUNT_PANEL_HEIGHT_M),
+        color=(0.2, 0.31, 0.33, 1),
+    )
+    make_box(
+        assembly,
+        "indoor-sensor-spacer",
+        (0, -0.082, 0),
+        (INDOOR_MOUNT_PANEL_WIDTH_M - 0.08, 0.05, INDOOR_MOUNT_PANEL_HEIGHT_M - 0.10),
+        (0.74, 0.77, 0.71, 1),
+        specular=(0.32, 0.34, 0.31),
+        shininess=24,
+    )
 
     scd_obj, scd = create_pickable_part(
         assembly,
@@ -54,11 +76,16 @@ def build_indoor_sensors(parent: Any, config: SceneConfig) -> tuple[dict[str, Sc
     add_louver_panel(sps, name="sps30-intake", width=0.23, height=0.22, y=-0.116, count=6)
     make_box(sps, "sps30-status-light", (0.15, -0.104, 0.16), (0.035, 0.02, 0.035), (0.25, 0.9, 0.65, 1))
     make_box(assembly, "sensor-cable-anchor", (0.35, -0.09, -0.32), (0.14, 0.07, 0.08), (0.22, 0.28, 0.29, 1))
+    indoor_gland = make_cylinder(assembly, "indoor-cable-gland", (0.29, -0.12, 0.36), 0.045, 0.09, (0.25, 0.31, 0.32, 1), axis="y", segments=12)
     make_cylinder(assembly, "sensor-mount-post", (0, 0.11, 0), 0.024, 0.68, (0.53, 0.59, 0.57, 1), axis="z")
-    add_world_label(assembly, "INDOOR SENSORS", (0, -0.10, 0.57), 0.09)
+    add_world_label(assembly, "INDOOR WALL NODE", (0, -0.10, 0.57), 0.084)
     return (
         {INDOOR_SENSOR: scd_obj, INDOOR_PARTICLE: sps_obj},
-        {INDOOR_SENSOR: (*center[:2], center[2] + 0.24), INDOOR_PARTICLE: (*center[:2], center[2] - 0.20)},
+        {
+            INDOOR_SENSOR: world_position(scd_obj.node, parent),
+            INDOOR_PARTICLE: world_position(sps_obj.node, parent),
+            "wire.indoor_gland": world_position(indoor_gland, parent),
+        },
     )
 
 
@@ -67,11 +94,25 @@ def build_outdoor_sensors(
 ) -> tuple[dict[str, SceneObject], dict[str, tuple[float, float, float]]]:
     from panda3d.core import PandaNode
 
-    center = (config.room_width_m * 0.26, config.room_depth_m / 2 + min(config.outdoor_depth_m * 0.39, 1.45), 1.48)
+    layout = EquipmentLayout.from_config(config)
+    center = layout.outdoor_station_center
     assembly = parent.attachNewNode(PandaNode("outdoor-weather-station"))
     assembly.setPos(*center)
-    make_cylinder(assembly, "outdoor-pole", (0, 0.14, -0.25), 0.038, 1.36, (0.31, 0.37, 0.38, 1), axis="z", segments=12)
+    assembly.setH(180)
     make_box(assembly, "outdoor-backplate", (0, 0.105, 0.09), (0.66, 0.08, 0.94), (0.66, 0.71, 0.66, 1), specular=(0.35, 0.38, 0.32), shininess=28)
+    for index, x in enumerate((-0.25, 0.25)):
+        make_cylinder(
+            assembly,
+            f"outdoor-wall-standoff-{index + 1}",
+            (x, OUTDOOR_BRACKET_STANDOFF_M - 0.05, 0.08),
+            0.032,
+            0.10,
+            (0.46, 0.52, 0.51, 1),
+            axis="y",
+            segments=12,
+        )
+        for z_index, z in enumerate((-0.34, 0.34)):
+            make_cylinder(assembly, f"outdoor-wall-bolt-{index + 1}-{z_index + 1}", (x, 0.07, z), 0.024, 0.03, (0.75, 0.78, 0.73, 1), axis="y", segments=10)
     # The broad hood sheds rain while the separated louvres keep the sensor volume ventilated.
     make_box(assembly, "outdoor-weather-hood", (0, -0.04, 0.51), (0.86, 0.40, 0.10), (0.78, 0.81, 0.74, 1), specular=(0.4, 0.42, 0.37), shininess=40)
     make_box(assembly, "outdoor-weather-base", (0, -0.02, -0.47), (0.80, 0.34, 0.08), (0.71, 0.75, 0.68, 1))
@@ -108,10 +149,14 @@ def build_outdoor_sensors(
     for index in range(5):
         make_box(sps, f"outdoor-sps30-exhaust-slot-{index + 1}", (0, 0.108, -0.11 + index * 0.055), (0.21, 0.012, 0.018), (0.51, 0.59, 0.55, 1))
 
-    # A side-entry gland and a restrained cable loop lead the data bundle back indoors.
-    make_cylinder(assembly, "outdoor-cable-gland", (0.35, -0.10, -0.39), 0.055, 0.09, (0.18, 0.23, 0.24, 1), axis="y", segments=12)
-    add_world_label(assembly, "OUTDOOR SENSORS", (0, -0.12, 0.70), 0.09)
+    # The cable gland sits on the weather shield's lower edge and returns into the wall raceway.
+    outdoor_gland = make_cylinder(assembly, "outdoor-cable-gland", (0.35, -0.10, -0.39), 0.055, 0.09, (0.18, 0.23, 0.24, 1), axis="y", segments=12)
+    add_world_label(assembly, "OUTDOOR WALL NODE", (0, -0.12, 0.70), 0.084)
     return (
         {OUTDOOR_CLIMATE: sht_obj, OUTDOOR_PARTICLE: sps_obj},
-        {OUTDOOR_CLIMATE: (center[0] + 0.15, center[1] - 0.10, center[2] + 0.25), OUTDOOR_PARTICLE: (center[0] - 0.08, center[1] - 0.10, center[2] - 0.19)},
+        {
+            OUTDOOR_CLIMATE: world_position(sht_obj.node, parent),
+            OUTDOOR_PARTICLE: world_position(sps_obj.node, parent),
+            "wire.outdoor_gland": world_position(outdoor_gland, parent),
+        },
     )
