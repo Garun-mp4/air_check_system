@@ -8,6 +8,7 @@ import type { Mesh } from 'three'
 import type { FanState, SimulatorSnapshot, VisualizationMode } from '../types'
 import { Pickable } from './Pickable'
 import { CylinderBetween, Fastener, Housing, StatusLed } from './models/parts'
+import { EXHAUST_HOOD_HOUSING_DEPTH_M, exteriorFanCenterZ, FAN_CABLE_OFFSETS, INTAKE_FILTER_HOUSING_DEPTH_M } from './models/geometry'
 
 type Point3 = [number, number, number]
 
@@ -125,16 +126,16 @@ function Fan({
         <Housing position={[0.084, 0.088, 0.045]} size={[0.045, 0.027, 0.039]} color="#3e4d50" radius={0.005} />
         <StatusLed position={[0.083, 0.090, 0.067]} active={state.enabled} size={0.006} />
         <Housing position={[0, -0.106, 0.048]} size={[0.055, 0.018, 0.029]} color="#49595b" radius={0.004} />
-        <mesh position={[0, -0.109, 0.065]}>
-          <cylinderGeometry args={[0.003, 0.003, 0.016, 8]} />
-          <meshStandardMaterial color="#d1b260" metalness={0.72} roughness={0.3} />
-        </mesh>
+        {FAN_CABLE_OFFSETS.map(([x, y, z], index) => <mesh key={index} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.0026, 0.0026, 0.006, 8]} />
+          <meshStandardMaterial color={index === 0 ? '#bd574d' : '#394648'} metalness={0.58} roughness={0.32} />
+        </mesh>)}
       </Pickable>
 
       {/* The service side is outside: intake has a removable filter cassette; exhaust has a backdraft hood. */}
       {intake ? (
         <group position={[position[0], position[1], exteriorZ]}>
-          <Housing position={[0, 0, 0]} size={[0.226, 0.226, 0.104]} color="#d3d9d2" radius={0.012} metalness={0.15} roughness={0.78} />
+          <Housing position={[0, 0, 0]} size={[0.226, 0.226, INTAKE_FILTER_HOUSING_DEPTH_M]} color="#d3d9d2" radius={0.012} metalness={0.15} roughness={0.78} />
           <Housing position={[0, 0, 0.057]} size={[0.198, 0.198, 0.018]} color="#aebdb3" radius={0.006} />
           <mesh position={[0, 0, 0.068]}>
             <boxGeometry args={[0.151, 0.151, 0.007]} />
@@ -147,7 +148,7 @@ function Fan({
         </group>
       ) : (
         <group position={[position[0], position[1], exteriorZ]}>
-          <Housing position={[0, 0, 0]} size={[0.22, 0.22, 0.075]} color="#c3cbc6" radius={0.010} metalness={0.24} roughness={0.68} />
+          <Housing position={[0, 0, 0]} size={[0.22, 0.22, EXHAUST_HOOD_HOUSING_DEPTH_M]} color="#c3cbc6" radius={0.010} metalness={0.24} roughness={0.68} />
           <Housing position={[0, 0, 0.043]} size={[0.19, 0.19, 0.018]} color="#788786" radius={0.008} metalness={0.28} />
           {[-0.045, 0, 0.045].map((y) => <mesh key={y} position={[0, y, 0.055]} rotation={[0.10, 0, 0.08]}><boxGeometry args={[0.145, 0.018, 0.012]} /><meshStandardMaterial color="#d6ddd8" metalness={0.24} roughness={0.58} /></mesh>)}
           <Housing position={[0, 0.112, 0.045]} size={[0.23, 0.034, 0.10]} color="#aab5b1" radius={0.008} />
@@ -179,8 +180,9 @@ export default function FanAssembly({
   const y = height_m * 0.81
   const wallInteriorFace = depth_m / 2 - wall_thickness_m / 2
   const fanDepth = wallInteriorFace - 0.11
-  const exteriorZ = depth_m / 2 + wall_thickness_m / 2 + 0.10
   const fanX = width_m * 0.37
+  const intakeExteriorZ = exteriorFanCenterZ(depth_m, wall_thickness_m, true)
+  const exhaustExteriorZ = exteriorFanCenterZ(depth_m, wall_thickness_m, false)
   return (
     <group>
       {/* Each sleeve bridges the opening through the back wall; filter and hood remain on the exterior side. */}
@@ -196,8 +198,8 @@ export default function FanAssembly({
           </mesh>
         </group>
       ))}
-      <Fan id="fan.intake" state={snapshot.ventilation.intake} position={[-fanX, y, fanDepth]} selectedId={selectedId} mode={mode} onSelect={onSelect} exteriorZ={exteriorZ} />
-      <Fan id="fan.exhaust" state={snapshot.ventilation.exhaust} position={[fanX, y, fanDepth]} selectedId={selectedId} mode={mode} onSelect={onSelect} exteriorZ={exteriorZ} />
+      <Fan id="fan.intake" state={snapshot.ventilation.intake} position={[-fanX, y, fanDepth]} selectedId={selectedId} mode={mode} onSelect={onSelect} exteriorZ={intakeExteriorZ} />
+      <Fan id="fan.exhaust" state={snapshot.ventilation.exhaust} position={[fanX, y, fanDepth]} selectedId={selectedId} mode={mode} onSelect={onSelect} exteriorZ={exhaustExteriorZ} />
     </group>
   )
 }

@@ -18,7 +18,7 @@ function BoardWithTerminals({ width, height, count = 4 }: { width: number; heigh
       {Array.from({ length: count }, (_, index) => (
         <group key={index} position={[-width * 0.39 + index * width * 0.78 / Math.max(1, count - 1), -height * 0.24, 0.009]}>
           <Housing position={[0, 0, 0]} size={[0.020, 0.016, 0.017]} color={index % 2 ? '#21755d' : '#c58e37'} radius={0.003} metalness={0.16} />
-          <mesh position={[0, 0, 0.009]}>
+          <mesh position={[0, 0, 0.009]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.003, 0.003, 0.005, 8]} />
             <meshStandardMaterial color="#c3c4b8" metalness={0.74} roughness={0.28} />
           </mesh>
@@ -71,7 +71,17 @@ function PowerSupply({ enabled }: { enabled: boolean }) {
       ))}
       <Housing position={[-0.072, -0.023, 0.057]} size={[0.026, 0.043, 0.012]} color="#e0e3dc" radius={0.003} />
       <Housing position={[0.057, -0.024, 0.057]} size={[0.045, 0.036, 0.012]} color="#596b6d" radius={0.003} />
-      <mesh position={[0.057, -0.024, 0.065]}><boxGeometry args={[0.030, 0.004, 0.003]} /><meshStandardMaterial color="#bca254" metalness={0.7} /></mesh>
+      {[
+        { y: -0.034, color: '#76533f' },
+        { y: -0.023, color: '#4c82a2' },
+        { y: -0.012, color: '#5d9b50' },
+      ].map(({ y, color }) => (
+        <group key={y}>
+          <mesh position={[-0.072, y, 0.065]}><boxGeometry args={[0.007, 0.003, 0.002]} /><meshStandardMaterial color={color} metalness={0.32} /></mesh>
+          <mesh position={[-0.072, y, 0.067]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.002, 0.002, 0.0015, 8]} /><meshStandardMaterial color="#c1bda9" metalness={0.72} roughness={0.32} /></mesh>
+        </group>
+      ))}
+      {[0.057, 0.071].map((x, index) => <mesh key={x} position={[x, -0.024, 0.065]}><boxGeometry args={[0.006, 0.003, 0.002]} /><meshStandardMaterial color={index === 0 ? '#c84f43' : '#303a3d'} metalness={0.24} /></mesh>)}
       <StatusLed position={[-0.063, 0.036, 0.059]} active={enabled} size={0.005} />
     </group>
   )
@@ -84,7 +94,6 @@ function BuckConverter() {
       <Housing position={[-0.020, 0.006, 0.012]} size={[0.027, 0.026, 0.022]} color="#283537" radius={0.003} metalness={0.26} />
       <mesh position={[-0.020, 0.006, 0.024]}><torusGeometry args={[0.0075, 0.002, 5, 12]} /><meshStandardMaterial color="#b07d36" metalness={0.64} roughness={0.36} /></mesh>
       {[-1, 1].map((side) => <mesh key={side} position={[side * 0.039, 0.015, 0.016]}><cylinderGeometry args={[0.006, 0.006, 0.012, 10]} /><meshStandardMaterial color="#bfbdad" metalness={0.38} /></mesh>)}
-      <Housing position={[0.027, -0.018, 0.014]} size={[0.025, 0.014, 0.016]} color="#c4ab67" radius={0.003} />
     </group>
   )
 }
@@ -94,7 +103,7 @@ function DriverBoard({ kind }: { kind: 'mosfet' | 'hbridge' }) {
   const height = kind === 'mosfet' ? 0.078 : 0.084
   return (
     <group>
-      <BoardWithTerminals width={width} height={height} count={kind === 'mosfet' ? 6 : 4} />
+      <BoardWithTerminals width={width} height={height} count={6} />
       {kind === 'mosfet' ? (
         <group>
           {[-0.025, 0.021].map((x) => (
@@ -124,6 +133,10 @@ function FuseRail() {
           <Housing position={[0, 0, 0]} size={[0.034, 0.036, 0.016]} color={index === 1 ? '#2c8d79' : '#d58b3e'} radius={0.007} />
           <mesh position={[0, 0, 0.010]}><boxGeometry args={[0.009, 0.021, 0.004]} /><meshStandardMaterial color="#eee6c9" transparent opacity={0.84} roughness={0.22} /></mesh>
           <mesh position={[0, 0.004, 0.013]}><boxGeometry args={[0.003, 0.013, 0.002]} /><meshStandardMaterial color="#c6ba8c" metalness={0.28} /></mesh>
+          {[-1, 1].map((side) => <group key={side} position={[0, side * 0.027, 0.008]}>
+            <Housing position={[0, 0, 0]} size={[0.022, 0.010, 0.010]} color="#4d5d60" radius={0.002} />
+            <mesh position={[0, 0, 0.006]}><boxGeometry args={[0.006, 0.002, 0.002]} /><meshStandardMaterial color="#c8b875" metalness={0.6} /></mesh>
+          </group>)}
         </group>
       ))}
     </group>
@@ -137,7 +150,7 @@ function TerminalStrip() {
       {colors.map((color, index) => (
         <group key={index} position={[-0.217 + index * 0.062, 0, 0]}>
           <Housing position={[0, 0, 0]} size={[0.058, 0.052, 0.045]} color={color} radius={0.004} />
-          <mesh position={[0, 0.006, 0.025]}>
+          <mesh position={[0, 0.006, 0.025]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.008, 0.008, 0.006, 8]} />
             <meshStandardMaterial color="#c9ccc3" metalness={0.72} roughness={0.28} />
           </mesh>

@@ -150,7 +150,16 @@ def build_outdoor_sensors(
         make_box(sps, f"outdoor-sps30-exhaust-slot-{index + 1}", (0, 0.108, -0.11 + index * 0.055), (0.21, 0.012, 0.018), (0.51, 0.59, 0.55, 1))
 
     # The cable gland sits on the weather shield's lower edge and returns into the wall raceway.
-    outdoor_gland = make_cylinder(assembly, "outdoor-cable-gland", (0.35, -0.10, -0.39), 0.055, 0.09, (0.18, 0.23, 0.24, 1), axis="y", segments=12)
+    outdoor_gland = make_cylinder(
+        assembly,
+        "outdoor-cable-gland",
+        (0.15, 0.145, -0.292),
+        0.055,
+        0.09,
+        (0.18, 0.23, 0.24, 1),
+        axis="y",
+        segments=12,
+    )
     add_world_label(assembly, "OUTDOOR WALL NODE", (0, -0.12, 0.70), 0.084)
     return (
         {OUTDOOR_CLIMATE: sht_obj, OUTDOOR_PARTICLE: sps_obj},

@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { RoundedBox } from '@react-three/drei'
 import { Quaternion, Vector3 } from 'three'
+import { mountingScrewPositions } from './geometry'
 
 export type Point3 = [number, number, number]
 
@@ -130,9 +131,9 @@ export function MountingScrews({
 }) {
   return (
     <group>
-      {[-1, 1].flatMap((xSide) => [-1, 1].map((ySide) => (
-        <Fastener key={`${xSide}-${ySide}`} position={[xSide * (width / 2 - inset), ySide * (height / 2 - inset), z]} facing={facing} />
-      )))}
+      {mountingScrewPositions({ width, height, inset, z }).map((position) => (
+        <Fastener key={position.join(':')} position={position} facing={facing} />
+      ))}
     </group>
   )
 }

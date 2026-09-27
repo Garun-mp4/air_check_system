@@ -18,6 +18,7 @@ from aircheck_simulator_3d.scene.cutaway import CutawayController, CutawayMode
 from aircheck_simulator_3d.scene.objects import PICKING_MASK_BIT, SceneObject
 from aircheck_simulator_3d.scene.picking import ScenePicker
 from aircheck_simulator_3d.scene.scene_builder import StandScene
+from aircheck_simulator_3d.scene.device_models.layout import EquipmentLayout
 
 
 def _wall() -> tuple[SceneObject, NodePath]:
@@ -83,6 +84,7 @@ def test_stand_contains_physical_aircheck_devices_and_pick_targets() -> None:
 
 def test_sensor_nodes_are_wall_mounted_and_each_sensor_is_wired_from_esp32() -> None:
     config = load_config()
+    layout = EquipmentLayout.from_config(config.scene)
     base = type("SceneBase", (), {})()
     base.render = NodePath(PandaNode("render"))
     scene = StandScene(base, config.scene)
@@ -114,6 +116,11 @@ def test_sensor_nodes_are_wall_mounted_and_each_sensor_is_wired_from_esp32() -> 
         outdoor_standoff = scene.root.find("**/outdoor-wall-standoff-1")
         standoff_position = outdoor_standoff.getPos(scene.root)
         assert abs(standoff_position.getY() - (outer_y + 0.05)) < 1e-4
+        outdoor_gland = scene.root.find("**/outdoor-cable-gland")
+        gland_position = outdoor_gland.getPos(scene.root)
+        assert abs(gland_position.getX() - (layout.outdoor_gland_x)) < 1e-4
+        assert abs(gland_position.getY() - layout.exterior_channel_y) < 1e-4
+        assert abs(gland_position.getZ() - layout.outdoor_gland_z) < 1e-4
 
         expected_routes = {
             "i2c-indoor-climate": "sensor.scd41.indoor",

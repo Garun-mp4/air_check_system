@@ -2,14 +2,15 @@
 
 import { useMemo } from 'react'
 import { Text } from '@react-three/drei'
-import { CatmullRomCurve3, Vector3 } from 'three'
 import type { SimulatorSnapshot } from '../types'
 import { CylinderBetween, Housing } from './models/parts'
+import { MAINS_ENTRY_CLEARANCE_M } from './models/geometry'
 import { createWiringRoutes, wireColor, wiringGeometryKey, type Point3 } from './wiringRoutes'
+import { createRoundedWireCurve } from './wireCurves'
 
 function Wire({ points, color, kind, muted }: { points: Point3[]; color: string; kind: string; muted: boolean }) {
   const route = useMemo(
-    () => new CatmullRomCurve3(points.map((point) => new Vector3(...point)), false, 'centripetal'),
+    () => createRoundedWireCurve(points),
     [points],
   )
   const radius = kind === 'power12' || kind === 'ground' ? 0.0027 : 0.0019
@@ -53,6 +54,7 @@ function WallRaceways({ snapshot }: { snapshot: SimulatorSnapshot }) {
   const racewayHeight = 0.12
   const rearWidth = d.width_m - 2 * d.wall_thickness_m
   const cabinetTop = layout.control_cabinet_center[2] + mount_dimensions.control_cabinet_height_m / 2
+  const mainsEntryX = layout.control_cabinet_center[0] + mount_dimensions.control_cabinet_width_m / 2 + MAINS_ENTRY_CLEARANCE_M
   const indoorTop = layout.indoor_sensor_center[2] + mount_dimensions.indoor_panel_height_m / 2
   const fanY = d.height_m * 0.81
   const fanX = d.width_m * 0.37
@@ -67,6 +69,8 @@ function WallRaceways({ snapshot }: { snapshot: SimulatorSnapshot }) {
       {/* Surface-mounted interior trunk and drops; the covers stay visible in every view mode. */}
       <Raceway position={[0, trunkY, insideZ]} size={[rearWidth, racewayHeight, racewayWidth]} />
       <Raceway position={[layout.controller_drop_x, (cabinetTop + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - cabinetTop, racewayWidth]} />
+      {/* Mains has its own path from the ceiling to the PSU, separated from the sensor/control trunk. */}
+      <Raceway position={[mainsEntryX, (d.height_m + cabinetTop) / 2, insideZ]} size={[racewayWidth, d.height_m - cabinetTop, racewayWidth]} />
       <Raceway position={[layout.indoor_drop_x, (indoorTop + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - indoorTop, racewayWidth]} />
       {[-fanX, fanX].map((x) => <Raceway key={x} position={[x, (fanDropTop + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - fanDropTop, racewayWidth]} />)}
       {[windowLeft, windowRight].map((x) => <Raceway key={x} position={[x, (d.window_sill_height_m + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - d.window_sill_height_m, racewayWidth]} />)}
@@ -82,6 +86,9 @@ function WallRaceways({ snapshot }: { snapshot: SimulatorSnapshot }) {
 export default function Wiring({ snapshot, visible }: { snapshot: SimulatorSnapshot; visible: boolean }) {
   const geometryKey = wiringGeometryKey(snapshot)
   const routes = useMemo(() => createWiringRoutes(snapshot), [geometryKey])
+  const mainsEntryX = snapshot.simulation.layout.control_cabinet_center[0]
+    + snapshot.simulation.mount_dimensions.control_cabinet_width_m / 2
+    + MAINS_ENTRY_CLEARANCE_M
   return (
     <group>
       <WallRaceways snapshot={snapshot} />
@@ -89,7 +96,18 @@ export default function Wiring({ snapshot, visible }: { snapshot: SimulatorSnaps
         <group>
           {routes.map((route) => <Wire key={route.id} points={route.points} color={wireColor(route.kind)} kind={route.kind} muted={route.kind === 'ground'} />)}
           <Text position={[0, snapshot.simulation.layout.trunk_z + 0.12, snapshot.simulation.room_dimensions.depth_m / 2 - snapshot.simulation.room_dimensions.wall_thickness_m / 2 - 0.04]} fontSize={0.038} color="#405457" anchorX="center" anchorY="bottom" outlineWidth={0.0018} outlineColor="#edf1e9">
-            12 V · 5 V · GND · I²C / UART · управление приводами
+            230 V AC · 12 V · 5 V / 3,3 V · GND · I²C / UART · управление приводами
+          </Text>
+          <Text
+            position={[mainsEntryX + 0.04, snapshot.simulation.room_dimensions.height_m - 0.08, snapshot.simulation.room_dimensions.depth_m / 2 - snapshot.simulation.room_dimensions.wall_thickness_m / 2 - 0.035]}
+            fontSize={0.027}
+            color="#6d5548"
+            anchorX="left"
+            anchorY="bottom"
+            outlineWidth={0.0015}
+            outlineColor="#edf1e9"
+          >
+            Ввод 230 V AC · отдельная трасса к БП
           </Text>
         </group>
       ) : null}

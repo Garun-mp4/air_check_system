@@ -3,8 +3,15 @@
 import { Text } from '@react-three/drei'
 import type { SimulatorSnapshot, VisualizationMode } from '../../types'
 import { Pickable } from '../Pickable'
-import { Fastener, Housing, MountingScrews, StatusLed, VentSlats } from './parts'
-import { INDOOR_NODE_OFFSETS, OUTDOOR_NODE_OFFSETS } from './geometry'
+import { Housing, MountingScrews, StatusLed, VentSlats } from './parts'
+import {
+  INDOOR_NODE_OFFSETS,
+  INDOOR_SENSOR_AIR_INLET_Z_M,
+  INDOOR_SENSOR_ENCLOSURE_DEPTH_M,
+  OUTDOOR_NODE_COVER_SCREWS,
+  OUTDOOR_NODE_OFFSETS,
+  OUTDOOR_NODE_SIDE_RAIL,
+} from './geometry'
 
 type Point3 = [number, number, number]
 type Select = (id: string, point: Point3) => void
@@ -91,9 +98,9 @@ export function IndoorSensorNode({
     <group position={[x, y, z]}>
       {/* Wall backplate and a shallow ventilated enclosure keep both sensors at room-sensing height. */}
       <Housing position={[0, 0, 0.047]} size={[panelWidth, panelHeight, 0.026]} color="#627273" radius={0.018} roughness={0.64} metalness={0.26} />
-      <Housing position={[0, 0, 0]} size={[panelWidth - 0.04, panelHeight - 0.04, 0.082]} color="#e6e6dc" radius={0.028} roughness={0.78} />
+      <Housing position={[0, 0, 0]} size={[panelWidth - 0.04, panelHeight - 0.04, INDOOR_SENSOR_ENCLOSURE_DEPTH_M]} color="#e6e6dc" radius={0.028} roughness={0.78} />
       <Housing position={[0, panelHeight * 0.442, -0.047]} size={[panelWidth * 0.69, 0.032, 0.014]} color="#d4d8ce" radius={0.008} />
-      <MountingScrews width={panelWidth - 0.05} height={panelHeight - 0.05} z={-0.050} inset={0.035} facing={-1} />
+      <MountingScrews width={panelWidth - 0.05} height={panelHeight - 0.05} z={-0.044} inset={0.035} facing={-1} />
       <NodeLabel position={[0, panelHeight * 0.59, -0.060]} size={0.055} rotation={[0, Math.PI, 0]}>ВНУТРЕННИЙ УЗЕЛ</NodeLabel>
 
       <group position={INDOOR_NODE_OFFSETS.scd41.module} rotation={[0, Math.PI, 0]}>
@@ -105,7 +112,7 @@ export function IndoorSensorNode({
           <mesh position={[-0.064, -0.047, 0.045]}><boxGeometry args={[0.026, 0.018, 0.007]} /><meshStandardMaterial color="#80908b" roughness={0.68} /></mesh>
           <StatusLed position={[0.071, 0.047, 0.048]} active={scdOnline} size={0.006} />
           <Housing position={[0, -0.073, 0.055]} size={[0.050, 0.016, 0.013]} color="#4a5a5d" radius={0.004} />
-          {[-1, 0, 1].map((index) => <mesh key={index} position={[index * 0.014, -0.073, 0.063]}><cylinderGeometry args={[0.0013, 0.0013, 0.012, 6]} /><meshStandardMaterial color="#b5a05e" metalness={0.7} /></mesh>)}
+          {Object.values(INDOOR_NODE_OFFSETS.scd41.pins).map(([x, y, z]) => <mesh key={x} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.0013, 0.0013, 0.012, 6]} /><meshStandardMaterial color="#b5a05e" metalness={0.7} /></mesh>)}
           <Housing position={[0.079, -0.041, 0.020]} size={[0.018, 0.022, 0.031]} color="#d7d8d0" radius={0.004} />
         </Pickable>
       </group>
@@ -116,7 +123,7 @@ export function IndoorSensorNode({
           <mesh position={[0, 0, 0.043]}><boxGeometry args={[0.067, 0.067, 0.006]} /><meshStandardMaterial color="#4f6265" roughness={0.74} /></mesh>
           <group position={[0, 0, 0.050]}><ParticleSensorBody /></group>
           <Housing position={[0, -0.084, 0.047]} size={[0.060, 0.016, 0.017]} color="#505f61" radius={0.004} />
-          {[-1, 0, 1].map((index) => <mesh key={index} position={[index * 0.017, -0.084, 0.058]}><cylinderGeometry args={[0.0015, 0.0015, 0.012, 6]} /><meshStandardMaterial color="#b5a05e" metalness={0.7} /></mesh>)}
+          {Object.values(INDOOR_NODE_OFFSETS.sps30.pins).map(([x, y, z]) => <mesh key={x} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.0015, 0.0015, 0.012, 6]} /><meshStandardMaterial color="#b5a05e" metalness={0.7} /></mesh>)}
           <StatusLed position={[0.070, 0.064, 0.046]} active={pmOnline} size={0.006} />
           {[-1, 1].map((side) => <mesh key={side} position={[side * 0.073, 0.020, 0.046]}><boxGeometry args={[0.006, 0.070, 0.006]} /><meshStandardMaterial color="#9ba7a2" roughness={0.68} /></mesh>)}
         </Pickable>
@@ -124,14 +131,10 @@ export function IndoorSensorNode({
 
       {/* The lower opening is the sampling-air inlet; the gland sits below the cover. */}
       <group>
-        <VentSlats width={0.28} count={4} y={-0.245} z={0.048} color="#8f9d99" thickness={0.004} />
+        <VentSlats width={0.28} count={4} y={-0.245} z={INDOOR_SENSOR_AIR_INLET_Z_M} color="#8f9d99" thickness={0.004} />
         <mesh position={[0, -0.326, -0.050]}><cylinderGeometry args={[0.016, 0.016, 0.020, 14]} /><meshStandardMaterial color="#526265" metalness={0.38} roughness={0.56} /></mesh>
         <mesh position={[0, -0.326, -0.062]}><cylinderGeometry args={[0.010, 0.010, 0.004, 14]} /><meshStandardMaterial color="#d6d8cf" roughness={0.66} /></mesh>
       </group>
-      <Fastener position={[-0.22, 0.25, -0.052]} scale={0.72} facing={-1} />
-      <Fastener position={[0.22, 0.25, -0.052]} scale={0.72} facing={-1} />
-      <Fastener position={[-0.22, -0.25, -0.052]} scale={0.72} facing={-1} />
-      <Fastener position={[0.22, -0.25, -0.052]} scale={0.72} facing={-1} />
     </group>
   )
 }
@@ -156,12 +159,12 @@ export function OutdoorSensorNode({
     <group position={[center[0], center[2], center[1]]}>
       {/* Galvanized stand-off bracket, UV-stable rain cap and ventilated radiation shield. */}
       <Housing position={[0, -0.01, -0.1525]} size={[0.10, 0.42, 0.055]} color="#718181" radius={0.008} metalness={0.34} />
-      <Housing position={[-0.16, 0.02, -0.095]} size={[0.036, 0.40, 0.12]} color="#899492" radius={0.006} metalness={0.38} />
-      <Housing position={[0.16, 0.02, -0.095]} size={[0.036, 0.40, 0.12]} color="#899492" radius={0.006} metalness={0.38} />
+      <Housing position={[OUTDOOR_NODE_SIDE_RAIL.leftX, 0.02, -0.095]} size={[0.036, 0.40, 0.12]} color="#899492" radius={0.006} metalness={0.38} />
+      <Housing position={[OUTDOOR_NODE_SIDE_RAIL.rightX, 0.02, -0.095]} size={[0.036, 0.40, 0.12]} color="#899492" radius={0.006} metalness={0.38} />
       <Housing position={[0, 0.286, 0.018]} size={[0.40, 0.060, 0.28]} color="#e6e8e0" radius={0.018} roughness={0.82} />
       <Housing position={[0, -0.275, 0.025]} size={[0.34, 0.032, 0.25]} color="#d6d9d1" radius={0.012} />
-      <Housing position={[-0.16, 0.015, 0.035]} size={[0.032, 0.49, 0.22]} color="#d9ddd5" radius={0.008} />
-      <Housing position={[0.16, 0.015, 0.035]} size={[0.032, 0.49, 0.22]} color="#d9ddd5" radius={0.008} />
+      <Housing position={[OUTDOOR_NODE_SIDE_RAIL.leftX, OUTDOOR_NODE_SIDE_RAIL.centerY, OUTDOOR_NODE_SIDE_RAIL.centerZ]} size={[OUTDOOR_NODE_SIDE_RAIL.width, OUTDOOR_NODE_SIDE_RAIL.height, OUTDOOR_NODE_SIDE_RAIL.depth]} color="#d9ddd5" radius={0.008} />
+      <Housing position={[OUTDOOR_NODE_SIDE_RAIL.rightX, OUTDOOR_NODE_SIDE_RAIL.centerY, OUTDOOR_NODE_SIDE_RAIL.centerZ]} size={[OUTDOOR_NODE_SIDE_RAIL.width, OUTDOOR_NODE_SIDE_RAIL.height, OUTDOOR_NODE_SIDE_RAIL.depth]} color="#d9ddd5" radius={0.008} />
       {Array.from({ length: 9 }, (_, index) => (
         <mesh key={index} position={[0, -0.173 + index * 0.044, 0.135]} castShadow>
           <boxGeometry args={[0.28, 0.014, 0.14]} />
@@ -170,15 +173,13 @@ export function OutdoorSensorNode({
       ))}
       <Housing position={[0, 0.229, 0.086]} size={[0.34, 0.025, 0.15]} color="#dce0d8" radius={0.006} />
       <NodeLabel position={[0, 0.40, 0.15]} size={0.052}>НАРУЖНЫЙ УЗЕЛ</NodeLabel>
-      <MountingScrews width={0.30} height={0.43} z={0.192} inset={0.018} />
-
       <group position={OUTDOOR_NODE_OFFSETS.sht45.module}>
         <Pickable id="sensor.sht45.outdoor" position={[0, 0, 0]} bounds={[0.17, 0.12, 0.09]} selectedId={selectedId} mode={mode} onSelect={onSelect}>
           <Housing position={[0, 0, 0.012]} size={[0.15, 0.092, 0.035]} color="#eef0e8" radius={0.009} />
           <ModuleBoard type="sht45" />
           <mesh position={[0, 0.005, 0.006]}><boxGeometry args={[0.013, 0.011, 0.003]} /><meshStandardMaterial color="#f3eee0" roughness={0.36} /></mesh>
           <mesh position={[0.039, -0.022, 0.024]}><boxGeometry args={[0.027, 0.015, 0.010]} /><meshStandardMaterial color="#4c5d5f" roughness={0.54} /></mesh>
-          {[0, 1, 2, 3].map((index) => <mesh key={index} position={[-0.012 + index * 0.008, -0.023, 0.029]}><cylinderGeometry args={[0.0012, 0.0012, 0.011, 6]} /><meshStandardMaterial color="#c2a55b" metalness={0.7} /></mesh>)}
+          {Object.values(OUTDOOR_NODE_OFFSETS.sht45.pins).map(([x, y, z]) => <mesh key={x} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.0012, 0.0012, 0.011, 6]} /><meshStandardMaterial color="#c2a55b" metalness={0.7} /></mesh>)}
           <StatusLed position={[0.060, 0.034, 0.031]} active={shtOnline} size={0.0055} />
         </Pickable>
       </group>
@@ -190,23 +191,27 @@ export function OutdoorSensorNode({
           <group position={[0, 0, 0.040]}><ParticleSensorBody /></group>
           <VentSlats width={0.074} count={4} y={-0.051} z={0.037} color="#66777a" thickness={0.0025} />
           <Housing position={[0.056, -0.060, 0.042]} size={[0.029, 0.018, 0.014]} color="#536365" radius={0.004} />
+          {Object.values(OUTDOOR_NODE_OFFSETS.sps30.pins).map(([x, y, z]) => (
+            <mesh key={x} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.0013, 0.0013, 0.006, 6]} />
+              <meshStandardMaterial color="#c2a55b" metalness={0.7} />
+            </mesh>
+          ))}
           <StatusLed position={[0.064, 0.060, 0.041]} active={pmOnline} size={0.0055} />
           <mesh position={[-0.013, -0.064, -0.002]} rotation={[0, Math.PI / 2, 0]}><cylinderGeometry args={[0.006, 0.006, 0.012, 12]} /><meshStandardMaterial color="#76878a" /></mesh>
         </Pickable>
       </group>
 
-      <mesh position={[0, -0.292, 0.08]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={OUTDOOR_NODE_OFFSETS.cableGland} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.025, 0.025, 0.036, 16]} />
         <meshStandardMaterial color="#596a6b" metalness={0.32} roughness={0.52} />
       </mesh>
-      <mesh position={[0, -0.292, 0.102]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={[OUTDOOR_NODE_OFFSETS.cableGland[0], OUTDOOR_NODE_OFFSETS.cableGland[1], OUTDOOR_NODE_OFFSETS.cableGland[2] + 0.020]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.014, 0.014, 0.008, 16]} />
         <meshStandardMaterial color="#d4d9d1" roughness={0.68} />
       </mesh>
-      <Fastener position={[-0.20, 0.20, 0.207]} scale={0.75} />
-      <Fastener position={[0.20, 0.20, 0.207]} scale={0.75} />
-      <Fastener position={[-0.20, -0.20, 0.207]} scale={0.75} />
-      <Fastener position={[0.20, -0.20, 0.207]} scale={0.75} />
+      {/* Cover screws are flush with the exposed faces of the two vertical side rails. */}
+      <MountingScrews {...OUTDOOR_NODE_COVER_SCREWS} />
     </group>
   )
 }

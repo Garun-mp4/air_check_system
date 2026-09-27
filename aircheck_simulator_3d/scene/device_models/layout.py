@@ -10,6 +10,7 @@ INDOOR_MOUNT_PANEL_DEPTH_M = 0.10
 INDOOR_MOUNT_PANEL_WIDTH_M = 0.54
 INDOOR_MOUNT_PANEL_HEIGHT_M = 0.66
 OUTDOOR_BRACKET_STANDOFF_M = 0.18
+OUTDOOR_GLAND_OFFSET_M = 0.15
 CONTROL_CABINET_WIDTH_M = 0.78
 CONTROL_CABINET_HEIGHT_M = 0.98
 RACEWAY_DEPTH_M = 0.07
@@ -40,7 +41,10 @@ class EquipmentLayout:
     @classmethod
     def from_config(cls, config: SceneConfig) -> EquipmentLayout:
         back_y = config.room_depth_m / 2
-        exterior_wall_y = back_y + config.wall_thickness_m
+        # In the Panda3D room, back_y is the inner wall face (window.py centers
+        # the wall at back_y + wall_thickness / 2). The exterior face is one
+        # full wall thickness beyond that coordinate.
+        exterior_wall_face_y = back_y + config.wall_thickness_m
         indoor_x = -config.room_width_m * 0.375
         outdoor_x = config.room_width_m * 0.26
         outdoor_z = config.room_height_m * 0.39
@@ -48,8 +52,8 @@ class EquipmentLayout:
         control_y = back_y - config.wall_thickness_m / 2
         control_z = config.room_height_m * 0.3125
         raceway_center_y = back_y - RACEWAY_DEPTH_M / 2
-        exterior_channel_y = exterior_wall_y + RACEWAY_DEPTH_M / 2
-        outdoor_gland_x = outdoor_x - 0.35
+        exterior_channel_y = exterior_wall_face_y + RACEWAY_DEPTH_M / 2
+        outdoor_gland_x = outdoor_x - OUTDOOR_GLAND_OFFSET_M
         exterior_entry_x = config.window_width_m / 2 + config.wall_thickness_m / 2
 
         return cls(
@@ -60,7 +64,7 @@ class EquipmentLayout:
             ),
             outdoor_station_center=(
                 outdoor_x,
-                exterior_wall_y + OUTDOOR_BRACKET_STANDOFF_M,
+                exterior_wall_face_y + OUTDOOR_BRACKET_STANDOFF_M,
                 outdoor_z,
             ),
             control_cabinet_center=(control_x, control_y, control_z),
@@ -68,7 +72,7 @@ class EquipmentLayout:
             rear_channel_y=raceway_center_y,
             rear_wire_y=raceway_center_y - RACEWAY_DEPTH_M / 2 - 0.012,
             exterior_channel_y=exterior_channel_y,
-            exterior_wire_y=exterior_channel_y + RACEWAY_DEPTH_M / 2 + 0.015,
+            exterior_wire_y=exterior_channel_y,
             trunk_z=config.room_height_m - RACEWAY_CEILING_CLEARANCE_M,
             exterior_entry_x=exterior_entry_x,
             outdoor_gland_x=outdoor_gland_x,
