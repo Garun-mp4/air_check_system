@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { AccessSessionProvider } from '../components/auth/AccessSessionProvider'
 import '../../css/styles.css'
 
 export const metadata: Metadata = {
@@ -45,7 +46,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body>
+        <AccessSessionProvider>{children}</AccessSessionProvider>
+      </body>
     </html>
   )
 }

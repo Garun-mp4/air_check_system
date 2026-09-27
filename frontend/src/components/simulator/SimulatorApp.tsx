@@ -6,7 +6,10 @@ import type { ReactNode } from 'react'
 import { sendControlCommand } from '../../lib/client-api'
 import SceneCanvas from './SceneLoader'
 import { useSimulatorState } from './useSimulatorState'
-import type { AccessRole, CutawayMode, SimulatorSnapshot, VisualizationMode } from './types'
+import type { CutawayMode, SimulatorSnapshot, VisualizationMode } from './types'
+import { getLoginHref } from '../../lib/auth-navigation'
+import AccountMenu from '../auth/AccountMenu'
+import { useAccessSession } from '../auth/AccessSessionProvider'
 
 type Point = [number, number, number]
 type DeviceDescription = { title: string; category: string; zone: string; interface: string; purpose: string }
@@ -62,10 +65,6 @@ function fmt(value: number | null | undefined, digits = 0): string {
     : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: digits }).format(value)
 }
 
-function roleLabel(role: AccessRole): string {
-  return { guest: 'Гость', user: 'Пользователь', operator: 'Оператор', owner: 'Владелец' }[role]
-}
-
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { ...init, cache: 'no-store', headers: { 'Content-Type': 'application/json', ...init?.headers } })
   const result: unknown = await response.json().catch(() => null)
@@ -82,7 +81,8 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export default function SimulatorApp() {
-  const { snapshot, access, connected, error } = useSimulatorState()
+  const { snapshot, connected, error } = useSimulatorState()
+  const { access, status: accessStatus } = useAccessSession()
   const [mode, setMode] = useState<VisualizationMode>('normal')
   const [cutaway, setCutaway] = useState<CutawayMode>('transparent')
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -92,7 +92,7 @@ export default function SimulatorApp() {
   const [notice, setNotice] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const isOperator = access.role === 'operator' || access.role === 'owner'
+  const isOperator = accessStatus === 'ready' && (access?.role === 'operator' || access?.role === 'owner')
 
   const callAction = useCallback(async (action: string, payload: Record<string, string | number | boolean> = {}) => {
     setBusy(true)
@@ -150,13 +150,17 @@ export default function SimulatorApp() {
   if (!snapshot) {
     return (
       <main className="simulator-page simulator-unavailable">
-        <header className="simulator-topbar"><a href="/" className="simulator-brand"><span className="simulator-brand-mark">A</span> AirCheck <span>3D-стенд</span></a><a className="simulator-back-dashboard" href="/">← Панель управления</a></header>
+        <header className="simulator-topbar">
+          <a href="/simulator" className="simulator-brand"><span className="simulator-brand-mark">A</span><span>AirCheck</span><span className="simulator-brand-subtitle">3D-стенд</span></a>
+          <nav className="simulator-primary-nav" aria-label="Основная навигация"><a href="/">Панель</a><a href="/simulator" aria-current="page">3D-стенд</a></nav>
+          <AccountMenu variant="simulator" />
+        </header>
         <section className="simulator-unavailable-card">
           <span className="sim-status-dot is-offline" />
           <h1>3D-симулятор пока недоступен</h1>
           <p>{error ?? 'Ожидаем запуска headless simulator.'}</p>
           <p className="sim-muted">Для веб-сцены запустите Compose с профилем <code>web-demo</code>. Если backend не отвечает, headless-процесс всё равно должен продолжать локальную симуляцию.</p>
-          <div className="simulator-unavailable-actions"><a className="sim-button sim-button-primary" href="/">Вернуться к панели</a><a className="sim-button" href="/login">Войти</a></div>
+          <div className="simulator-unavailable-actions"><a className="sim-button sim-button-primary" href="/">Вернуться к панели</a><a className="sim-button" href={getLoginHref('/simulator')}>Войти</a></div>
         </section>
       </main>
     )
@@ -169,14 +173,14 @@ export default function SimulatorApp() {
     <main className="simulator-page">
       <header className="simulator-topbar">
         <a href="/simulator" className="simulator-brand"><span className="simulator-brand-mark">A</span><span>AirCheck</span><span className="simulator-brand-subtitle">3D-стенд</span></a>
+        <nav className="simulator-primary-nav" aria-label="Основная навигация"><a href="/">Панель</a><a href="/simulator" aria-current="page">3D-стенд</a></nav>
         <div className="simulator-topbar-center">
           <span className={'sim-status-pill ' + (connected ? 'is-online' : 'is-offline')}><i />{connected ? 'Симулятор подключён' : 'Нет потока симуляции'}</span>
           <span className={'sim-status-pill ' + (snapshot.backend.online ? 'is-online' : 'is-warning')}><i />Backend {snapshot.backend.online ? 'online' : 'offline'}</span>
           <span className="sim-device-id">Узел <strong>{snapshot.device_id}</strong></span>
         </div>
         <div className="simulator-topbar-actions">
-          {access.role === 'owner' ? <a className="sim-link-button" href="/admin">Аккаунты</a> : null}
-          {access.userId ? <button className="sim-link-button" onClick={() => void requestJson('/api/auth/sign-out', { method: 'POST' }).then(() => window.location.reload())}>Выйти</button> : <a className="sim-link-button" href="/login">Войти</a>}
+          <AccountMenu variant="simulator" />
           <a className="sim-button sim-button-primary" href="/">Панель AirCheck <span aria-hidden="true">↗</span></a>
           <button className="sim-mobile-menu-toggle" type="button" aria-label="Открыть меню" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)}>☰</button>
         </div>
@@ -187,7 +191,6 @@ export default function SimulatorApp() {
         <nav className="simulator-nav-tabs" aria-label="Разделы цифрового стенда">
           {(['devices', 'controls', 'tools'] as const).map((item) => <button key={item} className={panel === item ? 'is-active' : ''} onClick={() => { setPanel(item); setMobileMenuOpen(false) }}>{item === 'devices' ? 'Устройства' : item === 'controls' ? 'Сценарии' : 'Инструменты'}</button>)}
         </nav>
-        <div className="simulator-account-summary"><span className="sim-user-avatar">{access.role === 'guest' ? 'G' : access.name?.slice(0, 1).toUpperCase() ?? 'U'}</span><span><strong>{roleLabel(access.role)}</strong><small>{access.email ?? 'Доступ только для просмотра'}</small></span></div>
       </div>
 
       <section className="simulator-workspace">
@@ -291,7 +294,7 @@ function DevicePanel({
       </div>
       <div className="sim-sidebar-control-block">
         <div className="sim-control-block-heading"><span>Команды устройствам</span><small>через очередь AirCheck</small></div>
-        {!isOperator ? <div className="sim-readonly-note">Для отправки команд войдите с правами оператора. <a href="/login">Войти →</a></div> : selectedId === 'window.assembly' || selectedId === 'window.actuator' ? <div className="sim-command-buttons"><button type="button" className="sim-button sim-button-primary" disabled={busy || windowMoving(snapshot)} onClick={() => void onCommand('window', 'open')}>Открыть окно</button><button type="button" className="sim-button" disabled={busy || windowClosed(snapshot)} onClick={() => void onCommand('window', 'close')}>Закрыть</button></div> : selectedId === 'fan.intake' || selectedId === 'fan.exhaust' ? <div className="sim-command-buttons"><button type="button" className="sim-button sim-button-primary" disabled={busy} onClick={() => void onCommand(selectedId === 'fan.intake' ? 'intake' : 'exhaust', selectedId === 'fan.intake' ? snapshot.ventilation.intake.enabled ? 'off' : 'on' : snapshot.ventilation.exhaust.enabled ? 'off' : 'on')}>{(selectedId === 'fan.intake' ? snapshot.ventilation.intake.enabled : snapshot.ventilation.exhaust.enabled) ? 'Выключить' : 'Включить'}</button></div> : <p className="sim-readonly-note">Выберите окно или вентилятор, чтобы отправить команду. Фактическое состояние задаёт Device Layer.</p>}
+        {!isOperator ? <div className="sim-readonly-note">Для отправки команд войдите с правами оператора. <a href={getLoginHref('/simulator')}>Войти →</a></div> : selectedId === 'window.assembly' || selectedId === 'window.actuator' ? <div className="sim-command-buttons"><button type="button" className="sim-button sim-button-primary" disabled={busy || windowMoving(snapshot)} onClick={() => void onCommand('window', 'open')}>Открыть окно</button><button type="button" className="sim-button" disabled={busy || windowClosed(snapshot)} onClick={() => void onCommand('window', 'close')}>Закрыть</button></div> : selectedId === 'fan.intake' || selectedId === 'fan.exhaust' ? <div className="sim-command-buttons"><button type="button" className="sim-button sim-button-primary" disabled={busy} onClick={() => void onCommand(selectedId === 'fan.intake' ? 'intake' : 'exhaust', selectedId === 'fan.intake' ? snapshot.ventilation.intake.enabled ? 'off' : 'on' : snapshot.ventilation.exhaust.enabled ? 'off' : 'on')}>{(selectedId === 'fan.intake' ? snapshot.ventilation.intake.enabled : snapshot.ventilation.exhaust.enabled) ? 'Выключить' : 'Включить'}</button></div> : <p className="sim-readonly-note">Выберите окно или вентилятор, чтобы отправить команду. Фактическое состояние задаёт Device Layer.</p>}
       </div>
     </>
   )
@@ -307,7 +310,7 @@ function ScenarioPanel({ snapshot, isOperator, busy, onAction }: { snapshot: Sim
       <div className="sim-scenario-current"><span>Текущий сценарий</span><strong>{snapshot.simulation.scenario}</strong><small>{snapshot.simulation.occupancy} {snapshot.simulation.occupancy === 1 ? 'человек' : 'чел.'} · скорость {fmt(snapshot.simulation.speed)}×</small></div>
       <div className="sim-scenario-list">{snapshot.simulation.scenarios.map((scenario, index) => <button key={scenario.id} type="button" disabled={!isOperator || busy} className={scenario.title === snapshot.simulation.scenario ? 'is-selected' : ''} onClick={() => void onAction('scenario', { scenario_id: scenario.id })}><span className="sim-scenario-number">{String(index + 1).padStart(2, '0')}</span><span>{scenario.title}</span><span aria-hidden="true">→</span></button>)}</div>
       <div className="sim-auto-demo-card"><div><span className="eyebrow">Сквозная демонстрация</span><strong>{snapshot.demo.active ? snapshot.demo.phase : 'Автоматический показ'}</strong><p>{snapshot.demo.detail}</p></div><button className="sim-button sim-button-primary" type="button" disabled={!isOperator || busy || snapshot.demo.active} onClick={() => void onAction('demo_start')}>{snapshot.demo.active ? 'Идёт показ' : 'Запустить'}</button>{snapshot.demo.active && isOperator ? <button className="sim-button" type="button" disabled={busy} onClick={() => void onAction('demo_stop')}>Остановить</button> : null}</div>
-      {!isOperator ? <p className="sim-readonly-note">Сценарии и demo доступны оператору. <a href="/login">Войти →</a></p> : null}
+      {!isOperator ? <p className="sim-readonly-note">Сценарии и demo доступны оператору. <a href={getLoginHref('/simulator')}>Войти →</a></p> : null}
     </div>
   )
 }

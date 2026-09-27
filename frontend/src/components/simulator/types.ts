@@ -1,6 +1,6 @@
 export type VisualizationMode = 'normal' | 'airflow' | 'sensors' | 'wiring' | 'technical'
 export type CutawayMode = 'visible' | 'transparent' | 'hidden'
-export type AccessRole = 'guest' | 'user' | 'operator' | 'owner'
+export type { AccessRole } from '../../lib/access-types'
 
 export interface AirReading {
   co2_ppm: number
@@ -144,10 +144,4 @@ export interface SimulatorSnapshot {
   demo: { active: boolean; phase: string; detail: string }
 }
 
-export interface AccessInfo {
-  userId: string | null
-  email: string | null
-  name: string | null
-  role: AccessRole
-  operatorExpiresAt: string | null
-}
+export type { AccessInfo } from '../../lib/access-types'

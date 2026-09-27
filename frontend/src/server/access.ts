@@ -2,17 +2,12 @@ import { timingSafeEqual } from 'node:crypto'
 
 import { NextResponse } from 'next/server'
 
+import type { AccessInfo, AccessRole } from '../lib/access-types'
 import { getAuth, getAuthPool } from './auth'
 
-export type AccessRole = 'guest' | 'user' | 'operator' | 'owner'
+export type { AccessRole } from '../lib/access-types'
 
-export interface AccessContext {
-  userId: string | null
-  email: string | null
-  name: string | null
-  role: AccessRole
-  operatorExpiresAt: string | null
-}
+export type AccessContext = AccessInfo
 
 export class AccessDeniedError extends Error {
   constructor(readonly status: 401 | 403, message: string) {
@@ -54,7 +49,7 @@ export async function readAccess(request: Request): Promise<AccessContext> {
     const row = result.rows[0]
     const storedRole = row?.role ?? 'user'
     const role = effectiveRole(storedRole, row?.operator_expires_at ?? null)
-    const operatorExpiresAt = role === 'operator' ? row?.operator_expires_at?.toISOString() ?? null : null
+    const operatorExpiresAt = storedRole === 'operator' ? row?.operator_expires_at?.toISOString() ?? null : null
     return {
       userId: session.user.id,
       email: session.user.email,

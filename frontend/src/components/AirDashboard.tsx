@@ -35,7 +35,10 @@ import {
   getPm25MarkerPosition,
   getPm25Tone,
 } from '../lib/air-quality'
+import { getLoginHref } from '../lib/auth-navigation'
 import { getCo2Thresholds, LineChart, type ChartViewport } from './Charts'
+import AccountMenu from './auth/AccountMenu'
+import { useAccessSession } from './auth/AccessSessionProvider'
 
 export type RangeKey = '30m' | '1h' | '6h' | '24h'
 type SettingsTab = 'automation' | 'thresholds' | 'technical'
@@ -1785,7 +1788,7 @@ export function SettingsPanel({
                 </div>
               </div>
               </fieldset>
-              {!canEdit ? <p className="settings-readonly-note">Просмотр настроек доступен всем. Изменять параметры может только оператор. <a href="/login">Войти →</a></p> : null}
+              {!canEdit ? <p className="settings-readonly-note">Просмотр настроек доступен всем. Изменять параметры может только оператор. <a href={getLoginHref('/#settings')}>Войти →</a></p> : null}
             </form>
 
             {tab === 'automation' ? (
@@ -1820,25 +1823,14 @@ export default function AirDashboard() {
   const [controlError, setControlError] = useState<string | null>(null)
   const [activeCommand, setActiveCommand] = useState<string | null>(null)
   const [controlNotice, setControlNotice] = useState<string | null>(null)
-  const [accessRole, setAccessRole] = useState<'guest' | 'user' | 'operator' | 'owner'>('guest')
+  const { access, status: accessStatus } = useAccessSession()
   const settingsCloseButtonRef = useRef<HTMLButtonElement>(null)
   const settingsTriggerRef = useRef<HTMLElement | null>(null)
   const settingsOpenRef = useRef(false)
   const lastDashboardHashRef = useRef('#overview')
   const loadSequenceRef = useRef(0)
   const activeLoadControllerRef = useRef<AbortController | null>(null)
-  const canOperate = accessRole === 'operator' || accessRole === 'owner'
-
-  useEffect(() => {
-    let active = true
-    void fetch('/api/auth/access', { cache: 'no-store' })
-      .then((response) => response.json())
-      .then((result: { data?: { role?: 'guest' | 'user' | 'operator' | 'owner' } }) => {
-        if (active && result.data?.role) setAccessRole(result.data.role)
-      })
-      .catch(() => { if (active) setAccessRole('guest') })
-    return () => { active = false }
-  }, [])
+  const canOperate = accessStatus === 'ready' && (access?.role === 'operator' || access?.role === 'owner')
 
   const openSettings = useCallback((trigger?: HTMLElement) => {
     if (trigger) {
@@ -2257,6 +2249,7 @@ export default function AirDashboard() {
             activeSection={activeNavigationItem}
             onNavigate={handleSectionNavigation}
           />
+          <AccountMenu variant="dashboard" />
         </div>
       </header>
 

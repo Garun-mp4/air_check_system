@@ -18,6 +18,19 @@ import {
 import type { ClientMeasurement } from '../lib/client-api'
 
 describe('dashboard navigation', () => {
+  it('shows the 3D stand as a top-level dashboard destination', () => {
+    const markup = renderToStaticMarkup(createElement(DashboardNavigation, {
+      label: 'Основная навигация',
+      linkClassName: 'nav-link',
+      activeSection: 'overview',
+      onNavigate: () => undefined,
+    }))
+
+    expect(markup).toContain('href="/simulator"')
+    expect(markup).toContain('3D-стенд')
+    expect(markup).toContain('data-navigation-item="simulator"')
+  })
+
   it('offers only the supported rolling history periods', () => {
     expect(Object.keys(rangeLabels)).toEqual(['30m', '1h', '6h', '24h'])
     expect(rangeMinutes).toEqual({ '30m': 30, '1h': 60, '6h': 360, '24h': 1440 })

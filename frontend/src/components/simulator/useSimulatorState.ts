@@ -2,31 +2,15 @@
 
 import { useEffect, useState } from 'react'
 
-import type { AccessInfo, SimulatorSnapshot } from './types'
+import type { SimulatorSnapshot } from './types'
 
 export function useSimulatorState() {
   const [snapshot, setSnapshot] = useState<SimulatorSnapshot | null>(null)
-  const [access, setAccess] = useState<AccessInfo>({
-    userId: null,
-    email: null,
-    name: null,
-    role: 'guest',
-    operatorExpiresAt: null,
-  })
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
-    const loadAccess = async () => {
-      try {
-        const response = await fetch('/api/auth/access', { cache: 'no-store' })
-        const result = await response.json() as { data?: AccessInfo }
-        if (active && response.ok && result.data) setAccess(result.data)
-      } catch {
-        if (active) setAccess((current) => ({ ...current, role: 'guest' }))
-      }
-    }
     const loadSnapshot = async () => {
       try {
         const response = await fetch('/api/simulator/state', { cache: 'no-store' })
@@ -44,7 +28,6 @@ export function useSimulatorState() {
         }
       }
     }
-    void loadAccess()
     void loadSnapshot()
     const stream = new EventSource('/api/simulator/events')
     stream.addEventListener('snapshot', (event) => {
@@ -67,5 +50,5 @@ export function useSimulatorState() {
     }
   }, [])
 
-  return { snapshot, access, connected, error }
+  return { snapshot, connected, error }
 }
