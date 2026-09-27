@@ -41,12 +41,12 @@ export default function SceneCanvas({
         onContextMenu={(event) => event.preventDefault()}
         onPointerMissed={(event) => { if (event.button === 0) onClearSelection() }}
       >
-        <color attach="background" args={['#a9d3e5']} />
-        <fog attach="fog" args={['#a9d3e5', 24, 78]} />
-        <ambientLight intensity={0.78} />
-        <hemisphereLight args={['#e8f7ff', '#738b67', 1.05]} />
-        <directionalLight position={[-6, 11, -8]} intensity={2.15} castShadow shadow-mapSize={[1024, 1024]} shadow-camera-far={45} shadow-camera-left={-12} shadow-camera-right={12} shadow-camera-top={12} shadow-camera-bottom={-12} />
-        <directionalLight position={[7, 5, 8]} intensity={0.74} color="#fff4d8" />
+        <color attach="background" args={['#c8e0ec']} />
+        <fog attach="fog" args={['#c8e0ec', 30, 90]} />
+        <ambientLight intensity={0.48} />
+        <hemisphereLight args={['#eef7fa', '#788b6d', 0.92]} />
+        <directionalLight position={[-5, 9, -6]} intensity={1.9} color="#fff9ef" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-far={40} shadow-camera-left={-11} shadow-camera-right={11} shadow-camera-top={10} shadow-camera-bottom={-10} shadow-bias={-0.00018} shadow-normalBias={0.018} />
+        <directionalLight position={[6, 4, 8]} intensity={0.42} color="#dceaf1" />
         <RoomShell snapshot={snapshot} cutaway={cutaway} />
         <WindowAssembly snapshot={snapshot} selectedId={selectedId} mode={mode} onSelect={onSelect} />
         <SensorsAndNodes snapshot={snapshot} selectedId={selectedId} mode={mode} onSelect={onSelect} />
@@ -57,7 +57,7 @@ export default function SceneCanvas({
         {/* A faint distant ground gives the green platform a horizon under the blue sky. */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.58, 0]} receiveShadow>
           <planeGeometry args={[d.width_m + d.outdoor_depth_m * 8, d.depth_m + d.outdoor_depth_m * 8]} />
-          <meshStandardMaterial color="#b4d6a7" roughness={1} />
+          <meshStandardMaterial color="#b7d4a8" roughness={1} />
         </mesh>
       </Canvas>
       <div className="simulator-scene-cue"><span className="simulator-cue-dot" /> Перетаскивайте — вращение · колёсико — масштаб · WASD/QE — перемещение камеры</div>

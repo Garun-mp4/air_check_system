@@ -1,58 +1,98 @@
 'use client'
 
 import { useMemo } from 'react'
+import { Text } from '@react-three/drei'
 import { CatmullRomCurve3, Vector3 } from 'three'
 import type { SimulatorSnapshot } from '../types'
+import { CylinderBetween, Housing } from './models/parts'
+import { createWiringRoutes, wireColor, wiringGeometryKey, type Point3 } from './wiringRoutes'
 
-type Point = [number, number, number]
-
-function curve(points: Point[]) {
-  return new CatmullRomCurve3(points.map((point) => new Vector3(...point)))
+function Wire({ points, color, kind, muted }: { points: Point3[]; color: string; kind: string; muted: boolean }) {
+  const route = useMemo(
+    () => new CatmullRomCurve3(points.map((point) => new Vector3(...point)), false, 'centripetal'),
+    [points],
+  )
+  const radius = kind === 'power12' || kind === 'ground' ? 0.0027 : 0.0019
+  return (
+    <mesh>
+      <tubeGeometry args={[route, Math.max(24, points.length * 6), radius, 6, false]} />
+      <meshStandardMaterial color={color} roughness={0.62} metalness={0.08} transparent opacity={muted ? 0.70 : 0.94} />
+    </mesh>
+  )
 }
 
-function Conduit({ points, color, radius = 0.012 }: { points: Point[]; color: string; radius?: number }) {
-  const route = useMemo(() => curve(points), [points])
-  const geometry = useMemo(() => route, [route])
-  return <mesh><tubeGeometry args={[geometry, 24, radius, 7, false]} /><meshStandardMaterial color={color} roughness={0.55} metalness={0.16} /></mesh>
+function Raceway({ position, size, lidSide = 'front' }: { position: Point3; size: Point3; lidSide?: 'front' | 'outside' | 'top' }) {
+  const lidPosition: Point3 = lidSide === 'front'
+    ? [0, 0, -size[2] / 2 - 0.002]
+    : lidSide === 'outside'
+      ? [0, 0, size[2] / 2 + 0.002]
+      : [0, size[1] / 2 + 0.002, 0]
+  const lidSize: Point3 = lidSide === 'top' ? [size[0], 0.006, size[2]] : [size[0], size[1], 0.006]
+  const coverZ = lidSide === 'outside' ? size[2] / 2 + 0.0055 : -size[2] / 2 - 0.0055
+  return (
+    <group position={position}>
+      <Housing position={[0, 0, 0]} size={size} color="#9ba7a2" radius={0.009} metalness={0.38} roughness={0.62} />
+      <Housing position={lidPosition} size={lidSize} color="#c4ccc5" radius={0.006} metalness={0.34} roughness={0.55} />
+      {size[0] > size[1] ? (
+        <group>
+          {[-1, 1].map((side) => <mesh key={side} position={[side * size[0] * 0.24, 0, lidSide === 'top' ? size[1] / 2 + 0.0055 : coverZ]}><sphereGeometry args={[0.0035, 8, 6]} /><meshStandardMaterial color="#647174" metalness={0.72} roughness={0.3} /></mesh>)}
+        </group>
+      ) : null}
+    </group>
+  )
+}
+
+function WallRaceways({ snapshot }: { snapshot: SimulatorSnapshot }) {
+  const { room_dimensions: d, layout, mount_dimensions } = snapshot.simulation
+  const innerFace = d.depth_m / 2 - d.wall_thickness_m / 2
+  const outerFace = d.depth_m / 2 + d.wall_thickness_m / 2
+  const insideZ = innerFace - 0.025
+  const outsideZ = outerFace + 0.025
+  const trunkY = layout.trunk_z
+  const racewayWidth = 0.062
+  const racewayHeight = 0.12
+  const rearWidth = d.width_m - 2 * d.wall_thickness_m
+  const cabinetTop = layout.control_cabinet_center[2] + mount_dimensions.control_cabinet_height_m / 2
+  const indoorTop = layout.indoor_sensor_center[2] + mount_dimensions.indoor_panel_height_m / 2
+  const fanY = d.height_m * 0.81
+  const fanX = d.width_m * 0.37
+  const fanDropTop = Math.min(trunkY - 0.02, fanY + 0.105)
+  const exteriorWidth = Math.abs(layout.outdoor_gland_x - layout.exterior_entry_x)
+  const outdoorGlandY = layout.outdoor_gland_z
+  const windowLeft = -d.window_width_m / 2 - 0.065
+  const windowRight = d.window_width_m / 2 + 0.065
+
+  return (
+    <group>
+      {/* Surface-mounted interior trunk and drops; the covers stay visible in every view mode. */}
+      <Raceway position={[0, trunkY, insideZ]} size={[rearWidth, racewayHeight, racewayWidth]} />
+      <Raceway position={[layout.controller_drop_x, (cabinetTop + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - cabinetTop, racewayWidth]} />
+      <Raceway position={[layout.indoor_drop_x, (indoorTop + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - indoorTop, racewayWidth]} />
+      {[-fanX, fanX].map((x) => <Raceway key={x} position={[x, (fanDropTop + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - fanDropTop, racewayWidth]} />)}
+      {[windowLeft, windowRight].map((x) => <Raceway key={x} position={[x, (d.window_sill_height_m + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - d.window_sill_height_m, racewayWidth]} />)}
+
+      {/* A sealed wall sleeve connects the room trunk to the weatherproof exterior raceway. */}
+      <CylinderBetween from={[layout.exterior_entry_x, trunkY, insideZ]} to={[layout.exterior_entry_x, trunkY, outsideZ]} radius={0.031} color="#7c8988" segments={16} metalness={0.38} />
+      <Raceway position={[(layout.exterior_entry_x + layout.outdoor_gland_x) / 2, trunkY, layout.exterior_channel_y]} size={[Math.max(exteriorWidth, 0.07) + racewayWidth, racewayHeight, racewayWidth]} lidSide="outside" />
+      <Raceway position={[layout.outdoor_gland_x, (outdoorGlandY + trunkY) / 2, layout.exterior_channel_y]} size={[racewayWidth, trunkY - outdoorGlandY, racewayWidth]} lidSide="outside" />
+    </group>
+  )
 }
 
 export default function Wiring({ snapshot, visible }: { snapshot: SimulatorSnapshot; visible: boolean }) {
-  const { room_dimensions: d, layout, mount_dimensions } = snapshot.simulation
-  if (!visible) return null
-  const indoor = layout.indoor_sensor_center
-  const outdoor = layout.outdoor_station_center
-  const cabinet = layout.control_cabinet_center
-  const convert = (point: [number, number, number], zOffset = 0.08): Point => [point[0], point[2], point[1] + zOffset]
-  const cabinetUpper: Point = [cabinet[0], cabinet[2] + mount_dimensions.control_cabinet_height_m * 0.40, cabinet[1] + 0.17]
-  const cabinetLower: Point = [cabinet[0], cabinet[2] - mount_dimensions.control_cabinet_height_m * 0.36, cabinet[1] + 0.17]
-  const upperTrunk: Point[] = [cabinetUpper, [cabinet[0], d.height_m - 0.37, layout.rear_wire_y], [0, d.height_m - 0.37, layout.rear_wire_y]]
-  const indoorDrop: Point[] = [...upperTrunk, [layout.indoor_drop_x, d.height_m - 0.37, layout.rear_wire_y], [layout.indoor_drop_x, indoor[2], layout.rear_wire_y], convert(indoor)]
-  const outdoorRoute: Point[] = [
-    [cabinet[0] - 0.7, cabinet[2] - 0.5, layout.rear_wire_y],
-    [layout.exterior_entry_x, cabinet[2] - 0.5, layout.rear_wire_y],
-    [layout.exterior_entry_x, outdoor[2] - 0.45, d.depth_m / 2 + d.wall_thickness_m + 0.04],
-    [outdoor[0] - 0.34, outdoor[2] - 0.45, outdoor[1] + 0.15],
-    convert(outdoor),
-  ]
-  const fanRoute = (x: number): Point[] => [
-    cabinetLower,
-    [x, cabinet[2] - 0.52, layout.rear_wire_y],
-    [x, d.height_m * 0.81, d.depth_m / 2 - d.wall_thickness_m / 2 - 0.2],
-  ]
-  const windowRoute: Point[] = [cabinetLower, [0.8, cabinet[2] - 0.52, layout.rear_wire_y], [0, d.window_sill_height_m + 0.3, d.depth_m / 2 + 0.14]]
-  const bundle = (points: Point[], color: string, count = 3) => Array.from({ length: count }, (_, index) => (
-    <Conduit key={`${color}-${index}`} points={points.map(([x, y, z]) => [x, y + index * 0.027, z] as Point)} color={color} radius={color === '#dc9147' ? 0.012 : 0.009} />
-  ))
+  const geometryKey = wiringGeometryKey(snapshot)
+  const routes = useMemo(() => createWiringRoutes(snapshot), [geometryKey])
   return (
     <group>
-      {/* +12 V / 5 V supply (orange), GND (graphite), and signal/control (teal/blue). */}
-      {bundle(upperTrunk, '#d8873c', 2)}
-      {bundle(upperTrunk, '#414f52', 2)}
-      {bundle(indoorDrop, '#3c8e91', 2)}
-      {bundle(outdoorRoute, '#347ca0', 2)}
-      {bundle(fanRoute(-d.width_m * 0.37), '#d8873c', 1)}
-      {bundle(fanRoute(d.width_m * 0.37), '#d8873c', 1)}
-      {bundle(windowRoute, '#347ca0', 2)}
+      <WallRaceways snapshot={snapshot} />
+      {visible ? (
+        <group>
+          {routes.map((route) => <Wire key={route.id} points={route.points} color={wireColor(route.kind)} kind={route.kind} muted={route.kind === 'ground'} />)}
+          <Text position={[0, snapshot.simulation.layout.trunk_z + 0.12, snapshot.simulation.room_dimensions.depth_m / 2 - snapshot.simulation.room_dimensions.wall_thickness_m / 2 - 0.04]} fontSize={0.038} color="#405457" anchorX="center" anchorY="bottom" outlineWidth={0.0018} outlineColor="#edf1e9">
+            12 V · 5 V · GND · I²C / UART · управление приводами
+          </Text>
+        </group>
+      ) : null}
     </group>
   )
 }

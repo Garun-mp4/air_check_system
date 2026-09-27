@@ -55,15 +55,17 @@ export default function Airflow({ snapshot, visible }: { snapshot: SimulatorSnap
   const d = snapshot.simulation.room_dimensions
   const windowY = d.window_sill_height_m + d.window_height_m * 0.5
   const windowZ = d.depth_m / 2 + 0.1
+  const exteriorFace = d.depth_m / 2 + d.wall_thickness_m / 2
   const intakeX = -d.width_m * 0.37
   const exhaustX = d.width_m * 0.37
   const fanY = d.height_m * 0.81
-  const fanZ = d.depth_m / 2 - d.wall_thickness_m / 2 - 0.2
+  const fanZ = d.depth_m / 2 - d.wall_thickness_m / 2 - 0.215
+  const exteriorOutletZ = exteriorFace + 0.22
   return (
     <group>
       <FlowTrack visible={visible} volume={snapshot.airflow.window_m3_h} color="#2994bc" points={[[0, windowY, d.depth_m / 2 + 1.0], [0.25, windowY + 0.28, windowZ], [0.12, windowY + 0.14, d.depth_m / 2 - 0.35], [0, windowY, d.depth_m / 2 - 1.1]]} />
-      <FlowTrack visible={visible} volume={snapshot.airflow.intake_m3_h} color="#1c9a84" points={[[intakeX, fanY, d.depth_m / 2 + 0.72], [intakeX, fanY, d.depth_m / 2 + 0.12], [intakeX, fanY - 0.06, fanZ], [intakeX * 0.56, fanY - 0.12, 0.2], [0, fanY - 0.32, -0.4]]} />
-      <FlowTrack visible={visible} volume={snapshot.airflow.exhaust_m3_h} color="#e09343" points={[[0.4, fanY - 0.28, -0.2], [exhaustX * 0.56, fanY - 0.12, 0.2], [exhaustX, fanY - 0.05, fanZ], [exhaustX, fanY, d.depth_m / 2 + 0.18], [exhaustX, fanY, d.depth_m / 2 + 0.75]]} />
+      <FlowTrack visible={visible} volume={snapshot.airflow.intake_m3_h} color="#1c9a84" points={[[intakeX, fanY, exteriorFace + 0.72], [intakeX, fanY, exteriorFace + 0.17], [intakeX, fanY - 0.06, fanZ], [intakeX * 0.56, fanY - 0.12, 0.2], [0, fanY - 0.32, -0.4]]} />
+      <FlowTrack visible={visible} volume={snapshot.airflow.exhaust_m3_h} color="#e09343" points={[[0.4, fanY - 0.28, -0.2], [exhaustX * 0.56, fanY - 0.12, 0.2], [exhaustX, fanY - 0.05, fanZ], [exhaustX, fanY, exteriorOutletZ], [exhaustX, fanY, exteriorFace + 0.75]]} />
     </group>
   )
 }

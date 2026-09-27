@@ -12,6 +12,7 @@ export function Pickable({
   id,
   position,
   bounds,
+  highlightPosition = [0, 0, 0],
   selectedId,
   mode,
   onSelect,
@@ -20,6 +21,7 @@ export function Pickable({
   id: string
   position?: Position
   bounds: Position
+  highlightPosition?: Position
   selectedId: string | null
   mode: VisualizationMode
   onSelect: (id: string, point: Position) => void
@@ -42,7 +44,7 @@ export function Pickable({
     >
       {children}
       {highlighted ? (
-        <mesh renderOrder={mode === 'technical' ? 9 : 2}>
+        <mesh position={highlightPosition} renderOrder={mode === 'technical' ? 9 : 2}>
           <boxGeometry args={bounds} />
           <meshBasicMaterial
             color={selectedId === id ? '#007f70' : '#e5a83b'}

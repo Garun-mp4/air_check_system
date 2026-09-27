@@ -7,11 +7,11 @@ from aircheck_simulator_3d.app.config import SceneConfig
 
 
 INDOOR_MOUNT_PANEL_DEPTH_M = 0.10
-INDOOR_MOUNT_PANEL_WIDTH_M = 0.76
-INDOOR_MOUNT_PANEL_HEIGHT_M = 0.86
+INDOOR_MOUNT_PANEL_WIDTH_M = 0.54
+INDOOR_MOUNT_PANEL_HEIGHT_M = 0.66
 OUTDOOR_BRACKET_STANDOFF_M = 0.18
-CONTROL_CABINET_WIDTH_M = 1.55
-CONTROL_CABINET_HEIGHT_M = 1.78
+CONTROL_CABINET_WIDTH_M = 0.78
+CONTROL_CABINET_HEIGHT_M = 0.98
 RACEWAY_DEPTH_M = 0.07
 RACEWAY_HEIGHT_M = 0.12
 RACEWAY_CEILING_CLEARANCE_M = 0.37
@@ -72,7 +72,7 @@ class EquipmentLayout:
             trunk_z=config.room_height_m - RACEWAY_CEILING_CLEARANCE_M,
             exterior_entry_x=exterior_entry_x,
             outdoor_gland_x=outdoor_gland_x,
-            outdoor_gland_z=outdoor_z - 0.39,
+            outdoor_gland_z=outdoor_z - 0.292,
             indoor_drop_x=indoor_x - 0.43,
         )
 
