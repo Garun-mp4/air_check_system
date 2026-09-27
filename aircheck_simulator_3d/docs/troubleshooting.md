@@ -36,4 +36,4 @@ docker compose logs -f web-simulator backend
 docker compose --profile web-demo up --build -d backend web-simulator
 ```
 
-Это пересоздаёт контейнеры, но не удаляет PostgreSQL/ML volumes. Отдельной Windows-сборки или команды Panda3D build больше нет: сцена запускается через браузерную панель.
+Это пересоздаёт контейнеры, но не удаляет PostgreSQL/ML volumes. Интерактивная сцена доступна в браузерной панели, а её состояние рассчитывает headless simulator.

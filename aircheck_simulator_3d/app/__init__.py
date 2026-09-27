@@ -1,1 +1,1 @@
-"""Application composition, configuration and lifecycle."""
+"""Headless simulator coordination, configuration and scene snapshot layout."""

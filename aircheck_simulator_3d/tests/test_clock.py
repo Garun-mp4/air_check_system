@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from aircheck_simulator_3d.app.application import Application
+from aircheck_simulator_3d.tests.support import new_simulation
 from aircheck_simulator_3d.app.config import load_config
 from aircheck_simulator_3d.simulation.clock import SimulationClock
 
@@ -12,7 +12,7 @@ CONFIG_DIR = Path(__file__).parents[1] / "config"
 
 
 def test_clock_advances_fixed_simulation_time_independent_of_frame_rate() -> None:
-    state = Application(load_config(CONFIG_DIR, {})).state
+    state = new_simulation(load_config(CONFIG_DIR, {})).state
     state.simulated_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
     state.fixed_step_seconds = 1.0
     state.simulation_speed = 2
@@ -25,7 +25,7 @@ def test_clock_advances_fixed_simulation_time_independent_of_frame_rate() -> Non
 
 
 def test_clock_limits_substeps_and_carries_remaining_time() -> None:
-    state = Application(load_config(CONFIG_DIR, {})).state
+    state = new_simulation(load_config(CONFIG_DIR, {})).state
     state.fixed_step_seconds = 1.0
     clock = SimulationClock(state, max_substeps_per_frame=2)
 
@@ -37,14 +37,14 @@ def test_clock_limits_substeps_and_carries_remaining_time() -> None:
 
 @pytest.mark.parametrize("delta", [-1, float("nan"), float("inf")])
 def test_clock_rejects_invalid_elapsed_time(delta: float) -> None:
-    state = Application(load_config(CONFIG_DIR, {})).state
+    state = new_simulation(load_config(CONFIG_DIR, {})).state
 
     with pytest.raises(ValueError, match="finite and non-negative"):
         SimulationClock(state, max_substeps_per_frame=1).advance(delta)
 
 
 def test_clock_does_not_advance_while_paused_even_with_pending_fraction() -> None:
-    state = Application(load_config(CONFIG_DIR, {})).state
+    state = new_simulation(load_config(CONFIG_DIR, {})).state
     clock = SimulationClock(state, max_substeps_per_frame=5)
 
     assert clock.advance(0.05) == 0
@@ -58,7 +58,7 @@ def test_clock_does_not_advance_while_paused_even_with_pending_fraction() -> Non
 
 
 def test_clock_rejects_scaled_overflow_without_corrupting_accumulator() -> None:
-    state = Application(load_config(CONFIG_DIR, {})).state
+    state = new_simulation(load_config(CONFIG_DIR, {})).state
     state.fixed_step_seconds = 1.0
     state.simulation_speed = 60.0
     clock = SimulationClock(state, max_substeps_per_frame=1)

@@ -14,6 +14,13 @@ from aircheck_simulator_3d.app.automatic_demo import AutomaticDemoController
 from aircheck_simulator_3d.app.config import AppConfig
 from aircheck_simulator_3d.app.developer_controls import DeveloperControls
 from aircheck_simulator_3d.app.scenarios import ScenarioController
+from aircheck_simulator_3d.app.stand_layout import (
+    CONTROL_CABINET_HEIGHT_M,
+    CONTROL_CABINET_WIDTH_M,
+    INDOOR_MOUNT_PANEL_HEIGHT_M,
+    INDOOR_MOUNT_PANEL_WIDTH_M,
+    EquipmentLayout,
+)
 from aircheck_simulator_3d.devices.command_executor import DeviceCommandExecutor
 from aircheck_simulator_3d.devices.device_layer import DeviceLayer
 from aircheck_simulator_3d.networking.contracts import ControlStateReport, MeasurementPayload
@@ -23,13 +30,6 @@ from aircheck_simulator_3d.networking.workers import (
     CommandReceived,
     NetworkIntegration,
     TelemetryAccepted,
-)
-from aircheck_simulator_3d.scene.device_models.layout import (
-    CONTROL_CABINET_HEIGHT_M,
-    CONTROL_CABINET_WIDTH_M,
-    INDOOR_MOUNT_PANEL_HEIGHT_M,
-    INDOOR_MOUNT_PANEL_WIDTH_M,
-    EquipmentLayout,
 )
 from aircheck_simulator_3d.simulation.engine import SimulationEngine
 from aircheck_simulator_3d.simulation.factory import create_initial_state

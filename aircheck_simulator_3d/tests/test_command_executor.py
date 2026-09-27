@@ -1,7 +1,7 @@
 from pathlib import Path
 import math
 
-from aircheck_simulator_3d.app.application import Application
+from aircheck_simulator_3d.tests.support import new_simulation
 from aircheck_simulator_3d.app.config import load_config
 from aircheck_simulator_3d.devices.command_executor import DeviceCommandExecutor
 from aircheck_simulator_3d.networking.contracts import CommandTarget, PendingControlCommand
@@ -16,7 +16,7 @@ def _command(command_id: int, target: CommandTarget, desired_state: bool) -> Pen
 
 
 def test_window_command_is_acknowledgeable_only_after_actual_travel_finishes() -> None:
-    app = Application(load_config(CONFIG_DIR, {}))
+    app = new_simulation(load_config(CONFIG_DIR, {}))
     app.simulation_engine.set_speed(1.0)
     executor = DeviceCommandExecutor(app.device_layer)
     command = _command(41, CommandTarget.WINDOW, True)
@@ -42,7 +42,7 @@ def test_window_command_is_acknowledgeable_only_after_actual_travel_finishes() -
 
 
 def test_commands_for_one_actuator_run_in_order_and_wait_for_each_endpoint() -> None:
-    app = Application(load_config(CONFIG_DIR, {}))
+    app = new_simulation(load_config(CONFIG_DIR, {}))
     app.simulation_engine.set_speed(1.0)
     executor = DeviceCommandExecutor(app.device_layer)
     executor.enqueue(_command(51, CommandTarget.WINDOW, True))
@@ -74,7 +74,7 @@ def test_commands_for_one_actuator_run_in_order_and_wait_for_each_endpoint() -> 
 
 
 def test_fan_command_completes_from_device_layer_state_and_can_be_retried() -> None:
-    app = Application(load_config(CONFIG_DIR, {}))
+    app = new_simulation(load_config(CONFIG_DIR, {}))
     executor = DeviceCommandExecutor(app.device_layer)
     command = _command(61, CommandTarget.INTAKE, True)
 

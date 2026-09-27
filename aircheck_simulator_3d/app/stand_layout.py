@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from aircheck_simulator_3d.app.config import SceneConfig
 
@@ -22,7 +21,7 @@ ESP32_CABLE_EXIT_Z_M = 0.86
 
 @dataclass(frozen=True)
 class EquipmentLayout:
-    """Shared wall-mount and cable-trunk coordinates for the equipment models."""
+    """Room-relative coordinates and dimensions serialized for the web scene."""
 
     indoor_sensor_center: tuple[float, float, float]
     outdoor_station_center: tuple[float, float, float]
@@ -40,18 +39,15 @@ class EquipmentLayout:
 
     @classmethod
     def from_config(cls, config: SceneConfig) -> EquipmentLayout:
-        back_y = config.room_depth_m / 2
-        # In the Panda3D room, back_y is the inner wall face (window.py centers
-        # the wall at back_y + wall_thickness / 2). The exterior face is one
-        # full wall thickness beyond that coordinate.
-        exterior_wall_face_y = back_y + config.wall_thickness_m
+        inner_wall_face_y = config.room_depth_m / 2
+        exterior_wall_face_y = inner_wall_face_y + config.wall_thickness_m
         indoor_x = -config.room_width_m * 0.375
         outdoor_x = config.room_width_m * 0.26
         outdoor_z = config.room_height_m * 0.39
         control_x = config.room_width_m * 0.365
-        control_y = back_y - config.wall_thickness_m / 2
+        control_y = inner_wall_face_y - config.wall_thickness_m / 2
         control_z = config.room_height_m * 0.3125
-        raceway_center_y = back_y - RACEWAY_DEPTH_M / 2
+        raceway_center_y = inner_wall_face_y - RACEWAY_DEPTH_M / 2
         exterior_channel_y = exterior_wall_face_y + RACEWAY_DEPTH_M / 2
         outdoor_gland_x = outdoor_x - OUTDOOR_GLAND_OFFSET_M
         exterior_entry_x = config.window_width_m / 2 + config.wall_thickness_m / 2
@@ -59,7 +55,7 @@ class EquipmentLayout:
         return cls(
             indoor_sensor_center=(
                 indoor_x,
-                back_y - INDOOR_MOUNT_PANEL_DEPTH_M / 2,
+                inner_wall_face_y - INDOOR_MOUNT_PANEL_DEPTH_M / 2,
                 config.room_height_m * 0.42,
             ),
             outdoor_station_center=(
@@ -79,8 +75,3 @@ class EquipmentLayout:
             outdoor_gland_z=outdoor_z - 0.292,
             indoor_drop_x=indoor_x - 0.43,
         )
-
-
-def world_position(node: Any, parent: Any) -> tuple[float, float, float]:
-    position = node.getPos(parent)
-    return (float(position.getX()), float(position.getY()), float(position.getZ()))

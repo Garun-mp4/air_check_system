@@ -5,35 +5,27 @@ from pathlib import Path
 
 import pytest
 
-from aircheck_simulator_3d.app.application import Application
 from aircheck_simulator_3d.app.automatic_demo import AutomaticDemoController
 from aircheck_simulator_3d.app.config import load_config
 from aircheck_simulator_3d.app.developer_controls import DeveloperControls
 from aircheck_simulator_3d.app.scenarios import ScenarioController
 from aircheck_simulator_3d.networking.contracts import BackendForecast, MeasurementPayload
-from aircheck_simulator_3d.presentation.airflow_visualization import (
-    active_particle_count,
-    flow_ratio,
-)
-from aircheck_simulator_3d.scene.objects import SceneObject
 from aircheck_simulator_3d.simulation.virtual_sensors import SensorReadingUnavailable, read_sensor_value
-from aircheck_simulator_3d.ui.presentation_data import device_details, format_hud
+from aircheck_simulator_3d.tests.support import SimulationHarness, new_simulation
 
 
 CONFIG_DIR = Path(__file__).parents[1] / "config"
 
 
-def _app() -> Application:
-    return Application(load_config(CONFIG_DIR, {}))
-
-
-def _scene_object(object_id: str) -> SceneObject:
-    return SceneObject(object_id, object_id, f"Description for {object_id}", None, None, None, (0, 0, 0))
+def _simulation() -> SimulationHarness:
+    return new_simulation(load_config(CONFIG_DIR, {}))
 
 
 def test_all_demo_scenarios_apply_their_configured_environment_and_device_states() -> None:
-    app = _app()
-    scenarios = ScenarioController(app.config, app.simulation_engine, app.device_layer, None)
+    simulation = _simulation()
+    scenarios = ScenarioController(
+        simulation.config, simulation.simulation_engine, simulation.device_layer, None
+    )
 
     assert len(scenarios.scenarios) == 9
     assert [scenario.title for scenario in scenarios.scenarios] == [
@@ -49,7 +41,7 @@ def test_all_demo_scenarios_apply_their_configured_environment_and_device_states
     ]
     for preset in scenarios.scenarios:
         selected = scenarios.apply(preset.scenario_id)
-        state = app.state
+        state = simulation.state
         assert selected == preset
         assert state.environment.occupancy == preset.occupancy
         assert state.outdoor.co2_ppm == preset.outdoor_co2_ppm
@@ -68,158 +60,65 @@ def test_all_demo_scenarios_apply_their_configured_environment_and_device_states
 
 
 def test_developer_controls_are_bounded_and_change_the_live_state() -> None:
-    app = _app()
-    controls = DeveloperControls(app.config, app.simulation_engine, app.device_layer)
+    simulation = _simulation()
+    controls = DeveloperControls(simulation.config, simulation.simulation_engine, simulation.device_layer)
 
     assert controls.adjust("occupancy", 1) == 2
-    assert app.state.environment.occupancy == 2
+    assert simulation.state.environment.occupancy == 2
     assert controls.adjust("outdoor_co2_ppm", 1) == 470
     assert controls.adjust("wind_speed_m_s", 1) == 1.5
     assert controls.adjust("filter_efficiency", -1) == pytest.approx(0.77)
     assert controls.adjust("intake_airflow_m3_h", 1) == 5
-    assert app.state.ventilation.intake.enabled
-    assert app.state.ventilation.intake.airflow_m3_h == 5
+    assert simulation.state.ventilation.intake.enabled
+    assert simulation.state.ventilation.intake.airflow_m3_h == 5
 
     for _ in range(30):
         value = controls.adjust("outdoor_pm25_ug_m3", -1)
     assert value == 0
-    assert app.state.outdoor.pm25_ug_m3 == 0
+    assert simulation.state.outdoor.pm25_ug_m3 == 0
     assert controls.step_simulation_speed(-1) == 0
-    assert app.state.simulation_speed == 0
+    assert simulation.state.simulation_speed == 0
 
 
-@pytest.mark.parametrize(
-    ("flow", "maximum", "ratio", "particles"),
-    [(0.0, 60.0, 0.0, 0), (15.0, 60.0, 0.25, 2), (90.0, 60.0, 1.0, 7)],
-)
-def test_airflow_visual_intensity_tracks_modelled_flow(
-    flow: float, maximum: float, ratio: float, particles: int
-) -> None:
-    assert flow_ratio(flow, maximum) == pytest.approx(ratio)
-    assert active_particle_count(flow, maximum, 7) == particles
-
-
-def test_sensor_panels_and_hud_read_live_virtual_sensor_values() -> None:
-    app = _app()
-    state = app.state
-    state.indoor.co2_ppm = 910
-    state.indoor.pm25_ug_m3 = 6.5
-    forecast = BackendForecast(1030, model_name="linear_regression")
-    expected = {
-        "sensor.scd41.indoor": ("Sensirion SCD41", "I²C", "910.0 ppm"),
-        "sensor.sps30.indoor": ("Sensirion SPS30", "UART", "6.5 мкг/м³"),
-        "sensor.sht45.outdoor": ("Sensirion SHT45", "I²C", "18.0 °C"),
-        "sensor.sps30.outdoor": ("Sensirion SPS30", "UART", "8.0 мкг/м³"),
-    }
-    for object_id, (model, interface, value) in expected.items():
-        _, details = device_details(
-            _scene_object(object_id),
-            state,
-            backend_online=True,
-            backend_message=None,
-            last_telemetry_at="2026-09-26T10:00:00Z",
-            pending_commands=0,
-        )
-        assert model in details
-        assert interface in details
-        assert value in details
-        assert "Состояние: В СЕТИ" in details
-
-    hud = format_hud(state, forecast, True, "Normal Room", "READY")
-    assert "910 ppm" in hud
-    assert "6.5" in hud
-    assert "1030 ppm" in hud
-    assert "В СЕТИ" in hud
-
-
-@pytest.mark.parametrize(
-    "object_id",
-    [
-        "device.esp32",
-        "sensor.scd41.indoor",
-        "sensor.sps30.indoor",
-        "sensor.sht45.outdoor",
-        "sensor.sps30.outdoor",
-        "window.assembly",
-        "window.actuator",
-        "window.reed_switch",
-        "window.limit_open",
-        "window.limit_close",
-        "fan.intake",
-        "fan.exhaust",
-        "power.psu_12v",
-        "power.dc_dc",
-        "power.mosfet_module",
-        "power.h_bridge",
-    ],
-)
-def test_every_key_device_has_a_live_details_panel(object_id: str) -> None:
-    app = _app()
-    title, details = device_details(
-        _scene_object(object_id),
-        app.state,
-        backend_online=False,
-        backend_message=None,
-        last_telemetry_at=None,
-        pending_commands=1,
+def test_sensor_failure_withholds_readings_and_telemetry() -> None:
+    simulation = _simulation()
+    scenarios = ScenarioController(
+        simulation.config, simulation.simulation_engine, simulation.device_layer, None
     )
-
-    assert title == object_id
-    assert details.strip()
-    if object_id == "device.esp32":
-        assert "room-01" in details and "Команд выполняется: 1" in details
-    if object_id == "window.actuator":
-        assert "Задано / фактически" in details and "Концевик закрытия" in details
-    if object_id == "fan.intake":
-        assert "Расход воздуха:" in details and "Фильтр:" in details
-
-
-def test_sensor_failure_marks_readings_unavailable_and_withholds_telemetry() -> None:
-    app = _app()
-    scenarios = ScenarioController(app.config, app.simulation_engine, app.device_layer, None)
     scenarios.apply("sensor_failure")
 
-    _, details = device_details(
-        _scene_object("sensor.scd41.indoor"),
-        app.state,
-        backend_online=True,
-        backend_message=None,
-        last_telemetry_at=None,
-        pending_commands=0,
-    )
-    assert "НЕТ СВЯЗИ" in details
     with pytest.raises(SensorReadingUnavailable, match="is offline"):
-        read_sensor_value(app.state, "indoor", "co2")
+        read_sensor_value(simulation.state, "indoor", "co2")
     with pytest.raises(SensorReadingUnavailable):
-        MeasurementPayload.from_state(app.state, datetime.now(timezone.utc))
+        MeasurementPayload.from_state(simulation.state, datetime.now(timezone.utc))
 
 
 def test_virtual_sensor_noise_is_deterministic_and_limited_to_reported_readings() -> None:
-    app = _app()
-    state = app.state
+    simulation = _simulation()
+    state = simulation.state
     state.elapsed_seconds = 13.5
     base_co2 = state.indoor.co2_ppm
     state.sensor_noise_percent = 5
     first = read_sensor_value(state, "indoor", "co2")
     second = read_sensor_value(state, "indoor", "co2")
+
     assert first == second
     assert abs(first - base_co2) <= base_co2 * 0.05
     assert state.indoor.co2_ppm == base_co2
 
 
-def test_automatic_demo_waits_for_real_backend_forecast_command_execution_ack_and_air_response() -> None:
-    app = _app()
-    demo = AutomaticDemoController(app.config.demo)
-    state = app.state
+def test_automatic_demo_waits_for_forecast_command_execution_ack_and_air_response() -> None:
+    simulation = _simulation()
+    demo = AutomaticDemoController(simulation.config.demo)
+    state = simulation.state
     demo.start(state)
     assert demo.status.phase == demo.BUILDUP
 
-    state.elapsed_seconds += app.config.demo.automatic_build_up_seconds
+    state.elapsed_seconds += simulation.config.demo.automatic_build_up_seconds
     state.indoor.co2_ppm = 1000
     assert demo.update(state, backend_online=False).detail.startswith("Backend offline")
     demo.update(state, backend_online=True)
-    forecast = BackendForecast(1280, model_name="linear_regression")
-    demo.forecast_received(forecast)
+    demo.forecast_received(BackendForecast(1280, model_name="linear_regression"))
     assert demo.status.phase == demo.FORECAST
     demo.command_received(77)
     demo.command_received(78)
@@ -244,33 +143,35 @@ def test_automatic_demo_waits_for_real_backend_forecast_command_execution_ack_an
 
 
 def test_automatic_demo_weather_allows_real_ventilation_to_reduce_co2() -> None:
-    app = _app()
-    scenario = ScenarioController(app.config, app.simulation_engine, app.device_layer, None)
+    simulation = _simulation()
+    scenario = ScenarioController(
+        simulation.config, simulation.simulation_engine, simulation.device_layer, None
+    )
     scenario.prepare_automatic_demo()
-    state = app.state
-    app.simulation_engine.set_speed(60.0)
+    state = simulation.state
+    simulation.simulation_engine.set_speed(60.0)
     baseline = state.indoor.co2_ppm
 
-    _run_simulated_seconds(app, app.config.demo.automatic_build_up_seconds)
+    _run_simulated_seconds(simulation, simulation.config.demo.automatic_build_up_seconds)
     peak = state.indoor.co2_ppm
     assert peak > baseline
     assert state.window.close_limit_switch
 
-    app.device_layer.request_window_open()
-    app.device_layer.set_intake_enabled(True)
-    app.device_layer.set_exhaust_enabled(True)
-    _run_simulated_seconds(app, app.config.devices.window_travel_seconds + 1)
+    simulation.device_layer.request_window_open()
+    simulation.device_layer.set_intake_enabled(True)
+    simulation.device_layer.set_exhaust_enabled(True)
+    _run_simulated_seconds(simulation, simulation.config.devices.window_travel_seconds + 1)
     assert state.window.open_limit_switch
-    _run_simulated_seconds(app, 15 * 60)
+    _run_simulated_seconds(simulation, 15 * 60)
 
-    assert state.indoor.co2_ppm <= peak - app.config.demo.automatic_co2_drop_ppm
+    assert state.indoor.co2_ppm <= peak - simulation.config.demo.automatic_co2_drop_ppm
 
 
-def _run_simulated_seconds(app: Application, simulated_seconds: float) -> None:
-    state = app.state
+def _run_simulated_seconds(simulation: SimulationHarness, simulated_seconds: float) -> None:
+    state = simulation.state
     remaining_ticks = round(simulated_seconds / state.fixed_step_seconds)
     while remaining_ticks:
-        ticks = min(remaining_ticks, app.config.physics.max_substeps_per_frame)
+        ticks = min(remaining_ticks, simulation.config.physics.max_substeps_per_frame)
         real_seconds = ticks * state.fixed_step_seconds / state.simulation_speed
-        assert app.simulation_engine.advance(real_seconds) == ticks
+        assert simulation.simulation_engine.advance(real_seconds) == ticks
         remaining_ticks -= ticks

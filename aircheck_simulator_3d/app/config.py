@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import math
 import os
-import sys
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,18 +11,6 @@ from urllib.parse import urlparse
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG_DIR = PACKAGE_ROOT / "config"
-
-
-def _default_config_directory() -> Path:
-    if not getattr(sys, "frozen", False):
-        return DEFAULT_CONFIG_DIR
-    executable_directory = Path(sys.executable).resolve().parent
-    candidates = (
-        executable_directory / "aircheck_simulator_3d" / "config",
-        executable_directory / "config",
-        DEFAULT_CONFIG_DIR,
-    )
-    return next((candidate for candidate in candidates if candidate.is_dir()), candidates[0])
 
 
 class ConfigurationError(ValueError):
@@ -133,27 +120,6 @@ class BackendConfig:
 
 
 @dataclass(frozen=True)
-class GraphicsConfig:
-    window_title: str
-    width: int
-    height: int
-    fullscreen: bool
-    background_rgb: tuple[float, float, float]
-    text_rgb: tuple[float, float, float]
-    text_scale: float
-    ui_font_path: str
-    multisample_enabled: bool
-    multisamples: int
-    shadows_enabled: bool
-    shadow_map_size: int
-    ambient_rgb: tuple[float, float, float]
-    sun_rgb: tuple[float, float, float]
-    quality_preset: str
-    target_fps: int
-    airflow_particles_per_track: int
-
-
-@dataclass(frozen=True)
 class SceneConfig:
     room_width_m: float
     room_depth_m: float
@@ -236,7 +202,6 @@ class AppConfig:
     devices: DeviceConfig
     physics: PhysicsConfig
     backend: BackendConfig
-    graphics: GraphicsConfig
     scene: SceneConfig
     camera: CameraConfig
     logging: LoggingConfig
@@ -290,22 +255,6 @@ def _boolean(section: dict[str, object], key: str, source: str) -> bool:
     if not isinstance(value, bool):
         raise ConfigurationError(f"{source}: {key} must be a boolean")
     return value
-
-
-def _color(section: dict[str, object], key: str, source: str) -> tuple[float, float, float]:
-    value = section.get(key)
-    if not isinstance(value, list) or len(value) != 3:
-        raise ConfigurationError(f"{source}: {key} must contain three color components")
-    components = tuple(
-        float(component)
-        for component in value
-        if isinstance(component, (int, float)) and not isinstance(component, bool)
-    )
-    if len(components) != 3 or any(
-        not math.isfinite(component) or not 0 <= component <= 1 for component in components
-    ):
-        raise ConfigurationError(f"{source}: {key} components must be between 0 and 1")
-    return components
 
 
 def _vector3(section: dict[str, object], key: str, source: str) -> tuple[float, float, float]:
@@ -660,18 +609,6 @@ def _validate(config: AppConfig) -> None:
         or config.backend.command_limit < 1
     ):
         raise ConfigurationError("backend retries, retry delay or command limit is invalid")
-    if config.graphics.width < 1 or config.graphics.height < 1 or config.graphics.text_scale <= 0:
-        raise ConfigurationError("graphics dimensions and text scale must be positive")
-    if config.graphics.target_fps < 1 or config.graphics.airflow_particles_per_track < 1:
-        raise ConfigurationError("graphics target FPS and airflow particle count must be positive")
-    if not config.graphics.ui_font_path:
-        raise ConfigurationError("graphics.ui_font_path must not be empty")
-    if config.graphics.multisamples < 0 or config.graphics.shadow_map_size < 0:
-        raise ConfigurationError("multisample count and shadow map size cannot be negative")
-    if config.graphics.multisample_enabled and config.graphics.multisamples < 2:
-        raise ConfigurationError("multisamples must be at least 2 when multisampling is enabled")
-    if config.graphics.shadows_enabled and config.graphics.shadow_map_size < 128:
-        raise ConfigurationError("shadow map size must be at least 128 when shadows are enabled")
     scene = config.scene
     if min(scene.room_width_m, scene.room_depth_m, scene.room_height_m, scene.wall_thickness_m) <= 0:
         raise ConfigurationError("room dimensions and wall thickness must be positive")
@@ -705,10 +642,9 @@ def _validate(config: AppConfig) -> None:
 def load_config(
     config_dir: Path | None = None,
     environ: Mapping[str, str] | None = None,
-    quality_preset: str | None = None,
 ) -> AppConfig:
-    directory = (config_dir or _default_config_directory()).expanduser().resolve()
-    config_names = ("room", "devices", "physics", "backend", "graphics", "camera", "scene", "logging", "demo")
+    directory = (config_dir or DEFAULT_CONFIG_DIR).expanduser().resolve()
+    config_names = ("room", "devices", "physics", "backend", "camera", "scene", "logging", "demo")
     paths = {name: directory / f"{name}.toml" for name in config_names}
     raw = {name: _read_toml(path) for name, path in paths.items()}
 
@@ -726,9 +662,6 @@ def load_config(
     moisture_table = _section(raw["physics"], "moisture", paths["physics"])
     fans_table = _section(raw["physics"], "fans", paths["physics"])
     backend_table = _section(raw["backend"], "backend", paths["backend"])
-    graphics_table = _section(raw["graphics"], "graphics", paths["graphics"])
-    lighting_table = _section(raw["graphics"], "lighting", paths["graphics"])
-    quality_table = _section(raw["graphics"], "quality", paths["graphics"])
     camera_table = _section(raw["camera"], "camera", paths["camera"])
     scene_table = _section(raw["scene"], "scene", paths["scene"])
     logging_table = _section(raw["logging"], "logging", paths["logging"])
@@ -857,35 +790,6 @@ def load_config(
                 backend_table, "health_check_interval_seconds", "backend.toml [backend]"
             ),
         )
-        selected_quality = (
-            quality_preset.strip().lower()
-            if quality_preset is not None
-            else _text(graphics_table, "quality_preset", "graphics.toml [graphics]").lower()
-        )
-        profile = quality_table.get(selected_quality)
-        if selected_quality not in {"low", "medium", "high"} or not isinstance(profile, dict):
-            raise ConfigurationError("graphics quality must be one of: low, medium, high")
-        graphics = GraphicsConfig(
-            window_title=_text(graphics_table, "window_title", "graphics.toml [graphics]"),
-            width=_integer(graphics_table, "width", "graphics.toml [graphics]"),
-            height=_integer(graphics_table, "height", "graphics.toml [graphics]"),
-            fullscreen=_boolean(graphics_table, "fullscreen", "graphics.toml [graphics]"),
-            background_rgb=_color(graphics_table, "background_rgb", "graphics.toml [graphics]"),
-            text_rgb=_color(graphics_table, "text_rgb", "graphics.toml [graphics]"),
-            text_scale=_number(graphics_table, "text_scale", "graphics.toml [graphics]"),
-            ui_font_path=_text(graphics_table, "ui_font_path", "graphics.toml [graphics]"),
-            multisample_enabled=_boolean(profile, "multisample_enabled", f"graphics.toml [quality.{selected_quality}]"),
-            multisamples=_integer(profile, "multisamples", f"graphics.toml [quality.{selected_quality}]"),
-            shadows_enabled=_boolean(profile, "shadows_enabled", f"graphics.toml [quality.{selected_quality}]"),
-            shadow_map_size=_integer(profile, "shadow_map_size", f"graphics.toml [quality.{selected_quality}]"),
-            ambient_rgb=_color(lighting_table, "ambient_rgb", "graphics.toml [lighting]"),
-            sun_rgb=_color(lighting_table, "sun_rgb", "graphics.toml [lighting]"),
-            quality_preset=selected_quality,
-            target_fps=_integer(graphics_table, "target_fps", "graphics.toml [graphics]"),
-            airflow_particles_per_track=_integer(
-                profile, "airflow_particles_per_track", f"graphics.toml [quality.{selected_quality}]"
-            ),
-        )
         camera = CameraConfig(
             start_position=_vector3(camera_table, "start_position", "camera.toml [camera]"),
             start_target=_vector3(camera_table, "start_target", "camera.toml [camera]"),
@@ -916,11 +820,7 @@ def load_config(
         )
         log_directory = Path(_text(logging_table, "directory", "logging.toml [logging]"))
         if not log_directory.is_absolute():
-            if getattr(sys, "frozen", False):
-                app_data = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
-                log_directory = app_data / "AirCheck3D" / "logs"
-            else:
-                log_directory = directory.parent / log_directory
+            log_directory = directory.parent / log_directory
         logging_config = LoggingConfig(
             directory=log_directory,
             level=_text(logging_table, "level", "logging.toml [logging]"),
@@ -940,7 +840,6 @@ def load_config(
         devices=devices,
         physics=physics,
         backend=backend,
-        graphics=graphics,
         scene=scene,
         camera=camera,
         logging=logging_config,

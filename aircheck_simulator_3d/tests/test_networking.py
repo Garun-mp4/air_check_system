@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 import pytest
 
-from aircheck_simulator_3d.app.application import Application
+from aircheck_simulator_3d.tests.support import new_simulation
 from aircheck_simulator_3d.app.config import BackendConfig, load_config
 from aircheck_simulator_3d.devices.command_executor import DeviceCommandExecutor
 from aircheck_simulator_3d.networking.contracts import (
@@ -259,7 +259,7 @@ def test_worker_offline_reconnect_telemetry_commands_execution_and_ack() -> None
     backend = _SwitchableBackend()
     network = NetworkIntegration(_config(), "room-01", backend)
     network.start()
-    state = Application(load_config(CONFIG_DIR, {})).state
+    state = new_simulation(load_config(CONFIG_DIR, {})).state
     report = ControlStateReport.from_state("room-01", datetime.now(timezone.utc), state)
     network.publish_actual_state(report)
 
@@ -278,7 +278,7 @@ def test_worker_offline_reconnect_telemetry_commands_execution_and_ack() -> None
     )
     assert _wait_for(lambda: len(backend.measurements) == 1)
 
-    active_app = Application(load_config(CONFIG_DIR, {}))
+    active_app = new_simulation(load_config(CONFIG_DIR, {}))
     executor = DeviceCommandExecutor(active_app.device_layer)
     for event in received:
         executor.enqueue(event.command)

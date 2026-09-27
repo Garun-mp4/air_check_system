@@ -61,7 +61,7 @@ export default function RoomShell({ snapshot, cutaway }: { snapshot: SimulatorSn
       <WallPanel size={[wall, height, depth]} position={[-width / 2, height / 2, 0]} color="#e0e0d7" />
       <WallPanel size={[wall, height, depth]} position={[width / 2, height / 2, 0]} color="#e0e0d7" />
 
-      {/* The near facade is the cutaway wall, matching the Panda3D room coordinates. */}
+      {/* The near facade uses the same room coordinate system as the Python snapshot. */}
       {cutaway !== 'hidden' ? (
         <group>
           <WallPanel size={[width, height, wall]} position={[0, height / 2, -backZ]} color="#dedfd8" opacity={wallOpacity} />

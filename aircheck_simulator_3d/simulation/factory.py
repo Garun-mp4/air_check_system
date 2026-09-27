@@ -21,7 +21,7 @@ from aircheck_simulator_3d.simulation.state import (
 
 
 def create_initial_state(config: AppConfig) -> SimulationState:
-    """Build the canonical initial state shared by desktop and headless hosts."""
+    """Build the canonical initial state for the headless simulator service."""
     room = config.room
     devices = config.devices
     position = devices.initial_window_position_percent

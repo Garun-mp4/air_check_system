@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from aircheck_simulator_3d.app.application import Application
+from aircheck_simulator_3d.tests.support import SimulationHarness, new_simulation
 from aircheck_simulator_3d.app.config import load_config
 from aircheck_simulator_3d.simulation.room_model import RoomModel
 
@@ -15,13 +15,13 @@ CONFIG_DIR = Path(__file__).parents[1] / "config"
 FIXED_TIME = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
 
-def new_app() -> Application:
-    app = Application(load_config(CONFIG_DIR, {}))
+def new_app() -> SimulationHarness:
+    app = new_simulation(load_config(CONFIG_DIR, {}))
     app.state.simulated_at = FIXED_TIME
     return app
 
 
-def run_simulated_seconds(app: Application, simulated_seconds: float) -> None:
+def run_simulated_seconds(app: SimulationHarness, simulated_seconds: float) -> None:
     state = app.state
     tick_count = round(simulated_seconds / state.fixed_step_seconds)
     remaining_ticks = tick_count

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from aircheck_simulator_3d.app.application import Application
+from aircheck_simulator_3d.tests.support import new_simulation
 from aircheck_simulator_3d.app.config import load_config
 from aircheck_simulator_3d.devices.models import WindowMotorState
 
@@ -15,7 +15,7 @@ CONFIG_DIR = Path(__file__).parents[1] / "config"
 
 @pytest.mark.parametrize("days", (1, 7))
 def test_accelerated_day_and_week_runs_remain_finite_and_consistent(days: int) -> None:
-    app = Application(load_config(CONFIG_DIR, {}))
+    app = new_simulation(load_config(CONFIG_DIR, {}))
     state = app.state
     state.fixed_step_seconds = 3600.0
     app.simulation_engine.set_speed(60.0)

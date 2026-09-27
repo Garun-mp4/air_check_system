@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from aircheck_simulator_3d.app.application import Application
+from aircheck_simulator_3d.tests.support import new_simulation
 from aircheck_simulator_3d.app.config import load_config
 from aircheck_simulator_3d.networking.contracts import (
     ApiRoutes,
@@ -19,7 +19,7 @@ CONFIG_DIR = Path(__file__).parents[1] / "config"
 
 
 def test_measurement_matches_aircheck_contract() -> None:
-    state = Application(load_config(CONFIG_DIR, {})).state
+    state = new_simulation(load_config(CONFIG_DIR, {})).state
     payload = MeasurementPayload.from_state(state, datetime(2026, 9, 6, 10, tzinfo=timezone.utc)).to_mapping()
 
     assert set(payload) == {"timestamp", "indoor", "outdoor", "window_open"}
@@ -31,7 +31,7 @@ def test_measurement_matches_aircheck_contract() -> None:
 
 
 def test_control_report_uses_measured_state_and_ack_ids() -> None:
-    state = Application(load_config(CONFIG_DIR, {})).state
+    state = new_simulation(load_config(CONFIG_DIR, {})).state
     state.ventilation.intake.enabled = True
     report = ControlStateReport.from_state(
         "room-01", datetime(2026, 9, 6, 10, tzinfo=timezone.utc), state, (101, 102)
