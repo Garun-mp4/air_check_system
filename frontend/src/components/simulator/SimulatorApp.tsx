@@ -189,7 +189,7 @@ export default function SimulatorApp() {
       <div className={'simulator-main-nav ' + (mobileMenuOpen ? 'is-open' : '')}>
         <div className="simulator-nav-title"><span className="eyebrow">Интерактивный стенд</span><h1>AirCheck <span>·</span> цифровой двойник</h1></div>
         <nav className="simulator-nav-tabs" aria-label="Разделы цифрового стенда">
-          {(['devices', 'controls', 'tools'] as const).map((item) => <button key={item} className={panel === item ? 'is-active' : ''} onClick={() => { setPanel(item); setMobileMenuOpen(false) }}>{item === 'devices' ? 'Устройства' : item === 'controls' ? 'Сценарии' : 'Инструменты'}</button>)}
+          {(['devices', 'controls', 'tools'] as const).map((item) => <button key={item} type="button" aria-pressed={panel === item} className={panel === item ? 'is-active' : ''} onClick={() => { setPanel(item); setMobileMenuOpen(false) }}>{item === 'devices' ? 'Устройства' : item === 'controls' ? 'Сценарии' : 'Инструменты'}</button>)}
         </nav>
       </div>
 
@@ -220,7 +220,7 @@ export default function SimulatorApp() {
 
           <div className="simulator-view-toolbar">
             <div className="sim-view-switcher" role="group" aria-label="Режим отображения сцены">
-              {MODE_OPTIONS.map((option) => <button key={option.id} type="button" className={mode === option.id ? 'is-active' : ''} onClick={() => setMode(option.id)} title={option.help}>{option.label}</button>)}
+              {MODE_OPTIONS.map((option) => <button key={option.id} type="button" aria-pressed={mode === option.id} className={mode === option.id ? 'is-active' : ''} onClick={() => setMode(option.id)} title={option.help}>{option.label}</button>)}
             </div>
             <div className="sim-camera-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> движение <kbd>Q</kbd><kbd>E</kbd> высота <kbd>Shift</kbd> быстрее · правая кнопка вращает</div>
           </div>
@@ -308,7 +308,7 @@ function ScenarioPanel({ snapshot, isOperator, busy, onAction }: { snapshot: Sim
     <div className="sim-sidebar-primary">
       <PanelHeading eyebrow="Среда помещения" title="Сценарии демонстрации" description="Готовые исходные условия загружаются из конфигурации Simulation Core. Формулы и автоматика остаются в Python/backend." />
       <div className="sim-scenario-current"><span>Текущий сценарий</span><strong>{snapshot.simulation.scenario}</strong><small>{snapshot.simulation.occupancy} {snapshot.simulation.occupancy === 1 ? 'человек' : 'чел.'} · скорость {fmt(snapshot.simulation.speed)}×</small></div>
-      <div className="sim-scenario-list">{snapshot.simulation.scenarios.map((scenario, index) => <button key={scenario.id} type="button" disabled={!isOperator || busy} className={scenario.title === snapshot.simulation.scenario ? 'is-selected' : ''} onClick={() => void onAction('scenario', { scenario_id: scenario.id })}><span className="sim-scenario-number">{String(index + 1).padStart(2, '0')}</span><span>{scenario.title}</span><span aria-hidden="true">→</span></button>)}</div>
+      <div className="sim-scenario-list">{snapshot.simulation.scenarios.map((scenario, index) => <button key={scenario.id} type="button" aria-pressed={scenario.title === snapshot.simulation.scenario} disabled={!isOperator || busy} className={scenario.title === snapshot.simulation.scenario ? 'is-selected' : ''} onClick={() => void onAction('scenario', { scenario_id: scenario.id })}><span className="sim-scenario-number">{String(index + 1).padStart(2, '0')}</span><span>{scenario.title}</span><span aria-hidden="true">→</span></button>)}</div>
       <div className="sim-auto-demo-card"><div><span className="eyebrow">Сквозная демонстрация</span><strong>{snapshot.demo.active ? snapshot.demo.phase : 'Автоматический показ'}</strong><p>{snapshot.demo.detail}</p></div><button className="sim-button sim-button-primary" type="button" disabled={!isOperator || busy || snapshot.demo.active} onClick={() => void onAction('demo_start')}>{snapshot.demo.active ? 'Идёт показ' : 'Запустить'}</button>{snapshot.demo.active && isOperator ? <button className="sim-button" type="button" disabled={busy} onClick={() => void onAction('demo_stop')}>Остановить</button> : null}</div>
       {!isOperator ? <p className="sim-readonly-note">Сценарии и demo доступны оператору. <a href={getLoginHref('/simulator')}>Войти →</a></p> : null}
     </div>

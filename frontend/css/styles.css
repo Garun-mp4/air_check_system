@@ -8126,3 +8126,684 @@ body.is-chart-expanded {
 .password-visibility-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .account-password-field > small { color: #81908c; font-size: 10px; font-weight: 400; line-height: 1.45; }
 .password-input-shell > input::-ms-reveal, .password-input-shell > input::-ms-clear { display: none; }
+
+/* Product UI aligned to DESIGN-cal.md. The 3D world keeps its physical scene
+   palette; these rules style the application shell and its controls. */
+.utility-page,
+.simulator-page {
+  color: var(--color-body);
+  background: var(--color-surface-soft);
+  font-family: var(--font-body);
+}
+
+.utility-topbar {
+  width: 100%;
+  min-height: 64px;
+  gap: var(--spacing-xl);
+  padding-inline: max(24px, calc((100% - 1200px) / 2));
+  border-bottom-color: var(--color-hairline-soft);
+  background: var(--color-canvas);
+}
+
+.utility-brand {
+  gap: var(--spacing-xs);
+  color: var(--color-ink);
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.utility-brand img { width: 36px; height: 30px; }
+
+.utility-primary-nav { gap: var(--spacing-xs); }
+
+.utility-primary-nav a {
+  position: relative;
+  min-height: 64px;
+  padding-inline: var(--spacing-sm);
+  border-radius: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.utility-primary-nav a:hover {
+  background: transparent;
+  color: var(--color-ink);
+}
+
+.utility-primary-nav a[aria-current='page'] {
+  background: transparent;
+  color: var(--color-ink);
+}
+
+.utility-primary-nav a[aria-current='page']::after {
+  position: absolute;
+  right: var(--spacing-sm);
+  bottom: 0;
+  left: var(--spacing-sm);
+  height: 2px;
+  background: var(--color-ink);
+  content: '';
+}
+
+.account-menu,
+.account-menu-loading,
+.account-menu-unavailable { color: var(--color-body); }
+
+.account-menu summary {
+  min-height: 40px;
+  gap: var(--spacing-xs);
+  padding: 3px 8px 3px 4px;
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-md);
+  color: var(--color-ink);
+}
+
+.account-menu summary:hover {
+  border-color: var(--color-muted-soft);
+  background: var(--color-surface-soft);
+}
+
+.account-menu summary:focus-visible,
+.account-menu-popover a:focus-visible,
+.account-menu-popover button:focus-visible,
+.account-menu-unavailable button:focus-visible,
+.account-menu-login:focus-visible {
+  outline: 2px solid var(--color-brand-accent);
+  outline-offset: 2px;
+}
+
+.account-menu-avatar {
+  width: 30px;
+  height: 30px;
+  background: var(--color-surface-card);
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.account-menu-trigger-copy strong { color: var(--color-ink); font-size: 13px; font-weight: 600; }
+.account-menu-trigger-copy small { color: var(--color-muted); font-size: 12px; }
+.account-menu-chevron { color: var(--color-muted); }
+
+.account-menu-popover {
+  width: min(288px, calc(100vw - 24px));
+  padding: var(--spacing-xs);
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-lg);
+  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.12);
+}
+
+.account-menu-identity { padding: var(--spacing-sm); border-bottom-color: var(--color-hairline-soft); }
+.account-menu-identity strong { color: var(--color-ink); font-size: 14px; }
+.account-menu-identity span { color: var(--color-muted); font-size: 13px; }
+.account-menu-identity small { color: var(--color-success); font-size: 12px; }
+
+.account-menu-popover > a,
+.account-menu-popover > button {
+  min-height: 42px;
+  padding-inline: var(--spacing-sm);
+  border-radius: var(--rounded-sm);
+  color: var(--color-body);
+  font-size: 14px;
+}
+
+.account-menu-popover > a:hover,
+.account-menu-popover > button:hover:not(:disabled) {
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
+}
+
+.account-menu-popover > button { border-top-color: var(--color-hairline-soft); color: var(--color-muted); }
+.account-menu-error { color: #b42318; font-size: 13px; }
+
+.account-menu-login {
+  min-height: 40px;
+  padding-inline: 16px;
+  border-color: var(--color-primary);
+  border-radius: var(--rounded-md);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.account-menu-login:hover { background: var(--color-primary-active); }
+.account-menu-loading { color: var(--color-muted); font-size: 13px; }
+.account-menu-unavailable { gap: var(--spacing-xs); color: #92400e; font-size: 13px; }
+.account-menu-unavailable button { padding: 6px 10px; border-color: #f1d19b; border-radius: var(--rounded-sm); background: #fffbeb; color: #92400e; }
+
+.simulator-primary-nav { gap: 2px; padding: 4px; border-radius: var(--rounded-pill); background: var(--color-surface-soft); }
+.simulator-primary-nav a { min-height: 36px; padding-inline: 12px; border-radius: var(--rounded-pill); color: var(--color-muted); font-size: 13px; font-weight: 500; }
+.simulator-primary-nav a:hover { color: var(--color-ink); }
+.simulator-primary-nav a[aria-current='page'] { background: var(--color-canvas); color: var(--color-ink); box-shadow: var(--shadow-soft); }
+
+.account-page-content {
+  width: min(calc(100% - 48px), 880px);
+  padding: 48px 0 80px;
+}
+
+.account-page-heading { margin-bottom: var(--spacing-xl); }
+.account-page-heading .eyebrow { color: var(--color-muted); font-size: 13px; letter-spacing: .02em; }
+.account-page-heading h1 { color: var(--color-ink); font: 600 clamp(30px, 4vw, 36px)/1.15 var(--font-display); letter-spacing: -1px; text-wrap: pretty; }
+.account-page-heading p { color: var(--color-muted); font-size: 14px; line-height: 1.5; }
+
+.account-card {
+  margin-top: var(--spacing-md);
+  padding: clamp(20px, 3vw, 28px);
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-lg);
+  background: var(--color-canvas);
+  box-shadow: var(--shadow-soft);
+}
+
+.account-card-heading .eyebrow { color: var(--color-muted); font-size: 13px; }
+.account-card-heading h2,
+.account-state-card h2 { color: var(--color-ink); font-size: 20px; font-weight: 600; letter-spacing: -.3px; }
+.account-role-mark { min-height: 28px; padding-inline: 10px; border-color: #a7f3d0; background: #ecfdf5; color: #047857; font-size: 12px; }
+.account-form { gap: var(--spacing-md); }
+.account-form-row { gap: var(--spacing-md); }
+
+.account-form label,
+.account-password-field > label {
+  color: var(--color-body);
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.account-form input,
+.auth-form input,
+.owner-create-fields input,
+.owner-role-editor select,
+.owner-role-editor input,
+.password-input-shell > input {
+  min-width: 0;
+  min-height: 44px;
+  padding-inline: 12px;
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-md);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font: 400 14px/1.4 var(--font-body);
+}
+
+.account-form input:focus-visible,
+.auth-form input:focus-visible,
+.owner-create-fields input:focus-visible,
+.owner-role-editor select:focus-visible,
+.owner-role-editor input:focus-visible,
+.password-input-shell > input:focus-visible {
+  border-color: var(--color-brand-accent);
+  outline: 2px solid color-mix(in srgb, var(--color-brand-accent) 24%, transparent);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
+.account-form input[readonly] { background: var(--color-surface-soft); color: var(--color-muted); }
+.account-form label small,
+.account-password-field > small { color: var(--color-muted); font-size: 12px; line-height: 1.45; }
+
+.account-button {
+  min-height: 40px;
+  padding-inline: 16px;
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-md);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.account-button:hover:not(:disabled) { border-color: var(--color-muted-soft); background: var(--color-surface-soft); }
+.account-button-primary { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+.account-button-primary:hover:not(:disabled) { border-color: var(--color-primary-active); background: var(--color-primary-active); }
+.account-access-summary { border-top-color: var(--color-hairline-soft); }
+.account-access-summary span { color: var(--color-muted); font-size: 13px; }
+.account-access-summary strong { color: var(--color-ink); font-size: 13px; }
+.account-access-summary p,
+.account-security-note { color: var(--color-muted); font-size: 13px; }
+.account-feedback { border-color: #a7f3d0; border-radius: var(--rounded-md); background: #ecfdf5; color: #047857; font-size: 13px; }
+.account-feedback.is-error,
+.account-state-error { border-color: #fecaca; background: #fef2f2; color: #b42318; }
+.account-state-card > p { color: var(--color-muted); font-size: 14px; }
+
+.auth-page {
+  min-height: calc(100vh - 64px);
+  min-height: calc(100dvh - 64px);
+  padding: var(--spacing-xl) var(--spacing-md);
+  background: var(--color-surface-soft);
+}
+
+.auth-card {
+  width: min(480px, 100%);
+  padding: clamp(24px, 4vw, 36px);
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-xl);
+  background: var(--color-canvas);
+  box-shadow: 0 8px 28px rgba(17, 17, 17, 0.06);
+}
+
+.auth-back { margin-bottom: var(--spacing-xl); color: var(--color-muted); font-size: 14px; }
+.auth-back:hover { color: var(--color-ink); }
+.auth-card .eyebrow,
+.owner-page-heading .eyebrow { color: var(--color-muted); font-size: 13px; }
+.auth-card h1,
+.owner-page h1 { color: var(--color-ink); font: 600 clamp(28px, 4vw, 32px)/1.2 var(--font-display); letter-spacing: -.6px; text-wrap: pretty; }
+.auth-intro,
+.owner-page-heading p { color: var(--color-muted); font-size: 14px; line-height: 1.55; }
+.auth-form { gap: var(--spacing-md); }
+.auth-form label,
+.owner-create-fields label,
+.owner-role-editor label { gap: var(--spacing-xs); color: var(--color-body); font-size: 14px; font-weight: 550; }
+.auth-field-note { color: var(--color-muted); font-size: 12px; line-height: 1.45; }
+.auth-error,
+.owner-feedback { padding: 12px 14px; border-color: #fecaca; border-radius: var(--rounded-md); background: #fef2f2; color: #b42318; font-size: 14px; line-height: 1.45; }
+.auth-submit { min-height: 44px; margin-top: var(--spacing-xs); border-radius: var(--rounded-md); font-size: 14px; }
+.auth-switch { margin-top: var(--spacing-lg); color: var(--color-muted); font-size: 14px; }
+.auth-switch button { color: var(--color-brand-accent); font-size: 14px; }
+.auth-switch button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.auth-recovery { margin-top: var(--spacing-lg); padding-top: var(--spacing-md); border-top-color: var(--color-hairline-soft); color: var(--color-muted); font-size: 12px; line-height: 1.5; }
+
+.owner-page {
+  width: min(1120px, calc(100% - 48px));
+  padding: 40px 0 72px;
+}
+
+.owner-page-heading { margin-bottom: var(--spacing-xl); }
+.owner-page-heading .auth-back { margin-bottom: var(--spacing-lg); }
+.owner-page h1 { margin-bottom: 6px; }
+.owner-page h2 { color: var(--color-ink); font-size: 18px; font-weight: 600; }
+.owner-create-card,
+.owner-user-list {
+  margin-top: var(--spacing-md);
+  padding: clamp(18px, 2.5vw, 24px);
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-lg);
+  background: var(--color-canvas);
+  box-shadow: var(--shadow-soft);
+}
+
+.owner-create-fields {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(140px, 0.72fr);
+  align-items: end;
+  gap: var(--spacing-md);
+}
+
+.owner-create-fields > button { min-height: 44px; white-space: nowrap; }
+.owner-create-card > p { margin-top: var(--spacing-md); }
+.owner-list-heading { gap: var(--spacing-md); }
+.owner-list-heading .button-secondary { min-height: 40px; }
+.owner-user-row { grid-template-columns: minmax(180px, 0.75fr) minmax(0, 1.6fr); gap: var(--spacing-lg); padding: var(--spacing-md); border-color: var(--color-hairline-soft); border-radius: var(--rounded-md); }
+.owner-user-identity { min-width: 0; gap: var(--spacing-xs); }
+.owner-user-identity strong { color: var(--color-ink); font-size: 14px; font-weight: 600; }
+.owner-user-identity span { overflow-wrap: anywhere; color: var(--color-body); font-size: 13px; }
+.owner-user-identity small,
+.owner-role-editor small { color: var(--color-muted); font-size: 12px; }
+.owner-role-editor { grid-template-columns: minmax(145px, 0.7fr) minmax(200px, 1fr) auto; gap: var(--spacing-sm); }
+.owner-role-chip { padding: 7px 11px; border-radius: var(--rounded-pill); background: #ecfdf5; color: #047857; font-size: 13px; }
+.owner-role-actions { align-items: center; gap: var(--spacing-xs); }
+.owner-role-actions .button-secondary { min-height: 40px; padding-inline: 12px; white-space: nowrap; }
+.owner-delete-button { min-height: 40px; padding-inline: 10px; border-radius: var(--rounded-md); color: #b42318; font-size: 13px; }
+.owner-delete-button:hover { background: #fef2f2; }
+.owner-empty { color: var(--color-muted); font-size: 14px; }
+
+.simulator-page {
+  --sim-ink: var(--color-ink);
+  --sim-muted: var(--color-muted);
+  --sim-line: var(--color-hairline);
+  --sim-teal: var(--color-ink);
+  --sim-mint: var(--color-surface-soft);
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--color-body);
+  background: var(--color-surface-soft);
+}
+
+.simulator-topbar {
+  min-height: 64px;
+  height: auto;
+  padding-inline: max(24px, calc((100% - 1680px) / 2));
+  gap: var(--spacing-md);
+  border-bottom-color: var(--color-hairline-soft);
+  background: var(--color-canvas);
+}
+
+.simulator-brand { gap: var(--spacing-xs); color: var(--color-ink); font-size: 18px; font-weight: 650; }
+.simulator-brand-mark { width: 30px; height: 30px; border-radius: var(--rounded-md); background: var(--color-primary); font-size: 14px; }
+.simulator-brand-subtitle,
+.simulator-brand > span:last-child { color: var(--color-muted); font-size: 14px; font-weight: 450; }
+.simulator-topbar-center,
+.simulator-topbar-actions { gap: var(--spacing-sm); }
+.sim-status-pill { min-height: 36px; padding: 6px 10px; border-color: var(--color-hairline); border-radius: var(--rounded-pill); background: var(--color-canvas); color: var(--color-body); font-size: 13px; font-weight: 500; }
+.sim-status-pill.is-online i,
+.sim-device-chip i { background: var(--color-success); box-shadow: none; }
+.sim-status-pill.is-offline i,
+.sim-device-chip i.is-offline { background: var(--color-error); box-shadow: none; }
+.sim-status-pill.is-warning i { background: var(--color-warning); box-shadow: none; }
+.sim-device-id { color: var(--color-muted); font-size: 13px; }
+.sim-device-id strong { color: var(--color-ink); font-size: 12px; }
+.sim-link-button { color: var(--color-muted); font-size: 14px; }
+.sim-link-button:hover { color: var(--color-ink); }
+
+.sim-button {
+  min-height: 40px;
+  padding: 9px 14px;
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-md);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 120ms ease-out, background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+.sim-button:hover:not(:disabled) { border-color: var(--color-muted-soft); background: var(--color-surface-soft); transform: none; }
+.sim-button-primary { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-on-primary); }
+.sim-button-primary:hover:not(:disabled) { border-color: var(--color-primary-active); background: var(--color-primary-active); }
+.sim-mobile-menu-toggle { border-color: var(--color-hairline); border-radius: var(--rounded-md); color: var(--color-ink); }
+.sim-mobile-menu-toggle:hover { background: var(--color-surface-soft); }
+
+.simulator-main-nav {
+  min-height: 80px;
+  padding: 12px max(24px, calc((100% - 1680px) / 2));
+  gap: var(--spacing-lg);
+  border-bottom-color: var(--color-hairline-soft);
+  background: var(--color-canvas);
+}
+
+.simulator-nav-title .eyebrow { color: var(--color-muted); font-size: 13px; }
+.simulator-nav-title h1 { color: var(--color-ink); font-size: 22px; font-weight: 600; letter-spacing: -.4px; }
+.simulator-nav-title h1 span { color: var(--color-muted-soft); }
+.simulator-nav-tabs { gap: 4px; padding: 4px; border-color: var(--color-hairline-soft); border-radius: var(--rounded-lg); background: var(--color-surface-soft); }
+.simulator-nav-tabs button { min-height: 40px; min-width: 112px; padding: 8px 14px; border-radius: var(--rounded-sm); color: var(--color-muted); font-size: 14px; font-weight: 550; }
+.simulator-nav-tabs button:hover { color: var(--color-ink); }
+.simulator-nav-tabs button.is-active { background: var(--color-canvas); color: var(--color-ink); box-shadow: var(--shadow-soft); }
+.sim-user-avatar { border-color: var(--color-hairline); background: var(--color-surface-card); color: var(--color-ink); }
+.simulator-account-summary strong { color: var(--color-ink); font-size: 13px; }
+.simulator-account-summary small { color: var(--color-muted); font-size: 12px; }
+
+.simulator-workspace {
+  width: min(100%, 1920px);
+  min-height: calc(100vh - 144px);
+  min-height: calc(100dvh - 144px);
+  padding: var(--spacing-lg) clamp(20px, 2.3vw, 36px) var(--spacing-xl);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+  gap: var(--spacing-md);
+}
+
+.simulator-stage-frame,
+.simulator-sidebar {
+  border-color: var(--color-hairline);
+  border-radius: var(--rounded-lg);
+  background: var(--color-canvas);
+  box-shadow: var(--shadow-soft);
+}
+
+.simulator-stage-topline { border-bottom-color: var(--color-hairline-soft); background: rgba(255, 255, 255, .96); }
+.simulator-stage-topline .eyebrow { color: var(--color-muted); font-size: 13px; }
+.simulator-stage-topline strong { color: var(--color-body); font-size: 14px; }
+.sim-compact-select select { min-height: 40px; height: 40px; border-color: var(--color-hairline); border-radius: var(--rounded-md); background: var(--color-canvas); color: var(--color-body); font-size: 13px; }
+.sim-icon-button { width: 40px; height: 40px; border-color: var(--color-hairline); border-radius: var(--rounded-md); color: var(--color-ink); }
+.sim-icon-button:hover:not(:disabled) { background: var(--color-surface-soft); }
+.simulator-canvas-host { background: #a9d3e5; }
+.simulator-scene-loading { color: #365b61; }
+.simulator-scene-cue { border-color: rgba(255, 255, 255, .8); border-radius: var(--rounded-sm); color: #374151; font-size: 12px; }
+.simulator-stage-hud { gap: var(--spacing-xs); }
+.sim-hud-card { padding: 10px 12px; border-color: rgba(229, 231, 235, .92); border-radius: var(--rounded-md); background: rgba(255, 255, 255, .94); box-shadow: var(--shadow-soft); }
+.sim-hud-card > span { color: var(--color-muted); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+.sim-hud-card strong { color: var(--color-ink); font-size: clamp(16px, 1.15vw, 20px); font-weight: 600; }
+.sim-hud-card strong small { color: var(--color-muted); font-size: 12px; }
+.sim-hud-co2 i { background: var(--color-success); }
+.sim-hud-co2 i.is-warning { background: var(--color-warning); }
+.sim-hud-co2 i.is-danger { background: var(--color-error); }
+.sim-hud-forecast { border-color: var(--color-hairline); background: rgba(255, 255, 255, .96); }
+.sim-hud-forecast strong { color: var(--color-ink); font-size: 16px; }
+.simulator-stage-footer { min-height: 48px; padding: 9px 14px; color: var(--color-muted); font-size: 13px; }
+.sim-stage-state { gap: var(--spacing-xs); }
+.sim-stage-state strong { color: var(--color-ink); font-size: 13px; }
+.sim-state-divider { background: var(--color-hairline); }
+.sim-live-indicator { background: var(--color-success); }
+.sim-live-indicator.is-moving { background: var(--color-warning); }
+.sim-flow-caption { color: var(--color-muted); white-space: normal; }
+.sim-flow-caption strong { color: var(--color-ink); }
+.simulator-view-toolbar { min-height: 52px; gap: var(--spacing-md); }
+.sim-view-switcher { gap: 4px; padding: 4px; border-color: var(--color-hairline-soft); border-radius: var(--rounded-lg); background: var(--color-surface-card); }
+.sim-view-switcher button { min-height: 36px; padding: 7px 12px; border-radius: var(--rounded-sm); color: var(--color-muted); font-size: 13px; font-weight: 550; }
+.sim-view-switcher button.is-active { color: var(--color-ink); box-shadow: var(--shadow-soft); }
+.sim-camera-hint { color: var(--color-muted); font-size: 12px; }
+.sim-camera-hint kbd { min-width: 20px; padding: 2px 5px; border-color: var(--color-hairline); border-radius: var(--rounded-xs); color: var(--color-body); }
+
+.sim-sidebar-primary { padding: 22px 20px; }
+.sim-panel-heading .eyebrow { color: var(--color-muted); font-size: 13px; }
+.sim-panel-heading h2 { margin: 4px 0 8px; color: var(--color-ink); font-size: 21px; font-weight: 600; letter-spacing: -.3px; line-height: 1.25; text-wrap: pretty; }
+.sim-panel-heading p { color: var(--color-muted); font-size: 14px; line-height: 1.5; }
+.sim-device-chip { margin-top: var(--spacing-md); padding: 7px 10px; border-radius: var(--rounded-pill); background: var(--color-surface-soft); color: var(--color-body); font-size: 12px; }
+.sim-device-meta { gap: var(--spacing-md); border-top-color: var(--color-hairline-soft); border-bottom-color: var(--color-hairline-soft); }
+.sim-device-meta dt { color: var(--color-muted); font-size: 12px; }
+.sim-device-meta dd { color: var(--color-body); font-size: 13px; font-weight: 550; line-height: 1.4; }
+.sim-reading-group { margin-top: var(--spacing-lg); }
+.sim-reading-group-title { margin-bottom: var(--spacing-xs); color: var(--color-body); font-size: 14px; }
+.sim-device-online,
+.sim-live-label { padding: 4px 8px; border-radius: var(--rounded-pill); background: #ecfdf5; color: #047857; font-size: 11px; letter-spacing: 0; }
+.sim-device-online.is-offline { background: #fef2f2; color: #b42318; }
+.sim-live-label { background: var(--color-surface-card); color: var(--color-muted); }
+.sim-reading-row { min-height: 40px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--spacing-sm); color: var(--color-muted); font-size: 13px; line-height: 1.4; }
+.sim-reading-row strong { min-width: 0; color: var(--color-ink); font-size: 13px; font-weight: 550; overflow-wrap: anywhere; }
+.sim-reading-row strong small { color: var(--color-muted); font-size: 12px; }
+.sim-muted { color: var(--color-muted); font-size: 13px; line-height: 1.5; }
+.sim-sidebar-control-block { padding: var(--spacing-md) 20px var(--spacing-lg); border-top-color: var(--color-hairline-soft); background: var(--color-surface-soft); }
+.sim-control-block-heading { align-items: center; color: var(--color-body); font-size: 14px; }
+.sim-control-block-heading small { color: var(--color-muted); font-size: 12px; }
+.sim-command-buttons { gap: var(--spacing-xs); }
+.sim-command-buttons .sim-button { min-width: 0; flex-wrap: wrap; }
+.sim-readonly-note { margin-top: var(--spacing-sm); padding: var(--spacing-sm); border-color: var(--color-hairline); border-radius: var(--rounded-md); background: var(--color-canvas); color: var(--color-muted); font-size: 13px; line-height: 1.5; }
+.sim-readonly-note a { color: var(--color-brand-accent); white-space: normal; }
+.simulator-sidebar-bottom { padding: 0 20px var(--spacing-md); background: var(--color-surface-soft); }
+.sim-outdoor-strip { padding-block: var(--spacing-sm); border-top-color: var(--color-hairline); }
+.sim-outdoor-strip > span { color: var(--color-muted); font-size: 13px; }
+.sim-outdoor-icon { background: var(--color-surface-card); color: var(--color-ink); }
+.sim-outdoor-strip strong { color: var(--color-body); font-size: 13px; }
+.sim-outdoor-strip small { color: var(--color-muted); font-size: 12px; }
+.simulator-footnote { border-top-color: var(--color-hairline); color: var(--color-muted); font: 12px var(--font-code); }
+.sim-feedback { padding: 10px 12px; border-color: #f1d19b; border-radius: var(--rounded-md); background: #fffbeb; color: #92400e; font-size: 13px; }
+
+.simulator-unavailable-card { border-color: var(--color-hairline); border-radius: var(--rounded-xl); box-shadow: 0 8px 28px rgba(17, 17, 17, .06); }
+.simulator-unavailable-card h1 { color: var(--color-ink); font-size: 26px; text-wrap: pretty; }
+.simulator-unavailable-card p { color: var(--color-muted); font-size: 14px; }
+.simulator-unavailable-card code { background: var(--color-surface-card); color: var(--color-ink); }
+.simulator-back-dashboard { color: var(--color-muted); font-size: 14px; }
+.sim-scenario-current { padding: var(--spacing-md); border-color: var(--color-hairline); border-radius: var(--rounded-md); background: var(--color-surface-soft); }
+.sim-scenario-current span,
+.sim-scenario-current small { color: var(--color-muted); font-size: 12px; }
+.sim-scenario-current strong { color: var(--color-ink); font-size: 16px; }
+.sim-scenario-list { gap: var(--spacing-xs); }
+.sim-scenario-list button { min-height: 44px; padding: 8px 10px; grid-template-columns: 30px minmax(0, 1fr) 18px; gap: var(--spacing-xs); border-color: var(--color-hairline-soft); border-radius: var(--rounded-md); color: var(--color-body); font-size: 13px; }
+.sim-scenario-list button:hover:not(:disabled),
+.sim-scenario-list button.is-selected { border-color: var(--color-hairline); background: var(--color-surface-soft); color: var(--color-ink); }
+.sim-scenario-number { color: var(--color-muted); font: 12px var(--font-code); }
+.sim-scenario-list button > span:last-child { color: var(--color-muted); }
+.sim-auto-demo-card { padding: var(--spacing-md); border-color: var(--color-hairline); border-radius: var(--rounded-md); background: var(--color-canvas); }
+.sim-auto-demo-card .eyebrow { color: var(--color-muted); font-size: 12px; }
+.sim-auto-demo-card strong { color: var(--color-ink); font-size: 14px; }
+.sim-auto-demo-card p { color: var(--color-muted); font-size: 13px; line-height: 1.5; }
+.sim-tool-group { border-top-color: var(--color-hairline-soft); }
+.sim-tool-title { color: var(--color-body); font-size: 13px; }
+.sim-speed-options,
+.sim-cutaway-options { gap: var(--spacing-xs); }
+.sim-speed-options button,
+.sim-cutaway-options button { min-height: 40px; padding: 7px 11px; border-color: var(--color-hairline); border-radius: var(--rounded-md); color: var(--color-body); font-size: 13px; }
+.sim-speed-options button.is-active { border-color: var(--color-ink); background: var(--color-ink); color: var(--color-canvas); }
+.sim-tool-choice-list { gap: var(--spacing-xs); }
+.sim-tool-choice-list button { min-height: 40px; padding: 8px 10px; border-color: var(--color-hairline); border-radius: var(--rounded-md); color: var(--color-body); font-size: 13px; }
+.sim-tool-choice-list button:hover { border-color: var(--color-muted-soft); background: var(--color-surface-soft); }
+.sim-tool-choice-list small { color: var(--color-muted); font-size: 12px; }
+.sim-debug-panel { border-color: var(--color-hairline); border-radius: var(--rounded-md); background: var(--color-canvas); }
+.sim-debug-panel summary { min-height: 48px; padding: 10px 12px; color: var(--color-body); }
+.sim-debug-panel summary b { font-size: 14px; }
+.sim-debug-panel summary small { color: var(--color-muted); font-size: 12px; }
+.sim-debug-fields { padding: 4px 12px var(--spacing-md); gap: var(--spacing-md); }
+.sim-debug-slider > span { color: var(--color-muted); font-size: 13px; }
+.sim-debug-slider strong { color: var(--color-ink); font-size: 13px; }
+.sim-debug-slider input { accent-color: var(--color-brand-accent); }
+.sim-backend-message { padding: var(--spacing-sm); border-radius: var(--rounded-md); background: var(--color-surface-soft); color: var(--color-muted); font-size: 13px; line-height: 1.45; }
+.sim-backend-message span { background: var(--color-warning); }
+.sim-backend-message span.is-online { background: var(--color-success); }
+.settings-readonly-note { color: var(--color-muted); font-size: 13px; }
+.settings-readonly-note a { color: var(--color-brand-accent); }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.password-visibility-toggle { width: 40px; height: 40px; right: 2px; border-radius: var(--rounded-sm); color: var(--color-muted); }
+.password-visibility-toggle:hover:not(:disabled) { background: var(--color-surface-soft); color: var(--color-ink); }
+.password-visibility-toggle:focus-visible { outline: 2px solid var(--color-brand-accent); outline-offset: 1px; }
+
+.utility-page :is(button, a, input, select, summary):focus-visible,
+.simulator-page :is(button, a, input, select, summary):focus-visible {
+  outline: 2px solid var(--color-brand-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1100px) {
+  .owner-create-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .owner-create-fields > button { align-self: end; }
+  .owner-role-editor { grid-template-columns: minmax(135px, .7fr) minmax(180px, 1fr); }
+  .owner-role-actions { grid-column: 1 / -1; }
+  .simulator-workspace { grid-template-columns: minmax(0, 1fr) minmax(300px, 330px); gap: var(--spacing-sm); }
+  .simulator-stage-hud { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sim-hud-forecast { display: none; }
+}
+
+@media (max-width: 940px) {
+  .simulator-workspace { grid-template-columns: minmax(0, 1fr); }
+  .simulator-sidebar { min-height: 0; }
+  .simulator-main-nav { padding-inline: 20px; }
+  .simulator-nav-tabs button { min-width: 96px; }
+}
+
+@media (max-width: 767px) {
+  .utility-topbar {
+    min-height: 60px;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    gap: 4px;
+    padding: 6px 12px;
+  }
+
+  .utility-brand { gap: 6px; font-size: 16px; }
+  .utility-brand img { width: 28px; height: 26px; }
+  .utility-primary-nav { min-width: 0; justify-self: end; gap: 0; }
+  .utility-primary-nav a { min-height: 44px; padding-inline: 7px; font-size: 12px; }
+  .utility-primary-nav a[aria-current='page']::after { right: 7px; left: 7px; }
+  .account-menu-utility { margin-left: 0; }
+  .account-menu-utility .account-menu-trigger-copy,
+  .account-menu-utility .account-menu-chevron { display: none; }
+  .account-menu-utility summary { width: 40px; justify-content: center; padding: 4px; }
+  .account-menu-login.account-menu-utility { min-height: 40px; padding-inline: 10px; font-size: 13px; }
+  .account-menu-unavailable.account-menu-utility span { display: none; }
+  .account-menu-popover { max-width: calc(100vw - 24px); }
+  .account-page-content { width: min(calc(100% - 32px), 880px); padding: 32px 0 56px; }
+  .account-page-heading { margin-bottom: var(--spacing-lg); }
+  .account-form-row { grid-template-columns: minmax(0, 1fr); }
+  .account-access-summary > div { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .account-access-summary strong { text-align: left; }
+  .auth-page { min-height: calc(100dvh - 60px); padding: var(--spacing-lg) 12px; }
+  .auth-card { padding: 24px; border-radius: var(--rounded-lg); }
+  .auth-back { margin-bottom: var(--spacing-lg); }
+  .owner-page { width: min(calc(100% - 32px), 1120px); padding: 32px 0 56px; }
+  .owner-create-fields { grid-template-columns: minmax(0, 1fr); }
+  .owner-create-fields > button { width: 100%; }
+  .owner-list-heading { align-items: flex-start; flex-wrap: wrap; }
+  .owner-user-row { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-md); }
+  .owner-role-editor { grid-template-columns: minmax(0, 1fr); }
+  .owner-role-actions { grid-column: auto; flex-wrap: wrap; }
+  .owner-role-actions .button-secondary { flex: 1 1 160px; }
+  .simulator-topbar { min-height: 0; height: auto; display: grid; grid-template-columns: minmax(0, 1fr) max-content; grid-template-areas: 'brand actions' 'nav nav'; padding: 8px 12px; gap: 6px var(--spacing-sm); }
+  .simulator-topbar > .simulator-brand { grid-area: brand; min-width: 0; }
+  .simulator-topbar > .simulator-primary-nav { grid-area: nav; justify-self: center; margin-left: 0; }
+  .simulator-topbar > .simulator-topbar-actions { grid-area: actions; justify-self: end; margin-left: 0; }
+  .simulator-brand { gap: 6px; font-size: 16px; }
+  .simulator-brand-mark { width: 28px; height: 28px; }
+  .simulator-brand-subtitle,
+  .simulator-brand > span:last-child { font-size: 12px; }
+  .simulator-topbar-center { display: none; }
+  .simulator-topbar-actions { gap: 6px; }
+  .simulator-topbar-actions > .sim-link-button,
+  .simulator-topbar-actions > .sim-button { display: none; }
+  .simulator-main-nav { min-height: 68px; padding: 10px 14px; }
+  .simulator-nav-title .eyebrow { font-size: 12px; }
+  .simulator-nav-title h1 { font-size: 18px; }
+  .simulator-account-summary { display: none; }
+  .simulator-nav-tabs { position: absolute; z-index: 6; top: 100%; right: 10px; left: 10px; display: none; padding: 6px; box-shadow: var(--shadow-card); }
+  .simulator-main-nav.is-open .simulator-nav-tabs { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .simulator-nav-tabs button { width: 100%; min-height: 44px; text-align: left; }
+  .simulator-workspace { min-height: 0; padding: 12px 10px 24px; grid-template-columns: minmax(0, 1fr); gap: var(--spacing-md); }
+  .simulator-stage-frame { min-height: 0; }
+  .simulator-stage-topline { min-height: 56px; padding: 8px 10px; align-items: center; flex-wrap: wrap; }
+  .simulator-stage-topline > div:first-child { min-width: 120px; flex: 1 1 120px; }
+  .sim-stage-quick-actions { width: 100%; flex: 0 1 auto; justify-content: flex-end; flex-wrap: wrap; }
+  .simulator-stage-topline .eyebrow { font-size: 12px; }
+  .simulator-stage-topline strong { font-size: 13px; }
+  .sim-compact-select select { max-width: min(170px, 38vw); min-height: 40px; height: 40px; padding-inline: 8px; font-size: 12px; }
+  .simulator-canvas-host { min-height: 320px; height: 52vh; max-height: 560px; }
+  .simulator-stage-hud { top: 112px; left: 8px; right: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .sim-hud-card { padding: 8px; }
+  .sim-hud-card > span { font-size: 10px; }
+  .sim-hud-card strong { font-size: 16px; }
+  .sim-hud-card strong small { font-size: 11px; }
+  .sim-hud-forecast { display: none; }
+  .simulator-scene-cue { right: 8px; bottom: 8px; max-width: calc(100% - 16px); padding: 6px 8px; font-size: 11px; }
+  .simulator-stage-footer { min-height: 54px; padding: 9px 10px; font-size: 12px; }
+  .sim-stage-state { gap: 6px; }
+  .sim-stage-state strong { font-size: 12px; }
+  .sim-flow-caption { width: 100%; font-size: 12px; }
+  .simulator-view-toolbar { align-items: stretch; flex-direction: column; gap: var(--spacing-xs); }
+  .sim-view-switcher { width: 100%; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .sim-view-switcher button { min-width: 0; min-height: 40px; grid-column: span 2; padding: 6px 4px; font-size: 12px; line-height: 1.25; text-align: center; }
+  .sim-view-switcher button:nth-last-child(2) { grid-column: 2 / span 2; }
+  .sim-view-switcher button:last-child { grid-column: 4 / span 2; }
+  .sim-camera-hint { flex-wrap: wrap; white-space: normal; }
+  .simulator-sidebar { display: flex; border-radius: var(--rounded-lg); }
+  .sim-sidebar-primary { padding: 18px 16px; }
+  .simulator-sidebar-bottom { padding: 0 16px var(--spacing-md); }
+  .sim-panel-heading h2 { font-size: 20px; }
+  .sim-scenario-list { grid-template-columns: minmax(0, 1fr); }
+  .sim-scenario-list button { grid-template-columns: 30px minmax(0, 1fr) 18px; font-size: 13px; }
+  .sim-scenario-list button > span:last-child { display: block; }
+}
+
+@media (max-width: 380px) {
+  .utility-topbar { grid-template-columns: max-content minmax(0, 1fr) max-content; padding-inline: 8px; }
+  .utility-brand img { width: 25px; }
+  .utility-brand { gap: 4px; font-size: 15px; }
+  .utility-primary-nav a { padding-inline: 5px; font-size: 11px; }
+  .utility-primary-nav a[aria-current='page']::after { right: 5px; left: 5px; }
+  .account-menu-login.account-menu-utility { min-height: 38px; padding-inline: 8px; font-size: 12px; }
+  .auth-card { padding: 20px; }
+  .simulator-stage-topline { align-items: flex-start; }
+  .sim-stage-quick-actions { gap: 4px; }
+  .sim-compact-select select { max-width: 126px; font-size: 11px; }
+  .simulator-canvas-host { min-height: 290px; }
+  .sim-hud-card { padding: 7px; }
+  .sim-hud-card > span { font-size: 9px; }
+  .sim-hud-card strong { font-size: 14px; }
+  .simulator-stage-footer { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sim-button,
+  .account-menu summary,
+  .account-menu-popover > a,
+  .account-menu-popover > button,
+  .password-visibility-toggle {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}
