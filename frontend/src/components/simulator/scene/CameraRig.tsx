@@ -7,6 +7,7 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { PerspectiveCamera, Vector3 } from 'three'
 
 import type { SimulatorSnapshot } from '../types'
+import { CameraTransition } from './cameraTransition'
 
 type Point = [number, number, number]
 type CameraCommand = { id: number; focus: Point | null }
@@ -25,9 +26,7 @@ export default function CameraRig({
   const controls = useRef<OrbitControlsImpl>(null)
   const { camera } = useThree()
   const keys = useRef(new Set<string>())
-  const targetGoal = useRef(new Vector3())
-  const positionGoal = useRef(new Vector3())
-  const transitioning = useRef(false)
+  const transition = useRef(new CameraTransition())
   const ready = useRef(false)
   const cameraSettings = snapshot.simulation.camera
   const startPosition = toWorld(cameraSettings.start_position)
@@ -56,16 +55,22 @@ export default function CameraRig({
   }, [])
 
   useEffect(() => {
+    const orbit = controls.current
+    if (!orbit) return
+    const cancelFocus = () => transition.current.cancel()
+    orbit.addEventListener('start', cancelFocus)
+    return () => orbit.removeEventListener('start', cancelFocus)
+  }, [])
+
+  useEffect(() => {
     camera.position.set(...startPosition)
     if (camera instanceof PerspectiveCamera) camera.fov = cameraSettings.field_of_view_degrees
     camera.near = cameraSettings.near_plane_m
     camera.far = cameraSettings.far_plane_m
     camera.updateProjectionMatrix()
-    targetGoal.current.set(...startTarget)
-    positionGoal.current.set(...startPosition)
     controls.current?.target.set(...startTarget)
     controls.current?.update()
-    transitioning.current = false
+    transition.current.cancel()
     ready.current = true
   }, [camera, cameraSettings.far_plane_m, cameraSettings.field_of_view_degrees, cameraSettings.near_plane_m, startPosition[0], startPosition[1], startPosition[2], startTarget[0], startTarget[1], startTarget[2]])
 
@@ -73,15 +78,10 @@ export default function CameraRig({
     if (!ready.current || !controls.current) return
     const controlsTarget = controls.current.target
     if (command.focus) {
-      const next = new Vector3(...command.focus)
-      const shift = next.clone().sub(controlsTarget)
-      targetGoal.current.copy(next)
-      positionGoal.current.copy(camera.position).add(shift)
+      transition.current.focus(camera.position, controlsTarget, new Vector3(...command.focus))
     } else {
-      targetGoal.current.set(...startTarget)
-      positionGoal.current.set(...startPosition)
+      transition.current.reset(new Vector3(...startPosition), new Vector3(...startTarget))
     }
-    transitioning.current = true
   }, [command.id])
 
   useFrame((_, delta) => {
@@ -98,19 +98,9 @@ export default function CameraRig({
     if (forward || sideways || vertical) {
       const movement = direction.multiplyScalar(forward * speed).addScaledVector(right, sideways * speed)
       movement.y += vertical * speed
-      camera.position.add(movement)
-      orbit.target.add(movement)
-    }
-    if (transitioning.current) {
-      const easing = 1 - Math.exp(-delta / Math.max(0.08, cameraSettings.transition_seconds))
-      camera.position.lerp(positionGoal.current, easing)
-      orbit.target.lerp(targetGoal.current, easing)
-      if (camera.position.distanceToSquared(positionGoal.current) < 0.0001
-        && orbit.target.distanceToSquared(targetGoal.current) < 0.0001) {
-        camera.position.copy(positionGoal.current)
-        orbit.target.copy(targetGoal.current)
-        transitioning.current = false
-      }
+      transition.current.move(camera.position, orbit.target, movement)
+    } else {
+      transition.current.advance(camera.position, orbit.target, delta, cameraSettings.transition_seconds)
     }
     orbit.update()
   })
