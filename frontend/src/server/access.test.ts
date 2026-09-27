@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { AccessDeniedError, assertSameOrigin, effectiveRole, requireDeviceToken } from './access'
+import {
+  AccessDeniedError,
+  AccessUnavailableError,
+  accessErrorResponse,
+  assertSameOrigin,
+  effectiveRole,
+  requireDeviceToken,
+} from './access'
 
 describe('server-side access controls', () => {
   const previousToken = process.env.DEVICE_API_TOKEN
@@ -16,6 +23,21 @@ describe('server-side access controls', () => {
     expect(effectiveRole('operator', expiredAt, current)).toBe('user')
     expect(effectiveRole('operator', null, current)).toBe('operator')
     expect(effectiveRole('owner', expiredAt, current)).toBe('owner')
+  })
+
+  it('returns service unavailable when role verification cannot reach its store', async () => {
+    const response = accessErrorResponse(new AccessUnavailableError())
+    expect(response).not.toBeNull()
+    if (!response) {
+      throw new Error('AccessUnavailableError was not mapped to an HTTP response')
+    }
+    expect(response.status).toBe(503)
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: 'auth_unavailable',
+        message: 'Проверка доступа временно недоступна',
+      },
+    })
   })
 
   it('rejects a missing, short or incorrect device token', () => {

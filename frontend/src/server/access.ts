@@ -20,6 +20,13 @@ export class AccessDeniedError extends Error {
   }
 }
 
+export class AccessUnavailableError extends Error {
+  constructor() {
+    super('Проверка доступа временно недоступна')
+    this.name = 'AccessUnavailableError'
+  }
+}
+
 export function effectiveRole(
   role: Exclude<AccessRole, 'guest'>,
   expiresAt: Date | null,
@@ -31,28 +38,33 @@ export function effectiveRole(
 }
 
 export async function readAccess(request: Request): Promise<AccessContext> {
-  const session = await getAuth().api.getSession({ headers: request.headers })
-  if (!session?.user) {
-    return { userId: null, email: null, name: null, role: 'guest', operatorExpiresAt: null }
-  }
+  try {
+    const session = await getAuth().api.getSession({ headers: request.headers })
+    if (!session?.user) {
+      return { userId: null, email: null, name: null, role: 'guest', operatorExpiresAt: null }
+    }
 
-  const result = await getAuthPool().query<{
-    role: Exclude<AccessRole, 'guest'>
-    operator_expires_at: Date | null
-  }>(
-    `SELECT role, operator_expires_at FROM aircheck_access_roles WHERE user_id = $1`,
-    [session.user.id],
-  )
-  const row = result.rows[0]
-  const storedRole = row?.role ?? 'user'
-  const role = effectiveRole(storedRole, row?.operator_expires_at ?? null)
-  const operatorExpiresAt = role === 'operator' ? row?.operator_expires_at?.toISOString() ?? null : null
-  return {
-    userId: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
-    role,
-    operatorExpiresAt,
+    const result = await getAuthPool().query<{
+      role: Exclude<AccessRole, 'guest'>
+      operator_expires_at: Date | null
+    }>(
+      `SELECT role, operator_expires_at FROM aircheck_access_roles WHERE user_id = $1`,
+      [session.user.id],
+    )
+    const row = result.rows[0]
+    const storedRole = row?.role ?? 'user'
+    const role = effectiveRole(storedRole, row?.operator_expires_at ?? null)
+    const operatorExpiresAt = role === 'operator' ? row?.operator_expires_at?.toISOString() ?? null : null
+    return {
+      userId: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      role,
+      operatorExpiresAt,
+    }
+  } catch (error) {
+    console.error('authorization check failed', error)
+    throw new AccessUnavailableError()
   }
 }
 
@@ -79,6 +91,12 @@ export async function requireOwner(request: Request): Promise<AccessContext> {
 }
 
 export function accessErrorResponse(error: unknown): NextResponse | null {
+  if (error instanceof AccessUnavailableError) {
+    return NextResponse.json(
+      { error: { code: 'auth_unavailable', message: error.message } },
+      { status: 503 },
+    )
+  }
   if (error instanceof AccessDeniedError) {
     return NextResponse.json(
       { error: { code: error.status === 401 ? 'unauthorized' : 'forbidden', message: error.message } },
