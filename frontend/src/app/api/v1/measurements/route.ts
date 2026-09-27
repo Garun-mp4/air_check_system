@@ -3,10 +3,18 @@ import { NextResponse } from 'next/server'
 import { ApiError, errorResponse, getAirQualityService } from '../../../../server/api'
 import { serializeIngest } from '../../../../server/serializers'
 import { parseMeasurementInput } from '../../../../server/validation'
+import { accessErrorResponse, requireDeviceToken } from '../../../../server/access'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
+  try {
+    requireDeviceToken(request)
+  } catch (error) {
+    const response = accessErrorResponse(error)
+    if (response) return response
+    throw error
+  }
   let payload: unknown
   try {
     payload = await request.json()

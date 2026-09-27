@@ -39,7 +39,15 @@ class DeveloperControls:
         if parameter is None:
             raise ValueError(f"unknown Developer Panel parameter: {name}")
         current = self.values()[name]
-        value = min(parameter.maximum, max(parameter.minimum, current + direction * parameter.step))
+        return self.set_value(name, current + direction * parameter.step)
+
+    def set_value(self, name: str, requested_value: float) -> float:
+        parameter = self._config.demo.developer_parameters.get(name)
+        if parameter is None:
+            raise ValueError(f"unknown Developer Panel parameter: {name}")
+        if not math.isfinite(requested_value):
+            raise ValueError("Developer Panel value must be finite")
+        value = min(parameter.maximum, max(parameter.minimum, requested_value))
         if parameter.integral:
             value = float(round(value))
         else:

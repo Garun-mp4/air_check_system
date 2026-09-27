@@ -11,11 +11,18 @@ import {
   parseControlLimit,
   parseDeviceId,
 } from '../../../../../server/validation'
+import {
+  accessErrorResponse,
+  assertSameOrigin,
+  requireDeviceToken,
+  requireOperator,
+} from '../../../../../server/access'
 
 export const runtime = 'nodejs'
 
 export async function GET(request: Request) {
   try {
+    requireDeviceToken(request)
     const searchParams = new URL(request.url).searchParams
     const config = getConfig()
     const deviceId = parseDeviceId(searchParams.get('device_id'), config.deviceId)
@@ -29,11 +36,21 @@ export async function GET(request: Request) {
       meta: { count: commands.length, device_id: deviceId, limit },
     })
   } catch (error) {
+    const response = accessErrorResponse(error)
+    if (response) return response
     return errorResponse(error)
   }
 }
 
 export async function POST(request: Request) {
+  try {
+    assertSameOrigin(request)
+    await requireOperator(request)
+  } catch (error) {
+    const response = accessErrorResponse(error)
+    if (response) return response
+    throw error
+  }
   let payload: unknown
   try {
     payload = await request.json()

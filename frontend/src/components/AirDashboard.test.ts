@@ -93,6 +93,7 @@ describe('dashboard navigation', () => {
       settingsError: null,
       settingsSaving: false,
       settingsNotice: null,
+      canEdit: true,
       onSave: async () => undefined,
     }))
 
@@ -137,6 +138,7 @@ describe('dashboard navigation', () => {
       settingsError: null,
       settingsSaving: false,
       settingsNotice: null,
+      canEdit: true,
       onSave: async () => undefined,
     }))
 
@@ -160,6 +162,7 @@ describe('dashboard navigation', () => {
       settingsError: null,
       settingsSaving: false,
       settingsNotice: null,
+      canEdit: true,
       onSave: async () => undefined,
     }))
 
@@ -181,6 +184,7 @@ describe('dashboard navigation', () => {
       settingsError: null,
       settingsSaving: false,
       settingsNotice: null,
+      canEdit: true,
       onSave: async () => undefined,
     }))
 
@@ -226,7 +230,8 @@ describe('dashboard navigation', () => {
     }))
 
     expect(markup.match(/href="#/g)).toHaveLength(5)
-    expect(markup.match(/<svg/g)).toHaveLength(5)
+    expect(markup.match(/<svg/g)).toHaveLength(6)
+    expect(markup).toContain('data-navigation-item="simulator"')
     expect(markup).toContain('data-navigation-item="settings"')
     expect(markup).toContain('aria-current="location"')
   })

@@ -7,6 +7,7 @@ import {
   parseNodeSettingsPatch,
 } from '../../../../server/validation'
 import { getConfig } from '../../../../server/config'
+import { accessErrorResponse, assertSameOrigin, requireOperator } from '../../../../server/access'
 
 export const runtime = 'nodejs'
 
@@ -23,6 +24,14 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  try {
+    assertSameOrigin(request)
+    await requireOperator(request)
+  } catch (error) {
+    const response = accessErrorResponse(error)
+    if (response) return response
+    throw error
+  }
   let payload: unknown
   try {
     payload = await request.json()

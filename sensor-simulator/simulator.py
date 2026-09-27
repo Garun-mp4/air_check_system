@@ -14,6 +14,8 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from simulator_lease import SimulatorLeaseError, SimulatorProcessLease
+
 
 LOGGER = logging.getLogger("sensor-simulator")
 SCENARIOS = {"normal", "closed", "open", "surge", "ventilate", "outdoor_bad"}
@@ -34,6 +36,7 @@ class SimulatorConfig:
     request_timeout_seconds: float
     backfill_points: int
     backfill_interval_seconds: float
+    device_api_token: str = ""
 
 
 def _env_float(name: str, default: float) -> float:
@@ -68,6 +71,7 @@ def load_config() -> SimulatorConfig:
         request_timeout_seconds=_env_float("REQUEST_TIMEOUT_SECONDS", 5),
         backfill_points=_env_int("BACKFILL_POINTS", 480),
         backfill_interval_seconds=_env_float("BACKFILL_INTERVAL_SECONDS", 30),
+        device_api_token=os.environ.get("DEVICE_API_TOKEN", "").strip(),
     )
     if config.interval_seconds <= 0 or config.backfill_interval_seconds <= 0:
         raise ValueError("simulator intervals must be positive")
@@ -146,9 +150,12 @@ class SensorSimulator:
 
 
 def get_pending_control_commands(config: SimulatorConfig) -> list[dict[str, Any]]:
+    headers = {"Accept": "application/json"}
+    if config.device_api_token:
+        headers["Authorization"] = "Bearer " + config.device_api_token
     request = Request(
         config.backend_url + "/api/v1/controls/commands?device_id=" + config.device_id + "&limit=20",
-        headers={"Accept": "application/json"},
+        headers=headers,
         method="GET",
     )
     with urlopen(request, timeout=config.request_timeout_seconds) as response:
@@ -177,7 +184,11 @@ def report_control_state(
     request = Request(
         config.backend_url + "/api/v1/controls/state",
         data=body,
-        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            **({"Authorization": "Bearer " + config.device_api_token} if config.device_api_token else {}),
+        },
         method="POST",
     )
     with urlopen(request, timeout=config.request_timeout_seconds) as response:
@@ -216,7 +227,11 @@ def post_measurement(config: SimulatorConfig, payload: dict[str, Any]) -> None:
     request = Request(
         config.backend_url + "/api/v1/measurements",
         data=body,
-        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            **({"Authorization": "Bearer " + config.device_api_token} if config.device_api_token else {}),
+        },
         method="POST",
     )
     last_error: Exception | None = None
@@ -335,20 +350,21 @@ def main() -> int:
         if args.scenario:
             config = SimulatorConfig(**{**config.__dict__, "scenario": args.scenario})
         mode = args.mode or os.environ.get("SIMULATOR_MODE", "live").strip().lower()
-        if args.once:
-            run_once(config)
-        elif mode == "backfill":
-            run_backfill(config, args.points, args.interval)
-        elif mode == "live":
-            stop_event = threading.Event()
-            try:
-                run_live(config, stop_event)
-            except KeyboardInterrupt:
-                LOGGER.info("stopping simulator")
-                stop_event.set()
-        else:
-            raise ValueError("SIMULATOR_MODE must be live or backfill")
-    except (RuntimeError, ValueError) as exc:
+        with SimulatorProcessLease(os.environ.get("SIMULATOR_LOCK_DIRECTORY"), config.device_id):
+            if args.once:
+                run_once(config)
+            elif mode == "backfill":
+                run_backfill(config, args.points, args.interval)
+            elif mode == "live":
+                stop_event = threading.Event()
+                try:
+                    run_live(config, stop_event)
+                except KeyboardInterrupt:
+                    LOGGER.info("stopping simulator")
+                    stop_event.set()
+            else:
+                raise ValueError("SIMULATOR_MODE must be live or backfill")
+    except (RuntimeError, ValueError, SimulatorLeaseError) as exc:
         LOGGER.error("%s", exc)
         return 1
     return 0
