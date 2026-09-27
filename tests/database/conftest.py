@@ -49,6 +49,10 @@ class IsolatedPostgres:
                 "-q",
                 "-A",
                 "-t",
+                "-h",
+                "127.0.0.1",
+                "-p",
+                "5432",
                 "-v",
                 "ON_ERROR_STOP=1",
                 "-U",
@@ -198,7 +202,19 @@ def postgres_db() -> IsolatedPostgres:
         deadline = time.monotonic() + 30
         while time.monotonic() < deadline:
             check = database.docker(
-                ["exec", name, "pg_isready", "-U", database_user, "-d", database_name],
+                [
+                    "exec",
+                    name,
+                    "pg_isready",
+                    "-h",
+                    "127.0.0.1",
+                    "-p",
+                    "5432",
+                    "-U",
+                    database_user,
+                    "-d",
+                    database_name,
+                ],
                 input_text=None,
             )
             if check.returncode == 0:
