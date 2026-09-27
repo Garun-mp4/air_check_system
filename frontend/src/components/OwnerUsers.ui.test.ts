@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { createElement } from 'react'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import OwnerUsers from './OwnerUsers'
@@ -52,5 +52,19 @@ describe('owner account list states', () => {
 
     expect(await screen.findByText('Account list unavailable.')).not.toBeNull()
     expect(screen.queryByText('Список пуст.')).toBeNull()
+    expect(screen.getByRole('alert')).not.toBeNull()
+  })
+
+  it('retries a failed account list request and then shows the successful empty state', async () => {
+    fetchMock
+      .mockResolvedValueOnce(response(false, { error: { message: 'Account list unavailable.' } }))
+      .mockResolvedValueOnce(response(true, { data: [] }))
+    render(createElement(OwnerUsers))
+
+    const retry = await screen.findByRole('button', { name: 'Повторить' })
+    fireEvent.click(retry)
+
+    expect(await screen.findByText('Список пуст.')).not.toBeNull()
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 })

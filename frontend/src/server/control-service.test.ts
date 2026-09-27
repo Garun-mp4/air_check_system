@@ -195,29 +195,36 @@ describe('climate control service', () => {
     expect(commands.map((command) => command.target)).toEqual(['exhaust', 'intake'])
   })
 
-  it('keeps an acknowledged command pending when actual state disagrees with desired state', async () => {
-    const repository = new MemoryRepository()
-    const [command] = await repository.queueControlCommands([
-      {
+  it.each([
+    ['exhaust', 'exhaustOn'],
+    ['intake', 'intakeOn'],
+    ['window', 'windowOpen'],
+  ] as const)(
+    'keeps an acknowledged %s command pending when actual state disagrees with desired state',
+    async (target, stateField) => {
+      const repository = new MemoryRepository()
+      const [command] = await repository.queueControlCommands([
+        {
+          deviceId: 'room-01',
+          target,
+          desiredState: true,
+          source: 'manual',
+          reason: 'test',
+          batchId: `actual-state-mismatch-${target}`,
+        },
+      ])
+
+      const state = await repository.reportControlState({
         deviceId: 'room-01',
-        target: 'exhaust',
-        desiredState: true,
-        source: 'manual',
-        reason: 'test',
-        batchId: 'actual-state-mismatch',
-      },
-    ])
+        timestamp: new Date(),
+        reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+        appliedCommandIds: [command.id],
+      })
 
-    const state = await repository.reportControlState({
-      deviceId: 'room-01',
-      timestamp: new Date(),
-      reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
-      appliedCommandIds: [command.id],
-    })
-
-    expect(state.reported.exhaustOn).toBe(false)
-    expect(state.desired.exhaustOn).toBe(true)
-    expect(state.pendingCommands).toBe(1)
-    expect(state.lastCommand?.status).toBe('pending')
-  })
+      expect(state.reported[stateField]).toBe(false)
+      expect(state.desired[stateField]).toBe(true)
+      expect(state.pendingCommands).toBe(1)
+      expect(state.lastCommand?.status).toBe('pending')
+    },
+  )
 })

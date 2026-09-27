@@ -326,6 +326,42 @@ async function runTransactions(repository, pool) {
   })
   assert.equal(rolledBackState.pendingCommands, 0)
 
+  const ackDevice = 'actual-ack-node'
+  const ackTimestamp = new Date('2026-01-01T00:00:00Z')
+  await repository.reportControlState({
+    deviceId: ackDevice,
+    timestamp: ackTimestamp,
+    reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+    appliedCommandIds: [],
+  })
+  const ackCommands = await repository.queueControlCommands([
+    command(ackDevice, 'exhaust', true, 'actual-ack'),
+    command(ackDevice, 'intake', true, 'actual-ack'),
+    command(ackDevice, 'window', true, 'actual-ack'),
+  ])
+  const mismatchedAck = await repository.reportControlState({
+    deviceId: ackDevice,
+    timestamp: new Date(ackTimestamp.getTime() + 60_000),
+    reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+    appliedCommandIds: ackCommands.map((item) => item.id),
+  })
+  assert.equal(mismatchedAck.pendingCommands, 3)
+  assert.deepEqual(
+    (await repository.listPendingControlCommands(ackDevice, 10)).map((item) => item.id),
+    ackCommands.map((item) => item.id),
+  )
+
+  const acceptedAck = await repository.reportControlState({
+    deviceId: ackDevice,
+    timestamp: new Date(ackTimestamp.getTime() + 120_000),
+    reported: { exhaustOn: true, intakeOn: true, windowOpen: true },
+    appliedCommandIds: ackCommands.map((item) => item.id),
+  })
+  assert.equal(acceptedAck.pendingCommands, 0)
+  for (const target of ['exhaust', 'intake', 'window']) {
+    assert.equal((await repository.getLatestControlCommand(ackDevice, target)).status, 'applied')
+  }
+
   const reportDevice = 'atomic-report-node'
   const initialTimestamp = new Date('2026-01-01T00:00:00Z')
   const nextTimestamp = new Date('2026-01-01T00:01:00Z')

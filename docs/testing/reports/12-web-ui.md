@@ -24,7 +24,7 @@ New test files: **20 passed, 1 failed, 0 skipped** (21 tests across 5 files).
 
 Full relevant UI set: **48 passed, 1 failed, 0 skipped** (49 tests across 11 files). The set includes the new files, existing dashboard/chart tests, and existing client-facing auth/access/air-quality helper tests. Server authorization suites and 3D scene tests were excluded as neighboring blocks.
 
-The one failing regression check is `OwnerUsers.ui.test.ts`: when `/api/admin/users` fails, the component displays the error feedback and also renders `Список пуст.`. `OwnerUsers.tsx` leaves `users` as an empty array after a failed request, then renders the empty-list branch once `loading` becomes false. This conflates request failure with a successful empty response. The test remains red as requested; production code was not changed.
+The original campaign left the `OwnerUsers.ui.test.ts` regression check failing: when `/api/admin/users` fails, the component displayed error feedback and also rendered `Список пуст.`. `OwnerUsers.tsx` kept `users` empty after a failed request, then rendered the empty-list branch once `loading` became false. This conflated request failure with a successful empty response. The correction is recorded below.
 
 The first test startup stopped before executing tests because `@testing-library/react`'s peer dependency `@testing-library/dom` was absent. It was added as a dev dependency, and the results above are from the subsequent successful test collection and execution.
 
@@ -47,3 +47,9 @@ Both `npm run typecheck` and `npm run lint` passed. In this package, `lint` is a
 ## Limits
 
 The Vitest environment is jsdom. It supports DOM interactions and keyboard events used above, but it does not calculate browser CSS layout. Responsive overflow, real viewport breakpoints, and visual layout were not verified; no browser runner was configured, and no browser dependency was added. The page-level tests mock the API/session boundary; they do not repeat backend role enforcement. Canvas/3D interaction was excluded.
+
+## Remediation follow-up
+
+`OwnerUsers` now has separate loading, error, and successful-empty branches. A failed request does not display “Список пуст.”; the error is announced as an alert and offers a retry action. The list is shown as empty only after a successful empty response. The existing AirCheck button and error styles are reused.
+
+The expanded UI set, including the retry regression check, now passes: **11 files, 50 passed, 0 failed, 0 skipped**. The complete frontend suite passes: **37 files, 292 passed**.

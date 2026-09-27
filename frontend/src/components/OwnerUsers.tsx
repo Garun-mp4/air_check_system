@@ -36,6 +36,7 @@ function toLocalInput(value: string | null): string {
 export default function OwnerUsers() {
   const [users, setUsers] = useState<ManagedUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [usersLoadError, setUsersLoadError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -44,13 +45,15 @@ export default function OwnerUsers() {
 
   async function loadUsers() {
     setLoading(true)
+    setUsersLoadError(null)
+    setMessage(null)
     try {
       const response = await fetch('/api/admin/users', { cache: 'no-store' })
       const result = await readJson<{ data: ManagedUser[] }>(response)
       setUsers(result.data)
       setMessage(null)
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Не удалось загрузить пользователей')
+      setUsersLoadError(error instanceof Error ? error.message : 'Не удалось загрузить пользователей')
     } finally {
       setLoading(false)
     }
@@ -142,7 +145,12 @@ export default function OwnerUsers() {
       </form>
       <div className="owner-user-list">
         <div className="owner-list-heading"><h2>Пользователи</h2><button className="button-secondary" type="button" onClick={() => void loadUsers()}>Обновить</button></div>
-        {loading ? <p className="owner-empty">Загружаем список…</p> : users.length === 0 ? <p className="owner-empty">Список пуст.</p> : users.map((user) => (
+        {loading ? <p className="owner-empty" role="status">Загружаем список…</p> : usersLoadError ? (
+          <>
+            <p className="owner-feedback" role="alert">{usersLoadError}</p>
+            <button className="button-secondary" type="button" onClick={() => void loadUsers()}>Повторить</button>
+          </>
+        ) : users.length === 0 ? <p className="owner-empty" role="status">Список пуст.</p> : users.map((user) => (
           <OwnerUserRow key={user.id} user={user} onSave={updateRole} onDelete={deleteUser} />
         ))}
       </div>

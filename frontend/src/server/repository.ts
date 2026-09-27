@@ -356,6 +356,11 @@ export class MemoryRepository implements Repository {
     if (!previouslyOpen && input.reported.windowOpen) {
       state.windowOpenSince = reportedAt
     }
+    const actualStateByTarget = {
+      exhaust: input.reported.exhaustOn,
+      intake: input.reported.intakeOn,
+      window: input.reported.windowOpen,
+    }
     for (const commandId of input.appliedCommandIds) {
       const command = this.controlCommands.find(
         (item) =>
@@ -363,7 +368,7 @@ export class MemoryRepository implements Repository {
           item.deviceId === input.deviceId &&
           item.status === 'pending',
       )
-      if (command) {
+      if (command && actualStateByTarget[command.target] === command.desiredState) {
         command.status = 'applied'
         command.appliedAt = new Date()
       }
@@ -840,6 +845,10 @@ export class PostgresRepository implements Repository {
         'INSERT INTO actuator_states (device_id) VALUES ($1) ON CONFLICT (device_id) DO NOTHING',
         [input[0].deviceId],
       )
+      await client.query(
+        'SELECT device_id FROM actuator_states WHERE device_id = $1 FOR UPDATE',
+        [input[0].deviceId],
+      )
       const current = await this.readControlState(input[0].deviceId, client)
       const pendingResult = await client.query<{
         target: ControlCommand['target']
@@ -957,10 +966,17 @@ export class PostgresRepository implements Repository {
         input.appliedCommandIds.length > 0
       ) {
         await client.query(
-          "UPDATE actuator_commands SET status = 'applied', applied_at = NOW() WHERE device_id = $1 AND status = 'pending' AND id = ANY($2::bigint[])",
+          "UPDATE actuator_commands SET status = 'applied', applied_at = NOW() " +
+            "WHERE device_id = $1 AND status = 'pending' AND id = ANY($2::bigint[]) " +
+            "AND ((target = 'exhaust' AND desired_state = $3::boolean) " +
+            "OR (target = 'intake' AND desired_state = $4::boolean) " +
+            "OR (target = 'window' AND desired_state = $5::boolean))",
           [
             input.deviceId,
             input.appliedCommandIds,
+            input.reported.exhaustOn,
+            input.reported.intakeOn,
+            input.reported.windowOpen,
           ],
         )
       }

@@ -487,7 +487,7 @@ describe('memory repository', () => {
     expect(state.pendingCommands).toBe(1)
   })
 
-  it('acknowledges every command explicitly applied in one device report', async () => {
+  it('acknowledges only commands whose desired state matches the device report', async () => {
     const repository = new MemoryRepository()
     const [started] = await repository.queueControlCommands([
       {
@@ -517,7 +517,9 @@ describe('memory repository', () => {
       appliedCommandIds: [started.id, stopped.id],
     })
 
-    expect(state.pendingCommands).toBe(0)
+    expect(state.pendingCommands).toBe(1)
+    expect((await repository.listPendingControlCommands('room-01', 10)).map((command) => command.id))
+      .toEqual([started.id])
     expect((await repository.getLatestControlCommand('room-01', 'exhaust'))?.status).toBe('applied')
   })
 })
