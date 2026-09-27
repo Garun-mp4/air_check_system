@@ -50,7 +50,9 @@ class ComposeRunner:
 
     def __init__(self, docker_cli: str) -> None:
         self.docker_cli = docker_cli
-        self._rendered: dict[tuple[str, ...], dict[str, Any]] = {}
+        self._rendered: dict[
+            tuple[tuple[str, ...], tuple[tuple[str, str], ...]], dict[str, Any]
+        ] = {}
         template_values, _ = _read_env_assignments()
         self.template_values = template_values
 
@@ -115,10 +117,14 @@ class ComposeRunner:
                 timeout=30,
             )
 
-    def config(self, *profiles: str) -> dict[str, Any]:
-        cache_key = tuple(sorted(profiles))
+    def config(
+        self, *profiles: str, overrides: dict[str, str] | None = None
+    ) -> dict[str, Any]:
+        profile_key = tuple(sorted(profiles))
+        override_key = tuple(sorted((overrides or {}).items()))
+        cache_key = (profile_key, override_key)
         if cache_key not in self._rendered:
-            result = self.run(cache_key)
+            result = self.run(profile_key, overrides=overrides)
             assert result.returncode == 0, (
                 "Docker Compose could not render the configuration. "
                 f"stderr: {result.stderr.strip()}"
@@ -287,9 +293,19 @@ def test_database_and_ml_ports_are_bound_to_loopback(compose_runner: ComposeRunn
     assert _port(services["ml-service"], 8000)["host_ip"] == "127.0.0.1"
 
 
-def test_backend_port_is_configurable_and_bound_to_loopback(compose_runner: ComposeRunner) -> None:
-    backend = _services(compose_runner.config())["backend"]
-    assert _port(backend, 3000)["host_ip"] == "127.0.0.1"
+@pytest.mark.parametrize(
+    ("configured_port", "overrides"),
+    [(3000, {}), (4300, {"PORT": "4300"})],
+)
+def test_backend_port_is_configurable_and_bound_to_loopback(
+    compose_runner: ComposeRunner, configured_port: int, overrides: dict[str, str]
+) -> None:
+    backend = _services(compose_runner.config(overrides=overrides))["backend"]
+    published_port = _port(backend, configured_port)
+    assert published_port["host_ip"] == "127.0.0.1"
+    assert published_port["target"] == configured_port
+    assert published_port["published"] == str(configured_port)
+    assert backend["environment"]["PORT"] == str(configured_port)
 
 
 def test_caddy_is_only_publicly_published_service(compose_runner: ComposeRunner) -> None:

@@ -8,7 +8,7 @@ Production-файлы не изменялись. Контейнеры и volumes
 
 ## Что добавлено
 
-- `tests/infrastructure/test_compose_contract.py` — 23 теста-кейса на Python/pytest. Тесты используют только `docker compose config --format json`, не требуют Docker Engine и не поднимают сервисы.
+- `tests/infrastructure/test_compose_contract.py` — 24 тест-кейса на Python/pytest. Тесты используют только `docker compose config --format json`, не требуют Docker Engine и не поднимают сервисы.
 - `pytest.ini` — каталог `tests/infrastructure` добавлен в `testpaths`.
 
 Новые зависимости не добавлялись. Для каждого вызова Compose создаётся временный env-файл с синтетическими тестовыми значениями; файл удаляется сразу после команды и не сохраняется в репозитории.
@@ -20,7 +20,7 @@ Production-файлы не изменялись. Контейнеры и volumes
 | Env-шаблон и секреты | Уникальность и синтаксис ключей, соответствие Compose-переменным, пустые значения для секретов в примере, правила Git для `.env` и `.env.example` |
 | Запуск и профили | Набор сервисов по умолчанию; отдельный сервис для каждого из профилей `demo`, `web-demo`, `maintenance`; обязательность `BETTER_AUTH_SECRET` |
 | Зависимости и симуляторы | Порядок запуска backend, PostgreSQL и ML; общий device lease для двух вариантов simulator; раздельное назначение device и internal token |
-| Сеть и health checks | Loopback для PostgreSQL, ML и backend; публичные 80/443 только через Caddy; отсутствие опубликованных портов у Python simulator; health checks PostgreSQL и web simulator |
+| Сеть и health checks | Loopback для PostgreSQL, ML и backend; проверка backend host/container port по умолчанию и после override `PORT=4300`; публичные 80/443 только через Caddy; отсутствие опубликованных портов у Python simulator; health checks PostgreSQL и web simulator |
 | Хранилища и маршрутизация | Именованные volumes для БД, модели, TLS и lease; read-only mounts миграций/Caddyfile; TLS и reverse proxy в Caddyfile |
 | Сборка | Наличие всех build contexts, Dockerfile и target `owner-tools` |
 
@@ -30,24 +30,24 @@ Production-файлы не изменялись. Контейнеры и volumes
 
 Окружение: Windows PowerShell, Python 3.12.10, pytest 8.3.5, Docker Compose CLI 5.1.4. Docker Engine не вызывался: проверка использовала лишь команду рендеринга конфигурации `docker compose config`.
 
-До добавления этой области `pytest --collect-only -q` находил 98 Python-тестов. После добавления обнаруживается 121 тест, включая 23 новых кейса инфраструктуры; прежние testpaths и тесты сохранены.
+До добавления этой области `pytest --collect-only -q` находил 98 Python-тестов. После добавления обнаруживается 122 теста, включая 24 новых кейса инфраструктуры; прежние testpaths и тесты сохранены.
 
 Запущенные команды и результаты:
 
 | Команда | Результат |
 |---|---:|
-| `pytest --collect-only -q tests/infrastructure/test_compose_contract.py` | 23 собрано |
-| `pytest -q tests/infrastructure/test_compose_contract.py` | 22 passed / 1 failed / 0 skipped |
-| `pytest -q` | 120 passed / 1 failed / 0 skipped |
+| `pytest --collect-only -q tests/infrastructure/test_compose_contract.py` | 24 собрано |
+| `pytest -q tests/infrastructure/test_compose_contract.py` | 23 passed / 1 failed / 0 skipped |
+| `pytest -q` | 121 passed / 1 failed / 0 skipped |
 | `git diff --check` | пройдено |
 
-Целевая область раньше не имела собственного набора тестов: **0 прежних тестов**. Теперь её полный целевой набор состоит из 23 новых кейсов и даёт **22 passed / 1 failed / 0 skipped**. Полный Python-набор проекта содержит 121 кейс и даёт **120 passed / 1 failed / 0 skipped**.
+Целевая область раньше не имела собственного набора тестов: **0 прежних тестов**. Теперь её полный целевой набор состоит из 24 новых кейсов и даёт **23 passed / 1 failed / 0 skipped**. Полный Python-набор проекта содержит 122 кейса и даёт **121 passed / 1 failed / 0 skipped**.
 
 ## Найденный сбой
 
 `test_env_example_covers_every_compose_interpolation` падает: Compose использует `SIMULATOR_LOG_LEVEL` в `docker-compose.yml`, но такого ключа нет в `.env.example`. Сейчас у переменной есть Compose fallback `INFO`, поэтому конфигурация собирается и приложение может использовать уровень по умолчанию; при этом настройка не представлена в шаблоне окружения. Чтобы восстановить ожидаемую полноту шаблона, добавьте `SIMULATOR_LOG_LEVEL=INFO` в `.env.example` и повторно выполните целевую и полную pytest suite.
 
-Остальные 22 новых проверки прошли. Ошибок от Docker Compose при рендеринге профилей не обнаружено.
+Проверка конфигурируемого backend-порта отдельно рендерит Compose с `PORT=4300` и подтверждает `host_ip=127.0.0.1`, опубликованный порт `4300` и целевой порт `4300`; сценарий со значением по умолчанию `3000` также проверяется. Остальные 23 новых проверки прошли. Ошибок от Docker Compose при рендеринге профилей не обнаружено.
 
 ## Риски и границы проверки
 
@@ -58,4 +58,4 @@ Production-файлы не изменялись. Контейнеры и volumes
 
 ## Итог
 
-Инфраструктурный блок покрыт 23 тест-кейсами; один из них зафиксировал несоответствие между Compose и `.env.example`. Блок нельзя отметить полностью прошедшим, пока шаблон не будет синхронизирован и целевая suite не станет зелёной. Исправление production/config файлов в рамках этой задачи намеренно не выполнялось.
+Инфраструктурный блок покрыт 24 тест-кейсами; один из них зафиксировал несоответствие между Compose и `.env.example`. Блок нельзя отметить полностью прошедшим, пока шаблон не будет синхронизирован и целевая suite не станет зелёной. Исправление production/config файлов в рамках этой задачи намеренно не выполнялось.
