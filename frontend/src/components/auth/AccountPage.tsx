@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { getLoginHref } from '../../lib/auth-navigation'
 import { getAccessRoleLabel } from '../../lib/access-types'
+import PasswordInput from './PasswordInput'
 import { useAccessSession } from './AccessSessionProvider'
 import UtilityHeader from './UtilityHeader'
 
@@ -175,20 +176,44 @@ export default function AccountPage() {
                 <div><span className="eyebrow">Безопасность</span><h2 id="account-password-title">Сменить пароль</h2></div>
               </div>
               <form className="account-form" onSubmit={(event) => void changePassword(event)}>
-                <label>
-                  Текущий пароль
-                  <input type="password" autoComplete="current-password" required maxLength={128} value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} />
-                </label>
+                <div className="account-password-field">
+                  <label htmlFor="account-current-password">Текущий пароль</label>
+                  <PasswordInput
+                    id="account-current-password"
+                    autoComplete="current-password"
+                    required
+                    maxLength={128}
+                    value={currentPassword}
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                  />
+                </div>
                 <div className="account-form-row">
-                  <label>
-                    Новый пароль
-                    <input type="password" autoComplete="new-password" required minLength={12} maxLength={128} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
-                    <small>От 12 до 128 символов.</small>
-                  </label>
-                  <label>
-                    Повторите новый пароль
-                    <input type="password" autoComplete="new-password" required minLength={12} maxLength={128} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
-                  </label>
+                  <div className="account-password-field">
+                    <label htmlFor="account-new-password">Новый пароль</label>
+                    <PasswordInput
+                      id="account-new-password"
+                      autoComplete="new-password"
+                      aria-describedby="account-new-password-note"
+                      required
+                      minLength={12}
+                      maxLength={128}
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                    />
+                    <small id="account-new-password-note">От 12 до 128 символов.</small>
+                  </div>
+                  <div className="account-password-field">
+                    <label htmlFor="account-confirm-password">Повторите новый пароль</label>
+                    <PasswordInput
+                      id="account-confirm-password"
+                      autoComplete="new-password"
+                      required
+                      minLength={12}
+                      maxLength={128}
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                    />
+                  </div>
                 </div>
                 <button className="account-button" type="submit" disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword}>
                   {savingPassword ? 'Меняем пароль…' : 'Изменить пароль'}

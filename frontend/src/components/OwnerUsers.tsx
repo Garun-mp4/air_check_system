@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import PasswordInput from './auth/PasswordInput'
+
 type ManagedUser = {
   id: string
   email: string
@@ -120,7 +122,20 @@ export default function OwnerUsers() {
         <div className="owner-create-fields">
           <label>Имя<input required maxLength={80} value={name} onChange={(event) => setName(event.target.value)} /></label>
           <label>Email<input required type="email" maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} /></label>
-          <label>Временный пароль<input required type="password" minLength={12} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} /></label>
+          <div className="owner-password-field">
+            <label htmlFor="owner-create-password">Временный пароль</label>
+            <PasswordInput
+              id="owner-create-password"
+              autoComplete="new-password"
+              aria-describedby="owner-create-password-note"
+              required
+              minLength={12}
+              maxLength={128}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            <span id="owner-create-password-note" className="auth-field-note">Не менее 12 символов.</span>
+          </div>
           <button className="button-primary" disabled={creating}>{creating ? 'Создаём…' : 'Создать'}</button>
         </div>
         <p className="auth-field-note">Email не отправляется: пароль нужно передать пользователю отдельно. Учётная запись создаётся с правами только на просмотр.</p>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 
 import { getSafeReturnPath } from '../lib/auth-navigation'
 import { useAccessSession } from './auth/AccessSessionProvider'
+import PasswordInput from './auth/PasswordInput'
 import UtilityHeader from './auth/UtilityHeader'
 
 type AuthMode = 'signin' | 'signup'
@@ -80,19 +81,21 @@ export default function AuthPanel() {
                 onChange={(event) => setEmail(event.target.value)}
               />
             </label>
-            <label>
-              Пароль
-              <input
-                type="password"
+            <div className="auth-password-field">
+              <label htmlFor="auth-password">Пароль</label>
+              <PasswordInput
+                key={mode}
+                id="auth-password"
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 required
                 minLength={12}
                 maxLength={128}
+                aria-describedby={mode === 'signup' ? 'auth-password-note' : undefined}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
-              {mode === 'signup' ? <span className="auth-field-note">Не менее 12 символов.</span> : null}
-            </label>
+              {mode === 'signup' ? <span id="auth-password-note" className="auth-field-note">Не менее 12 символов.</span> : null}
+            </div>
             {error ? <p className="auth-error" role="alert">{error}</p> : null}
             <button className="button-primary auth-submit" type="submit" disabled={pending}>
               {pending ? 'Подождите…' : mode === 'signin' ? 'Войти' : 'Зарегистрироваться'}

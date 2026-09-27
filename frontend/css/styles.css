@@ -8115,3 +8115,14 @@ body.is-chart-expanded {
   .dashboard-shell .mobile-bottom-nav { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .simulator-topbar { height: auto; min-height: 58px; }
 }
+
+.auth-password-field, .owner-password-field, .account-password-field { display: grid; gap: 6px; min-width: 0; }
+.password-input-shell { position: relative; width: 100%; min-width: 0; }
+.password-input-shell > input { box-sizing: border-box; width: 100%; padding-right: 46px; }
+.password-visibility-toggle { position: absolute; top: 50%; right: 2px; width: 36px; height: 36px; padding: 0; display: grid; place-items: center; transform: translateY(-50%); border: 0; border-radius: 5px; background: transparent; color: #70817c; cursor: pointer; touch-action: manipulation; }
+.password-visibility-toggle:hover:not(:disabled) { background: #edf5f0; color: #0c7768; }
+.password-visibility-toggle:focus-visible { outline: 2px solid #0c7768; outline-offset: 1px; }
+.password-visibility-toggle:disabled { opacity: .55; cursor: not-allowed; }
+.password-visibility-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.account-password-field > small { color: #81908c; font-size: 10px; font-weight: 400; line-height: 1.45; }
+.password-input-shell > input::-ms-reveal, .password-input-shell > input::-ms-clear { display: none; }
