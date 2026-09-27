@@ -45,6 +45,7 @@ class HttpAirCheckBackend:
         self.device_id = device_id
         self.timeout_seconds = config.request_timeout_seconds
         self.command_limit = config.command_limit
+        self.device_token = config.device_token
 
     def pending_commands(self) -> list[PendingControlCommand]:
         payload = self._request("GET", self.routes.pending_commands(self.device_id, self.command_limit))
@@ -88,6 +89,8 @@ class HttpAirCheckBackend:
     def _request(self, method: str, url: str, payload: dict[str, object] | None = None) -> dict[str, Any]:
         body = None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
         headers = {"Accept": "application/json"}
+        if self.device_token:
+            headers["Authorization"] = f"Bearer {self.device_token}"
         if body is not None:
             headers["Content-Type"] = "application/json"
         request = Request(url, data=body, headers=headers, method=method)

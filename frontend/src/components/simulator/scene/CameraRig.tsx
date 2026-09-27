@@ -1,0 +1,132 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { OrbitControls } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
+import { PerspectiveCamera, Vector3 } from 'three'
+
+import type { SimulatorSnapshot } from '../types'
+
+type Point = [number, number, number]
+type CameraCommand = { id: number; focus: Point | null }
+
+function toWorld(point: Point): Point {
+  return [point[0], point[2], point[1]]
+}
+
+export default function CameraRig({
+  snapshot,
+  command,
+}: {
+  snapshot: SimulatorSnapshot
+  command: CameraCommand
+}) {
+  const controls = useRef<OrbitControlsImpl>(null)
+  const { camera } = useThree()
+  const keys = useRef(new Set<string>())
+  const targetGoal = useRef(new Vector3())
+  const positionGoal = useRef(new Vector3())
+  const transitioning = useRef(false)
+  const ready = useRef(false)
+  const cameraSettings = snapshot.simulation.camera
+  const startPosition = toWorld(cameraSettings.start_position)
+  const startTarget = toWorld(cameraSettings.start_target)
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!document.querySelector('.simulator-canvas-host:hover') || event.altKey || event.ctrlKey || event.metaKey) return
+      if (event.target instanceof HTMLElement && ['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(event.target.tagName)) return
+      const key = event.key.toLowerCase()
+      if (['w', 'a', 's', 'd', 'q', 'e', 'shift'].includes(key)) {
+        keys.current.add(key)
+        event.preventDefault()
+      }
+    }
+    const onKeyUp = (event: KeyboardEvent) => keys.current.delete(event.key.toLowerCase())
+    const clear = () => keys.current.clear()
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', clear)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('blur', clear)
+    }
+  }, [])
+
+  useEffect(() => {
+    camera.position.set(...startPosition)
+    if (camera instanceof PerspectiveCamera) camera.fov = cameraSettings.field_of_view_degrees
+    camera.near = cameraSettings.near_plane_m
+    camera.far = cameraSettings.far_plane_m
+    camera.updateProjectionMatrix()
+    targetGoal.current.set(...startTarget)
+    positionGoal.current.set(...startPosition)
+    controls.current?.target.set(...startTarget)
+    controls.current?.update()
+    transitioning.current = false
+    ready.current = true
+  }, [camera, cameraSettings.far_plane_m, cameraSettings.field_of_view_degrees, cameraSettings.near_plane_m, startPosition[0], startPosition[1], startPosition[2], startTarget[0], startTarget[1], startTarget[2]])
+
+  useEffect(() => {
+    if (!ready.current || !controls.current) return
+    const controlsTarget = controls.current.target
+    if (command.focus) {
+      const next = new Vector3(...command.focus)
+      const shift = next.clone().sub(controlsTarget)
+      targetGoal.current.copy(next)
+      positionGoal.current.copy(camera.position).add(shift)
+    } else {
+      targetGoal.current.set(...startTarget)
+      positionGoal.current.set(...startPosition)
+    }
+    transitioning.current = true
+  }, [command.id])
+
+  useFrame((_, delta) => {
+    const orbit = controls.current
+    if (!orbit) return
+    const direction = camera.getWorldDirection(new Vector3())
+    direction.y = 0
+    direction.normalize()
+    const right = new Vector3().crossVectors(direction, camera.up).normalize()
+    const speed = cameraSettings.move_speed_m_s * (keys.current.has('shift') ? cameraSettings.fast_move_multiplier : 1) * delta
+    const forward = Number(keys.current.has('w')) - Number(keys.current.has('s'))
+    const sideways = Number(keys.current.has('d')) - Number(keys.current.has('a'))
+    const vertical = Number(keys.current.has('e')) - Number(keys.current.has('q'))
+    if (forward || sideways || vertical) {
+      const movement = direction.multiplyScalar(forward * speed).addScaledVector(right, sideways * speed)
+      movement.y += vertical * speed
+      camera.position.add(movement)
+      orbit.target.add(movement)
+    }
+    if (transitioning.current) {
+      const easing = 1 - Math.exp(-delta / Math.max(0.08, cameraSettings.transition_seconds))
+      camera.position.lerp(positionGoal.current, easing)
+      orbit.target.lerp(targetGoal.current, easing)
+      if (camera.position.distanceToSquared(positionGoal.current) < 0.0001
+        && orbit.target.distanceToSquared(targetGoal.current) < 0.0001) {
+        camera.position.copy(positionGoal.current)
+        orbit.target.copy(targetGoal.current)
+        transitioning.current = false
+      }
+    }
+    orbit.update()
+  })
+
+  return (
+    <OrbitControls
+      ref={controls}
+      makeDefault
+      enableDamping
+      dampingFactor={0.085}
+      minDistance={cameraSettings.focus_distance_min_m ?? 1.1}
+      maxDistance={Math.max(24, snapshot.simulation.room_dimensions.outdoor_depth_m * 3)}
+      minPolarAngle={Math.PI * 8 / 180}
+      maxPolarAngle={Math.PI * 0.94}
+      screenSpacePanning
+      mouseButtons={{ LEFT: 0, MIDDLE: 1, RIGHT: 2 }}
+    />
+  )
+}

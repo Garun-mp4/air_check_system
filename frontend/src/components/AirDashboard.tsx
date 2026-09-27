@@ -132,6 +132,11 @@ export function DashboardNavigation({
           </a>
         )
       })}
+      <a className={linkClassName} href="/simulator" data-navigation-item="simulator">
+        <span className="nav-link-icon"><Icon name="room" /></span>
+        <span className="nav-link-label-full">3D-стенд</span>
+        <span className="nav-link-label-short" aria-hidden="true">3D</span>
+      </a>
     </nav>
   )
 }
@@ -1367,6 +1372,7 @@ export function SettingsPanel({
   settingsError,
   settingsSaving,
   settingsNotice,
+  canEdit,
   onSave,
 }: {
   presentation?: 'drawer' | 'page'
@@ -1384,6 +1390,7 @@ export function SettingsPanel({
   settingsError: string | null
   settingsSaving: boolean
   settingsNotice: string | null
+  canEdit: boolean
   onSave: (patch: ClientNodeSettingsPatch) => Promise<void>
 }) {
   const isPage = presentation === 'page'
@@ -1617,6 +1624,7 @@ export function SettingsPanel({
             {settingsNotice && !dirty ? <div className="settings-feedback" role="status" aria-live="polite">{settingsNotice}</div> : null}
 
             <form className="settings-form" onSubmit={(event) => void handleSubmit(event)}>
+              <fieldset className="settings-edit-fieldset" disabled={!canEdit}>
               {tab === 'automation' ? (
                 <>
                   <div className="settings-form-section">
@@ -1776,6 +1784,8 @@ export function SettingsPanel({
                   </button>
                 </div>
               </div>
+              </fieldset>
+              {!canEdit ? <p className="settings-readonly-note">Просмотр настроек доступен всем. Изменять параметры может только оператор. <a href="/login">Войти →</a></p> : null}
             </form>
 
             {tab === 'automation' ? (
@@ -1810,12 +1820,25 @@ export default function AirDashboard() {
   const [controlError, setControlError] = useState<string | null>(null)
   const [activeCommand, setActiveCommand] = useState<string | null>(null)
   const [controlNotice, setControlNotice] = useState<string | null>(null)
+  const [accessRole, setAccessRole] = useState<'guest' | 'user' | 'operator' | 'owner'>('guest')
   const settingsCloseButtonRef = useRef<HTMLButtonElement>(null)
   const settingsTriggerRef = useRef<HTMLElement | null>(null)
   const settingsOpenRef = useRef(false)
   const lastDashboardHashRef = useRef('#overview')
   const loadSequenceRef = useRef(0)
   const activeLoadControllerRef = useRef<AbortController | null>(null)
+  const canOperate = accessRole === 'operator' || accessRole === 'owner'
+
+  useEffect(() => {
+    let active = true
+    void fetch('/api/auth/access', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((result: { data?: { role?: 'guest' | 'user' | 'operator' | 'owner' } }) => {
+        if (active && result.data?.role) setAccessRole(result.data.role)
+      })
+      .catch(() => { if (active) setAccessRole('guest') })
+    return () => { active = false }
+  }, [])
 
   const openSettings = useCallback((trigger?: HTMLElement) => {
     if (trigger) {
@@ -1933,6 +1956,7 @@ export default function AirDashboard() {
   }, [range])
 
   const saveNodeSettings = useCallback(async (patch: ClientNodeSettingsPatch) => {
+    if (!canOperate) return
     setSettingsSaving(true)
     setSettingsError(null)
     setSettingsNotice(null)
@@ -1950,10 +1974,11 @@ export default function AirDashboard() {
     } finally {
       setSettingsSaving(false)
     }
-  }, [controls?.device_id, loadData, nodeSettings?.device_id])
+  }, [canOperate, controls?.device_id, loadData, nodeSettings?.device_id])
 
   const executeControl = useCallback(
     async (target: ClientControlTarget, action: ClientControlAction) => {
+      if (!canOperate) return
       const commandKey = target + ':' + action
       setActiveCommand(commandKey)
       setControlError(null)
@@ -1978,11 +2003,12 @@ export default function AirDashboard() {
         setActiveCommand(null)
       }
     },
-    [controls?.device_id],
+    [canOperate, controls?.device_id],
   )
 
   const executeVentilation = useCallback(
     async (action: ClientVentilationAction) => {
+      if (!canOperate) return
       const commandKey = 'ventilation:' + action
       setActiveCommand(commandKey)
       setControlError(null)
@@ -2007,7 +2033,7 @@ export default function AirDashboard() {
         setActiveCommand(null)
       }
     },
-    [controls?.device_id],
+    [canOperate, controls?.device_id],
   )
 
   useEffect(() => {
@@ -2253,6 +2279,7 @@ export default function AirDashboard() {
             settingsError={settingsError}
             settingsSaving={settingsSaving}
             settingsNotice={settingsNotice}
+            canEdit={canOperate}
             onSave={saveNodeSettings}
           />
         ) : (
@@ -2431,7 +2458,7 @@ export default function AirDashboard() {
                   className={'ventilation-master-button ' + (ventilationActive ? 'button-secondary' : 'button-primary')}
                   type="button"
                   onClick={() => void executeVentilation(ventilationAction)}
-                  disabled={ventilationPending}
+                  disabled={ventilationPending || !canOperate}
                   aria-pressed={ventilationActive}
                 >
                   <Icon name="air" />
@@ -2485,7 +2512,7 @@ export default function AirDashboard() {
                     className={'category-tab ' + (windowMode === 'auto' ? 'category-tab-active' : '')}
                     type="button"
                     onClick={() => void executeControl('window', 'auto')}
-                    disabled={controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
+                    disabled={!canOperate || controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
                     aria-pressed={windowMode === 'auto'}
                   >
                     Авто
@@ -2494,7 +2521,7 @@ export default function AirDashboard() {
                     className={'category-tab ' + (windowMode === 'manual' && windowDesiredOpen ? 'category-tab-active' : '')}
                     type="button"
                     onClick={() => void executeControl('window', 'open')}
-                    disabled={controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
+                    disabled={!canOperate || controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
                     aria-pressed={windowMode === 'manual' && windowDesiredOpen}
                   >
                     Открыть
@@ -2503,7 +2530,7 @@ export default function AirDashboard() {
                     className={'category-tab ' + (windowMode === 'manual' && !windowDesiredOpen ? 'category-tab-active' : '')}
                     type="button"
                     onClick={() => void executeControl('window', 'close')}
-                    disabled={controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
+                    disabled={!canOperate || controls === null || activeCommand !== null || controls.reported.window_open !== controls.desired.window_open}
                     aria-pressed={windowMode === 'manual' && !windowDesiredOpen}
                   >
                     Закрыть

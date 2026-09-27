@@ -16,6 +16,8 @@ AirCheck — локальная панель управления качеств
 - защита от немедленного вмешательства автоматики после ручной команды окна;
 - очередь команд с различием между желаемым и подтверждённым состоянием;
 - polling simulator, который использует тот же контракт, что и будущая ESP32;
+- браузерный интерактивный 3D-стенд на отдельной вкладке с общей Python Simulation Core и Device Layer;
+- вход по email/паролю с ролями «гость», «пользователь», «оператор» и единственным владельцем установки;
 - отдельная панель настроек с техническими сведениями и правилами автоматики;
 - ручное обновление показаний прямо в карточке «Воздух в комнате» с отметкой времени последней синхронизации;
 - фото-контексты «Внутри комнаты» и «Снаружи» с переходом к соответствующей группе датчиков;
@@ -28,19 +30,18 @@ AirCheck — локальная панель управления качеств
 ## Архитектура
 
 ```text
-Python simulator / будущая ESP32
-        │  REST/JSON: measurements + control state
+Браузер: React dashboard + Three.js 3D-стенд
+        │ same-origin API / SSE, вход и проверка прав
         ▼
-Next.js TypeScript server
-  ├─ React dashboard
-  ├─ REST API route handlers
-  ├─ Recommendation Engine
-  └─ очередь команд климатического контура
-        │                         │
-        ▼                         ▼
- PostgreSQL 16              Python ML service
- measurements                scikit-learn
- predictions                 train / predict
+Next.js server — AirCheck UI и REST-контракт
+        │                            ▲
+        ├─ measurements ─────────────┤ Python Simulation Core
+        ├─ очередь команд ──────────►│ Device Layer / виртуальная ESP32
+        ├─ actual state / ACK ◄──────┤ telemetry / прогноз
+        ▼                            │
+ PostgreSQL 16 ◄──► Python ML service
+ measurements       scikit-learn
+ predictions        train / predict
  recommendations
  actuator_states
  actuator_commands
@@ -49,7 +50,9 @@ Next.js TypeScript server
 ### Стек
 
 - TypeScript 5 + Next.js 15 server runtime;
-- React 19 + TypeScript;
+- React 19 + TypeScript + React Three Fiber / Three.js;
+- Better Auth, PostgreSQL sessions and explicit server-side AirCheck permissions;
+- Python headless simulator, shared by REST telemetry and browser SSE snapshots;
 - PostgreSQL 16;
 - Python 3.12 + scikit-learn;
 - simulator на Python с `urllib`, без отдельного формата данных;
@@ -66,8 +69,12 @@ Next.js TypeScript server
 
 ```powershell
 Copy-Item .env.example .env
-docker compose build
-docker compose up -d postgres ml-service backend
+```
+
+Перед запуском задайте в `.env` три случайных значения не короче 32 символов: `DEVICE_API_TOKEN`, `SIMULATOR_INTERNAL_TOKEN` и `BETTER_AUTH_SECRET`. Например, создайте их командой `openssl rand -hex 32` и вставьте результат в соответствующее поле. Не используйте один токен для разных назначений и не отправляйте `.env` в Git.
+
+```powershell
+docker compose --profile web-demo up --build -d
 ```
 
 Проверить состояние контейнеров:
@@ -79,6 +86,22 @@ curl.exe http://localhost:8000/healthz
 ```
 
 Ожидается `postgres ... healthy`, а backend и ML-service должны иметь статус `Up`.
+
+Откройте основной интерфейс по HTTPS: `https://aircheck.home.arpa`, вкладка цифрового двойника — `https://aircheck.home.arpa/simulator`. Для локального просмотра API-здоровья доступен только с этого компьютера адрес `http://localhost:3000/healthz`; прямого LAN-доступа к Next.js, Python simulator, PostgreSQL и ML-service нет.
+
+Для первого запуска создайте владельца с интерактивным вводом пароля:
+
+```powershell
+docker compose exec backend npm run owner -- bootstrap
+```
+
+Если PostgreSQL volume уже существовал до добавления входа, примените идемпотентную миграцию ролей и таблиц авторизации один раз:
+
+```powershell
+docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/005_auth.sql'
+```
+
+На клиентских компьютерах в локальной сети нужно настроить имя `aircheck.home.arpa` на IP компьютера с AirCheck и добавить локальный корневой сертификат Caddy в доверенные корневые центры сертификации. Инструкции по HTTPS, ролям и обновлению существующей базы — в [руководстве по веб-симулятору](docs/web-simulator.md).
 
 ### Заполнение истории и обучение модели
 
@@ -101,26 +124,44 @@ Backend автоматически удаляет записи старше 24 �
 
 Периодическая очистка не зависит от количества точек, возвращаемых API. Для полного 24-часового графика при интервале simulator 30 секунд лимит истории увеличен до 5000 точек.
 
-### Live simulator
+### Варианты симулятора
 
-Для постоянной демонстрации запустите источник данных:
+Для веб-сцены и общей физической модели запустите headless-симулятор:
+
+```powershell
+docker compose --profile web-demo up --build -d web-simulator
+docker compose logs -f web-simulator
+```
+
+Откройте панель по `https://aircheck.home.arpa`, затем вкладку «3D-стенд» или прямой адрес `https://aircheck.home.arpa/simulator`. Headless-процесс отправляет telemetry через существующий REST-контракт, получает команды, исполняет их в Device Layer и подтверждает фактическое состояние.
+
+Старый `sensor-simulator` сохранён для резервного REST-only режима и заполнения истории. Для непрерывной работы без 3D-сцены запустите его:
 
 ```powershell
 docker compose --profile demo up -d simulator
 docker compose logs -f simulator
 ```
 
-В интерфейсе откройте [http://localhost:3000](http://localhost:3000). Simulator каждые 30 секунд:
+Он каждые 30 секунд:
 
 1. получает ожидающие команды для `room-01`;
 2. применяет их к своим состояниям вытяжки, притока и окна;
 3. отправляет measurement;
 4. отправляет подтверждённое control state обратно на сервер.
 
+Для одного `DEVICE_ID` запускайте только один источник одновременно: web-вариант или старый резервный simulator. Общая блокировка не позволит двум процессам отправлять данные одного узла.
+
 Остановка demo-контейнера:
 
 ```powershell
 docker compose stop simulator
+```
+
+Перед переключением на другой источник остановите первый:
+
+```powershell
+docker compose stop simulator
+docker compose stop web-simulator
 ```
 
 Полная остановка стека:
@@ -130,6 +171,8 @@ docker compose --profile demo down
 ```
 
 Команда `down` удаляет контейнеры и сеть, но не удаляет именованные volumes PostgreSQL и ML-модели.
+
+Подробное описание браузерной сцены, управления камерой, Device Layer, ролей, machine token и переключения demo-профилей: [docs/web-simulator.md](docs/web-simulator.md).
 
 ## Бизнес-логика климатического контура
 
@@ -361,7 +404,7 @@ Python-проверка:
 
 ```powershell
 cd ..
-python -m pytest ml-service/tests sensor-simulator/test_simulator.py -q
+python -m pytest aircheck_simulator_3d/tests ml-service/tests sensor-simulator -q
 ```
 
 Standalone frontend image собирается через `frontend/Dockerfile`. В production Next.js работает как единый standalone server: React UI и REST API доступны на порту 3000.
@@ -386,12 +429,13 @@ Standalone frontend image собирается через `frontend/Dockerfile`.
 Команды проверки:
 
 ```powershell
+python -m pip install -r aircheck_simulator_3d/requirements-test.txt -r ml-service/requirements.txt
 cd frontend
 npm run typecheck
 npm test
 npm run build
 cd ..
-python -m pytest ml-service/tests sensor-simulator/test_simulator.py -q
+python -m pytest aircheck_simulator_3d/tests ml-service/tests sensor-simulator -q
 docker compose config --quiet
 ```
 
@@ -400,9 +444,10 @@ docker compose config --quiet
 - `database/migrations/001_init.sql` — measurements, predictions, recommendations;
 - `database/migrations/002_controls.sql` — actuator states и очередь команд;
 - `database/migrations/003_retention_indexes.sql` — индексы для периодической очистки.
-- `database/migrations/004_node_settings.sql` — постоянные настройки автоматики и порогов для узла.
+- `database/migrations/004_node_settings.sql` — постоянные настройки автоматики и порогов для узла;
+- `database/migrations/005_auth.sql` — Better Auth, роли AirCheck и аудит изменения прав.
 
-Для чистого PostgreSQL Compose применяет все миграции при первом создании volume. Если volume уже существовал до добавления `002_controls.sql`, `003_retention_indexes.sql` или `004_node_settings.sql`, примените отсутствующие файлы один раз вручную:
+Для чистого PostgreSQL Compose применяет все миграции при первом создании volume. Если volume уже существовал до добавления миграций, примените отсутствующие файлы один раз вручную; для входа и ролей также примените `005_auth.sql`:
 
 ```powershell
 docker compose exec -T postgres psql -U air_quality -d air_quality -f /docker-entrypoint-initdb.d/002_controls.sql

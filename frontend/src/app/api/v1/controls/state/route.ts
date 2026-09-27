@@ -8,10 +8,18 @@ import {
 } from '../../../../../server/api'
 import { serializeControlStatus } from '../../../../../server/serializers'
 import { parseDeviceStateReport } from '../../../../../server/validation'
+import { accessErrorResponse, requireDeviceToken } from '../../../../../server/access'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
+  try {
+    requireDeviceToken(request)
+  } catch (error) {
+    const response = accessErrorResponse(error)
+    if (response) return response
+    throw error
+  }
   let payload: unknown
   try {
     payload = await request.json()

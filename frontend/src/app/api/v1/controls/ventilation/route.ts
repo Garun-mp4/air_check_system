@@ -7,10 +7,19 @@ import {
   serializeControlStatus,
 } from '../../../../../server/serializers'
 import { parseVentilationCommand } from '../../../../../server/validation'
+import { accessErrorResponse, assertSameOrigin, requireOperator } from '../../../../../server/access'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
+  try {
+    assertSameOrigin(request)
+    await requireOperator(request)
+  } catch (error) {
+    const response = accessErrorResponse(error)
+    if (response) return response
+    throw error
+  }
   let payload: unknown
   try {
     payload = await request.json()

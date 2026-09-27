@@ -125,6 +125,7 @@ class BackendConfig:
     command_limit: int
     command_poll_interval_seconds: float = 2.0
     health_check_interval_seconds: float = 10.0
+    device_token: str = ""
 
     @property
     def resolved_dashboard_url(self) -> str:
@@ -469,6 +470,7 @@ def _apply_environment_overrides(
         health_check_interval_seconds=_environment_float(
             environ, "BACKEND_HEALTH_CHECK_INTERVAL_SECONDS", backend.health_check_interval_seconds
         ),
+        device_token=environ.get("DEVICE_API_TOKEN", "").strip(),
     )
     indoor = AirReadingConfig(
         co2_ppm=_environment_float(environ, "INITIAL_CO2", room.initial_indoor.co2_ppm),

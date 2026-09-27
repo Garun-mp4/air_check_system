@@ -8,14 +8,19 @@
     "start": "node scripts/start-standalone.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "owner": "node scripts/manage-owner.mjs"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.1",
+    "better-auth": "^1.7.6",
     "echarts": "^6.1.0",
     "next": "^15.5.0",
     "pg": "^8.13.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

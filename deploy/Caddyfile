@@ -1,0 +1,5 @@
+{$AIR_CHECK_DOMAIN:aircheck.home.arpa} {
+	tls internal
+	encode zstd gzip
+	reverse_proxy backend:{$PORT:3000}
+}
