@@ -45,6 +45,52 @@ def _read_env_assignments(path: Path = ENV_EXAMPLE) -> tuple[dict[str, str], lis
     return values, keys
 
 
+def _compose_interpolations(text: str) -> list[tuple[str, str | None]]:
+    """Return unescaped Compose variables and their interpolation operators."""
+    interpolations: list[tuple[str, str | None]] = []
+    cursor = 0
+    while True:
+        start = text.find("${", cursor)
+        if start < 0:
+            break
+        if start > 0 and text[start - 1] == "$":
+            cursor = start + 2
+            continue
+
+        depth = 1
+        end = start + 2
+        while end < len(text) and depth:
+            if text.startswith("$${", end):
+                escaped_end = text.find("}", end + 3)
+                if escaped_end < 0:
+                    raise ValueError("Unclosed escaped Compose interpolation")
+                end = escaped_end + 1
+                continue
+            if text.startswith("${", end) and text[end - 1] != "$":
+                depth += 1
+                end += 2
+                continue
+            if text[end] == "}":
+                depth -= 1
+            end += 1
+        if depth:
+            raise ValueError("Unclosed Compose interpolation")
+
+        expression = text[start + 2 : end - 1]
+        match = re.match(r"([A-Za-z_][A-Za-z0-9_]*)(.*)\Z", expression, re.DOTALL)
+        if match is None:
+            raise ValueError("Invalid Compose interpolation")
+        suffix = match.group(2)
+        operator = next(
+            (candidate for candidate in (":-", ":?", "-", "?", ":+", "+") if suffix.startswith(candidate)),
+            None,
+        )
+        interpolations.append((match.group(1), operator))
+        interpolations.extend(_compose_interpolations(expression))
+        cursor = end
+    return interpolations
+
+
 class ComposeRunner:
     """Run read-only Compose config rendering with an isolated test project."""
 
@@ -171,15 +217,36 @@ def _port(service: dict[str, Any], target: int) -> dict[str, Any]:
     return matches[0]
 
 
-def test_env_example_covers_every_compose_interpolation() -> None:
+def test_compose_interpolation_scanner_handles_escaped_nested_and_required_forms() -> None:
+    text = (
+        'literal="$${ESCAPED:-value}"\n'
+        'url="${URL:-https://${HOST:-local}}"\n'
+        'outer="${OUTER:-literal $${NESTED_ESCAPED}}"\n'
+        'required="${TOKEN:?Set a token}"\n'
+        'plain="${PLAIN}"'
+    )
+    assert _compose_interpolations(text) == [
+        ("URL", ":-"),
+        ("HOST", ":-"),
+        ("OUTER", ":-"),
+        ("TOKEN", ":?"),
+        ("PLAIN", None),
+    ]
+
+
+def test_compose_variables_are_documented_or_have_an_explicit_fallback() -> None:
     template_values, _ = _read_env_assignments()
     compose_text = COMPOSE_FILE.read_text(encoding="utf-8")
-    referenced_variables = set(
-        re.findall(r"(?<!\$)\$\{([A-Za-z_][A-Za-z0-9_]*)(?:[^}]*)\}", compose_text)
+    missing_without_fallback = sorted(
+        {
+            name
+            for name, operator in _compose_interpolations(compose_text)
+            if name not in template_values and operator not in (":-", "-")
+        }
     )
-    assert referenced_variables <= set(template_values), (
-        "Compose variables missing from .env.example: "
-        f"{sorted(referenced_variables - set(template_values))}"
+    assert not missing_without_fallback, (
+        "Compose variables absent from .env.example and without an explicit fallback: "
+        f"{missing_without_fallback}"
     )
 
 
