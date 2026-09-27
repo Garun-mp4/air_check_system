@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+import { getAuthErrorMessage } from '../lib/auth-errors'
 import { getSafeReturnPath } from '../lib/auth-navigation'
 import { useAccessSession } from './auth/AccessSessionProvider'
 import PasswordInput from './auth/PasswordInput'
@@ -34,10 +35,7 @@ export default function AuthPanel() {
       })
       const result: unknown = await response.json().catch(() => null)
       if (!response.ok) {
-        const message = typeof result === 'object' && result !== null && 'message' in result && typeof result.message === 'string'
-          ? result.message
-          : 'Не удалось выполнить вход. Проверьте данные и повторите попытку.'
-        throw new Error(message)
+        throw new Error(getAuthErrorMessage(result, mode))
       }
       await refresh()
       const returnTo = new URLSearchParams(window.location.search).get('returnTo')

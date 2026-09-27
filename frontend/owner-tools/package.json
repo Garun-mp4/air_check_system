@@ -1,0 +1,9 @@
+{
+  "name": "aircheck-owner-tools",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "better-auth": "1.7.6",
+    "pg": "8.23.0"
+  }
+}

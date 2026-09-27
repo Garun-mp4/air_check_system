@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth'
 import { Pool } from 'pg'
 
 import { getConfig } from './config'
+import { parseTrustedOrigins } from './trusted-origins'
 
 let pool: Pool | null = null
 
@@ -22,17 +23,14 @@ function createAuth() {
     throw new Error('BETTER_AUTH_SECRET must contain at least 32 characters')
   }
   const publicUrl = process.env.BETTER_AUTH_URL?.trim().replace(/\/$/, '')
-  const trustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean)
+  const trustedOrigins = parseTrustedOrigins(process.env.BETTER_AUTH_TRUSTED_ORIGINS)
 
   return betterAuth({
     appName: 'AirCheck',
     ...(publicUrl ? { baseURL: publicUrl } : {}),
     secret,
     database: getAuthPool(),
-    trustedOrigins,
+    ...(trustedOrigins ? { trustedOrigins } : {}),
     emailAndPassword: {
       enabled: true,
       disableSignUp: false,

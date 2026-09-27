@@ -4,6 +4,15 @@ WORKDIR /app
 COPY package*.json .npmrc ./
 RUN npm ci
 
+FROM node:22-alpine AS owner-tools
+
+WORKDIR /app
+COPY owner-tools/package*.json ./
+RUN npm ci --omit=dev
+COPY --chown=node:node scripts/manage-owner.mjs ./scripts/manage-owner.mjs
+USER node
+ENTRYPOINT ["node", "scripts/manage-owner.mjs"]
+
 FROM node:22-alpine AS builder
 
 WORKDIR /app

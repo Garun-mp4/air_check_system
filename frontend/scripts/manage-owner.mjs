@@ -6,8 +6,11 @@ import { hashPassword } from 'better-auth/crypto'
 import { Pool } from 'pg'
 
 const mode = process.argv[2]
+const passwordFromStdin = process.argv.includes('--password-stdin')
+const positionalArguments = process.argv.slice(3).filter((argument) => argument !== '--password-stdin')
+const emailArgument = positionalArguments[0]
 if (!['bootstrap', 'recover'].includes(mode)) {
-  console.error('Usage: node scripts/manage-owner.mjs <bootstrap|recover>')
+  console.error('Usage: node scripts/manage-owner.mjs <bootstrap|recover> [email] [--password-stdin]')
   process.exit(2)
 }
 
@@ -16,9 +19,15 @@ if (!process.env.DATABASE_URL) {
   process.exit(2)
 }
 
-const readline = createInterface({ input: stdin, output: stdout })
+if (passwordFromStdin && !emailArgument) {
+  console.error('An email address argument is required with --password-stdin.')
+  process.exit(2)
+}
+
+const readline = passwordFromStdin ? null : createInterface({ input: stdin, output: stdout })
 
 function question(prompt) {
+  if (!readline) throw new Error('An email argument is required when reading the password from stdin.')
   return new Promise((resolve) => readline.question(prompt, resolve))
 }
 
@@ -60,14 +69,24 @@ async function hiddenQuestion(prompt) {
   })
 }
 
+async function readPasswordInput() {
+  let input = ''
+  for await (const chunk of stdin) input += chunk
+  const lines = input.split(/\r?\n/)
+  if (lines.at(-1) === '') lines.pop()
+  if (lines.length !== 2) throw new Error('Password input must contain exactly two lines.')
+  return lines
+}
+
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
 const client = await pool.connect()
 
 try {
-  const email = (mode === 'recover' ? process.argv[3] : await question('Owner email: ')).trim().toLowerCase()
+  const email = (emailArgument ?? (mode === 'bootstrap' ? await question('Owner email: ') : '')).trim().toLowerCase()
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('A valid email address is required.')
-  const password = await hiddenQuestion('New owner password (12+ characters): ')
-  const confirmation = await hiddenQuestion('Repeat password: ')
+  const [password, confirmation] = passwordFromStdin
+    ? await readPasswordInput()
+    : [await hiddenQuestion('New owner password (12+ characters): '), await hiddenQuestion('Repeat password: ')]
   if (password.length < 12 || password.length > 128) throw new Error('Password must contain 12–128 characters.')
   if (password !== confirmation) throw new Error('Passwords do not match.')
   const passwordHash = await hashPassword(password)
@@ -80,7 +99,7 @@ try {
     if (owner.rowCount) throw new Error('An owner already exists. Use recover with that owner email instead.')
   }
 
-  let user = await client.query<{ id: string }>('SELECT id FROM "user" WHERE lower(email) = $1 FOR UPDATE', [email])
+  let user = await client.query('SELECT id FROM "user" WHERE lower(email) = $1 FOR UPDATE', [email])
   let userId = user.rows[0]?.id
   if (!userId) {
     if (mode === 'recover') throw new Error('No account exists for this email.')
@@ -125,7 +144,7 @@ try {
   console.error(error instanceof Error ? error.message : 'Owner operation failed.')
   process.exitCode = 1
 } finally {
-  readline.close()
+  readline?.close()
   client.release()
   await pool.end()
 }

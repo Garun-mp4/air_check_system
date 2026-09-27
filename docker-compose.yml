@@ -52,9 +52,9 @@ services:
       DEVICE_HEARTBEAT_TIMEOUT_MS: ${DEVICE_HEARTBEAT_TIMEOUT_MS:-90000}
       SIMULATOR_INTERNAL_URL: http://web-simulator:8090
       SIMULATOR_INTERNAL_TOKEN: ${SIMULATOR_INTERNAL_TOKEN:-}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-https://${AIR_CHECK_DOMAIN:-aircheck.home.arpa}}
-      BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS:-https://${AIR_CHECK_DOMAIN:-aircheck.home.arpa}}
+      BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS:-https://${AIR_CHECK_DOMAIN:-aircheck.home.arpa},http://localhost:${PORT:-3000},http://127.0.0.1:${PORT:-3000}}
       WINDOW_MANUAL_OVERRIDE_MINUTES: ${WINDOW_MANUAL_OVERRIDE_MINUTES:-30}
       AUTO_VENTILATION_MINIMUM_MINUTES: ${AUTO_VENTILATION_MINIMUM_MINUTES:-5}
       AUTOMATION_ENABLED: ${AUTOMATION_ENABLED:-true}
@@ -120,6 +120,18 @@ services:
       retries: 5
     profiles:
       - web-demo
+
+  owner-cli:
+    build:
+      context: ./frontend
+      target: owner-tools
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-air_quality}:${POSTGRES_PASSWORD:-air_quality_dev}@postgres:5432/${POSTGRES_DB:-air_quality}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - maintenance
 
   https-proxy:
     image: caddy:2-alpine

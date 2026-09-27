@@ -49,7 +49,7 @@ Copy-Item .env.example .env
 - `SIMULATOR_INTERNAL_TOKEN` — только Python service proxy;
 - `BETTER_AUTH_SECRET` — подпись сессии Better Auth.
 
-Сгенерировать значение можно локально командой `openssl rand -hex 32`. Не вставляйте значения в исходники, не публикуйте `.env`. Для одной LAN-инсталляции также согласуйте `AIR_CHECK_DOMAIN`, `AIR_CHECK_PUBLIC_URL`, `BETTER_AUTH_URL` и `BETTER_AUTH_TRUSTED_ORIGINS`.
+Сгенерировать значение можно локально командой `openssl rand -hex 32`. Не вставляйте значения в исходники, не публикуйте `.env`. Для одной LAN-инсталляции также согласуйте `AIR_CHECK_DOMAIN`, `AIR_CHECK_PUBLIC_URL`, `BETTER_AUTH_URL` и `BETTER_AUTH_TRUSTED_ORIGINS`. Если панель открывается напрямую по HTTP, trusted-origin список должен содержать точные адреса `http://localhost:${PORT}` и `http://127.0.0.1:${PORT}`; значения по умолчанию Compose включают их вместе с HTTPS-доменом.
 
 После настройки:
 
@@ -78,16 +78,16 @@ docker compose cp https-proxy:/data/caddy/pki/authorities/local/root.crt "$env:T
 docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/005_auth.sql'
 ```
 
-Создайте единственную учётную запись владельца. Команда запросит email и пароль без отображения пароля в терминале; пароля по умолчанию нет:
+Создайте единственную учётную запись владельца. В Windows запускайте PowerShell-обёртку: она скрывает ввод пароля на хосте и передаёт его Docker-команде через stdin, а не в аргументах или переменных окружения. Пароля по умолчанию нет:
 
 ```powershell
-docker compose exec backend npm run owner -- bootstrap
+.\frontend\scripts\manage-owner.ps1 bootstrap
 ```
 
 Для восстановления доступа существующего владельца, сохраняя его роль:
 
 ```powershell
-docker compose exec backend npm run owner -- recover owner@example.org
+.\frontend\scripts\manage-owner.ps1 recover owner@example.org
 ```
 
 Самостоятельного восстановления через email пока нет: SMTP не подключён. Владелец может создавать учётные записи через раздел «Аккаунты» или выполнить административное восстановление командой.
