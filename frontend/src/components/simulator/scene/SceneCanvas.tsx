@@ -60,7 +60,7 @@ export default function SceneCanvas({
           <meshStandardMaterial color="#b7d4a8" roughness={1} />
         </mesh>
       </Canvas>
-      <div className="simulator-scene-cue"><span className="simulator-cue-dot" /> Перетаскивайте — вращение · колёсико — масштаб · WASD/QE — перемещение камеры</div>
+      <div className="simulator-scene-cue"><span className="simulator-cue-dot" /> ЛКМ — сдвиг · ПКМ — вращение · колёсико — масштаб · WASD/QE — камера</div>
     </div>
   )
 }

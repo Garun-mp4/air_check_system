@@ -8,6 +8,7 @@ import { PerspectiveCamera, Vector3 } from 'three'
 
 import type { SimulatorSnapshot } from '../types'
 import { CameraTransition } from './cameraTransition'
+import { CAMERA_MOUSE_BUTTONS, trackCameraKeyDown, trackCameraKeyUp } from './cameraInput'
 
 type Point = [number, number, number]
 type CameraCommand = { id: number; focus: Point | null }
@@ -33,24 +34,21 @@ export default function CameraRig({
   const startTarget = toWorld(cameraSettings.start_target)
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (!document.querySelector('.simulator-canvas-host:hover') || event.altKey || event.ctrlKey || event.metaKey) return
-      if (event.target instanceof HTMLElement && ['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(event.target.tagName)) return
-      const key = event.key.toLowerCase()
-      if (['w', 'a', 's', 'd', 'q', 'e', 'shift'].includes(key)) {
-        keys.current.add(key)
-        event.preventDefault()
-      }
-    }
-    const onKeyUp = (event: KeyboardEvent) => keys.current.delete(event.key.toLowerCase())
+    const onKeyDown = (event: KeyboardEvent) => { trackCameraKeyDown(event, keys.current) }
+    const onKeyUp = (event: KeyboardEvent) => { trackCameraKeyUp(event, keys.current) }
     const clear = () => keys.current.clear()
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') clear()
+    }
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('keyup', onKeyUp)
     window.addEventListener('blur', clear)
+    document.addEventListener('visibilitychange', onVisibilityChange)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
       window.removeEventListener('blur', clear)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
     }
   }, [])
 
@@ -116,7 +114,7 @@ export default function CameraRig({
       minPolarAngle={Math.PI * 8 / 180}
       maxPolarAngle={Math.PI * 0.94}
       screenSpacePanning
-      mouseButtons={{ LEFT: 0, MIDDLE: 1, RIGHT: 2 }}
+      mouseButtons={CAMERA_MOUSE_BUTTONS}
     />
   )
 }
