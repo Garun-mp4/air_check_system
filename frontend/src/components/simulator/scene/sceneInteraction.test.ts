@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { isValidElement } from 'react'
 import type { ReactElement, ReactNode } from 'react'
+import { Edges } from '@react-three/drei'
 import { describe, expect, it, vi } from 'vitest'
 import { Canvas } from '@react-three/fiber'
 import { Vector3 } from 'three'
@@ -131,6 +132,24 @@ describe('3D scene interaction wiring', () => {
     expect(stopPropagation).toHaveBeenCalledOnce()
     expect(onSelect).toHaveBeenCalledWith('fan.intake', [1, 2, 3])
     expect(tree.props.userData).toEqual({ deviceId: 'fan.intake' })
+  })
+
+  it('draws a clean object-boundary highlight without triangulated box diagonals', () => {
+    const tree = Pickable({
+      id: 'window.assembly',
+      bounds: [1.8, 1.25, 0.11],
+      selectedId: 'window.assembly',
+      mode: 'normal',
+      onSelect: vi.fn(),
+      children: null,
+    }) as SceneElement
+    const descendants = elements(tree)
+    const edgeHighlight = descendants.find((element) => element.type === Edges)
+
+    expect(edgeHighlight).toBeDefined()
+    expect(edgeHighlight?.props.depthTest).toBe(true)
+    expect(edgeHighlight?.props.depthWrite).toBe(false)
+    expect(descendants.some((element) => element.type === 'meshBasicMaterial' && element.props.wireframe)).toBe(false)
   })
 })
 

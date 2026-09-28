@@ -14,6 +14,10 @@ import {
 
 type Point3 = [number, number, number]
 
+const GLASS_PANE_SIZE_INSET_M = 0.095
+const GLASS_PANE_THICKNESS_M = 0.006
+const GLASS_PANE_OFFSETS_Z_M = [0.004, 0.022] as const
+
 function rotateAboutBottom(point: Point3, angle: number): Point3 {
   const cosine = Math.cos(angle)
   const sine = Math.sin(angle)
@@ -82,14 +86,20 @@ export default function WindowAssembly({
       {/* A single bottom-hinged sash opens outwards, matching the linear actuator's travel. */}
       <group position={[0, 0, sashPlaneZ]} rotation={[sashAngle, 0, 0]}>
         <Pickable id="window.assembly" position={[0, 0, 0.030]} highlightPosition={[0, sashHeight / 2, 0]} bounds={[sashWidth + 0.02, sashHeight + 0.025, 0.11]} selectedId={selectedId} mode={mode} onSelect={onSelect}>
-          <mesh position={[0, sashHeight / 2, 0.010]} castShadow>
-            <boxGeometry args={[sashWidth - 0.095, sashHeight - 0.095, 0.018]} />
-            <meshPhysicalMaterial color="#acd4df" transparent opacity={0.40} roughness={0.12} metalness={0.06} clearcoat={0.8} clearcoatRoughness={0.10} side={2} />
-          </mesh>
-          <mesh position={[0, sashHeight / 2, 0.000]}>
-            <boxGeometry args={[sashWidth - 0.118, sashHeight - 0.118, 0.006]} />
-            <meshPhysicalMaterial color="#c6e2e8" transparent opacity={0.20} roughness={0.10} metalness={0.02} side={2} />
-          </mesh>
+          {GLASS_PANE_OFFSETS_Z_M.map((offsetZ, index) => <mesh key={offsetZ} position={[0, sashHeight / 2, offsetZ]} castShadow={index === 0}>
+            <boxGeometry args={[sashWidth - GLASS_PANE_SIZE_INSET_M, sashHeight - GLASS_PANE_SIZE_INSET_M, GLASS_PANE_THICKNESS_M]} />
+            <meshPhysicalMaterial
+              color={index === 0 ? '#acd4df' : '#c6e2e8'}
+              transparent
+              opacity={index === 0 ? 0.40 : 0.20}
+              roughness={index === 0 ? 0.12 : 0.10}
+              metalness={index === 0 ? 0.06 : 0.02}
+              clearcoat={index === 0 ? 0.8 : 0}
+              clearcoatRoughness={0.10}
+              depthWrite={false}
+              side={2}
+            />
+          </mesh>)}
           {/* Four hollow aluminum profiles form the moving frame around the glazing. */}
           <Housing position={[-sashWidth / 2 + 0.024, sashHeight / 2, 0.020]} size={[0.048, sashHeight, 0.060]} color="#617174" radius={0.009} metalness={0.48} roughness={0.42} />
           <Housing position={[sashWidth / 2 - 0.024, sashHeight / 2, 0.020]} size={[0.048, sashHeight, 0.060]} color="#617174" radius={0.009} metalness={0.48} roughness={0.42} />

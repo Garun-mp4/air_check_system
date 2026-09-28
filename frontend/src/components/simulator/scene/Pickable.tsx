@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { ThreeEvent } from '@react-three/fiber'
+import { Edges } from '@react-three/drei'
 
 import type { VisualizationMode } from '../types'
 
@@ -44,14 +45,21 @@ export function Pickable({
     >
       {children}
       {highlighted ? (
-        <mesh position={highlightPosition} renderOrder={mode === 'technical' ? 9 : 2}>
+        <mesh position={highlightPosition} scale={1.025} renderOrder={mode === 'technical' ? 9 : 2}>
           <boxGeometry args={bounds} />
           <meshBasicMaterial
+            colorWrite={false}
+            depthWrite={false}
+          />
+          <Edges
             color={selectedId === id ? '#007f70' : '#e5a83b'}
-            wireframe
+            threshold={15}
+            lineWidth={1}
             transparent
             opacity={selectedId === id ? 0.92 : 0.62}
             depthTest
+            depthWrite={false}
+            renderOrder={mode === 'technical' ? 9 : 2}
           />
         </mesh>
       ) : null}

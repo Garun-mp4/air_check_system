@@ -189,6 +189,27 @@ describe('snapshot-driven scene state', () => {
     expect(solidPanelsAcrossOpening).toHaveLength(0)
   })
 
+  it('keeps the two glazing panes separated instead of intersecting in the sash', () => {
+    const panes = elements(WindowAssembly({
+      snapshot: sceneSnapshot(),
+      selectedId: null,
+      mode: 'normal',
+      onSelect: () => {},
+    })).filter((element) => elementName(element) === 'mesh'
+      && elements(element.props.children).some((child) => elementName(child) === 'meshPhysicalMaterial'))
+    const paneGeometry = panes.map((pane) => ({
+      centerZ: (pane.props.position as number[])[2],
+      size: elements(pane).find((element) => elementName(element) === 'boxGeometry')!.props.args as number[],
+    })).sort((left, right) => left.centerZ - right.centerZ)
+    const [innerPane, outerPane] = paneGeometry
+    const airGap = outerPane.centerZ - outerPane.size[2] / 2 - (innerPane.centerZ + innerPane.size[2] / 2)
+
+    expect(paneGeometry).toHaveLength(2)
+    expect(outerPane.size[0]).toBeCloseTo(innerPane.size[0], 6)
+    expect(outerPane.size[1]).toBeCloseTo(innerPane.size[1], 6)
+    expect(airGap).toBeGreaterThanOrEqual(0.01)
+  })
+
   it('feeds each reported airflow volume and visibility into its matching flow track', () => {
     const snapshot = sceneSnapshot({ windowAirflow: 12.5, intakeAirflow: 48, exhaustAirflow: 47 })
     const tracks = elements(Airflow({ snapshot, visible: true })).filter((element) => elementName(element) === 'FlowTrack')
