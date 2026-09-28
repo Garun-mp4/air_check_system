@@ -8808,6 +8808,7 @@ body.is-chart-expanded {
   .account-menu summary,
   .account-menu-popover > a,
   .account-menu-popover > button,
+  .account-settings-nav button,
   .password-visibility-toggle {
     scroll-behavior: auto;
     transition: none;
@@ -8817,14 +8818,14 @@ body.is-chart-expanded {
 /* Account settings layout */
 .utility-page.account-page .account-page-content { width: min(calc(100% - 48px), 1120px); }
 .account-settings-layout { display: grid; grid-template-columns: 184px minmax(0, 1fr); align-items: start; gap: 24px; }
-.account-settings-nav { position: sticky; top: 84px; display: grid; gap: 4px; padding: 6px; border: 1px solid var(--color-hairline); border-radius: var(--rounded-lg); background: var(--color-canvas); }
-.account-settings-nav a { min-height: 42px; display: flex; align-items: center; padding: 0 12px; border-radius: var(--rounded-sm); color: var(--color-body); font-size: 14px; font-weight: 500; text-decoration: none; transition: background-color .16s ease, color .16s ease; }
-.account-settings-nav a:hover { background: var(--color-surface-soft); color: var(--color-ink); }
-.account-settings-nav a:focus-visible { outline: 2px solid var(--color-brand-accent); outline-offset: 2px; }
+.account-settings-nav { position: sticky; top: 84px; display: grid; align-content: start; gap: 4px; padding: 6px; border: 1px solid var(--color-hairline); border-radius: var(--rounded-lg); background: var(--color-canvas); }
+.account-settings-nav button { min-height: 42px; display: flex; align-items: center; padding: 0 12px; border: 0; border-radius: var(--rounded-sm); background: transparent; color: var(--color-body); font: 500 14px/1.4 var(--font-body); text-align: left; cursor: pointer; transition: background-color .16s ease, color .16s ease; }
+.account-settings-nav button:hover { background: var(--color-surface-soft); color: var(--color-ink); }
+.account-settings-nav button[aria-selected="true"] { background: var(--color-surface-soft); color: var(--color-ink); font-weight: 600; }
+.account-settings-nav button:focus-visible { outline: 2px solid var(--color-brand-accent); outline-offset: 2px; }
 .account-settings-stack { display: grid; gap: var(--spacing-md); min-width: 0; }
-.account-settings-stack > .account-card { margin: 0; scroll-margin-top: 24px; }
-.account-profile-overview { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(220px, .85fr); align-items: start; gap: var(--spacing-md); }
-.account-profile-overview > .account-card { min-width: 0; margin: 0; }
+.account-settings-stack > .account-settings-panel { min-width: 0; margin: 0; scroll-margin-top: 24px; }
+.account-settings-panel[hidden] { display: none !important; }
 .account-profile-card .account-form { align-items: start; }
 .account-email-field { display: grid; gap: 6px; min-width: 0; }
 .account-field-label { color: var(--color-body); font-size: 14px; font-weight: 550; }
@@ -8847,23 +8848,22 @@ body.is-chart-expanded {
 @media (max-width: 900px) {
   .account-settings-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .account-settings-nav { position: static; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .account-settings-nav a { justify-content: center; padding-inline: 8px; }
+  .account-settings-nav button { justify-content: center; padding-inline: 8px; text-align: center; }
 }
 
 @media (max-width: 640px) {
   .utility-page.account-page .account-page-content { width: min(calc(100% - 32px), 1120px); padding-top: 28px; }
   .account-settings-layout { gap: 12px; }
   .account-settings-nav { gap: 2px; padding: 4px; }
-  .account-settings-nav a { min-height: 42px; padding-inline: 4px; font-size: 12px; text-align: center; }
-  .account-profile-overview { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .account-settings-nav button { min-height: 42px; padding-inline: 4px; font-size: 12px; }
   .account-settings-stack { gap: 12px; }
-  .account-settings-stack > .account-card { padding: 20px; }
+  .account-settings-stack > .account-settings-panel { padding: 20px; }
   .account-access-permissions { margin-top: 8px; padding-top: 12px; }
 }
 
 @media (max-width: 360px) {
-  .account-settings-nav a { font-size: 11px; }
-  .account-settings-stack > .account-card { padding: 17px; }
+  .account-settings-nav button { font-size: 11px; }
+  .account-settings-stack > .account-settings-panel { padding: 17px; }
 }
 
 /* Profile photo and square avatar cropper */

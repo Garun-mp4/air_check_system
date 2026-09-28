@@ -59,6 +59,7 @@ afterEach(() => {
 })
 
 beforeEach(() => {
+  window.history.replaceState(null, '', '/account')
   mocks.refresh.mockReset().mockResolvedValue(true)
   mocks.signOut.mockReset().mockResolvedValue(undefined)
   mocks.routerRefresh.mockReset()
@@ -160,7 +161,8 @@ describe('sign-in and account page UI', () => {
     expect(mocks.refresh).toHaveBeenCalledTimes(1)
   })
 
-  it('shows email as read-only information and presents only supported account sections', () => {
+  it('shows one supported account section at a time and preserves profile edits while switching', async () => {
+    const user = userEvent.setup()
     mocks.useAccessSession.mockReturnValue({
       access: {
         userId: 'user-1',
@@ -176,17 +178,109 @@ describe('sign-in and account page UI', () => {
     })
     render(createElement(AccountPage))
 
-    const profileSection = screen.getByRole('region', { name: 'Профиль' })
+    const profileSection = screen.getByRole('tabpanel', { name: 'Профиль' })
     expect(within(profileSection).getByText('reader@example.test')).not.toBeNull()
     expect(within(profileSection).queryByRole('textbox', { name: /Электронная почта/ })).toBeNull()
-    expect(screen.getByRole('region', { name: 'Доступ' })).not.toBeNull()
-    expect(screen.getByRole('region', { name: 'Пароль' })).not.toBeNull()
-    expect(screen.getByRole('navigation', { name: 'Разделы настроек аккаунта' }).querySelectorAll('a')).toHaveLength(3)
+    expect(screen.queryByRole('tabpanel', { name: 'Доступ' })).toBeNull()
+    expect(screen.queryByRole('tabpanel', { name: 'Безопасность' })).toBeNull()
+    expect(screen.getByRole('tablist', { name: 'Разделы настроек аккаунта' }).querySelectorAll('[role="tab"]')).toHaveLength(3)
+
+    const name = within(profileSection).getByRole('textbox', { name: 'Имя' }) as HTMLInputElement
+    await user.clear(name)
+    await user.type(name, 'Reader Draft')
+    await user.click(screen.getByRole('tab', { name: 'Доступ' }))
+
+    expect(screen.getByRole('tabpanel', { name: 'Доступ' })).not.toBeNull()
+    expect(profileSection.hidden).toBe(true)
+    expect(new URL(window.location.href).searchParams.get('section')).toBe('access')
+    expect(document.querySelector<HTMLInputElement>('input[autocomplete="name"]')?.value).toBe('Reader Draft')
+
+    await user.click(screen.getByRole('tab', { name: 'Безопасность' }))
+    expect(screen.getByRole('tabpanel', { name: 'Безопасность' })).not.toBeNull()
     expect(screen.getByText(/Сброс пароля по электронной почте пока недоступен/)).not.toBeNull()
 
     const newPassword = screen.getByLabelText('Новый пароль') as HTMLInputElement
     expect(newPassword.minLength).toBe(15)
     expect(newPassword.maxLength).toBe(128)
+  })
+
+  it('opens a section from the URL and follows browser back and forward navigation', async () => {
+    const user = userEvent.setup()
+    window.history.replaceState(null, '', '/account?section=security')
+    mocks.useAccessSession.mockReturnValue({
+      access: {
+        userId: 'user-1',
+        email: 'reader@example.test',
+        name: 'Reader',
+        image: null,
+        role: 'user',
+        operatorExpiresAt: null,
+      },
+      status: 'ready',
+      refresh: mocks.refresh,
+      signOut: mocks.signOut,
+    })
+    render(createElement(AccountPage))
+
+    expect(await screen.findByRole('tabpanel', { name: 'Безопасность' })).not.toBeNull()
+    expect(screen.getByRole('tab', { name: 'Безопасность' }).getAttribute('aria-selected')).toBe('true')
+
+    await user.click(screen.getByRole('tab', { name: 'Профиль' }))
+    await user.click(screen.getByRole('tab', { name: 'Доступ' }))
+    window.history.back()
+
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Профиль' }).getAttribute('aria-selected')).toBe('true'))
+    window.history.forward()
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Доступ' }).getAttribute('aria-selected')).toBe('true'))
+  })
+
+  it('translates an existing account hash link without scrolling to an anchor', async () => {
+    window.history.replaceState(null, '', '/account#account-access')
+    mocks.useAccessSession.mockReturnValue({
+      access: {
+        userId: 'user-1',
+        email: 'reader@example.test',
+        name: 'Reader',
+        image: null,
+        role: 'user',
+        operatorExpiresAt: null,
+      },
+      status: 'ready',
+      refresh: mocks.refresh,
+      signOut: mocks.signOut,
+    })
+    render(createElement(AccountPage))
+
+    expect(await screen.findByRole('tabpanel', { name: 'Доступ' })).not.toBeNull()
+    expect(window.location.hash).toBe('')
+    expect(new URL(window.location.href).searchParams.get('section')).toBe('access')
+  })
+
+  it('supports arrow-key tab switching with automatic activation', async () => {
+    const user = userEvent.setup()
+    mocks.useAccessSession.mockReturnValue({
+      access: {
+        userId: 'user-1',
+        email: 'reader@example.test',
+        name: 'Reader',
+        image: null,
+        role: 'user',
+        operatorExpiresAt: null,
+      },
+      status: 'ready',
+      refresh: mocks.refresh,
+      signOut: mocks.signOut,
+    })
+    render(createElement(AccountPage))
+
+    const profileTab = screen.getByRole('tab', { name: 'Профиль' })
+    profileTab.focus()
+    await user.keyboard('{ArrowDown}')
+
+    const accessTab = screen.getByRole('tab', { name: 'Доступ' })
+    expect(document.activeElement).toBe(accessTab)
+    expect(accessTab.getAttribute('aria-selected')).toBe('true')
+    expect(screen.getByRole('tabpanel', { name: 'Доступ' })).not.toBeNull()
   })
 
   it('saves a changed display name and reports success inside the profile section', async () => {
