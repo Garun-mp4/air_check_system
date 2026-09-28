@@ -55,6 +55,28 @@ describe('owner account list states', () => {
     expect(password.maxLength).toBe(128)
   })
 
+  it('keeps account access fields and actions clearly labeled', async () => {
+    fetchMock.mockResolvedValue(response(true, {
+      data: [{
+        id: 'user-1',
+        email: 'user@example.org',
+        name: 'User One',
+        role: 'operator',
+        operator_expires_at: '2026-10-01T12:00:00.000Z',
+        created_at: '2026-09-28T12:00:00.000Z',
+      }],
+    }))
+    render(createElement(OwnerUsers))
+
+    expect(await screen.findByRole('combobox', { name: 'Доступ' })).not.toBeNull()
+    const expiry = screen.getByLabelText('Действует до') as HTMLInputElement
+    expect(expiry.type).toBe('datetime-local')
+    expect(expiry.getAttribute('aria-describedby')).toBe('owner-expiry-note-user-1')
+    expect(screen.getByText('Оставьте пустым для постоянных прав.')).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Сохранить права' })).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Удалить' })).not.toBeNull()
+  })
+
   it('does not present a failed list request as an empty account list', async () => {
     fetchMock.mockResolvedValue(response(false, { error: { message: 'Account list unavailable.' } }))
     render(createElement(OwnerUsers))

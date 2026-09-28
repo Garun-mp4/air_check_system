@@ -8482,17 +8482,23 @@ body.is-chart-expanded {
 .owner-create-card > p { margin-top: var(--spacing-md); }
 .owner-list-heading { gap: var(--spacing-md); }
 .owner-list-heading .button-secondary { min-height: 40px; }
-.owner-user-row { grid-template-columns: minmax(180px, 0.75fr) minmax(0, 1.6fr); gap: var(--spacing-lg); padding: var(--spacing-md); border-color: var(--color-hairline-soft); border-radius: var(--rounded-md); }
+.owner-user-row { grid-template-columns: minmax(180px, 0.75fr) minmax(0, 1.6fr); align-items: start; gap: var(--spacing-lg); padding: var(--spacing-md); border-color: var(--color-hairline-soft); border-radius: var(--rounded-md); }
 .owner-user-identity { min-width: 0; gap: var(--spacing-xs); }
 .owner-user-identity strong { color: var(--color-ink); font-size: 14px; font-weight: 600; }
 .owner-user-identity span { overflow-wrap: anywhere; color: var(--color-body); font-size: 13px; }
 .owner-user-identity small,
 .owner-role-editor small { color: var(--color-muted); font-size: 12px; }
-.owner-role-editor { grid-template-columns: minmax(145px, 0.7fr) minmax(200px, 1fr) auto; gap: var(--spacing-sm); }
+.owner-role-editor { grid-template-columns: minmax(145px, 0.7fr) minmax(200px, 1fr) auto; align-items: start; gap: var(--spacing-sm); }
+.owner-role-field,
+.owner-role-expiry { display: grid; align-content: start; gap: var(--spacing-xs); min-width: 0; }
+.owner-role-editor.is-view-only { grid-template-columns: minmax(0, 1fr); }
+.owner-role-editor.is-view-only .owner-role-actions { grid-column: 1 / -1; margin-top: 0; }
+.owner-role-editor select,
+.owner-role-editor input { box-sizing: border-box; width: 100%; }
 .owner-role-chip { padding: 7px 11px; border-radius: var(--rounded-pill); background: #ecfdf5; color: #047857; font-size: 13px; }
-.owner-role-actions { align-items: center; gap: var(--spacing-xs); }
-.owner-role-actions .button-secondary { min-height: 40px; padding-inline: 12px; white-space: nowrap; }
-.owner-delete-button { min-height: 40px; padding-inline: 10px; border-radius: var(--rounded-md); color: #b42318; font-size: 13px; }
+.owner-role-actions { grid-column: 3; align-items: center; justify-content: flex-start; gap: var(--spacing-xs); margin-top: calc(1.5em + var(--spacing-xs)); font-size: 14px; }
+.owner-role-actions .button-secondary { min-height: 44px; padding-inline: 12px; white-space: nowrap; }
+.owner-delete-button { min-height: 44px; padding-inline: 10px; border-radius: var(--rounded-md); color: #b42318; font-size: 13px; }
 .owner-delete-button:hover { background: #fef2f2; }
 .owner-empty { color: var(--color-muted); font-size: 14px; }
 
@@ -8723,8 +8729,8 @@ body.is-chart-expanded {
 
 @media (max-width: 1100px) {
   .owner-create-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .owner-role-editor { grid-template-columns: minmax(135px, .7fr) minmax(180px, 1fr); }
-  .owner-role-actions { grid-column: 1 / -1; }
+  .owner-role-editor { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+  .owner-role-actions { grid-column: 1 / -1; margin-top: 0; }
   .simulator-workspace { grid-template-columns: minmax(0, 1fr) minmax(300px, 330px); gap: var(--spacing-sm); }
   .simulator-stage-hud { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .sim-hud-forecast { display: none; }
@@ -8772,8 +8778,9 @@ body.is-chart-expanded {
   .owner-list-heading { align-items: flex-start; flex-wrap: wrap; }
   .owner-user-row { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-md); }
   .owner-role-editor { grid-template-columns: minmax(0, 1fr); }
-  .owner-role-actions { grid-column: auto; flex-wrap: wrap; }
-  .owner-role-actions .button-secondary { flex: 1 1 160px; }
+  .owner-role-editor.is-view-only { grid-template-columns: minmax(0, 1fr); }
+  .owner-role-actions { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr); margin-top: 0; }
+  .owner-role-actions > button { width: 100%; min-height: 44px; }
   .simulator-topbar { min-height: 0; height: auto; display: grid; grid-template-columns: minmax(0, 1fr) max-content; grid-template-areas: 'brand actions' 'nav nav'; padding: 8px 12px; gap: 6px var(--spacing-sm); }
   .simulator-topbar > .simulator-brand { grid-area: brand; min-width: 0; }
   .simulator-topbar > .simulator-primary-nav { grid-area: nav; justify-self: center; margin-left: 0; }

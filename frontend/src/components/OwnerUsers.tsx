@@ -179,14 +179,27 @@ function OwnerUserRow({
         <small>Создан: {new Intl.DateTimeFormat('ru-RU', { dateStyle: 'medium' }).format(new Date(user.created_at))}</small>
       </div>
       {owner ? <span className="owner-role-chip">Владелец · защищён</span> : (
-        <div className="owner-role-editor">
-          <label>Доступ
-            <select value={role} onChange={(event) => setRole(event.target.value as 'user' | 'operator')}>
+        <div className={`owner-role-editor${role === 'operator' ? '' : ' is-view-only'}`}>
+          <div className="owner-role-field">
+            <label htmlFor={`owner-role-${user.id}`}>Доступ</label>
+            <select id={`owner-role-${user.id}`} value={role} onChange={(event) => setRole(event.target.value as 'user' | 'operator')}>
               <option value="user">Только просмотр</option>
               <option value="operator">Оператор</option>
             </select>
-          </label>
-          {role === 'operator' ? <label>Действует до<input type="datetime-local" value={expiry} onChange={(event) => setExpiry(event.target.value)} aria-label="Срок прав оператора, пусто означает бессрочно" /><small>Оставьте пустым для постоянных прав.</small></label> : null}
+          </div>
+          {role === 'operator' ? (
+            <div className="owner-role-expiry">
+              <label htmlFor={`owner-expiry-${user.id}`}>Действует до</label>
+              <input
+                id={`owner-expiry-${user.id}`}
+                type="datetime-local"
+                value={expiry}
+                onChange={(event) => setExpiry(event.target.value)}
+                aria-describedby={`owner-expiry-note-${user.id}`}
+              />
+              <small id={`owner-expiry-note-${user.id}`}>Оставьте пустым для постоянных прав.</small>
+            </div>
+          ) : null}
           <div className="owner-role-actions">
             <button className="button-secondary" type="button" onClick={() => void onSave(user, role, expiry)}>Сохранить права</button>
             <button className="owner-delete-button" type="button" onClick={() => void onDelete(user)}>Удалить</button>
