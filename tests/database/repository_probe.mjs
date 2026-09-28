@@ -415,6 +415,52 @@ async function runTransactions(repository, pool) {
   assert.equal(committed.lastCommand.status, 'applied')
 }
 
+async function runReportedStateSync(repository) {
+  const deviceId = 'reported-state-sync-node'
+  const baseline = new Date('2026-01-01T00:00:00Z')
+  const off = { exhaustOn: false, intakeOn: false, windowOpen: false }
+  const on = { exhaustOn: true, intakeOn: true, windowOpen: true }
+  await repository.reportControlState({
+    deviceId,
+    timestamp: baseline,
+    reported: off,
+    appliedCommandIds: [],
+  })
+  const commands = await repository.queueControlCommands([
+    command(deviceId, 'exhaust', true, 'reported-state-sync'),
+    command(deviceId, 'intake', true, 'reported-state-sync'),
+    command(deviceId, 'window', true, 'reported-state-sync'),
+  ])
+
+  const stillWaiting = await repository.reportControlState({
+    deviceId,
+    timestamp: new Date(baseline.getTime() + 1_000),
+    reported: off,
+    appliedCommandIds: [],
+  })
+  assert.deepEqual(stillWaiting.desired, on)
+  assert.equal(stillWaiting.pendingCommands, 3)
+
+  const applied = await repository.reportControlState({
+    deviceId,
+    timestamp: new Date(baseline.getTime() + 2_000),
+    reported: on,
+    appliedCommandIds: commands.map((item) => item.id),
+  })
+  assert.deepEqual(applied.desired, applied.reported)
+  assert.equal(applied.pendingCommands, 0)
+
+  const restarted = await repository.reportControlState({
+    deviceId,
+    timestamp: new Date(baseline.getTime() + 3_000),
+    reported: off,
+    appliedCommandIds: [],
+  })
+  assert.deepEqual(restarted.reported, off)
+  assert.deepEqual(restarted.desired, off)
+  assert.equal(restarted.pendingCommands, 0)
+}
+
 async function runConcurrentMeasurements(repository) {
   const measurements = await Promise.all(
     Array.from({ length: 40 }, (_, index) =>
@@ -511,6 +557,9 @@ try {
       break
     case 'transactions':
       await runTransactions(repository, pool)
+      break
+    case 'reported-state-sync':
+      await runReportedStateSync(repository)
       break
     case 'concurrent-writes':
       await runConcurrentMeasurements(repository)

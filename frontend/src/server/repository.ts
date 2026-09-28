@@ -347,8 +347,25 @@ export class MemoryRepository implements Repository {
     ) {
       return this.getControlState(input.deviceId)
     }
+    const pendingTargets = new Set(
+      this.controlCommands
+        .filter(
+          (command) =>
+            command.deviceId === input.deviceId && command.status === 'pending',
+        )
+        .map((command) => command.target),
+    )
     const previouslyOpen = state.reported.windowOpen
     state.reported = { ...input.reported }
+    if (!pendingTargets.has('exhaust')) {
+      state.desired.exhaustOn = input.reported.exhaustOn
+    }
+    if (!pendingTargets.has('intake')) {
+      state.desired.intakeOn = input.reported.intakeOn
+    }
+    if (!pendingTargets.has('window')) {
+      state.desired.windowOpen = input.reported.windowOpen
+    }
     state.lastReportedAt = reportedAt
     state.windowOpenSince = input.reported.windowOpen
       ? state.windowOpenSince ?? reportedAt
@@ -949,6 +966,9 @@ export class PostgresRepository implements Repository {
           'VALUES ($1, $2::boolean, $3::boolean, $4::boolean, $2::boolean, $3::boolean, $4::boolean, $5::timestamptz, CASE WHEN $4::boolean THEN $5::timestamptz ELSE NULL::timestamptz END) ' +
           'ON CONFLICT (device_id) DO UPDATE SET exhaust_on = EXCLUDED.exhaust_on, intake_on = EXCLUDED.intake_on, ' +
           'window_open = EXCLUDED.window_open, window_open_since = CASE WHEN EXCLUDED.window_open THEN COALESCE(actuator_states.window_open_since, EXCLUDED.last_reported_at) ELSE NULL END, ' +
+          "desired_exhaust_on = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'exhaust' AND status = 'pending') THEN actuator_states.desired_exhaust_on ELSE EXCLUDED.exhaust_on END, " +
+          "desired_intake_on = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'intake' AND status = 'pending') THEN actuator_states.desired_intake_on ELSE EXCLUDED.intake_on END, " +
+          "desired_window_open = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'window' AND status = 'pending') THEN actuator_states.desired_window_open ELSE EXCLUDED.window_open END, " +
           'last_reported_at = EXCLUDED.last_reported_at, updated_at = NOW() ' +
           'WHERE actuator_states.last_reported_at IS NULL OR EXCLUDED.last_reported_at >= actuator_states.last_reported_at ' +
           'RETURNING device_id',

@@ -429,6 +429,80 @@ describe('memory repository', () => {
     expect(state.pendingCommands).toBe(0)
   })
 
+  it('uses the device-reported state as desired state when no command is pending', async () => {
+    const repository = new MemoryRepository()
+    const baseline = new Date('2026-09-09T13:00:00Z')
+    await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: baseline,
+      reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+      appliedCommandIds: [],
+    })
+
+    const commands = await repository.queueControlCommands([
+      {
+        deviceId: 'room-01',
+        target: 'exhaust',
+        desiredState: true,
+        source: 'manual',
+        reason: 'test',
+        batchId: 'reported-state-sync',
+      },
+      {
+        deviceId: 'room-01',
+        target: 'intake',
+        desiredState: true,
+        source: 'manual',
+        reason: 'test',
+        batchId: 'reported-state-sync',
+      },
+      {
+        deviceId: 'room-01',
+        target: 'window',
+        desiredState: true,
+        source: 'manual',
+        reason: 'test',
+        batchId: 'reported-state-sync',
+      },
+    ])
+    const waitingForDevice = await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: new Date(baseline.getTime() + 1_000),
+      reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+      appliedCommandIds: [],
+    })
+
+    expect(waitingForDevice.desired).toEqual({
+      exhaustOn: true,
+      intakeOn: true,
+      windowOpen: true,
+    })
+    expect(waitingForDevice.pendingCommands).toBe(3)
+
+    const applied = await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: new Date(baseline.getTime() + 2_000),
+      reported: { exhaustOn: true, intakeOn: true, windowOpen: true },
+      appliedCommandIds: commands.map((command) => command.id),
+    })
+    expect(applied.desired).toEqual(applied.reported)
+    expect(applied.pendingCommands).toBe(0)
+
+    const deviceRestarted = await repository.reportControlState({
+      deviceId: 'room-01',
+      timestamp: new Date(baseline.getTime() + 3_000),
+      reported: { exhaustOn: false, intakeOn: false, windowOpen: false },
+      appliedCommandIds: [],
+    })
+    expect(deviceRestarted.reported).toEqual({
+      exhaustOn: false,
+      intakeOn: false,
+      windowOpen: false,
+    })
+    expect(deviceRestarted.desired).toEqual(deviceRestarted.reported)
+    expect(deviceRestarted.pendingCommands).toBe(0)
+  })
+
   it('does not acknowledge a command belonging to another device', async () => {
     const repository = new MemoryRepository()
     const [command] = await repository.queueControlCommands([

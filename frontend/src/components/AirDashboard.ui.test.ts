@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
 import { createElement } from 'react'
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import AirDashboard from './AirDashboard'
+import AirDashboard, { DASHBOARD_LIVE_REFRESH_INTERVAL_MS } from './AirDashboard'
 import type {
   ClientControlStatus,
   ClientMeasurement,
@@ -166,6 +166,63 @@ describe('dashboard states and control actions', () => {
     render(createElement(AirDashboard))
 
     expect(await screen.findByText('Данных пока нет')).not.toBeNull()
+  })
+
+  it('refreshes current readings and actual device state without reloading history', async () => {
+    vi.useFakeTimers()
+    try {
+      const timestamp = new Date().toISOString()
+      const liveMeasurement: ClientMeasurement = {
+        ...measurement,
+        id: 2,
+        created_at: timestamp,
+        timestamp,
+        indoor: { ...measurement.indoor, co2: 712 },
+      }
+      const liveDashboard: DashboardData = {
+        ...dashboardData,
+        measurement: liveMeasurement,
+      }
+      const liveControlStatus: ClientControlStatus = {
+        ...controlStatus,
+        reported: { ...controlStatus.reported, window_open: true },
+        desired: { ...controlStatus.desired, window_open: true },
+      }
+      mocks.getLatestDashboard
+        .mockResolvedValueOnce(dashboardData)
+        .mockResolvedValue(liveDashboard)
+      mocks.getControlStatus
+        .mockResolvedValueOnce(controlStatus)
+        .mockResolvedValue(liveControlStatus)
+
+      setHash('#controls')
+      render(createElement(AirDashboard))
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(mocks.getLatestDashboard).toHaveBeenCalledTimes(1)
+      expect(mocks.getHistory).toHaveBeenCalledTimes(1)
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(DASHBOARD_LIVE_REFRESH_INTERVAL_MS)
+      })
+
+      expect(mocks.getLatestDashboard).toHaveBeenCalledTimes(2)
+      expect(mocks.getControlStatus).toHaveBeenCalledTimes(2)
+      expect(mocks.getHistory).toHaveBeenCalledTimes(1)
+      expect(screen.getAllByText('Открыто').length).toBeGreaterThan(0)
+      setHash('#overview')
+      await act(async () => {
+        window.dispatchEvent(new HashChangeEvent('hashchange'))
+      })
+      expect(screen.getAllByText(/712/).length).toBeGreaterThan(0)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('announces a dashboard error and recovers when the user retries', async () => {

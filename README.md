@@ -75,6 +75,7 @@ Copy-Item .env.example .env
 Перед запуском задайте в `.env` три случайных значения не короче 32 символов: `DEVICE_API_TOKEN`, `SIMULATOR_INTERNAL_TOKEN` и `BETTER_AUTH_SECRET`. Например, создайте их командой `openssl rand -hex 32` и вставьте результат в соответствующее поле. Не используйте один токен для разных назначений и не отправляйте `.env` в Git.
 
 ```powershell
+docker compose stop simulator
 docker compose --profile web-demo up --build -d
 ```
 
@@ -132,6 +133,7 @@ Backend автоматически удаляет записи старше 24 �
 Для веб-сцены и общей физической модели запустите headless-симулятор:
 
 ```powershell
+docker compose stop simulator
 docker compose --profile web-demo up --build -d web-simulator
 docker compose logs -f web-simulator
 ```
@@ -378,6 +380,7 @@ Responsive behavior:
 | `ALERTS_ENABLED` | показывать рекомендации по превышению порогов | `true` |
 | `SIMULATOR_MODE` | `live` или `backfill` | `live` |
 | `SIMULATOR_INTERVAL_SECONDS` | период live-цикла | `30` |
+| `WEB_SIMULATOR_INTERVAL_SECONDS` | период телеметрии 3D web-симулятора | `5` |
 | `SCENARIO` | профиль синтетических данных | `normal` |
 | `INITIAL_CO2` | начальный CO₂ simulator | `650` |
 

@@ -87,6 +87,12 @@ def test_postgres_repository_command_report_and_cleanup_are_transactional(
     _run_repository_probe(repository_db, "transactions")
 
 
+def test_postgres_repository_aligns_desired_state_after_device_restart(
+    repository_db: IsolatedPostgres,
+) -> None:
+    _run_repository_probe(repository_db, "reported-state-sync")
+
+
 def test_postgres_repository_concurrent_measurement_writes_persist_all_rows(
     repository_db: IsolatedPostgres,
 ) -> None:

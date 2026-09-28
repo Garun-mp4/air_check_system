@@ -92,6 +92,8 @@ export const rangeLabels: Record<RangeKey, string> = {
   '24h': '24 ч',
 }
 
+export const DASHBOARD_LIVE_REFRESH_INTERVAL_MS = 2_000
+
 export function getSectionIdFromHash(hash: string): DashboardSectionId {
   const sectionId = hash.startsWith('#') ? hash.slice(1) : hash
   return dashboardNavItems.some((item) => item.id === sectionId)
@@ -1831,6 +1833,8 @@ export default function AirDashboard() {
   const lastDashboardHashRef = useRef('#overview')
   const loadSequenceRef = useRef(0)
   const activeLoadControllerRef = useRef<AbortController | null>(null)
+  const liveLoadSequenceRef = useRef(0)
+  const liveLoadControllerRef = useRef<AbortController | null>(null)
   const canOperate = accessStatus === 'ready' && (access?.role === 'operator' || access?.role === 'owner')
 
   const openSettings = useCallback((trigger?: HTMLElement) => {
@@ -1868,6 +1872,9 @@ export default function AirDashboard() {
   }, [])
 
   const loadData = useCallback(async () => {
+    liveLoadSequenceRef.current += 1
+    liveLoadControllerRef.current?.abort()
+    liveLoadControllerRef.current = null
     activeLoadControllerRef.current?.abort()
     const controller = new AbortController()
     activeLoadControllerRef.current = controller
@@ -1944,6 +1951,73 @@ export default function AirDashboard() {
       }
       if (activeLoadControllerRef.current === controller) {
         activeLoadControllerRef.current = null
+      }
+    }
+  }, [range])
+
+  const refreshLiveState = useCallback(async () => {
+    if (activeLoadControllerRef.current || liveLoadControllerRef.current) {
+      return
+    }
+    const controller = new AbortController()
+    liveLoadControllerRef.current = controller
+    const sequence = ++liveLoadSequenceRef.current
+    const isCurrent = () =>
+      sequence === liveLoadSequenceRef.current &&
+      liveLoadControllerRef.current === controller &&
+      !activeLoadControllerRef.current
+
+    try {
+      const [latestResult, controlResult] = await Promise.allSettled([
+        getLatestDashboard(controller.signal),
+        getControlStatus(undefined, controller.signal),
+      ])
+      if (!isCurrent()) {
+        return
+      }
+
+      if (latestResult.status === 'fulfilled') {
+        const latest = latestResult.value
+        setDashboard(latest)
+        setLastUpdated(new Date().toISOString())
+        const latestMeasurement = latest.measurement
+        if (latestMeasurement) {
+          const rangeStart = Date.now() - rangeMinutes[range] * 60 * 1000
+          setHistory((current) => {
+            const measurementTime = Date.parse(latestMeasurement.timestamp)
+            if (!Number.isFinite(measurementTime) || measurementTime < rangeStart) {
+              return current
+            }
+            const next = current.filter((item) => item.id !== latestMeasurement.id)
+            next.push(latestMeasurement)
+            return next.sort(
+              (left, right) =>
+                Date.parse(left.timestamp) - Date.parse(right.timestamp) || left.id - right.id,
+            )
+          })
+        }
+        setError(null)
+      } else if (!(latestResult.reason instanceof Error && latestResult.reason.name === 'AbortError')) {
+        setError(
+          latestResult.reason instanceof ClientApiError
+            ? latestResult.reason.message
+            : 'Не удалось обновить текущие показания',
+        )
+      }
+
+      if (controlResult.status === 'fulfilled') {
+        setControls(controlResult.value)
+        setControlError(null)
+      } else if (!(controlResult.reason instanceof Error && controlResult.reason.name === 'AbortError')) {
+        setControlError(
+          controlResult.reason instanceof ClientApiError
+            ? controlResult.reason.message
+            : 'Не удалось обновить фактическое состояние устройств',
+        )
+      }
+    } finally {
+      if (liveLoadControllerRef.current === controller) {
+        liveLoadControllerRef.current = null
       }
     }
   }, [range])
@@ -2031,16 +2105,23 @@ export default function AirDashboard() {
 
   useEffect(() => {
     void loadData()
-    const timer = window.setInterval(() => {
+    const fullRefreshTimer = window.setInterval(() => {
       void loadData()
     }, 30_000)
+    const liveRefreshTimer = window.setInterval(() => {
+      void refreshLiveState()
+    }, DASHBOARD_LIVE_REFRESH_INTERVAL_MS)
     return () => {
       activeLoadControllerRef.current?.abort()
       activeLoadControllerRef.current = null
       loadSequenceRef.current += 1
-      window.clearInterval(timer)
+      liveLoadControllerRef.current?.abort()
+      liveLoadControllerRef.current = null
+      liveLoadSequenceRef.current += 1
+      window.clearInterval(fullRefreshTimer)
+      window.clearInterval(liveRefreshTimer)
     }
-  }, [loadData])
+  }, [loadData, refreshLiveState])
 
   useEffect(() => {
     const applyHashView = () => {
