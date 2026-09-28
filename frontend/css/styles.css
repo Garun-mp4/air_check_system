@@ -8303,6 +8303,7 @@ body.is-chart-expanded {
 .account-role-mark { min-height: 28px; padding-inline: 10px; border-color: #a7f3d0; background: #ecfdf5; color: #047857; font-size: 12px; }
 .account-form { gap: var(--spacing-md); }
 .account-form-row { gap: var(--spacing-md); }
+.account-password-field { align-content: start; }
 
 .account-form label,
 .account-password-field > label {
@@ -8424,11 +8425,18 @@ body.is-chart-expanded {
 
 .owner-create-fields {
   grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(140px, 0.72fr);
-  align-items: end;
+  align-items: start;
   gap: var(--spacing-md);
 }
 
-.owner-create-fields > button { min-height: 44px; white-space: nowrap; }
+.owner-password-field { gap: var(--spacing-xs); }
+
+.owner-create-fields > button {
+  align-self: start;
+  min-height: 44px;
+  margin-top: calc(1.5em + var(--spacing-xs));
+  white-space: nowrap;
+}
 .owner-create-card > p { margin-top: var(--spacing-md); }
 .owner-list-heading { gap: var(--spacing-md); }
 .owner-list-heading .button-secondary { min-height: 40px; }
@@ -8673,7 +8681,6 @@ body.is-chart-expanded {
 
 @media (max-width: 1100px) {
   .owner-create-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .owner-create-fields > button { align-self: end; }
   .owner-role-editor { grid-template-columns: minmax(135px, .7fr) minmax(180px, 1fr); }
   .owner-role-actions { grid-column: 1 / -1; }
   .simulator-workspace { grid-template-columns: minmax(0, 1fr) minmax(300px, 330px); gap: var(--spacing-sm); }
@@ -8719,7 +8726,7 @@ body.is-chart-expanded {
   .auth-back { margin-bottom: var(--spacing-lg); }
   .owner-page { width: min(calc(100% - 32px), 1120px); padding: 32px 0 56px; }
   .owner-create-fields { grid-template-columns: minmax(0, 1fr); }
-  .owner-create-fields > button { width: 100%; }
+  .owner-create-fields > button { width: 100%; margin-top: 0; }
   .owner-list-heading { align-items: flex-start; flex-wrap: wrap; }
   .owner-user-row { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-md); }
   .owner-role-editor { grid-template-columns: minmax(0, 1fr); }
