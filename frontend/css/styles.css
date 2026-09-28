@@ -8281,7 +8281,7 @@ body.is-chart-expanded {
 .account-signout-dialog-content > p:not(.account-feedback) { margin: 12px 0 0; color: var(--color-muted); font-size: 14px; line-height: 1.5; }
 .account-signout-error { margin-top: 14px; }
 .account-signout-actions { display: flex; justify-content: flex-end; gap: var(--spacing-xs); margin-top: var(--spacing-lg); }
-.account-button-danger { border-color: var(--color-error-strong); background: var(--color-error-strong); color: var(--color-on-primary); }
+.account-signout-dialog .account-button-danger { border-color: var(--color-error-strong); background: var(--color-error-strong); color: var(--color-on-primary); }
 .account-signout-dialog .account-button-danger:hover:not(:disabled) { border-color: var(--color-error-strong-active); background: var(--color-error-strong-active); color: var(--color-on-primary); }
 .account-signout-dialog .account-button:focus-visible { outline: 2px solid var(--color-brand-accent); outline-offset: 2px; }
 
