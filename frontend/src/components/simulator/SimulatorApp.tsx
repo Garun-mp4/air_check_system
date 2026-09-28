@@ -85,7 +85,7 @@ export default function SimulatorApp() {
   const { snapshot, connected, error } = useSimulatorState()
   const { access, status: accessStatus } = useAccessSession()
   const [mode, setMode] = useState<VisualizationMode>('normal')
-  const [cutaway, setCutaway] = useState<CutawayMode>('transparent')
+  const [cutaway, setCutaway] = useState<CutawayMode>('hidden')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedPoint, setSelectedPoint] = useState<Point | null>(null)
   const [cameraCommand, setCameraCommand] = useState<{ id: number; focus: Point | null }>({ id: 0, focus: null })
@@ -247,7 +247,6 @@ export default function SimulatorApp() {
                 <button className="sim-icon-button" type="button" onClick={() => selectedPoint && setCameraCommand((previous) => ({ id: previous.id + 1, focus: selectedPoint }))} disabled={!selectedPoint} aria-label="Сфокусировать камеру на выбранном устройстве" title="Фокус на выбранном устройстве">◎</button>
               </div>
             </div>
-            <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} />
             <div className={'simulator-stage-hud' + (mobileMetricsExpanded ? ' is-expanded' : '')}>
               <div className="sim-hud-card sim-hud-co2"><span>CO₂ · ВНУТРИ</span><strong>{fmt(snapshot.indoor.co2_ppm)} <small>ppm</small></strong><i className={snapshot.indoor.co2_ppm >= 1000 ? 'is-danger' : snapshot.indoor.co2_ppm >= 800 ? 'is-warning' : ''} /></div>
               <button className="sim-hud-mobile-toggle" type="button" aria-expanded={mobileMetricsExpanded} aria-controls="simulator-air-metrics" onClick={() => setMobileMetricsExpanded((expanded) => !expanded)}>{mobileMetricsExpanded ? 'Скрыть показатели' : 'Показатели воздуха'}</button>
@@ -258,6 +257,7 @@ export default function SimulatorApp() {
                 <div className="sim-hud-card sim-hud-forecast"><span>ПРОГНОЗ AIRCHECK · +15 МИН</span><strong>{snapshot.backend.forecast ? `${fmt(snapshot.backend.forecast.predicted_co2_15min)} ppm` : 'Ожидание ML'}</strong></div>
               </div>
             </div>
+            <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} />
             <div className="simulator-stage-footer">
               <div className="sim-stage-state"><span className={windowMoving ? 'sim-live-indicator is-moving' : 'sim-live-indicator'} /><strong>Окно</strong> {snapshot.window.motor_state === 'opening' ? 'открывается' : snapshot.window.motor_state === 'closing' ? 'закрывается' : snapshot.window.motor_state === 'fault' ? 'ошибка' : `${fmt(snapshot.window.actual_position_percent)}%`}<span className="sim-state-divider" /><strong>Приток</strong> {snapshot.ventilation.intake.enabled ? `${fmt(snapshot.ventilation.intake.airflow_m3_h)} м³/ч` : 'выкл.'}<span className="sim-state-divider" /><strong>Вытяжка</strong> {snapshot.ventilation.exhaust.enabled ? `${fmt(snapshot.ventilation.exhaust.airflow_m3_h)} м³/ч` : 'выкл.'}</div>
               <div className="sim-flow-caption">Эффективный расход <strong>{fmt(airflow.total_effective_m3_h)} м³/ч</strong> · {fmt(airflow.air_changes_per_hour, 2)} ACH</div>

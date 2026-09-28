@@ -226,7 +226,7 @@ export default function ControlCabinet({
             {module.kind === 'fuse' ? <FuseRail /> : null}
             {module.kind === 'terminals' ? <TerminalStrip /> : null}
           </group>
-          <CabinetLabel position={[0, -module.bounds[1] * 0.67, -module.bounds[2] / 2 - 0.006]} rotation={[0, Math.PI, 0]} size={0.031} color="#35464a">{module.label}</CabinetLabel>
+          {mode === 'technical' ? <CabinetLabel position={[0, -module.bounds[1] * 0.67, -module.bounds[2] / 2 - 0.006]} rotation={[0, Math.PI, 0]} size={0.031} color="#35464a">{module.label}</CabinetLabel> : null}
         </Pickable>
       ))}
 
@@ -235,14 +235,14 @@ export default function ControlCabinet({
         <Housing position={[width / 2 - 0.005, 0, 0.018]} size={[width - 0.070, height - 0.072, 0.008]} color="#a5b0ad" radius={0.010} metalness={0.18} roughness={0.58} />
         <Housing position={[width - 0.070, 0, 0.027]} size={[0.022, 0.084, 0.014]} color="#45565a" radius={0.006} metalness={0.42} />
         <mesh position={[width - 0.070, 0, 0.035]}><cylinderGeometry args={[0.008, 0.008, 0.006, 10]} /><meshStandardMaterial color="#d2b768" metalness={0.74} /></mesh>
-        <CabinetLabel position={[width / 2 - 0.005, height * 0.24, 0.026]} size={0.052} color="#405155">12 V DC · AIR CHECK</CabinetLabel>
+        {mode === 'technical' ? <CabinetLabel position={[width / 2 - 0.005, height * 0.24, 0.026]} size={0.052} color="#405155">12 V DC · AIR CHECK</CabinetLabel> : null}
         {[-1, 0, 1].map((side) => <mesh key={side} position={[width * 0.23, side * 0.14, 0.025]}><boxGeometry args={[width * 0.50, 0.004, 0.004]} /><meshStandardMaterial color="#778480" /></mesh>)}
         {[0.30, -0.30].map((hingeY) => <Housing key={hingeY} position={[0.008, hingeY, 0]} size={[0.025, 0.11, 0.036]} color="#59696c" radius={0.006} metalness={0.52} />)}
       </group>
       <CylinderBetween from={[x - width / 2 + 0.010, y + 0.30, doorZ - 0.035]} to={[x - width / 2 + 0.010, y + 0.30, doorZ + 0.035]} radius={0.006} color="#b8c3bf" />
       <CylinderBetween from={[x - width / 2 + 0.010, y - 0.30, doorZ - 0.035]} to={[x - width / 2 + 0.010, y - 0.30, doorZ + 0.035]} radius={0.006} color="#b8c3bf" />
       <Housing position={[x, y + height / 2 - 0.060, wallInside - 0.115]} size={[width - 0.18, 0.045, 0.018]} color="#415156" radius={0.008} />
-      <CabinetLabel position={[x, y + height / 2 - 0.060, wallInside - 0.128]} rotation={[0, Math.PI, 0]} size={0.035}>УПРАВЛЕНИЕ · 12 V DC</CabinetLabel>
+      {mode === 'technical' ? <CabinetLabel position={[x, y + height / 2 - 0.060, wallInside - 0.128]} rotation={[0, Math.PI, 0]} size={0.035}>УПРАВЛЕНИЕ · 12 V DC</CabinetLabel> : null}
       <Fastener position={[x - width / 2 + 0.042, y - height / 2 + 0.042, wallInside - 0.15]} facing={-1} scale={0.85} />
       <Fastener position={[x + width / 2 - 0.042, y - height / 2 + 0.042, wallInside - 0.15]} facing={-1} scale={0.85} />
     </group>

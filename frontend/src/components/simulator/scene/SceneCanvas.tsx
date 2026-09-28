@@ -1,6 +1,7 @@
 'use client'
 
 import { Canvas } from '@react-three/fiber'
+import { ACESFilmicToneMapping } from 'three'
 import type { SimulatorSnapshot, CutawayMode, VisualizationMode } from '../types'
 import Airflow from './Airflow'
 import CameraRig from './CameraRig'
@@ -46,16 +47,16 @@ export default function SceneCanvas({
         shadows
         dpr={[1, 1.5]}
         camera={{ position: [7, 3.1, -9], fov: snapshot.simulation.camera.field_of_view_degrees, near: snapshot.simulation.camera.near_plane_m, far: snapshot.simulation.camera.far_plane_m }}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1 }}
         onContextMenu={(event) => event.preventDefault()}
         onPointerMissed={(event) => { if (event.button === 0) onClearSelection() }}
       >
         <color attach="background" args={['#c8e0ec']} />
         <fog attach="fog" args={['#c8e0ec', 30, 90]} />
-        <ambientLight intensity={0.48} />
-        <hemisphereLight args={['#eef7fa', '#788b6d', 0.92]} />
-        <directionalLight position={[-5, 9, -6]} intensity={1.9} color="#fff9ef" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-far={40} shadow-camera-left={-11} shadow-camera-right={11} shadow-camera-top={10} shadow-camera-bottom={-10} shadow-bias={-0.00018} shadow-normalBias={0.018} />
-        <directionalLight position={[6, 4, 8]} intensity={0.42} color="#dceaf1" />
+        <ambientLight intensity={0.24} />
+        <hemisphereLight args={['#eef7fa', '#788b6d', 0.58]} />
+        <directionalLight position={[-5, 9, -6]} intensity={1.45} color="#fff9ef" castShadow shadow-mapSize={[2048, 2048]} shadow-camera-far={40} shadow-camera-left={-11} shadow-camera-right={11} shadow-camera-top={10} shadow-camera-bottom={-10} shadow-bias={-0.00018} shadow-normalBias={0.018} />
+        <directionalLight position={[6, 4, 8]} intensity={0.28} color="#dceaf1" />
         <RoomShell snapshot={snapshot} cutaway={cutaway} />
         <WindowAssembly snapshot={snapshot} selectedId={selectedId} mode={mode} onSelect={onSelect} />
         <SensorsAndNodes snapshot={snapshot} selectedId={selectedId} mode={mode} onSelect={onSelect} />

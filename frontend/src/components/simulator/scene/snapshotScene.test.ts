@@ -9,6 +9,8 @@ import { Pickable } from './Pickable'
 import RoomShell from './RoomShell'
 import WindowAssembly from './WindowAssembly'
 import { windowAssemblyGeometry } from './models/geometry'
+import ControlCabinet from './models/ControlCabinet'
+import { IndoorSensorNode, OutdoorSensorNode } from './models/WallSensorNodes'
 
 Object.assign(globalThis, { React })
 
@@ -91,7 +93,30 @@ function sceneSnapshot(options: SnapshotOptions = {}): SimulatorSnapshot {
       total_effective_m3_h: 81,
       air_changes_per_hour: 3.2,
     },
-  } as SimulatorSnapshot
+  } as unknown as SimulatorSnapshot
+}
+
+function sceneWithLabels(): SimulatorSnapshot {
+  const snapshot = sceneSnapshot()
+  return {
+    ...snapshot,
+    sensors: [],
+    backend: { online: true },
+    simulation: {
+      ...snapshot.simulation,
+      layout: {
+        indoor_sensor_center: [-1.2, 0, 1.55],
+        outdoor_station_center: [-2.5, 0.4, 2.1],
+        control_cabinet_center: [1.7, 0, 1.55],
+      },
+      mount_dimensions: {
+        indoor_panel_width_m: 0.55,
+        indoor_panel_height_m: 0.72,
+        control_cabinet_width_m: 0.92,
+        control_cabinet_height_m: 1.04,
+      },
+    },
+  } as unknown as SimulatorSnapshot
 }
 
 describe('snapshot-driven scene state', () => {
@@ -264,6 +289,50 @@ describe('snapshot-driven scene state', () => {
     ).find((element) => element.type === 'meshStandardMaterial')?.props.opacity
 
     expect(materialOpacity(visibleFacade)).toBe(1)
-    expect(materialOpacity(transparentFacade)).toBe(0.22)
+    expect(materialOpacity(transparentFacade)).toBe(0.08)
+
+    const transparentMesh = elements(
+      (transparentFacade.type as (props: SceneElement['props']) => ReactNode)(transparentFacade.props),
+    ).find((element) => element.type === 'mesh')!
+    expect(transparentMesh.props.castShadow).toBe(false)
+    expect(transparentMesh.props.receiveShadow).toBe(false)
+  })
+
+  it('keeps scene annotations out of the normal view and shows them in the relevant detail modes', () => {
+    const snapshot = sceneWithLabels()
+    const onSelect = () => {}
+    const componentLabels = (mode: 'normal' | 'sensors' | 'technical') => {
+      const components = [
+        IndoorSensorNode({ snapshot, selectedId: null, mode, onSelect }),
+        OutdoorSensorNode({ snapshot, selectedId: null, mode, onSelect }),
+        ControlCabinet({ snapshot, selectedId: null, mode, onSelect }),
+      ]
+      return components.flatMap((component) => elements(component))
+    }
+
+    const normalLabels = componentLabels('normal')
+    expect(normalLabels.some((element) => elementName(element) === 'NodeLabel')).toBe(false)
+    expect(normalLabels.some((element) => elementName(element) === 'CabinetLabel')).toBe(false)
+
+    const sensorLabels = componentLabels('sensors')
+    expect(sensorLabels.filter((element) => elementName(element) === 'NodeLabel')).toHaveLength(2)
+    expect(sensorLabels.some((element) => elementName(element) === 'CabinetLabel')).toBe(false)
+
+    const technicalLabels = componentLabels('technical')
+    expect(technicalLabels.filter((element) => elementName(element) === 'NodeLabel')).toHaveLength(2)
+    expect(technicalLabels.some((element) => elementName(element) === 'CabinetLabel')).toBe(true)
+  })
+
+  it('shows window labels only in the technical view', () => {
+    const snapshot = sceneSnapshot()
+    const onSelect = () => {}
+    const windowLabels = (mode: 'normal' | 'technical') => elements(WindowAssembly({
+      snapshot,
+      selectedId: null,
+      mode,
+      onSelect,
+    })).filter((element) => elementName(element) === 'DirectionTag')
+    expect(windowLabels('normal')).toHaveLength(0)
+    expect(windowLabels('technical').length).toBeGreaterThan(0)
   })
 })

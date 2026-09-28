@@ -143,7 +143,7 @@ function Fan({
           </mesh>
           {Array.from({ length: 9 }, (_, index) => <mesh key={index} position={[0, -0.064 + index * 0.016, 0.073]}><boxGeometry args={[0.152, 0.003, 0.003]} /><meshStandardMaterial color="#8ca197" roughness={0.7} /></mesh>)}
           <Housing position={[0.105, 0, 0.009]} size={[0.036, 0.16, 0.072]} color="#72847e" radius={0.008} />
-          <CabinetDirectionLabel position={[0, -0.151, 0.075]}>{'G4 · ФИЛЬТР'}</CabinetDirectionLabel>
+          {mode === 'technical' ? <CabinetDirectionLabel position={[0, -0.151, 0.075]}>{'G4 · ФИЛЬТР'}</CabinetDirectionLabel> : null}
           {[-1, 1].flatMap((xSide) => [-1, 1].map((ySide) => <Fastener key={`${xSide}-${ySide}`} position={[xSide * 0.095, ySide * 0.095, 0.069]} scale={0.72} />))}
         </group>
       ) : (
@@ -152,7 +152,7 @@ function Fan({
           <Housing position={[0, 0, 0.043]} size={[0.19, 0.19, 0.018]} color="#788786" radius={0.008} metalness={0.28} />
           {[-0.045, 0, 0.045].map((y) => <mesh key={y} position={[0, y, 0.055]} rotation={[0.10, 0, 0.08]}><boxGeometry args={[0.145, 0.018, 0.012]} /><meshStandardMaterial color="#d6ddd8" metalness={0.24} roughness={0.58} /></mesh>)}
           <Housing position={[0, 0.112, 0.045]} size={[0.23, 0.034, 0.10]} color="#aab5b1" radius={0.008} />
-          <CabinetDirectionLabel position={[0, -0.151, 0.055]}>{'ОБРАТНЫЙ КЛАПАН'}</CabinetDirectionLabel>
+          {mode === 'technical' ? <CabinetDirectionLabel position={[0, -0.151, 0.055]}>{'ОБРАТНЫЙ КЛАПАН'}</CabinetDirectionLabel> : null}
           {[-1, 1].flatMap((xSide) => [-1, 1].map((ySide) => <Fastener key={`${xSide}-${ySide}`} position={[xSide * 0.092, ySide * 0.092, 0.060]} scale={0.70} />))}
         </group>
       )}

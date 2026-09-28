@@ -8033,8 +8033,8 @@ body.is-chart-expanded {
 .simulator-scene-loading { min-height: 460px; display: grid; place-items: center; background: linear-gradient(#a9d3e5 0 48%, #b5d9a7 48%); color: #365b61; font-size: 14px; }
 .simulator-scene-cue { position: absolute; right: 12px; bottom: 10px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.66); border-radius: 6px; background: rgba(255,255,255,.84); color: #537070; font-size: 10px; box-shadow: 0 2px 8px rgba(27,64,67,.08); pointer-events: none; }
 .simulator-cue-dot { width: 6px; height: 6px; margin-right: 5px; display: inline-block; border-radius: 50%; background: #0c806f; vertical-align: 1px; }
-.simulator-stage-hud { position: absolute; z-index: 2; top: 72px; left: 12px; right: 12px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; pointer-events: none; }
-.sim-hud-card { min-width: 0; position: relative; padding: 9px 10px 8px; overflow: hidden; border: 1px solid rgba(255,255,255,.82); border-radius: 7px; background: rgba(255,255,255,.9); box-shadow: 0 2px 9px rgba(31,67,65,.07); backdrop-filter: blur(7px); }
+.simulator-stage-hud { position: relative; z-index: 1; flex: 0 0 auto; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; padding: var(--spacing-xs) 12px; border-bottom: 1px solid var(--color-hairline-soft); background: var(--color-surface-soft); pointer-events: none; }
+.sim-hud-card { min-width: 0; position: relative; padding: 9px 10px 8px; overflow: hidden; border: 1px solid rgba(255,255,255,.82); border-radius: 7px; background: #fff; box-shadow: 0 2px 9px rgba(31,67,65,.07); }
 .sim-hud-card > span { display: block; overflow: hidden; color: #728683; font-size: 8px; font-weight: 750; letter-spacing: .055em; text-overflow: ellipsis; white-space: nowrap; }
 .sim-hud-card strong { display: block; margin-top: 2px; color: #254247; font-size: clamp(14px,1.2vw,18px); font-weight: 680; line-height: 1.2; white-space: nowrap; }
 .sim-hud-card strong small { color: #748582; font-size: 9px; font-weight: 550; }
@@ -8108,7 +8108,7 @@ body.is-chart-expanded {
   .simulator-topbar { height: 58px; gap: 8px; }.simulator-brand { gap: 7px; font-size: 15px; }.simulator-brand-logo { width: 30px; height: 23px; }.simulator-brand-subtitle, .simulator-brand > span:last-child { font-size: 11px; }.simulator-topbar-actions { gap: 4px; }.simulator-topbar-actions > .sim-link-button { display: none; }.simulator-topbar-actions > .sim-button { min-height: 33px; padding: 6px 8px; font-size: 10px; }.sim-mobile-menu-toggle { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #dbe5df; border-radius: 6px; background: white; color: #367366; font-size: 18px; }
   .simulator-main-nav { position: relative; min-height: 66px; padding: 9px 14px; }.simulator-nav-title h1 { font-size: 16px; }.simulator-account-summary { display: none; }.simulator-nav-tabs { position: absolute; z-index: 6; top: 100%; right: 10px; left: 10px; display: none; padding: 7px; box-shadow: 0 9px 24px rgba(33,57,48,.15); }.simulator-main-nav.is-open .simulator-nav-tabs { display: grid; grid-template-columns: 1fr; }.simulator-nav-tabs button { width: 100%; text-align: left; }
   .simulator-workspace { padding: 9px 9px 18px; }.simulator-stage-frame { min-height: 0; border-radius: 9px; }.simulator-stage-topline { min-height: 50px; padding: 7px 8px; }.simulator-stage-topline strong { font-size: 10px; }.sim-compact-select select { max-width: 122px; height: 30px; padding-left: 6px; font-size: 9px; }.sim-icon-button { width: 30px; height: 30px; }
-  .simulator-canvas-host { min-height: 380px; height: 52vh; max-height: 560px; }.simulator-stage-hud { top: 59px; left: 7px; right: 7px; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; }.sim-hud-card { padding: 6px 7px; }.sim-hud-card > span { font-size: 7px; }.sim-hud-card strong { font-size: 13px; }.sim-hud-card strong small { font-size: 8px; }.sim-hud-forecast { display: none; }.simulator-scene-cue { right: 6px; bottom: 6px; max-width: calc(100% - 12px); padding: 5px 6px; font-size: 8px; }.simulator-stage-footer { min-height: 50px; padding: 7px 8px; font-size: 9px; }.sim-flow-caption { width: 100%; }.simulator-view-toolbar { padding-top: 7px; }.sim-view-switcher { width: 100%; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }.sim-view-switcher button { padding: 5px 3px; font-size: 9px; }
+  .simulator-canvas-host { min-height: 380px; height: 52vh; max-height: 560px; }.simulator-stage-hud { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; padding-inline: 7px; }.sim-hud-card { padding: 6px 7px; }.sim-hud-card > span { font-size: 7px; }.sim-hud-card strong { font-size: 13px; }.sim-hud-card strong small { font-size: 8px; }.sim-hud-forecast { display: none; }.simulator-scene-cue { right: 6px; bottom: 6px; max-width: calc(100% - 12px); padding: 5px 6px; font-size: 8px; }.simulator-stage-footer { min-height: 50px; padding: 7px 8px; font-size: 9px; }.sim-flow-caption { width: 100%; }.simulator-view-toolbar { padding-top: 7px; }.sim-view-switcher { width: 100%; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }.sim-view-switcher button { padding: 5px 3px; font-size: 9px; }
   .simulator-sidebar { display: flex; border-radius: 9px; }.sim-sidebar-primary { padding: 15px 13px; }.simulator-sidebar-bottom { padding: 0 13px 10px; }.sim-panel-heading h2 { font-size: 18px; }.sim-scenario-list { grid-template-columns: 1fr 1fr; }.sim-scenario-list button { grid-template-columns: 21px 1fr; font-size: 9px; }.sim-scenario-list button > span:last-child { display: none; }
   .owner-create-fields { grid-template-columns: 1fr; }.owner-user-row { grid-template-columns: 1fr; gap: 10px; }.owner-role-editor { grid-template-columns: 1fr; }.owner-role-actions { flex-wrap: wrap; }
 }
@@ -8603,14 +8603,14 @@ body.is-chart-expanded {
 .simulator-scene-loading { color: #365b61; }
 .simulator-scene-cue { border-color: rgba(255, 255, 255, .8); border-radius: var(--rounded-sm); color: #374151; font-size: 12px; }
 .simulator-stage-hud { gap: var(--spacing-xs); }
-.sim-hud-card { padding: 10px 12px; border-color: rgba(229, 231, 235, .92); border-radius: var(--rounded-md); background: rgba(255, 255, 255, .94); box-shadow: var(--shadow-soft); }
+.sim-hud-card { padding: 10px 12px; border-color: rgba(229, 231, 235, .92); border-radius: var(--rounded-md); background: var(--color-canvas); box-shadow: var(--shadow-soft); }
 .sim-hud-card > span { color: var(--color-muted); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
 .sim-hud-card strong { color: var(--color-ink); font-size: clamp(16px, 1.15vw, 20px); font-weight: 600; }
 .sim-hud-card strong small { color: var(--color-muted); font-size: 12px; }
 .sim-hud-co2 i { background: var(--color-success); }
 .sim-hud-co2 i.is-warning { background: var(--color-warning); }
 .sim-hud-co2 i.is-danger { background: var(--color-error); }
-.sim-hud-forecast { border-color: var(--color-hairline); background: rgba(255, 255, 255, .96); }
+.sim-hud-forecast { border-color: var(--color-hairline); background: var(--color-canvas); }
 .sim-hud-forecast strong { color: var(--color-ink); font-size: 16px; }
 .simulator-stage-footer { min-height: 48px; padding: 9px 14px; color: var(--color-muted); font-size: 13px; }
 .sim-stage-state { gap: var(--spacing-xs); }
@@ -8732,7 +8732,7 @@ body.is-chart-expanded {
   .owner-role-editor { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
   .owner-role-actions { grid-column: 1 / -1; margin-top: 0; }
   .simulator-workspace { grid-template-columns: minmax(0, 1fr) minmax(300px, 330px); gap: var(--spacing-sm); }
-  .simulator-stage-hud { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .simulator-stage-hud { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .sim-hud-forecast { display: none; }
 }
 
@@ -8809,7 +8809,7 @@ body.is-chart-expanded {
   .simulator-stage-topline strong { font-size: 13px; }
   .sim-compact-select select { max-width: min(170px, 38vw); min-height: 40px; height: 40px; padding-inline: 8px; font-size: 12px; }
   .simulator-canvas-host { min-height: 320px; height: 52vh; max-height: 560px; }
-  .simulator-stage-hud { top: 112px; left: 8px; right: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .simulator-stage-hud { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding-inline: 8px; }
   .sim-hud-card { padding: 8px; }
   .sim-hud-card > span { font-size: 10px; }
   .sim-hud-card strong { font-size: 16px; }
@@ -9184,7 +9184,6 @@ body.is-chart-expanded {
   }
 
   .simulator-stage-hud {
-    top: 104px;
     grid-template-columns: minmax(0, 1fr) max-content;
     align-items: start;
     pointer-events: none;

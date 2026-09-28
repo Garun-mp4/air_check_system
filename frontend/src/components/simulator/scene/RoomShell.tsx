@@ -14,7 +14,7 @@ function WallPanel({
   opacity?: number
 }) {
   return (
-    <mesh position={position} castShadow receiveShadow>
+    <mesh position={position} castShadow={opacity === 1} receiveShadow={opacity === 1}>
       <boxGeometry args={size} />
       <meshStandardMaterial color={color} roughness={0.92} transparent={opacity < 1} opacity={opacity} depthWrite={opacity === 1} />
     </mesh>
@@ -28,7 +28,7 @@ export default function RoomShell({ snapshot, cutaway }: { snapshot: SimulatorSn
   const windowWidth = d.window_width_m
   const windowHeight = d.window_height_m
   const backZ = depth / 2
-  const wallOpacity = cutaway === 'visible' ? 1 : cutaway === 'transparent' ? 0.22 : 0
+  const wallOpacity = cutaway === 'visible' ? 1 : cutaway === 'transparent' ? 0.08 : 0
   const fanCenterX = width * 0.37
   const fanCenterY = height * 0.81
   const ventilationOpening = 0.225
@@ -64,7 +64,7 @@ export default function RoomShell({ snapshot, cutaway }: { snapshot: SimulatorSn
       {/* The near facade uses the same room coordinate system as the Python snapshot. */}
       {cutaway !== 'hidden' ? (
         <group>
-          <WallPanel size={[width, height, wall]} position={[0, height / 2, -backZ]} color="#dedfd8" opacity={wallOpacity} />
+          <WallPanel size={[width, height, wall]} position={[0, height / 2, -backZ]} color={cutaway === 'transparent' ? '#aab6b1' : '#dedfd8'} opacity={wallOpacity} />
         </group>
       ) : null}
 
@@ -74,7 +74,7 @@ export default function RoomShell({ snapshot, cutaway }: { snapshot: SimulatorSn
 
       <mesh position={[0, height + 0.12, 0]} receiveShadow>
         <boxGeometry args={[width + 0.34, 0.2, depth + 0.34]} />
-        <meshStandardMaterial color="#f7f4ec" roughness={0.82} transparent opacity={cutaway === 'visible' ? 0.16 : 0.1} depthWrite={false} />
+        <meshStandardMaterial color="#f7f4ec" roughness={0.82} transparent opacity={cutaway === 'visible' ? 0.12 : 0.04} depthWrite={false} />
       </mesh>
       <WallBaseboards width={width} depth={depth} wall={wall} height={0.085} />
     </group>

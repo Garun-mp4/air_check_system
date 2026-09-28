@@ -101,7 +101,7 @@ export function IndoorSensorNode({
       <Housing position={[0, 0, 0]} size={[panelWidth - 0.04, panelHeight - 0.04, INDOOR_SENSOR_ENCLOSURE_DEPTH_M]} color="#e6e6dc" radius={0.028} roughness={0.78} />
       <Housing position={[0, panelHeight * 0.442, -0.047]} size={[panelWidth * 0.69, 0.032, 0.014]} color="#d4d8ce" radius={0.008} />
       <MountingScrews width={panelWidth - 0.05} height={panelHeight - 0.05} z={-0.044} inset={0.035} facing={-1} />
-      <NodeLabel position={[0, panelHeight * 0.59, -0.060]} size={0.055} rotation={[0, Math.PI, 0]}>ВНУТРЕННИЙ УЗЕЛ</NodeLabel>
+      {mode === 'sensors' || mode === 'technical' ? <NodeLabel position={[0, panelHeight * 0.59, -0.060]} size={0.055} rotation={[0, Math.PI, 0]}>ВНУТРЕННИЙ УЗЕЛ</NodeLabel> : null}
 
       <group position={INDOOR_NODE_OFFSETS.scd41.module} rotation={[0, Math.PI, 0]}>
         <Pickable id="sensor.scd41.indoor" position={[0, 0, 0]} bounds={[0.14, 0.12, 0.10]} selectedId={selectedId} mode={mode} onSelect={onSelect}>
@@ -172,7 +172,7 @@ export function OutdoorSensorNode({
         </mesh>
       ))}
       <Housing position={[0, 0.229, 0.086]} size={[0.34, 0.025, 0.15]} color="#dce0d8" radius={0.006} />
-      <NodeLabel position={[0, 0.40, 0.15]} size={0.052}>НАРУЖНЫЙ УЗЕЛ</NodeLabel>
+      {mode === 'sensors' || mode === 'technical' ? <NodeLabel position={[0, 0.40, 0.15]} size={0.052}>НАРУЖНЫЙ УЗЕЛ</NodeLabel> : null}
       <group position={OUTDOOR_NODE_OFFSETS.sht45.module}>
         <Pickable id="sensor.sht45.outdoor" position={[0, 0, 0]} bounds={[0.17, 0.12, 0.09]} selectedId={selectedId} mode={mode} onSelect={onSelect}>
           <Housing position={[0, 0, 0.012]} size={[0.15, 0.092, 0.035]} color="#eef0e8" radius={0.009} />

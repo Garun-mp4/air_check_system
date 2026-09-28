@@ -211,7 +211,7 @@ export default function WindowAssembly({
         <Fastener key={`${side}-${y}`} position={[side * (width / 2 + frameWidth * 0.45), y, -(d.wall_thickness_m + 0.07) / 2 - 0.003]} scale={0.72} facing={-1} />
       )))}
       <StatusLed position={[0.070, 0.086, -d.wall_thickness_m / 2 - 0.104]} active={!motorMoving} size={0.006} />
-      <DirectionTag position={[0, height + frameWidth + 0.105, -d.wall_thickness_m / 2 - 0.030]}>ПОВОРОТНАЯ СТВОРКА · 12 V</DirectionTag>
+      {mode === 'technical' ? <DirectionTag position={[0, height + frameWidth + 0.105, -d.wall_thickness_m / 2 - 0.030]}>ПОВОРОТНАЯ СТВОРКА · 12 V</DirectionTag> : null}
       {mode === 'technical' ? <DirectionTag position={[0, -0.19, -d.wall_thickness_m / 2 - 0.18]}>{`ОТКРЫТИЕ ${snapshot.window.actual_position_percent.toFixed(0)}% · ${snapshot.window.motor_state.toUpperCase()}`}</DirectionTag> : null}
     </group>
   )

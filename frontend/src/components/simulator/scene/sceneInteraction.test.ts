@@ -4,7 +4,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { Edges } from '@react-three/drei'
 import { describe, expect, it, vi } from 'vitest'
 import { Canvas } from '@react-three/fiber'
-import { Vector3 } from 'three'
+import { ACESFilmicToneMapping, Vector3 } from 'three'
 import type { SimulatorSnapshot, VisualizationMode } from '../types'
 import Airflow from './Airflow'
 import CameraRig from './CameraRig'
@@ -73,6 +73,8 @@ describe('3D scene interaction wiring', () => {
       })
       const canvas = elements(tree).find((element) => element.type === Canvas)
       expect(canvas).toBeDefined()
+      expect((canvas!.props.gl as { toneMapping: number }).toneMapping).toBe(ACESFilmicToneMapping)
+      expect((canvas!.props.gl as { toneMappingExposure: number }).toneMappingExposure).toBe(1)
 
       const scene = elements(canvas!.props.children)
       expect(scene.find((element) => element.type === RoomShell)?.props.cutaway).toBe('transparent')
