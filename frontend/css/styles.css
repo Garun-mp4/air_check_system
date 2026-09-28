@@ -7732,7 +7732,13 @@ body.is-settings-open {
   .account-menu-dashboard .account-menu-trigger-copy,
   .account-menu-dashboard .account-menu-chevron { display: none; }
   .account-menu-dashboard summary { width: 40px; justify-content: center; padding: 4px; }
-  .account-menu-popover { width: min(260px, calc(100vw - 24px)); }
+  .dashboard-shell .account-menu-dashboard .account-menu-popover {
+    position: fixed;
+    top: calc(64px + env(safe-area-inset-top) + 8px);
+    right: max(12px, env(safe-area-inset-right));
+    left: auto;
+    width: min(288px, calc(100vw - 24px));
+  }
   .utility-topbar { gap: 8px; padding-inline: 12px; }
   .utility-brand { gap: 6px; font-size: 14px; }
   .utility-brand img { width: 31px; height: 26px; }
