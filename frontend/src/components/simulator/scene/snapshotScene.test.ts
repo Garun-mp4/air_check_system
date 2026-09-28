@@ -172,6 +172,23 @@ describe('snapshot-driven scene state', () => {
     expect(openRotation.slice(1)).toEqual([0, 0])
   })
 
+  it('does not leave a fixed opaque panel across the moving window opening', () => {
+    const snapshot = sceneSnapshot()
+    const { window_width_m: windowWidth, window_height_m: windowHeight } = snapshot.simulation.room_dimensions
+    const fixedWindowParts = elements(WindowAssembly({
+      snapshot,
+      selectedId: null,
+      mode: 'normal',
+      onSelect: () => {},
+    })).filter((element) => elementName(element) === 'Housing')
+    const solidPanelsAcrossOpening = fixedWindowParts.filter((element) => {
+      const [partWidth, partHeight] = element.props.size as number[]
+      return partWidth >= windowWidth && partHeight >= windowHeight
+    })
+
+    expect(solidPanelsAcrossOpening).toHaveLength(0)
+  })
+
   it('feeds each reported airflow volume and visibility into its matching flow track', () => {
     const snapshot = sceneSnapshot({ windowAirflow: 12.5, intakeAirflow: 48, exhaustAirflow: 47 })
     const tracks = elements(Airflow({ snapshot, visible: true })).filter((element) => elementName(element) === 'FlowTrack')

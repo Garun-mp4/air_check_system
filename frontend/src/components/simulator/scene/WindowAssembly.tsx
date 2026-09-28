@@ -78,8 +78,6 @@ export default function WindowAssembly({
       <Housing position={[0, -frameWidth / 2, 0]} size={[width + frameWidth * 2 + 0.07, frameWidth, d.wall_thickness_m + 0.10]} color="#8c9893" radius={0.014} metalness={0.42} roughness={0.48} />
       <Housing position={[0, -0.086, -d.wall_thickness_m / 2 - 0.063]} size={[width + 0.17, 0.027, 0.12]} color="#d1d5ce" radius={0.008} roughness={0.62} />
       <Housing position={[0, -0.105, d.wall_thickness_m / 2 + 0.045]} size={[width + 0.12, 0.019, 0.11]} color="#87938e" radius={0.006} metalness={0.22} />
-      <Housing position={[0, height / 2, -d.wall_thickness_m / 2 - 0.009]} size={[width + 0.11, height + 0.11, 0.024]} color="#d4d8d1" radius={0.016} />
-      <Housing position={[0, height / 2, d.wall_thickness_m / 2 + 0.010]} size={[width + 0.08, height + 0.08, 0.020]} color="#d4d8d1" radius={0.014} />
 
       {/* A single bottom-hinged sash opens outwards, matching the linear actuator's travel. */}
       <group position={[0, 0, sashPlaneZ]} rotation={[sashAngle, 0, 0]}>
