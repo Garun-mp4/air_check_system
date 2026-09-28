@@ -1,4 +1,4 @@
-import { MOUSE } from 'three'
+import { MOUSE, TOUCH } from 'three'
 
 const CAMERA_KEYS_BY_CODE = {
   KeyW: 'w',
@@ -17,6 +17,11 @@ export const CAMERA_MOUSE_BUTTONS = {
   LEFT: MOUSE.PAN,
   MIDDLE: MOUSE.DOLLY,
   RIGHT: MOUSE.ROTATE,
+} as const
+
+export const CAMERA_TOUCHES = {
+  ONE: TOUCH.ROTATE,
+  TWO: TOUCH.DOLLY_PAN,
 } as const
 
 function isTextEntryTarget(target: EventTarget | null): boolean {

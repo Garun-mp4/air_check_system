@@ -240,13 +240,18 @@ describe('dashboard navigation', () => {
       linkClassName: 'mobile-bottom-nav-link',
       activeSection: 'settings',
       onNavigate: () => undefined,
+      mobile: true,
     }))
 
     expect(markup.match(/href="#/g)).toHaveLength(5)
-    expect(markup.match(/<svg/g)).toHaveLength(6)
+    expect(markup.match(/<svg/g)).toHaveLength(7)
     expect(markup).toContain('data-navigation-item="simulator"')
     expect(markup).toContain('data-navigation-item="settings"')
     expect(markup).toContain('aria-current="location"')
+    expect(markup).toContain('aria-label="Primary navigation"')
+    expect(markup).toContain('aria-label="Дополнительные разделы, открыт раздел Настройки"')
+    expect(markup).toContain('class="mobile-bottom-nav-more-panel"')
+    expect(markup).toContain('aria-label="3D-стенд"')
   })
 
   it('uses human-readable connection labels', () => {

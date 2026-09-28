@@ -112,37 +112,93 @@ export function DashboardNavigation({
   linkClassName,
   activeSection,
   onNavigate,
+  mobile = false,
 }: {
   className?: string
   label: string
   linkClassName: string
   activeSection: DashboardViewId
   onNavigate: (sectionId: DashboardViewId, event: MouseEvent<HTMLAnchorElement>) => void
+  mobile?: boolean
 }) {
+  const moreDisclosureRef = useRef<HTMLDetailsElement>(null)
+  const morePanelId = useId()
+  const moreItems = primaryNavItems.filter((item) => item.id === 'history' || item.id === 'settings')
+  const visibleItems = mobile
+    ? primaryNavItems.filter((item) => item.id !== 'history' && item.id !== 'settings')
+    : primaryNavItems
+  const moreIsActive = moreItems.some((item) => item.id === activeSection)
+
+  useEffect(() => {
+    if (!mobile) return
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const disclosure = moreDisclosureRef.current
+      if (disclosure && event.target instanceof Node && !disclosure.contains(event.target)) disclosure.open = false
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer)
+    return () => document.removeEventListener('pointerdown', closeOnOutsidePointer)
+  }, [mobile])
+
+  const renderSectionLink = (item: (typeof primaryNavItems)[number], inMoreMenu = false) => {
+    const isActive = activeSection === item.id
+    return (
+      <a
+        data-navigation-item={item.id}
+        className={linkClassName + (isActive ? ' is-active' : '') + (inMoreMenu ? ' mobile-bottom-nav-more-link' : '')}
+        href={'#' + item.id}
+        key={item.id}
+        onClick={(event) => {
+          const openDisclosure = event.currentTarget.closest('nav')?.querySelector('details[open]')
+          if (openDisclosure) {
+            openDisclosure.removeAttribute('open')
+            openDisclosure.querySelector('summary')?.focus()
+          }
+          onNavigate(item.id, event)
+        }}
+        aria-label={item.label}
+        aria-current={isActive ? 'location' : undefined}
+      >
+        <span className="nav-link-icon"><Icon name={item.icon} /></span>
+        <span className="nav-link-label-full">{item.label}</span>
+        <span className="nav-link-label-short" aria-hidden="true">{item.shortLabel}</span>
+      </a>
+    )
+  }
+
   return (
     <nav className={className} aria-label={label}>
-      {primaryNavItems.map((item) => {
-        const isActive = activeSection === item.id
-        return (
-          <a
-            data-navigation-item={item.id}
-            className={linkClassName + (isActive ? ' is-active' : '')}
-            href={'#' + item.id}
-            key={item.id}
-            onClick={(event) => onNavigate(item.id, event)}
-            aria-current={isActive ? 'location' : undefined}
-          >
-            <span className="nav-link-icon"><Icon name={item.icon} /></span>
-            <span className="nav-link-label-full">{item.label}</span>
-            <span className="nav-link-label-short" aria-hidden="true">{item.shortLabel}</span>
-          </a>
-        )
-      })}
-      <a className={linkClassName} href="/simulator" data-navigation-item="simulator">
+      {visibleItems.map((item) => renderSectionLink(item))}
+      <a className={linkClassName} href="/simulator" data-navigation-item="simulator" aria-label="3D-стенд">
         <span className="nav-link-icon"><Icon name="room" /></span>
         <span className="nav-link-label-full">3D-стенд</span>
         <span className="nav-link-label-short" aria-hidden="true">3D</span>
       </a>
+      {mobile ? (
+        <details
+          ref={moreDisclosureRef}
+          className="mobile-bottom-nav-more"
+          onKeyDown={(event) => {
+            if (event.key === 'Escape' && event.currentTarget.open) {
+              event.preventDefault()
+              event.currentTarget.open = false
+              event.currentTarget.querySelector('summary')?.focus()
+            }
+          }}
+        >
+          <summary
+            className={linkClassName + ' mobile-bottom-nav-more-trigger' + (moreIsActive ? ' is-active' : '')}
+            aria-label={moreIsActive ? 'Дополнительные разделы, открыт раздел ' + moreItems.find((item) => item.id === activeSection)?.label : 'Дополнительные разделы'}
+            aria-controls={morePanelId}
+          >
+            <span className="nav-link-icon"><Icon name="menu" /></span>
+            <span>Ещё</span>
+          </summary>
+          <div className="mobile-bottom-nav-more-panel" id={morePanelId}>
+            <span className="mobile-bottom-nav-more-heading">Другие разделы</span>
+            {moreItems.map((item) => renderSectionLink(item, true))}
+          </div>
+        </details>
+      ) : null}
     </nav>
   )
 }
@@ -2709,6 +2765,7 @@ export default function AirDashboard() {
         linkClassName="mobile-bottom-nav-link"
         activeSection={activeNavigationItem}
         onNavigate={handleSectionNavigation}
+        mobile
       />
     </div>
   )

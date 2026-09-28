@@ -8,7 +8,7 @@ import { PerspectiveCamera, Vector3 } from 'three'
 
 import type { SimulatorSnapshot } from '../types'
 import { CameraTransition } from './cameraTransition'
-import { CAMERA_MOUSE_BUTTONS, trackCameraKeyDown, trackCameraKeyUp } from './cameraInput'
+import { CAMERA_MOUSE_BUTTONS, CAMERA_TOUCHES, trackCameraKeyDown, trackCameraKeyUp } from './cameraInput'
 
 type Point = [number, number, number]
 type CameraCommand = { id: number; focus: Point | null }
@@ -20,9 +20,11 @@ function toWorld(point: Point): Point {
 export default function CameraRig({
   snapshot,
   command,
+  touchNavigationEnabled,
 }: {
   snapshot: SimulatorSnapshot
   command: CameraCommand
+  touchNavigationEnabled: boolean
 }) {
   const controls = useRef<OrbitControlsImpl>(null)
   const { camera } = useThree()
@@ -107,6 +109,7 @@ export default function CameraRig({
     <OrbitControls
       ref={controls}
       makeDefault
+      enabled={touchNavigationEnabled}
       enableDamping
       dampingFactor={0.085}
       minDistance={cameraSettings.focus_distance_min_m ?? 1.1}
@@ -115,6 +118,7 @@ export default function CameraRig({
       maxPolarAngle={Math.PI * 0.94}
       screenSpacePanning
       mouseButtons={CAMERA_MOUSE_BUTTONS}
+      touches={CAMERA_TOUCHES}
     />
   )
 }

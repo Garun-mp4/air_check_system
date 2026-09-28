@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { sendControlCommand } from '../../lib/client-api'
@@ -93,7 +93,21 @@ export default function SimulatorApp() {
   const [notice, setNotice] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [touchCameraMode, setTouchCameraMode] = useState(false)
+  const [coarsePointer, setCoarsePointer] = useState(false)
+  const [mobileMetricsExpanded, setMobileMetricsExpanded] = useState(false)
+  const [mobileDevicePanelOpen, setMobileDevicePanelOpen] = useState(false)
+  const devicePanelToggleRef = useRef<HTMLButtonElement>(null)
   const isOperator = accessStatus === 'ready' && (access?.role === 'operator' || access?.role === 'owner')
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
+    const pointerQuery = window.matchMedia('(pointer: coarse)')
+    const syncPointerMode = () => setCoarsePointer(pointerQuery.matches)
+    syncPointerMode()
+    pointerQuery.addEventListener('change', syncPointerMode)
+    return () => pointerQuery.removeEventListener('change', syncPointerMode)
+  }, [])
 
   const callAction = useCallback(async (action: string, payload: Record<string, string | number | boolean> = {}) => {
     setBusy(true)
@@ -124,13 +138,22 @@ export default function SimulatorApp() {
   const pick = useCallback((id: string, point: Point) => {
     setSelectedId(id)
     setSelectedPoint(point)
+    setPanel('devices')
+    setMobileDevicePanelOpen(true)
     setCameraCommand((previous) => ({ id: previous.id + 1, focus: point }))
   }, [])
 
   const resetCamera = useCallback(() => {
     setSelectedId(null)
     setSelectedPoint(null)
+    setMobileDevicePanelOpen(false)
+    setMobileMetricsExpanded(false)
     setCameraCommand((previous) => ({ id: previous.id + 1, focus: null }))
+  }, [])
+
+  const closeMobileDevicePanel = useCallback(() => {
+    setMobileDevicePanelOpen(false)
+    devicePanelToggleRef.current?.focus()
   }, [])
 
   const selectedInfo = selectedId ? DEVICE_INFO[selectedId] : null
@@ -191,14 +214,14 @@ export default function SimulatorApp() {
         <div className="simulator-topbar-actions">
           <AccountMenu variant="simulator" />
           <a className="sim-button sim-button-primary" href="/">Панель AirCheck <span aria-hidden="true">↗</span></a>
-          <button className="sim-mobile-menu-toggle" type="button" aria-label="Открыть меню" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)}>☰</button>
+          <button className="sim-mobile-menu-toggle" type="button" aria-label={mobileMenuOpen ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)}><span aria-hidden="true">☰</span></button>
         </div>
       </header>
 
       <div className={'simulator-main-nav ' + (mobileMenuOpen ? 'is-open' : '')}>
         <div className="simulator-nav-title"><span className="eyebrow">Интерактивный стенд</span><h1>AirCheck <span>·</span> цифровой двойник</h1></div>
         <nav className="simulator-nav-tabs" aria-label="Разделы цифрового стенда">
-          {(['devices', 'controls', 'tools'] as const).map((item) => <button key={item} type="button" aria-pressed={panel === item} className={panel === item ? 'is-active' : ''} onClick={() => { setPanel(item); setMobileMenuOpen(false) }}>{item === 'devices' ? 'Устройства' : item === 'controls' ? 'Сценарии' : 'Инструменты'}</button>)}
+          {(['devices', 'controls', 'tools'] as const).map((item) => <button key={item} type="button" aria-pressed={panel === item} className={panel === item ? 'is-active' : ''} onClick={() => { setPanel(item); setMobileDevicePanelOpen(item === 'devices'); setMobileMenuOpen(false) }}>{item === 'devices' ? 'Устройства' : item === 'controls' ? 'Сценарии' : 'Инструменты'}</button>)}
         </nav>
       </div>
 
@@ -209,17 +232,31 @@ export default function SimulatorApp() {
               <div><span className="eyebrow">{snapshot.simulation.scenario}</span><strong>{snapshot.simulation.room_volume_m3.toFixed(1)} м³ · {snapshot.simulation.occupancy} {snapshot.simulation.occupancy === 1 ? 'человек' : 'чел.'}</strong></div>
               <div className="sim-stage-quick-actions">
                 <label className="sim-compact-select"><span className="sr-only">Режим стены</span><select value={cutaway} onChange={(event) => setCutaway(event.target.value as CutawayMode)}><option value="visible">Стена: видимая</option><option value="transparent">Стена: прозрачная</option><option value="hidden">Стена: скрыта</option></select></label>
+                {coarsePointer ? (
+                  <button
+                    className={'sim-icon-button simulator-touch-camera-toggle' + (touchCameraMode ? ' is-active' : '')}
+                    type="button"
+                    aria-label={touchCameraMode ? 'Выключить управление камерой' : 'Включить управление камерой'}
+                    aria-pressed={touchCameraMode}
+                    onClick={() => setTouchCameraMode((enabled) => !enabled)}
+                  >
+                    Камера
+                  </button>
+                ) : null}
                 <button className="sim-icon-button" type="button" onClick={resetCamera} aria-label="Сбросить камеру" title="Сброс камеры">⌖</button>
                 <button className="sim-icon-button" type="button" onClick={() => selectedPoint && setCameraCommand((previous) => ({ id: previous.id + 1, focus: selectedPoint }))} disabled={!selectedPoint} aria-label="Сфокусировать камеру на выбранном устройстве" title="Фокус на выбранном устройстве">◎</button>
               </div>
             </div>
-            <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null) }} />
-            <div className="simulator-stage-hud">
+            <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} />
+            <div className={'simulator-stage-hud' + (mobileMetricsExpanded ? ' is-expanded' : '')}>
               <div className="sim-hud-card sim-hud-co2"><span>CO₂ · ВНУТРИ</span><strong>{fmt(snapshot.indoor.co2_ppm)} <small>ppm</small></strong><i className={snapshot.indoor.co2_ppm >= 1000 ? 'is-danger' : snapshot.indoor.co2_ppm >= 800 ? 'is-warning' : ''} /></div>
-              <div className="sim-hud-card"><span>PM2.5 · ВНУТРИ</span><strong>{fmt(snapshot.indoor.pm25_ug_m3, 1)} <small>мкг/м³</small></strong></div>
-              <div className="sim-hud-card"><span>ТЕМПЕРАТУРА · ВНУТРИ</span><strong>{fmt(snapshot.indoor.temperature_c, 1)} <small>°C</small></strong></div>
-              <div className="sim-hud-card"><span>ВЛАЖНОСТЬ · ВНУТРИ</span><strong>{fmt(snapshot.indoor.humidity_percent)} <small>%</small></strong></div>
-              <div className="sim-hud-card sim-hud-forecast"><span>ПРОГНОЗ AIRCHECK · +15 МИН</span><strong>{snapshot.backend.forecast ? `${fmt(snapshot.backend.forecast.predicted_co2_15min)} ppm` : 'Ожидание ML'}</strong></div>
+              <button className="sim-hud-mobile-toggle" type="button" aria-expanded={mobileMetricsExpanded} aria-controls="simulator-air-metrics" onClick={() => setMobileMetricsExpanded((expanded) => !expanded)}>{mobileMetricsExpanded ? 'Скрыть показатели' : 'Показатели воздуха'}</button>
+              <div className="sim-hud-secondary" id="simulator-air-metrics">
+                <div className="sim-hud-card"><span>PM2.5 · ВНУТРИ</span><strong>{fmt(snapshot.indoor.pm25_ug_m3, 1)} <small>мкг/м³</small></strong></div>
+                <div className="sim-hud-card"><span>ТЕМПЕРАТУРА · ВНУТРИ</span><strong>{fmt(snapshot.indoor.temperature_c, 1)} <small>°C</small></strong></div>
+                <div className="sim-hud-card"><span>ВЛАЖНОСТЬ · ВНУТРИ</span><strong>{fmt(snapshot.indoor.humidity_percent)} <small>%</small></strong></div>
+                <div className="sim-hud-card sim-hud-forecast"><span>ПРОГНОЗ AIRCHECK · +15 МИН</span><strong>{snapshot.backend.forecast ? `${fmt(snapshot.backend.forecast.predicted_co2_15min)} ppm` : 'Ожидание ML'}</strong></div>
+              </div>
             </div>
             <div className="simulator-stage-footer">
               <div className="sim-stage-state"><span className={windowMoving ? 'sim-live-indicator is-moving' : 'sim-live-indicator'} /><strong>Окно</strong> {snapshot.window.motor_state === 'opening' ? 'открывается' : snapshot.window.motor_state === 'closing' ? 'закрывается' : snapshot.window.motor_state === 'fault' ? 'ошибка' : `${fmt(snapshot.window.actual_position_percent)}%`}<span className="sim-state-divider" /><strong>Приток</strong> {snapshot.ventilation.intake.enabled ? `${fmt(snapshot.ventilation.intake.airflow_m3_h)} м³/ч` : 'выкл.'}<span className="sim-state-divider" /><strong>Вытяжка</strong> {snapshot.ventilation.exhaust.enabled ? `${fmt(snapshot.ventilation.exhaust.airflow_m3_h)} м³/ч` : 'выкл.'}</div>
@@ -227,15 +264,36 @@ export default function SimulatorApp() {
             </div>
           </div>
 
+          <button
+            ref={devicePanelToggleRef}
+            className="simulator-mobile-device-toggle"
+            type="button"
+            aria-expanded={mobileDevicePanelOpen}
+            aria-controls="simulator-device-panel"
+            onClick={() => setMobileDevicePanelOpen((open) => !open)}
+          >
+            <span>{selectedInfo ? 'Выбрано устройство' : 'Устройства стенда'}</span>
+            <strong>{selectedInfo?.title ?? 'Выберите объект на сцене'}</strong>
+            <span className="simulator-mobile-device-toggle-action">{mobileDevicePanelOpen ? 'Свернуть' : 'Показать'}</span>
+          </button>
+
           <div className="simulator-view-toolbar">
             <div className="sim-view-switcher" role="group" aria-label="Режим отображения сцены">
               {MODE_OPTIONS.map((option) => <button key={option.id} type="button" aria-pressed={mode === option.id} className={mode === option.id ? 'is-active' : ''} onClick={() => setMode(option.id)} title={option.help}>{option.label}</button>)}
+            </div>
+            <div className="simulator-mobile-camera-control">
+              <p>{touchCameraMode ? 'Перетаскивайте одним пальцем для вращения; двумя пальцами — масштаб и сдвиг. Короткое касание выбирает объект.' : 'Коснитесь объекта, чтобы выбрать его. Для жестов камеры включите режим управления; страницу можно прокручивать за пределами сцены.'}</p>
             </div>
             <div className="sim-camera-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> движение <kbd>Q</kbd><kbd>E</kbd> высота <kbd>Shift</kbd> быстрее · правая кнопка вращает</div>
           </div>
         </div>
 
-        <aside className="simulator-sidebar">
+        <aside
+          id="simulator-device-panel"
+          className={'simulator-sidebar' + (panel === 'devices' ? ' is-device-panel' : '') + (panel === 'devices' && mobileDevicePanelOpen ? ' is-mobile-sheet-open' : '')}
+          aria-label={panel === 'devices' ? 'Информация об устройстве' : panel === 'controls' ? 'Сценарии симуляции' : 'Инструменты стенда'}
+        >
+          {panel === 'devices' && mobileDevicePanelOpen ? <button className="simulator-mobile-device-close" type="button" onClick={closeMobileDevicePanel}>Закрыть сведения об устройстве</button> : null}
           {panel === 'devices' ? (
             <DevicePanel snapshot={snapshot} selectedId={selectedId} info={selectedInfo} sensor={selectedSensor} isOperator={isOperator} busy={busy} onCommand={sendDeviceCommand} />
           ) : panel === 'controls' ? (

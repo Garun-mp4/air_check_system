@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { MOUSE } from 'three'
+import { MOUSE, TOUCH } from 'three'
 
-import { CAMERA_MOUSE_BUTTONS, trackCameraKeyDown, trackCameraKeyUp } from './cameraInput'
+import { CAMERA_MOUSE_BUTTONS, CAMERA_TOUCHES, trackCameraKeyDown, trackCameraKeyUp } from './cameraInput'
 
 function keyEvent(code: string, target: object | null = null, modifiers: Partial<Pick<KeyboardEvent, 'altKey' | 'ctrlKey' | 'metaKey'>> = {}) {
   return {
@@ -22,6 +22,13 @@ describe('camera input', () => {
       LEFT: MOUSE.PAN,
       MIDDLE: MOUSE.DOLLY,
       RIGHT: MOUSE.ROTATE,
+    })
+  })
+
+  it('uses one-finger orbit and two-finger zoom/pan on touch screens', () => {
+    expect(CAMERA_TOUCHES).toEqual({
+      ONE: TOUCH.ROTATE,
+      TWO: TOUCH.DOLLY_PAN,
     })
   })
 

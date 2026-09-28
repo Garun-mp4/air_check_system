@@ -19,6 +19,8 @@ export default function SceneCanvas({
   cutaway,
   selectedId,
   cameraCommand,
+  touchCameraMode = false,
+  touchDevice = false,
   onSelect,
   onClearSelection,
 }: {
@@ -27,12 +29,19 @@ export default function SceneCanvas({
   cutaway: CutawayMode
   selectedId: string | null
   cameraCommand: CameraCommand
+  touchCameraMode?: boolean
+  touchDevice?: boolean
   onSelect: (id: string, point: Point) => void
   onClearSelection: () => void
 }) {
   const d = snapshot.simulation.room_dimensions
+
+  const touchClass = touchDevice
+    ? touchCameraMode ? ' is-touch-camera-active' : ' is-touch-selection'
+    : ''
+
   return (
-    <div className="simulator-canvas-host" role="application" aria-label="Интерактивная 3D-сцена стенда AirCheck">
+    <div className={'simulator-canvas-host' + touchClass} role="application" aria-label="Интерактивная 3D-сцена стенда AirCheck">
       <Canvas
         shadows
         dpr={[1, 1.5]}
@@ -53,14 +62,14 @@ export default function SceneCanvas({
         <FanAssembly snapshot={snapshot} selectedId={selectedId} mode={mode} onSelect={onSelect} />
         <Wiring snapshot={snapshot} visible={mode === 'wiring' || mode === 'technical'} />
         <Airflow snapshot={snapshot} visible={mode === 'airflow'} />
-        <CameraRig snapshot={snapshot} command={cameraCommand} />
+        <CameraRig snapshot={snapshot} command={cameraCommand} touchNavigationEnabled={!touchDevice || touchCameraMode} />
         {/* A faint distant ground gives the green platform a horizon under the blue sky. */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.58, 0]} receiveShadow>
           <planeGeometry args={[d.width_m + d.outdoor_depth_m * 8, d.depth_m + d.outdoor_depth_m * 8]} />
           <meshStandardMaterial color="#b7d4a8" roughness={1} />
         </mesh>
       </Canvas>
-      <div className="simulator-scene-cue"><span className="simulator-cue-dot" /> ЛКМ — сдвиг · ПКМ — вращение · колёсико — масштаб · WASD/QE — камера</div>
+      {!touchDevice ? <div className="simulator-scene-cue"><span className="simulator-cue-dot" /> ЛКМ — сдвиг · ПКМ — вращение · колёсико — масштаб · WASD/QE — камера</div> : null}
     </div>
   )
 }

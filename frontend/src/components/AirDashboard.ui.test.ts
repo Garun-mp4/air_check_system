@@ -5,7 +5,7 @@ import { act, cleanup, render, screen, waitFor, within } from '@testing-library/
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import AirDashboard, { DASHBOARD_LIVE_REFRESH_INTERVAL_MS } from './AirDashboard'
+import AirDashboard, { DASHBOARD_LIVE_REFRESH_INTERVAL_MS, DashboardNavigation } from './AirDashboard'
 import type {
   ClientControlStatus,
   ClientMeasurement,
@@ -142,6 +142,48 @@ beforeEach(() => {
 })
 
 describe('dashboard states and control actions', () => {
+  it('opens the mobile secondary navigation and closes it after a section is chosen', async () => {
+    const user = userEvent.setup()
+    const onNavigate = vi.fn()
+    render(createElement(DashboardNavigation, {
+      label: 'Основная мобильная навигация',
+      linkClassName: 'mobile-bottom-nav-link',
+      activeSection: 'overview',
+      onNavigate,
+      mobile: true,
+    }))
+
+    const disclosure = screen.getByText('Ещё').closest('details') as HTMLDetailsElement
+    await user.click(screen.getByText('Ещё'))
+    expect(disclosure.open).toBe(true)
+
+    await user.click(screen.getByRole('link', { name: 'История' }))
+    expect(onNavigate).toHaveBeenCalledOnce()
+    expect(onNavigate.mock.calls[0][0]).toBe('history')
+    expect(disclosure.open).toBe(false)
+    expect(document.activeElement).toBe(screen.getByText('Ещё').closest('summary'))
+  })
+
+  it('closes the mobile secondary navigation with Escape and restores focus', async () => {
+    const user = userEvent.setup()
+    render(createElement(DashboardNavigation, {
+      label: 'Основная мобильная навигация',
+      linkClassName: 'mobile-bottom-nav-link',
+      activeSection: 'overview',
+      onNavigate: () => undefined,
+      mobile: true,
+    }))
+
+    const label = screen.getByText('Ещё')
+    const summary = label.closest('summary') as HTMLElement
+    const disclosure = summary.closest('details') as HTMLDetailsElement
+    await user.click(summary)
+    await user.keyboard('{Escape}')
+
+    expect(disclosure.open).toBe(false)
+    expect(document.activeElement).toBe(summary)
+  })
+
   it('announces initial synchronization and keeps the skip link first in keyboard order', async () => {
     const user = userEvent.setup()
     mocks.getLatestDashboard.mockReturnValue(new Promise(() => undefined))
