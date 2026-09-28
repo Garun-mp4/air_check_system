@@ -8,12 +8,13 @@ describe('shared account access data', () => {
       userId: null,
       email: null,
       name: null,
+      image: null,
       role: 'guest',
       operatorExpiresAt: null,
     })).toBe(true)
     expect(isAccessInfo({ userId: 'user-1', role: 'owner' })).toBe(false)
-    expect(isAccessInfo({ userId: 'user-1', email: null, name: null, role: 'root', operatorExpiresAt: null })).toBe(false)
-    expect(isAccessInfo({ userId: null, email: null, name: null, role: 'owner', operatorExpiresAt: null })).toBe(false)
+    expect(isAccessInfo({ userId: 'user-1', email: null, name: null, image: null, role: 'root', operatorExpiresAt: null })).toBe(false)
+    expect(isAccessInfo({ userId: null, email: null, name: null, image: null, role: 'owner', operatorExpiresAt: null })).toBe(false)
   })
 
   it('uses the same role names across application surfaces', () => {

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { getLoginHref } from '../../lib/auth-navigation'
 import { getAccessRoleLabel } from '../../lib/access-types'
 import { useAccessSession } from './AccessSessionProvider'
+import UserAvatar from './UserAvatar'
 
 function currentReturnPath(): string {
   return `${window.location.pathname}${window.location.search}${window.location.hash}`
@@ -57,12 +58,11 @@ export default function AccountMenu({ variant = 'dashboard' }: { variant?: 'dash
   }
 
   const displayName = access.name?.trim() || access.email || 'Пользователь AirCheck'
-  const avatar = (access.name?.trim() || access.email || 'A').slice(0, 1).toLocaleUpperCase('ru-RU')
 
   return (
     <details className={`account-menu account-menu-${variant}`}>
       <summary aria-label={`Открыть меню аккаунта: ${displayName}`}>
-        <span className="account-menu-avatar" aria-hidden="true">{avatar}</span>
+        <UserAvatar image={access.image} name={displayName} size={30} className="account-menu-avatar" />
         <span className="account-menu-trigger-copy">
           <strong>{displayName}</strong>
           <small>{getAccessRoleLabel(access.role)}</small>

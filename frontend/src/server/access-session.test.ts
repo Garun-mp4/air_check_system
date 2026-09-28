@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const state = vi.hoisted(() => ({
-  sessionUser: null as null | { id: string; email: string; name: string },
+  sessionUser: null as null | { id: string; email: string; name: string; image?: string | null },
   role: 'user' as 'user' | 'operator' | 'owner',
   operatorExpiresAt: null as Date | null,
   getSession: vi.fn(),
@@ -51,6 +51,7 @@ describe('session-derived access context', () => {
       userId: null,
       email: null,
       name: null,
+      image: null,
       role: 'guest',
       operatorExpiresAt: null,
     })
@@ -62,13 +63,14 @@ describe('session-derived access context', () => {
     ['operator', 'operator'],
     ['owner', 'owner'],
   ] as const)('returns the stored %s identity and role', async (role, effectiveRole) => {
-    state.sessionUser = { id: 'account-1', email: 'person@example.org', name: 'Person' }
+    state.sessionUser = { id: 'account-1', email: 'person@example.org', name: 'Person', image: null }
     state.role = role
 
     await expect(readAccess(request())).resolves.toEqual({
       userId: 'account-1',
       email: 'person@example.org',
       name: 'Person',
+      image: null,
       role: effectiveRole,
       operatorExpiresAt: null,
     })
@@ -81,13 +83,14 @@ describe('session-derived access context', () => {
   it('drops an operator grant exactly at its expiry while retaining its recorded expiry', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-09-28T12:00:00.000Z'))
-    state.sessionUser = { id: 'operator-1', email: 'operator@example.org', name: 'Operator' }
+    state.sessionUser = { id: 'operator-1', email: 'operator@example.org', name: 'Operator', image: null }
     state.role = 'operator'
     state.operatorExpiresAt = new Date('2026-09-28T12:00:00.000Z')
 
     try {
       await expect(readAccess(request())).resolves.toMatchObject({
         userId: 'operator-1',
+        image: null,
         role: 'user',
         operatorExpiresAt: '2026-09-28T12:00:00.000Z',
       })
@@ -97,7 +100,7 @@ describe('session-derived access context', () => {
   })
 
   it('keeps an operator grant active when its expiry is null', async () => {
-    state.sessionUser = { id: 'operator-1', email: 'operator@example.org', name: 'Operator' }
+    state.sessionUser = { id: 'operator-1', email: 'operator@example.org', name: 'Operator', image: null }
     state.role = 'operator'
     state.operatorExpiresAt = null
 
@@ -106,7 +109,7 @@ describe('session-derived access context', () => {
 
   it('fails closed when the role store cannot be read', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    state.sessionUser = { id: 'account-1', email: 'person@example.org', name: 'Person' }
+    state.sessionUser = { id: 'account-1', email: 'person@example.org', name: 'Person', image: null }
     state.roleQuery.mockRejectedValueOnce(new Error('database unavailable'))
 
     await expect(readAccess(request())).rejects.toBeInstanceOf(AccessUnavailableError)

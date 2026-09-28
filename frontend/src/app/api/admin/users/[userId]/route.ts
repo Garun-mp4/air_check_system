@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { accessErrorResponse, assertSameOrigin, requireOwner } from '../../../../../server/access'
+import { removeUserAvatars } from '../../../../../server/avatar-storage'
 import { ApiError, errorResponse } from '../../../../../server/api'
 import { getAuthPool } from '../../../../../server/auth'
 
@@ -104,6 +105,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     )
     await client.query(`DELETE FROM "user" WHERE id = $1`, [userId])
     await client.query('COMMIT')
+    await removeUserAvatars(userId).catch((error) => console.error('deleted account avatar cleanup failed', error))
     return NextResponse.json({ data: { deleted: true } })
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined)

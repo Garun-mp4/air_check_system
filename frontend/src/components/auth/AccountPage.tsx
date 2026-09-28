@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import passwordPolicy from '../../../password-policy.json'
 import { getLoginHref } from '../../lib/auth-navigation'
 import { getAccessRoleLabel } from '../../lib/access-types'
+import ProfileAvatarEditor from './ProfileAvatarEditor'
 import PasswordInput from './PasswordInput'
 import { useAccessSession } from './AccessSessionProvider'
 import UtilityHeader from './UtilityHeader'
@@ -161,6 +162,7 @@ export default function AccountPage() {
                   <div className="account-card-heading">
                     <div><span className="eyebrow">Личные данные</span><h2 id="account-profile-title">Профиль</h2></div>
                   </div>
+                  <ProfileAvatarEditor image={access.image} name={access.name?.trim() || access.email || 'Пользователь AirCheck'} />
                   <form className="account-form" onSubmit={(event) => void updateName(event)}>
                     <label>
                       Имя

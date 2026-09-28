@@ -36,7 +36,7 @@ export async function readAccess(request: Request): Promise<AccessContext> {
   try {
     const session = await getAuth().api.getSession({ headers: request.headers })
     if (!session?.user) {
-      return { userId: null, email: null, name: null, role: 'guest', operatorExpiresAt: null }
+      return { userId: null, email: null, name: null, image: null, role: 'guest', operatorExpiresAt: null }
     }
 
     const result = await getAuthPool().query<{
@@ -54,6 +54,7 @@ export async function readAccess(request: Request): Promise<AccessContext> {
       userId: session.user.id,
       email: session.user.email,
       name: session.user.name,
+      image: session.user.image ?? null,
       role,
       operatorExpiresAt,
     }

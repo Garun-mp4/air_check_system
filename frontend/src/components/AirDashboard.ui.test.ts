@@ -105,6 +105,7 @@ function setSession(role: 'user' | 'operator' | 'owner' | null = 'user') {
           userId: `account-${role}`,
           email: `${role}@example.test`,
           name: role,
+          image: null,
           role,
           operatorExpiresAt: null,
         }

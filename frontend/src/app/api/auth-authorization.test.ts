@@ -20,7 +20,7 @@ vi.mock('../../server/auth', () => ({
     handler: state.authHandler,
     api: {
       getSession: async () => state.sessionUserId
-        ? { user: { id: state.sessionUserId, email: 'person@example.org', name: 'Person' } }
+        ? { user: { id: state.sessionUserId, email: 'person@example.org', name: 'Person', image: null } }
         : null,
       signUpEmail: state.signUpEmail,
     },
@@ -133,6 +133,7 @@ describe('Better Auth API routing and access projection', () => {
         userId: 'person-1',
         email: 'person@example.org',
         name: 'Person',
+        image: null,
         role: 'operator',
         operatorExpiresAt: '2026-10-01T00:00:00.000Z',
       },

@@ -55,6 +55,7 @@ describe('account menu', () => {
         userId: 'account-1',
         email: `${role}@example.test`,
         name: role,
+        image: null,
         role,
         operatorExpiresAt: null,
       },
@@ -92,5 +93,24 @@ describe('account menu', () => {
     expect(screen.getByRole('status')).not.toBeNull()
     await user.click(screen.getByRole('button', { name: 'Повторить' }))
     expect(mocks.refresh).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders the saved profile image in the shared account menu', () => {
+    mocks.useAccessSession.mockReturnValue({
+      access: {
+        userId: 'account-1',
+        email: 'owner@example.test',
+        name: 'Owner',
+        image: '/api/profile/avatar/8f477503-d23c-47e3-85c3-11f9e9543bc7',
+        role: 'owner',
+        operatorExpiresAt: null,
+      },
+      status: 'ready',
+      refresh: mocks.refresh,
+      signOut: mocks.signOut,
+    })
+    render(createElement(AccountMenu))
+
+    expect(document.querySelector('img[src="/api/profile/avatar/8f477503-d23c-47e3-85c3-11f9e9543bc7"]')).not.toBeNull()
   })
 })

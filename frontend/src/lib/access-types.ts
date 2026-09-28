@@ -4,6 +4,7 @@ export interface AccessInfo {
   userId: string | null
   email: string | null
   name: string | null
+  image: string | null
   role: AccessRole
   operatorExpiresAt: string | null
 }
@@ -22,6 +23,7 @@ export function isAccessInfo(value: unknown): value is AccessInfo {
     && (candidate.userId === null || typeof candidate.userId === 'string')
     && (candidate.email === null || typeof candidate.email === 'string')
     && (candidate.name === null || typeof candidate.name === 'string')
+    && (candidate.image === null || typeof candidate.image === 'string')
     && typeof role === 'string'
     && ACCESS_ROLES.has(role)
     && (candidate.operatorExpiresAt === null || typeof candidate.operatorExpiresAt === 'string')

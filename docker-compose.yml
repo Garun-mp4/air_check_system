@@ -55,6 +55,7 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-https://${AIR_CHECK_DOMAIN:-aircheck.home.arpa}}
       BETTER_AUTH_TRUSTED_ORIGINS: ${BETTER_AUTH_TRUSTED_ORIGINS:-https://${AIR_CHECK_DOMAIN:-aircheck.home.arpa},http://localhost:${PORT:-3000},http://127.0.0.1:${PORT:-3000}}
+      AVATAR_STORAGE_PATH: /app/data/avatars
       WINDOW_MANUAL_OVERRIDE_MINUTES: ${WINDOW_MANUAL_OVERRIDE_MINUTES:-30}
       AUTO_VENTILATION_MINIMUM_MINUTES: ${AUTO_VENTILATION_MINIMUM_MINUTES:-5}
       AUTOMATION_ENABLED: ${AUTOMATION_ENABLED:-true}
@@ -62,6 +63,8 @@ services:
       ALERTS_ENABLED: ${ALERTS_ENABLED:-true}
     ports:
       - "127.0.0.1:${PORT:-3000}:${PORT:-3000}"
+    volumes:
+      - avatar-data:/app/data/avatars
     depends_on:
       postgres:
         condition: service_healthy
@@ -151,6 +154,7 @@ services:
 
 volumes:
   postgres-data:
+  avatar-data:
   ml-model:
   caddy-data:
   caddy-config:
