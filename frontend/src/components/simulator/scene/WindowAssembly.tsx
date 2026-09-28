@@ -7,6 +7,7 @@ import { CylinderBetween, Fastener, Housing, StatusLed } from './models/parts'
 import {
   WINDOW_ACTUATOR_WIRE_OFFSETS,
   WINDOW_LIMIT_CONTACT_OFFSETS,
+  WINDOW_OPEN_LIMIT_SWITCH_SIZE,
   WINDOW_REED_CONTACT_OFFSETS,
   windowAssemblyGeometry,
 } from './models/geometry'
@@ -160,10 +161,27 @@ export default function WindowAssembly({
         ))}
       </Pickable>
 
-      {/* The open limit is at the actuator-side end of travel; the close limit is on the sill. */}
-      <Pickable id="window.limit_open" position={geometry.openLimitCenter} bounds={[0.075, 0.065, 0.055]} selectedId={selectedId} mode={mode} onSelect={onSelect}>
-        <Housing position={[0, 0, 0]} size={[0.061, 0.047, 0.029]} color="#495a5d" radius={0.006} />
-        <CylinderBetween from={[0, -0.005, 0.010]} to={[0, -0.030, 0.010]} radius={0.005} color="#c4ceca" segments={8} />
+      {/* The open limit is fixed to a small bracket on the stationary actuator base. */}
+      <Housing position={geometry.openLimitBracketCenter} size={geometry.openLimitBracketSize} color="#8d9994" radius={0.003} metalness={0.62} roughness={0.38} />
+      {geometry.openLimitBracketFasteners.map(([x, y, z], index) => (
+        <group key={`open-limit-fastener-${index}`}>
+          <mesh position={[x, y, z]} castShadow>
+            <cylinderGeometry args={[0.0045, 0.0045, 0.003, 12]} />
+            <meshStandardMaterial color="#c2cbc7" metalness={0.72} roughness={0.3} />
+          </mesh>
+          <mesh position={[x, y + 0.002, z]}>
+            <boxGeometry args={[0.005, 0.0007, 0.001]} />
+            <meshStandardMaterial color="#536164" metalness={0.42} roughness={0.4} />
+          </mesh>
+        </group>
+      ))}
+      <Pickable id="window.limit_open" position={geometry.openLimitCenter} bounds={WINDOW_OPEN_LIMIT_SWITCH_SIZE} selectedId={selectedId} mode={mode} onSelect={onSelect}>
+        <Housing position={[0, 0, 0]} size={WINDOW_OPEN_LIMIT_SWITCH_SIZE} color="#495a5d" radius={0.006} />
+        <CylinderBetween from={[-0.005, 0.012, -0.016]} to={[-0.045, 0.027, -0.016]} radius={0.003} color="#c4ceca" segments={8} />
+        <mesh position={[-0.047, 0.028, -0.016]}>
+          <sphereGeometry args={[0.006, 10, 8]} />
+          <meshStandardMaterial color="#657275" metalness={0.62} roughness={0.36} />
+        </mesh>
         <StatusLed position={[0.032, 0.026, 0.018]} active={snapshot.window.open_limit_switch} size={0.005} />
         {WINDOW_LIMIT_CONTACT_OFFSETS.map(([x, y, z], index) => <mesh key={index} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.0022, 0.0022, 0.006, 8]} />

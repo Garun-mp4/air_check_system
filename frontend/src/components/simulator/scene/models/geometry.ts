@@ -184,26 +184,42 @@ export const WINDOW_LIMIT_CONTACT_OFFSETS: [Point3, Point3] = [
   [0.018, 0.008, 0.018],
 ]
 
+export const WINDOW_OPEN_LIMIT_BRACKET_SIZE: Point3 = [0.085, 0.012, 0.09]
+export const WINDOW_OPEN_LIMIT_BRACKET_OFFSET: Point3 = [0.005, 0.0435, -0.005]
+export const WINDOW_OPEN_LIMIT_SWITCH_SIZE: Point3 = [0.061, 0.047, 0.029]
+export const WINDOW_OPEN_LIMIT_SWITCH_OFFSET: Point3 = [0.005, 0.073, -0.005]
+export const WINDOW_OPEN_LIMIT_BRACKET_FASTENER_OFFSETS: Point3[] = [
+  [-0.032, 0.051, -0.005],
+  [0.042, 0.051, -0.005],
+]
+
 export function windowAssemblyGeometry(dimensions: WindowGeometryInput) {
   const sashWidth = dimensions.window_width_m - 0.07
   const sashHeight = dimensions.window_height_m - 0.07
   const sashPlaneZ = -dimensions.wall_thickness_m / 2 - 0.022
   const openingAngle = dimensions.window_open_angle_degrees * Math.PI / 180
-  const openSwitchOnSash = rotateAboutBottom([sashWidth * 0.38, sashHeight - 0.07, 0.028], openingAngle)
   // The magnet sits on the sash's right stile; the reed is fixed to the adjacent jamb.
   const magnetLocal: Point3 = [sashWidth / 2 - 0.015, sashHeight * 0.31, -0.010]
+  const actuatorBase = [0, 0.13, -dimensions.wall_thickness_m / 2 - 0.245] as Point3
 
   return {
     sashWidth,
     sashHeight,
     sashPlaneZ,
     openingAngle,
-    actuatorBase: [0, 0.13, -dimensions.wall_thickness_m / 2 - 0.245] as Point3,
+    actuatorBase,
     magnetLocal,
     reedCenter: [dimensions.window_width_m / 2, magnetLocal[1], sashPlaneZ - 0.023] as Point3,
-    openLimitCenter: [openSwitchOnSash[0], openSwitchOnSash[1], sashPlaneZ + openSwitchOnSash[2] + 0.04] as Point3,
+    openLimitBracketCenter: addPoint(actuatorBase, WINDOW_OPEN_LIMIT_BRACKET_OFFSET),
+    openLimitBracketSize: WINDOW_OPEN_LIMIT_BRACKET_SIZE,
+    openLimitBracketFasteners: WINDOW_OPEN_LIMIT_BRACKET_FASTENER_OFFSETS.map((offset) => addPoint(actuatorBase, offset)),
+    openLimitCenter: addPoint(actuatorBase, WINDOW_OPEN_LIMIT_SWITCH_OFFSET),
     closeLimitCenter: [sashWidth * 0.34, 0.040, sashPlaneZ - 0.065] as Point3,
   }
+}
+
+function addPoint(left: Point3, right: Point3): Point3 {
+  return [left[0] + right[0], left[1] + right[1], left[2] + right[2]]
 }
 
 function rotateAboutBottom(point: Point3, angle: number): Point3 {

@@ -130,6 +130,28 @@ describe('snapshot-driven scene state', () => {
     expect([...windowPickables, ...fanPickables].every((element) => element.props.onSelect === onSelect)).toBe(true)
   })
 
+  it('mounts the open limit switch on the fixed actuator bracket instead of the open sash position', () => {
+    const closed = sceneSnapshot({ actualPositionPercent: 0 })
+    const open = sceneSnapshot({ actualPositionPercent: 100 })
+    const renderWindow = (snapshot: SimulatorSnapshot) => elements(WindowAssembly({
+      snapshot,
+      selectedId: null,
+      mode: 'normal',
+      onSelect: () => {},
+    }))
+    const closedElements = renderWindow(closed)
+    const openElements = renderWindow(open)
+    const openSwitch = (scene: SceneElement[]) => scene.find((element) => element.type === Pickable
+      && element.props.id === 'window.limit_open')!
+    const geometry = windowAssemblyGeometry(closed.simulation.room_dimensions)
+    const bracket = closedElements.find((element) => elementName(element) === 'Housing'
+      && JSON.stringify(element.props.position) === JSON.stringify(geometry.openLimitBracketCenter))
+
+    expect(openSwitch(closedElements).props.position).toEqual(geometry.openLimitCenter)
+    expect(openSwitch(openElements).props.position).toEqual(geometry.openLimitCenter)
+    expect(bracket?.props.size).toEqual(geometry.openLimitBracketSize)
+  })
+
   it('uses the reported window opening percentage to rotate the sash', () => {
     const closed = sceneSnapshot({ actualPositionPercent: 0 })
     const open = sceneSnapshot({ actualPositionPercent: 40 })
