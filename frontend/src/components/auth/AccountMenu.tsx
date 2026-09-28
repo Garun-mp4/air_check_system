@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { getLoginHref } from '../../lib/auth-navigation'
 import { getAccessRoleLabel } from '../../lib/access-types'
 import { useAccessSession } from './AccessSessionProvider'
+import AccountSignOutDialog from './AccountSignOutDialog'
 import UserAvatar from './UserAvatar'
 
 function currentReturnPath(): string {
@@ -18,6 +19,7 @@ export default function AccountMenu({ variant = 'dashboard' }: { variant?: 'dash
   const router = useRouter()
   const [returnTo, setReturnTo] = useState(pathname || '/')
   const [signingOut, setSigningOut] = useState(false)
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function AccountMenu({ variant = 'dashboard' }: { variant?: 'dash
     setSigningOut(true)
     try {
       await signOut()
+      setConfirmingSignOut(false)
       router.refresh()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Не удалось завершить сеанс')
@@ -60,28 +63,38 @@ export default function AccountMenu({ variant = 'dashboard' }: { variant?: 'dash
   const displayName = access.name?.trim() || access.email || 'Пользователь AirCheck'
 
   return (
-    <details className={`account-menu account-menu-${variant}`}>
-      <summary aria-label={`Открыть меню аккаунта: ${displayName}`}>
-        <UserAvatar image={access.image} name={displayName} size={30} className="account-menu-avatar" />
-        <span className="account-menu-trigger-copy">
-          <strong>{displayName}</strong>
-          <small>{getAccessRoleLabel(access.role)}</small>
-        </span>
-        <span className="account-menu-chevron" aria-hidden="true">⌄</span>
-      </summary>
-      <div className="account-menu-popover">
-        <div className="account-menu-identity">
-          <strong>{displayName}</strong>
-          <span>{access.email}</span>
-          <small>{getAccessRoleLabel(access.role)}</small>
+    <>
+      <details className={`account-menu account-menu-${variant}`}>
+        <summary aria-label={`Открыть меню аккаунта: ${displayName}`}>
+          <UserAvatar image={access.image} name={displayName} size={30} className="account-menu-avatar" />
+          <span className="account-menu-trigger-copy">
+            <strong>{displayName}</strong>
+            <small>{getAccessRoleLabel(access.role)}</small>
+          </span>
+          <span className="account-menu-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div className="account-menu-popover">
+          <div className="account-menu-identity">
+            <strong>{displayName}</strong>
+            <span>{access.email}</span>
+            <small>{getAccessRoleLabel(access.role)}</small>
+          </div>
+          <a href="/account">Личный кабинет</a>
+          {access.role === 'owner' ? <a href="/admin">Управление аккаунтами</a> : null}
+          <button type="button" onClick={() => { setError(null); setConfirmingSignOut(true) }}>
+            Выйти
+          </button>
         </div>
-        <a href="/account">Личный кабинет</a>
-        {access.role === 'owner' ? <a href="/admin">Управление аккаунтами</a> : null}
-        {error ? <p className="account-menu-error" role="alert">{error}</p> : null}
-        <button type="button" onClick={() => void handleSignOut()} disabled={signingOut}>
-          {signingOut ? 'Выходим…' : 'Выйти'}
-        </button>
-      </div>
-    </details>
+      </details>
+      <AccountSignOutDialog
+        open={confirmingSignOut}
+        busy={signingOut}
+        error={error}
+        onCancel={() => {
+          if (!signingOut) setConfirmingSignOut(false)
+        }}
+        onConfirm={() => void handleSignOut()}
+      />
+    </>
   )
 }
