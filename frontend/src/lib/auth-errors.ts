@@ -1,9 +1,11 @@
+import passwordPolicy from '../../password-policy.json'
+
 type AuthMode = 'signin' | 'signup'
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   INVALID_ORIGIN: 'Адрес страницы не разрешён для входа. Откройте AirCheck по настроенному адресу или проверьте список разрешённых источников.',
   INVALID_EMAIL_OR_PASSWORD: 'Неверная почта или пароль.',
-  PASSWORD_TOO_SHORT: 'Пароль слишком короткий. Используйте не менее 12 символов.',
+  PASSWORD_TOO_SHORT: `Пароль слишком короткий. Используйте не менее ${passwordPolicy.minimumLength} символов.`,
   USER_ALREADY_EXISTS: 'Аккаунт с такой почтой уже существует. Войдите или укажите другой адрес.',
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'Аккаунт с такой почтой уже существует. Войдите или укажите другой адрес.',
 }

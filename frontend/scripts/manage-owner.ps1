@@ -9,12 +9,13 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$passwordPolicy = Get-Content -Raw (Join-Path $PSScriptRoot '..\password-policy.json') | ConvertFrom-Json
 
 if ([string]::IsNullOrWhiteSpace($Email)) {
   $Email = Read-Host 'Owner email'
 }
 
-$securePassword = Read-Host -Prompt 'New owner password (12+ characters)' -AsSecureString
+$securePassword = Read-Host -Prompt "New owner password ($($passwordPolicy.minimumLength)+ characters)" -AsSecureString
 $secureConfirmation = Read-Host -Prompt 'Repeat password' -AsSecureString
 $passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
 $confirmationPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureConfirmation)
@@ -29,10 +30,10 @@ try {
   $secureConfirmation.Dispose()
 }
 
-if ($plainPassword.Length -lt 12 -or $plainPassword.Length -gt 128) {
+if ($plainPassword.Length -lt $passwordPolicy.minimumLength -or $plainPassword.Length -gt $passwordPolicy.maximumLength) {
   $plainPassword = $null
   $plainConfirmation = $null
-  throw 'Password must contain 12–128 characters.'
+  throw "Password must contain $($passwordPolicy.minimumLength)–$($passwordPolicy.maximumLength) characters."
 }
 if ($plainPassword -cne $plainConfirmation) {
   $plainPassword = $null

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+import passwordPolicy from '../../password-policy.json'
 import { getAuthErrorMessage } from '../lib/auth-errors'
 import { getSafeReturnPath } from '../lib/auth-navigation'
 import { useAccessSession } from './auth/AccessSessionProvider'
@@ -86,13 +87,13 @@ export default function AuthPanel() {
                 id="auth-password"
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 required
-                minLength={12}
-                maxLength={128}
+                minLength={mode === 'signup' ? passwordPolicy.minimumLength : undefined}
+                maxLength={passwordPolicy.maximumLength}
                 aria-describedby={mode === 'signup' ? 'auth-password-note' : undefined}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
-              {mode === 'signup' ? <span id="auth-password-note" className="auth-field-note">Не менее 12 символов.</span> : null}
+              {mode === 'signup' ? <span id="auth-password-note" className="auth-field-note">Не менее {passwordPolicy.minimumLength} символов.</span> : null}
             </div>
             {error ? <p className="auth-error" role="alert">{error}</p> : null}
             <button className="button-primary auth-submit" type="submit" disabled={pending}>
@@ -105,7 +106,7 @@ export default function AuthPanel() {
               {mode === 'signin' ? 'Создать аккаунт' : 'Войти'}
             </button>
           </p>
-          <p className="auth-recovery">Восстановление доступа выполняет владелец установки через локальную административную команду.</p>
+          <p className="auth-recovery">Сброс пароля по электронной почте пока недоступен: почтовый сервис не подключён.</p>
         </section>
       </main>
     </div>

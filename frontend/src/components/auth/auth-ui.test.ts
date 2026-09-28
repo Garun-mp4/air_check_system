@@ -53,7 +53,10 @@ function PasswordHarness() {
   })
 }
 
-afterEach(() => cleanup())
+afterEach(() => {
+  cleanup()
+  vi.unstubAllGlobals()
+})
 
 beforeEach(() => {
   mocks.refresh.mockReset().mockResolvedValue(true)
@@ -108,7 +111,7 @@ describe('password input', () => {
 })
 
 describe('sign-in and account page UI', () => {
-  it('exposes labelled sign-in inputs and documented password length constraints', async () => {
+  it('allows legacy passwords at sign-in and applies the configured minimum to new accounts', async () => {
     const user = userEvent.setup()
     render(createElement(AuthPanel))
 
@@ -118,16 +121,17 @@ describe('sign-in and account page UI', () => {
     expect(email.type).toBe('email')
     expect(email.required).toBe(true)
     expect(password.type).toBe('password')
-    expect(password.minLength).toBe(12)
+    expect(password.minLength).toBe(-1)
 
     await user.click(screen.getByRole('button', { name: 'Создать аккаунт' }))
 
     expect(screen.getByRole('heading', { level: 1, name: 'Создать аккаунт' })).not.toBeNull()
     expect(screen.getByRole('textbox', { name: 'Имя' })).not.toBeNull()
-    const signupPassword = screen.getByLabelText('Пароль')
+    const signupPassword = screen.getByLabelText('Пароль') as HTMLInputElement
     const descriptionId = signupPassword.getAttribute('aria-describedby')
     expect(descriptionId).not.toBeNull()
-    expect(document.getElementById(descriptionId ?? '')?.textContent).toContain('12')
+    expect(signupPassword.minLength).toBe(15)
+    expect(document.getElementById(descriptionId ?? '')?.textContent).toContain('15')
   })
 
   it('announces account loading and provides a retry action after an access error', async () => {
@@ -156,7 +160,7 @@ describe('sign-in and account page UI', () => {
     expect(mocks.refresh).toHaveBeenCalledTimes(1)
   })
 
-  it('keeps the profile email read-only and associates profile sections with headings', () => {
+  it('shows email as read-only information and presents only supported account sections', () => {
     mocks.useAccessSession.mockReturnValue({
       access: {
         userId: 'user-1',
@@ -172,9 +176,45 @@ describe('sign-in and account page UI', () => {
     render(createElement(AccountPage))
 
     const profileSection = screen.getByRole('region', { name: 'Профиль' })
-    const email = within(profileSection).getByLabelText(/Электронная почта/) as HTMLInputElement
-    expect(email.readOnly).toBe(true)
-    expect(email.getAttribute('aria-describedby')).not.toBeNull()
-    expect(screen.getByRole('region', { name: 'Сменить пароль' })).not.toBeNull()
+    expect(within(profileSection).getByText('reader@example.test')).not.toBeNull()
+    expect(within(profileSection).queryByRole('textbox', { name: /Электронная почта/ })).toBeNull()
+    expect(screen.getByRole('region', { name: 'Доступ' })).not.toBeNull()
+    expect(screen.getByRole('region', { name: 'Пароль' })).not.toBeNull()
+    expect(screen.getByRole('navigation', { name: 'Разделы настроек аккаунта' }).querySelectorAll('a')).toHaveLength(3)
+    expect(screen.getByText(/Сброс пароля по электронной почте пока недоступен/)).not.toBeNull()
+
+    const newPassword = screen.getByLabelText('Новый пароль') as HTMLInputElement
+    expect(newPassword.minLength).toBe(15)
+    expect(newPassword.maxLength).toBe(128)
+  })
+
+  it('saves a changed display name and reports success inside the profile section', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response)
+    vi.stubGlobal('fetch', fetchMock)
+    mocks.useAccessSession.mockReturnValue({
+      access: {
+        userId: 'user-1',
+        email: 'reader@example.test',
+        name: 'Reader',
+        role: 'user',
+        operatorExpiresAt: null,
+      },
+      status: 'ready',
+      refresh: mocks.refresh,
+      signOut: mocks.signOut,
+    })
+    render(createElement(AccountPage))
+
+    const name = screen.getByRole('textbox', { name: 'Имя' })
+    await user.clear(name)
+    await user.type(name, 'Reader AirCheck')
+    await user.click(screen.getByRole('button', { name: 'Сохранить имя' }))
+
+    expect((await screen.findByRole('status')).textContent).toContain('Имя профиля сохранено.')
+    expect(fetchMock).toHaveBeenCalledWith('/api/auth/update-user', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ name: 'Reader AirCheck' }),
+    }))
   })
 })

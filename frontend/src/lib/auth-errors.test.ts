@@ -12,6 +12,10 @@ describe('authentication error messages', () => {
     expect(getAuthErrorMessage({ code: 'INVALID_EMAIL_OR_PASSWORD' }, 'signin')).toBe('Неверная почта или пароль.')
   })
 
+  it('explains the current minimum for a rejected new password', () => {
+    expect(getAuthErrorMessage({ code: 'PASSWORD_TOO_SHORT' }, 'signup')).toContain('15 символов')
+  })
+
   it('uses a Russian fallback for unrecognized errors', () => {
     expect(getAuthErrorMessage({ message: 'Internal Server Error' }, 'signup')).toContain('создать аккаунт')
   })

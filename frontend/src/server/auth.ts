@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { Pool } from 'pg'
 
+import passwordPolicy from '../../password-policy.json'
 import { getConfig } from './config'
 import { parseTrustedOrigins } from './trusted-origins'
 
@@ -35,8 +36,8 @@ function createAuth() {
       enabled: true,
       disableSignUp: false,
       requireEmailVerification: false,
-      minPasswordLength: 12,
-      maxPasswordLength: 128,
+      minPasswordLength: passwordPolicy.minimumLength,
+      maxPasswordLength: passwordPolicy.maximumLength,
     },
     session: {
       expiresIn: 60 * 60 * 24 * 7,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
+import passwordPolicy from '../../../password-policy.json'
 import { getLoginHref } from '../../lib/auth-navigation'
 import { getAccessRoleLabel } from '../../lib/access-types'
 import PasswordInput from './PasswordInput'
@@ -30,15 +31,25 @@ function formatDate(value: string): string {
   return new Intl.DateTimeFormat('ru-RU', { dateStyle: 'long', timeStyle: 'short' }).format(date)
 }
 
+function FeedbackMessage({ feedback }: { feedback: Feedback | null }) {
+  if (!feedback) return null
+  return (
+    <p className={`account-feedback is-${feedback.tone}`} role={feedback.tone === 'error' ? 'alert' : 'status'} aria-live="polite">
+      {feedback.message}
+    </p>
+  )
+}
+
 export default function AccountPage() {
   const { access, status, refresh } = useAccessSession()
   const [name, setName] = useState('')
   const [savingName, setSavingName] = useState(false)
+  const [profileFeedback, setProfileFeedback] = useState<Feedback | null>(null)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [savingPassword, setSavingPassword] = useState(false)
-  const [feedback, setFeedback] = useState<Feedback | null>(null)
+  const [passwordFeedback, setPasswordFeedback] = useState<Feedback | null>(null)
 
   useEffect(() => {
     setName(access?.name ?? '')
@@ -48,12 +59,12 @@ export default function AccountPage() {
     event.preventDefault()
     const nextName = name.trim()
     if (!nextName || nextName.length > 80) {
-      setFeedback({ tone: 'error', message: 'Имя должно содержать от 1 до 80 символов.' })
+      setProfileFeedback({ tone: 'error', message: 'Имя должно содержать от 1 до 80 символов.' })
       return
     }
 
     setSavingName(true)
-    setFeedback(null)
+    setProfileFeedback(null)
     try {
       const response = await fetch('/api/auth/update-user', {
         method: 'POST',
@@ -63,9 +74,9 @@ export default function AccountPage() {
       })
       if (!response.ok) throw new Error(await responseError(response))
       await refresh()
-      setFeedback({ tone: 'success', message: 'Имя профиля сохранено.' })
+      setProfileFeedback({ tone: 'success', message: 'Имя профиля сохранено.' })
     } catch (cause) {
-      setFeedback({ tone: 'error', message: cause instanceof Error ? cause.message : 'Не удалось обновить имя.' })
+      setProfileFeedback({ tone: 'error', message: cause instanceof Error ? cause.message : 'Не удалось обновить имя.' })
     } finally {
       setSavingName(false)
     }
@@ -73,17 +84,20 @@ export default function AccountPage() {
 
   async function changePassword(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (newPassword.length < 12 || newPassword.length > 128) {
-      setFeedback({ tone: 'error', message: 'Новый пароль должен содержать от 12 до 128 символов.' })
+    if (newPassword.length < passwordPolicy.minimumLength || newPassword.length > passwordPolicy.maximumLength) {
+      setPasswordFeedback({
+        tone: 'error',
+        message: `Новый пароль должен содержать от ${passwordPolicy.minimumLength} до ${passwordPolicy.maximumLength} символов.`,
+      })
       return
     }
     if (newPassword !== confirmPassword) {
-      setFeedback({ tone: 'error', message: 'Новые пароли не совпадают.' })
+      setPasswordFeedback({ tone: 'error', message: 'Новые пароли не совпадают.' })
       return
     }
 
     setSavingPassword(true)
-    setFeedback(null)
+    setPasswordFeedback(null)
     try {
       const response = await fetch('/api/auth/change-password', {
         method: 'POST',
@@ -96,9 +110,9 @@ export default function AccountPage() {
       setNewPassword('')
       setConfirmPassword('')
       await refresh()
-      setFeedback({ tone: 'success', message: 'Пароль изменён. Другие активные сеансы завершены.' })
+      setPasswordFeedback({ tone: 'success', message: 'Пароль изменён. Другие активные сеансы завершены.' })
     } catch (cause) {
-      setFeedback({ tone: 'error', message: cause instanceof Error ? cause.message : 'Не удалось изменить пароль.' })
+      setPasswordFeedback({ tone: 'error', message: cause instanceof Error ? cause.message : 'Не удалось изменить пароль.' })
     } finally {
       setSavingPassword(false)
     }
@@ -112,9 +126,8 @@ export default function AccountPage() {
       <UtilityHeader />
       <main className="account-page-content">
         <div className="account-page-heading">
-          <span className="eyebrow">Профиль AirCheck</span>
-          <h1>Личный кабинет</h1>
-          <p>Данные учётной записи и доступ к функциям панели управления.</p>
+          <h1>Настройки аккаунта</h1>
+          <p>Управляйте профилем, доступом и безопасностью учётной записи.</p>
         </div>
 
         {status === 'loading' ? <section className="account-card account-state-card" role="status">Проверяем учётную запись…</section> : null}
@@ -128,100 +141,123 @@ export default function AccountPage() {
         {status === 'ready' && !access?.userId ? (
           <section className="account-card account-state-card">
             <span className="account-role-mark">Гость</span>
-            <h2>Войдите, чтобы открыть профиль</h2>
-            <p>Гость может просматривать панель и 3D-стенд. Войдите или создайте аккаунт для персонального профиля.</p>
+            <h2>Войдите, чтобы открыть настройки</h2>
+            <p>Гость может просматривать панель и 3D-стенд. Войдите или создайте аккаунт для персональных настроек.</p>
             <a className="account-button account-button-primary" href={getLoginHref('/account')}>Войти или зарегистрироваться</a>
           </section>
         ) : null}
 
         {status === 'ready' && access?.userId ? (
-          <>
-            {feedback ? <p className={`account-feedback is-${feedback.tone}`} role={feedback.tone === 'error' ? 'alert' : 'status'}>{feedback.message}</p> : null}
-            <section className="account-card account-profile-card" aria-labelledby="account-profile-title">
-              <div className="account-card-heading">
-                <div><span className="eyebrow">Учётная запись</span><h2 id="account-profile-title">Профиль</h2></div>
-                <span className="account-role-mark">{getAccessRoleLabel(access.role)}</span>
-              </div>
-              <form className="account-form" onSubmit={(event) => void updateName(event)}>
-                <label>
-                  Имя
-                  <input autoComplete="name" required maxLength={80} value={name} onChange={(event) => setName(event.target.value)} />
-                </label>
-                <label>
-                  Электронная почта
-                  <input type="email" value={access.email ?? ''} readOnly aria-describedby="account-email-note" />
-                  <small id="account-email-note">Изменение адреса отключено: почтовое подтверждение пока не настроено.</small>
-                </label>
-                <button className="account-button account-button-primary" type="submit" disabled={savingName || name.trim() === (access.name ?? '')}>
-                  {savingName ? 'Сохраняем…' : 'Сохранить имя'}
-                </button>
-              </form>
-              <div className="account-access-summary">
-                <div><span>Уровень доступа</span><strong>{getAccessRoleLabel(access.role)}</strong></div>
-                {expiresAt ? (
-                  <div><span>Права оператора</span><strong>{operatorExpired ? `Истекли ${formatDate(expiresAt)}` : `Действуют до ${formatDate(expiresAt)}`}</strong></div>
-                ) : access.role === 'operator' ? (
-                  <div><span>Права оператора</span><strong>Без срока окончания</strong></div>
-                ) : null}
-                <p>{access.role === 'owner'
-                  ? 'Полный доступ, включая управление учётными записями.'
-                  : access.role === 'operator'
-                    ? 'Можно управлять устройствами, настройками и демонстрационными сценариями.'
-                    : 'Доступен просмотр панели, истории и 3D-стенда. Команды устройствам недоступны.'}</p>
-              </div>
-            </section>
+          <div className="account-settings-layout">
+            <nav className="account-settings-nav" aria-label="Разделы настроек аккаунта">
+              <a href="#account-profile">Профиль</a>
+              <a href="#account-access">Доступ</a>
+              <a href="#account-security">Безопасность</a>
+            </nav>
 
-            <section className="account-card" aria-labelledby="account-password-title">
-              <div className="account-card-heading">
-                <div><span className="eyebrow">Безопасность</span><h2 id="account-password-title">Сменить пароль</h2></div>
+            <div className="account-settings-stack">
+              <div className="account-profile-overview">
+                <section className="account-card account-profile-card" id="account-profile" aria-labelledby="account-profile-title">
+                  <div className="account-card-heading">
+                    <div><span className="eyebrow">Личные данные</span><h2 id="account-profile-title">Профиль</h2></div>
+                  </div>
+                  <form className="account-form" onSubmit={(event) => void updateName(event)}>
+                    <label>
+                      Имя
+                      <input autoComplete="name" required maxLength={80} value={name} onChange={(event) => setName(event.target.value)} />
+                    </label>
+                    <div className="account-email-field">
+                      <span className="account-field-label">Электронная почта</span>
+                      <div className="account-email-value">{access.email || 'Адрес не указан'}</div>
+                      <small>Изменение появится после настройки почтового подтверждения.</small>
+                    </div>
+                    <button className="account-button account-button-primary" type="submit" disabled={savingName || name.trim() === (access.name ?? '')}>
+                      {savingName ? 'Сохраняем…' : 'Сохранить имя'}
+                    </button>
+                    <FeedbackMessage feedback={profileFeedback} />
+                  </form>
+                </section>
+
+                <section className="account-card account-access-card" id="account-access" aria-labelledby="account-access-title">
+                  <div className="account-card-heading">
+                    <div><span className="eyebrow">Права учётной записи</span><h2 id="account-access-title">Доступ</h2></div>
+                  </div>
+                  <p className="account-access-role">{access.role === 'owner' ? 'Владелец' : getAccessRoleLabel(access.role)}</p>
+                  <p className="account-access-description">Роль применяется в текущей системе AirCheck.</p>
+                  {expiresAt ? (
+                    <p className="account-access-expiry">
+                      {operatorExpired ? `Права оператора истекли ${formatDate(expiresAt)}.` : `Права оператора действуют до ${formatDate(expiresAt)}.`}
+                    </p>
+                  ) : access.role === 'operator' ? (
+                    <p className="account-access-expiry">Права оператора без срока окончания.</p>
+                  ) : null}
+                  <p className="account-access-permissions">
+                    {access.role === 'owner'
+                      ? 'Полный доступ, включая управление учётными записями.'
+                      : access.role === 'operator'
+                        ? 'Можно управлять устройствами, настройками и демонстрационными сценариями.'
+                        : 'Доступен просмотр панели, истории и 3D-стенда. Команды устройствам недоступны.'}
+                  </p>
+                </section>
               </div>
-              <form className="account-form" onSubmit={(event) => void changePassword(event)}>
-                <div className="account-password-field">
-                  <label htmlFor="account-current-password">Текущий пароль</label>
-                  <PasswordInput
-                    id="account-current-password"
-                    autoComplete="current-password"
-                    required
-                    maxLength={128}
-                    value={currentPassword}
-                    onChange={(event) => setCurrentPassword(event.target.value)}
-                  />
+
+              <section className="account-card" id="account-security" aria-labelledby="account-password-title">
+                <div className="account-card-heading">
+                  <div><span className="eyebrow">Защита учётной записи</span><h2 id="account-password-title">Пароль</h2></div>
                 </div>
-                <div className="account-form-row">
+                <p className="account-section-intro">Для смены пароля потребуется подтвердить текущий.</p>
+                <form className="account-form" onSubmit={(event) => void changePassword(event)}>
                   <div className="account-password-field">
-                    <label htmlFor="account-new-password">Новый пароль</label>
+                    <label htmlFor="account-current-password">Текущий пароль</label>
                     <PasswordInput
-                      id="account-new-password"
-                      autoComplete="new-password"
-                      aria-describedby="account-new-password-note"
+                      id="account-current-password"
+                      autoComplete="current-password"
                       required
-                      minLength={12}
-                      maxLength={128}
-                      value={newPassword}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                    />
-                    <small id="account-new-password-note">От 12 до 128 символов.</small>
-                  </div>
-                  <div className="account-password-field">
-                    <label htmlFor="account-confirm-password">Повторите новый пароль</label>
-                    <PasswordInput
-                      id="account-confirm-password"
-                      autoComplete="new-password"
-                      required
-                      minLength={12}
-                      maxLength={128}
-                      value={confirmPassword}
-                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      maxLength={passwordPolicy.maximumLength}
+                      value={currentPassword}
+                      onChange={(event) => setCurrentPassword(event.target.value)}
                     />
                   </div>
+                  <div className="account-form-row">
+                    <div className="account-password-field">
+                      <label htmlFor="account-new-password">Новый пароль</label>
+                      <PasswordInput
+                        id="account-new-password"
+                        autoComplete="new-password"
+                        aria-describedby="account-new-password-note"
+                        required
+                        minLength={passwordPolicy.minimumLength}
+                        maxLength={passwordPolicy.maximumLength}
+                        value={newPassword}
+                        onChange={(event) => setNewPassword(event.target.value)}
+                      />
+                      <small id="account-new-password-note">От {passwordPolicy.minimumLength} до {passwordPolicy.maximumLength} символов. Можно использовать пробелы и вставку из менеджера паролей.</small>
+                    </div>
+                    <div className="account-password-field">
+                      <label htmlFor="account-confirm-password">Повторите новый пароль</label>
+                      <PasswordInput
+                        id="account-confirm-password"
+                        autoComplete="new-password"
+                        required
+                        minLength={passwordPolicy.minimumLength}
+                        maxLength={passwordPolicy.maximumLength}
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <button className="account-button account-button-primary" type="submit" disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword}>
+                    {savingPassword ? 'Меняем пароль…' : 'Изменить пароль'}
+                  </button>
+                  <FeedbackMessage feedback={passwordFeedback} />
+                </form>
+                <div className="account-security-note">
+                  <p>После смены пароля остальные активные сеансы будут завершены.</p>
+                  <p>Сброс пароля по электронной почте пока недоступен: почтовый сервис не подключён.</p>
                 </div>
-                <button className="account-button" type="submit" disabled={savingPassword || !currentPassword || !newPassword || !confirmPassword}>
-                  {savingPassword ? 'Меняем пароль…' : 'Изменить пароль'}
-                </button>
-              </form>
-              <p className="account-security-note">После смены пароля остальные активные сеансы будут завершены. Если вы не помните текущий пароль, восстановление выполняет владелец установки.</p>
-            </section>
-          </>
+              </section>
+            </div>
+          </div>
         ) : null}
       </main>
     </div>

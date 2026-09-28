@@ -46,6 +46,15 @@ describe('owner account list states', () => {
     expect(await screen.findByText('Список пуст.')).not.toBeNull()
   })
 
+  it('uses the configured password bounds when creating an account', async () => {
+    fetchMock.mockResolvedValue(response(true, { data: [] }))
+    render(createElement(OwnerUsers))
+
+    const password = await screen.findByLabelText('Временный пароль') as HTMLInputElement
+    expect(password.minLength).toBe(15)
+    expect(password.maxLength).toBe(128)
+  })
+
   it('does not present a failed list request as an empty account list', async () => {
     fetchMock.mockResolvedValue(response(false, { error: { message: 'Account list unavailable.' } }))
     render(createElement(OwnerUsers))

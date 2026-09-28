@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { createRequire } from 'node:module'
 import { createInterface } from 'node:readline/promises'
 import { stdin, stdout } from 'node:process'
 
@@ -6,6 +7,7 @@ import { hashPassword } from 'better-auth/crypto'
 import { Pool } from 'pg'
 
 const mode = process.argv[2]
+const passwordPolicy = createRequire(import.meta.url)('../password-policy.json')
 const passwordFromStdin = process.argv.includes('--password-stdin')
 const positionalArguments = process.argv.slice(3).filter((argument) => argument !== '--password-stdin')
 const emailArgument = positionalArguments[0]
@@ -86,8 +88,10 @@ try {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('A valid email address is required.')
   const [password, confirmation] = passwordFromStdin
     ? await readPasswordInput()
-    : [await hiddenQuestion('New owner password (12+ characters): '), await hiddenQuestion('Repeat password: ')]
-  if (password.length < 12 || password.length > 128) throw new Error('Password must contain 12–128 characters.')
+    : [await hiddenQuestion(`New owner password (${passwordPolicy.minimumLength}+ characters): `), await hiddenQuestion('Repeat password: ')]
+  if (password.length < passwordPolicy.minimumLength || password.length > passwordPolicy.maximumLength) {
+    throw new Error(`Password must contain ${passwordPolicy.minimumLength}–${passwordPolicy.maximumLength} characters.`)
+  }
   if (password !== confirmation) throw new Error('Passwords do not match.')
   const passwordHash = await hashPassword(password)
 

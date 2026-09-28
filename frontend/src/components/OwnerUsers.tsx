@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import PasswordInput from './auth/PasswordInput'
+import passwordPolicy from '../../password-policy.json'
 
 type ManagedUser = {
   id: string
@@ -132,12 +133,12 @@ export default function OwnerUsers() {
               autoComplete="new-password"
               aria-describedby="owner-create-password-note"
               required
-              minLength={12}
-              maxLength={128}
+              minLength={passwordPolicy.minimumLength}
+              maxLength={passwordPolicy.maximumLength}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
-            <span id="owner-create-password-note" className="auth-field-note">Не менее 12 символов.</span>
+            <span id="owner-create-password-note" className="auth-field-note">Не менее {passwordPolicy.minimumLength} символов.</span>
           </div>
           <button className="button-primary" disabled={creating}>{creating ? 'Создаём…' : 'Создать'}</button>
         </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import passwordPolicy from '../../../../../password-policy.json'
 import { accessErrorResponse, assertSameOrigin, requireOwner } from '../../../../server/access'
 import { errorResponse, ApiError } from '../../../../server/api'
 import { getAuthPool } from '../../../../server/auth'
@@ -54,8 +55,8 @@ export async function POST(request: Request) {
     const name = typeof input.name === 'string' ? input.name.trim() : ''
     const password = typeof input.password === 'string' ? input.password : ''
     if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-      || !name || name.length > 80 || password.length < 12 || password.length > 128) {
-      throw new ApiError('invalid_user', 'Укажите email, имя и пароль от 12 до 128 символов', 400)
+      || !name || name.length > 80 || password.length < passwordPolicy.minimumLength || password.length > passwordPolicy.maximumLength) {
+      throw new ApiError('invalid_user', `Укажите email, имя и пароль от ${passwordPolicy.minimumLength} до ${passwordPolicy.maximumLength} символов`, 400)
     }
     const auth = await import('../../../../server/auth').then((module) => module.getAuth())
     const created = await auth.api.signUpEmail({

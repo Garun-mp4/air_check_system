@@ -55,7 +55,7 @@ describe('Better Auth policy wired by the server', () => {
     expect(mocks.betterAuth).not.toHaveBeenCalled()
   })
 
-  it('enables email registration with the documented password minimum and session support', async () => {
+  it('enables email registration with the configured password policy and session support', async () => {
     const { getAuth } = await import('./auth')
     getAuth()
 
@@ -68,7 +68,8 @@ describe('Better Auth policy wired by the server', () => {
         enabled: true,
         disableSignUp: false,
         requireEmailVerification: false,
-        minPasswordLength: 12,
+        minPasswordLength: 15,
+        maxPasswordLength: 128,
       },
     })
     expect(options.session).toBeDefined()
