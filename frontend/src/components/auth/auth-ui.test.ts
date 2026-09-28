@@ -161,7 +161,7 @@ describe('sign-in and account page UI', () => {
     expect(mocks.refresh).toHaveBeenCalledTimes(1)
   })
 
-  it('shows one supported account section at a time and preserves profile edits while switching', async () => {
+  it('shows only profile and security sections and preserves profile edits while switching', async () => {
     const user = userEvent.setup()
     mocks.useAccessSession.mockReturnValue({
       access: {
@@ -183,20 +183,20 @@ describe('sign-in and account page UI', () => {
     expect(within(profileSection).queryByRole('textbox', { name: /Электронная почта/ })).toBeNull()
     expect(screen.queryByRole('tabpanel', { name: 'Доступ' })).toBeNull()
     expect(screen.queryByRole('tabpanel', { name: 'Безопасность' })).toBeNull()
-    expect(screen.getByRole('tablist', { name: 'Разделы настроек аккаунта' }).querySelectorAll('[role="tab"]')).toHaveLength(3)
+    expect(screen.queryByRole('tab', { name: 'Доступ' })).toBeNull()
+    expect(screen.getByRole('tablist', { name: 'Разделы настроек аккаунта' }).querySelectorAll('[role="tab"]')).toHaveLength(2)
+    expect(within(profileSection).getByRole('region', { name: 'Роль в системе' })).not.toBeNull()
 
     const name = within(profileSection).getByRole('textbox', { name: 'Имя' }) as HTMLInputElement
     await user.clear(name)
     await user.type(name, 'Reader Draft')
-    await user.click(screen.getByRole('tab', { name: 'Доступ' }))
+    await user.click(screen.getByRole('tab', { name: 'Безопасность' }))
 
-    expect(screen.getByRole('tabpanel', { name: 'Доступ' })).not.toBeNull()
+    expect(screen.getByRole('tabpanel', { name: 'Безопасность' })).not.toBeNull()
     expect(profileSection.hidden).toBe(true)
-    expect(new URL(window.location.href).searchParams.get('section')).toBe('access')
+    expect(new URL(window.location.href).searchParams.get('section')).toBe('security')
     expect(document.querySelector<HTMLInputElement>('input[autocomplete="name"]')?.value).toBe('Reader Draft')
 
-    await user.click(screen.getByRole('tab', { name: 'Безопасность' }))
-    expect(screen.getByRole('tabpanel', { name: 'Безопасность' })).not.toBeNull()
     expect(screen.getByText(/Сброс пароля по электронной почте пока недоступен/)).not.toBeNull()
 
     const newPassword = screen.getByLabelText('Новый пароль') as HTMLInputElement
@@ -226,16 +226,16 @@ describe('sign-in and account page UI', () => {
     expect(screen.getByRole('tab', { name: 'Безопасность' }).getAttribute('aria-selected')).toBe('true')
 
     await user.click(screen.getByRole('tab', { name: 'Профиль' }))
-    await user.click(screen.getByRole('tab', { name: 'Доступ' }))
+    await user.click(screen.getByRole('tab', { name: 'Безопасность' }))
     window.history.back()
 
     await waitFor(() => expect(screen.getByRole('tab', { name: 'Профиль' }).getAttribute('aria-selected')).toBe('true'))
     window.history.forward()
-    await waitFor(() => expect(screen.getByRole('tab', { name: 'Доступ' }).getAttribute('aria-selected')).toBe('true'))
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Безопасность' }).getAttribute('aria-selected')).toBe('true'))
   })
 
-  it('translates an existing account hash link without scrolling to an anchor', async () => {
-    window.history.replaceState(null, '', '/account#account-access')
+  it.each(['/account?section=access', '/account#account-access'])('maps legacy access URL %s to the profile section', async (legacyUrl) => {
+    window.history.replaceState(null, '', legacyUrl)
     mocks.useAccessSession.mockReturnValue({
       access: {
         userId: 'user-1',
@@ -251,9 +251,10 @@ describe('sign-in and account page UI', () => {
     })
     render(createElement(AccountPage))
 
-    expect(await screen.findByRole('tabpanel', { name: 'Доступ' })).not.toBeNull()
+    expect(await screen.findByRole('tabpanel', { name: 'Профиль' })).not.toBeNull()
+    expect(screen.queryByRole('tab', { name: 'Доступ' })).toBeNull()
     expect(window.location.hash).toBe('')
-    expect(new URL(window.location.href).searchParams.get('section')).toBe('access')
+    expect(new URL(window.location.href).searchParams.get('section')).toBe('profile')
   })
 
   it('supports arrow-key tab switching with automatic activation', async () => {
@@ -277,10 +278,56 @@ describe('sign-in and account page UI', () => {
     profileTab.focus()
     await user.keyboard('{ArrowDown}')
 
-    const accessTab = screen.getByRole('tab', { name: 'Доступ' })
-    expect(document.activeElement).toBe(accessTab)
-    expect(accessTab.getAttribute('aria-selected')).toBe('true')
-    expect(screen.getByRole('tabpanel', { name: 'Доступ' })).not.toBeNull()
+    const securityTab = screen.getByRole('tab', { name: 'Безопасность' })
+    expect(document.activeElement).toBe(securityTab)
+    expect(securityTab.getAttribute('aria-selected')).toBe('true')
+    expect(screen.getByRole('tabpanel', { name: 'Безопасность' })).not.toBeNull()
+  })
+
+  it.each([
+    { role: 'user', label: 'Пользователь', tone: 'user' },
+    { role: 'operator', label: 'Оператор', tone: 'operator' },
+    { role: 'owner', label: 'Владелец установки', tone: 'owner' },
+  ] as const)('shows the $role access badge in the profile with its role color', async ({ role, label, tone }) => {
+    mocks.useAccessSession.mockReturnValue({
+      access: {
+        userId: 'user-1',
+        email: 'reader@example.test',
+        name: 'Reader',
+        image: null,
+        role,
+        operatorExpiresAt: null,
+      },
+      status: 'ready',
+      refresh: mocks.refresh,
+      signOut: mocks.signOut,
+    })
+    render(createElement(AccountPage))
+
+    const profile = await screen.findByRole('tabpanel', { name: 'Профиль' })
+    const roleSummary = within(profile).getByRole('region', { name: 'Роль в системе' })
+    const badge = within(roleSummary).getByText(label)
+    expect(badge.className).toContain(`account-role-badge-${tone}`)
+  })
+
+  it('keeps an operator privilege expiry notice in the profile summary', async () => {
+    mocks.useAccessSession.mockReturnValue({
+      access: {
+        userId: 'operator-1',
+        email: 'operator@example.test',
+        name: 'Operator',
+        image: null,
+        role: 'operator',
+        operatorExpiresAt: '2000-01-01T00:00:00.000Z',
+      },
+      status: 'ready',
+      refresh: mocks.refresh,
+      signOut: mocks.signOut,
+    })
+    render(createElement(AccountPage))
+
+    const summary = await screen.findByRole('region', { name: 'Роль в системе' })
+    expect(within(summary).getByText(/Права оператора истекли/)).not.toBeNull()
   })
 
   it('saves a changed display name and reports success inside the profile section', async () => {

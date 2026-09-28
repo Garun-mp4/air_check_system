@@ -4,27 +4,35 @@ import { useEffect, useRef, useState } from 'react'
 
 import passwordPolicy from '../../../password-policy.json'
 import { getLoginHref } from '../../lib/auth-navigation'
-import { getAccessRoleLabel } from '../../lib/access-types'
+import { getAccessRoleLabel, type AccessRole } from '../../lib/access-types'
 import ProfileAvatarEditor from './ProfileAvatarEditor'
 import PasswordInput from './PasswordInput'
 import { useAccessSession } from './AccessSessionProvider'
 import UtilityHeader from './UtilityHeader'
 
 type Feedback = { tone: 'success' | 'error'; message: string }
-type AccountSection = 'profile' | 'access' | 'security'
+type AccountSection = 'profile' | 'security'
 type TabOrientation = 'horizontal' | 'vertical'
 
-const accountSections: AccountSection[] = ['profile', 'access', 'security']
+const accountSections: AccountSection[] = ['profile', 'security']
 const accountSectionLabels: Record<AccountSection, string> = {
   profile: 'Профиль',
-  access: 'Доступ',
   security: 'Безопасность',
 }
 
 const legacyAccountSections: Record<string, AccountSection> = {
   '#account-profile': 'profile',
-  '#account-access': 'access',
+  '#account-access': 'profile',
   '#account-security': 'security',
+}
+
+function getAccountRoleDescription(role: AccessRole): string {
+  return {
+    guest: 'Войдите, чтобы открыть настройки аккаунта.',
+    user: 'Просмотр панели, истории и 3D-стенда. Команды устройствам недоступны.',
+    operator: 'Управление устройствами, настройками и демонстрационными сценариями.',
+    owner: 'Полный доступ, включая управление учётными записями.',
+  }[role]
 }
 
 function readAccountSectionFromLocation(): AccountSection {
@@ -210,7 +218,7 @@ export default function AccountPage() {
       <main className="account-page-content">
         <div className="account-page-heading">
           <h1>Настройки аккаунта</h1>
-          <p>Управляйте профилем, доступом и безопасностью учётной записи.</p>
+          <p>Управляйте профилем и безопасностью учётной записи.</p>
         </div>
 
         {status === 'loading' ? <section className="account-card account-state-card" role="status">Проверяем учётную запись…</section> : null}
@@ -223,7 +231,6 @@ export default function AccountPage() {
         ) : null}
         {status === 'ready' && !access?.userId ? (
           <section className="account-card account-state-card">
-            <span className="account-role-mark">Гость</span>
             <h2>Войдите, чтобы открыть настройки</h2>
             <p>Гость может просматривать панель и 3D-стенд. Войдите или создайте аккаунт для персональных настроек.</p>
             <a className="account-button account-button-primary" href={getLoginHref('/account')}>Войти или зарегистрироваться</a>
@@ -270,6 +277,22 @@ export default function AccountPage() {
                   <div><span className="eyebrow">Личные данные</span><h2 id="account-profile-title">Профиль</h2></div>
                 </div>
                 <ProfileAvatarEditor image={access.image} name={access.name?.trim() || access.email || 'Пользователь AirCheck'} />
+                <section className="account-profile-access" aria-labelledby="account-profile-access-title">
+                  <div className="account-profile-access-heading">
+                    <span id="account-profile-access-title" className="account-profile-access-label">Роль в системе</span>
+                    <span className={`account-role-badge account-role-badge-${access.role}`}>
+                      {getAccessRoleLabel(access.role)}
+                    </span>
+                  </div>
+                  <p>{getAccountRoleDescription(access.role)}</p>
+                  {expiresAt ? (
+                    <p className="account-profile-access-expiry">
+                      {operatorExpired ? `Права оператора истекли ${formatDate(expiresAt)}.` : `Права оператора действуют до ${formatDate(expiresAt)}.`}
+                    </p>
+                  ) : access.role === 'operator' ? (
+                    <p className="account-profile-access-expiry">Права оператора без срока окончания.</p>
+                  ) : null}
+                </section>
                 <form className="account-form" onSubmit={(event) => void updateName(event)}>
                   <label>
                     Имя
@@ -285,35 +308,6 @@ export default function AccountPage() {
                   </button>
                   <FeedbackMessage feedback={profileFeedback} />
                 </form>
-              </section>
-
-              <section
-                className="account-card account-access-card account-settings-panel"
-                id="account-access"
-                role="tabpanel"
-                aria-labelledby="account-tab-access"
-                tabIndex={activeSection === 'access' ? 0 : -1}
-                hidden={activeSection !== 'access'}
-              >
-                <div className="account-card-heading">
-                  <div><span className="eyebrow">Права учётной записи</span><h2 id="account-access-title">Доступ</h2></div>
-                </div>
-                <p className="account-access-role">{access.role === 'owner' ? 'Владелец' : getAccessRoleLabel(access.role)}</p>
-                <p className="account-access-description">Роль применяется в текущей системе AirCheck.</p>
-                {expiresAt ? (
-                  <p className="account-access-expiry">
-                    {operatorExpired ? `Права оператора истекли ${formatDate(expiresAt)}.` : `Права оператора действуют до ${formatDate(expiresAt)}.`}
-                  </p>
-                ) : access.role === 'operator' ? (
-                  <p className="account-access-expiry">Права оператора без срока окончания.</p>
-                ) : null}
-                <p className="account-access-permissions">
-                  {access.role === 'owner'
-                    ? 'Полный доступ, включая управление учётными записями.'
-                    : access.role === 'operator'
-                      ? 'Можно управлять устройствами, настройками и демонстрационными сценариями.'
-                      : 'Доступен просмотр панели, истории и 3D-стенда. Команды устройствам недоступны.'}
-                </p>
               </section>
 
               <section
