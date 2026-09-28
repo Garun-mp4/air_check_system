@@ -36,6 +36,7 @@ import {
   getPm25Tone,
 } from '../lib/air-quality'
 import { getLoginHref } from '../lib/auth-navigation'
+import BrandLogo from './BrandLogo'
 import { getCo2Thresholds, LineChart, type ChartViewport } from './Charts'
 import AccountMenu from './auth/AccountMenu'
 import { useAccessSession } from './auth/AccessSessionProvider'
@@ -2219,17 +2220,9 @@ export default function AirDashboard() {
             href="#overview"
             onClick={(event) => handleSectionNavigation('overview', event)}
           >
-            <picture className="brand-logo-frame">
-              <source srcSet="/aircheck-logo.webp" type="image/webp" />
-              <img
-                className="brand-logo"
-                src="/aircheck-logo.png"
-                alt=""
-                width="44"
-                height="32"
-                aria-hidden="true"
-              />
-            </picture>
+            <span className="brand-logo-frame">
+              <BrandLogo className="brand-logo" width={44} height={32} priority />
+            </span>
             <span className="brand-name">AirCheck</span>
           </a>
 

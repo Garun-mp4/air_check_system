@@ -8,6 +8,7 @@ import SceneCanvas from './SceneLoader'
 import { useSimulatorState } from './useSimulatorState'
 import type { CutawayMode, SimulatorSnapshot, VisualizationMode } from './types'
 import { getLoginHref } from '../../lib/auth-navigation'
+import BrandLogo from '../BrandLogo'
 import AccountMenu from '../auth/AccountMenu'
 import { useAccessSession } from '../auth/AccessSessionProvider'
 
@@ -151,7 +152,11 @@ export default function SimulatorApp() {
     return (
       <main className="simulator-page simulator-unavailable">
         <header className="simulator-topbar">
-          <a href="/simulator" className="simulator-brand"><span className="simulator-brand-mark">A</span><span>AirCheck</span><span className="simulator-brand-subtitle">3D-стенд</span></a>
+          <a href="/simulator" className="simulator-brand">
+            <BrandLogo className="simulator-brand-logo" width={36} height={27} priority />
+            <span>AirCheck</span>
+            <span className="simulator-brand-subtitle">3D-стенд</span>
+          </a>
           <nav className="simulator-primary-nav" aria-label="Основная навигация"><a href="/">Панель</a><a href="/simulator" aria-current="page">3D-стенд</a></nav>
           <AccountMenu variant="simulator" />
         </header>
@@ -172,7 +177,11 @@ export default function SimulatorApp() {
   return (
     <main className="simulator-page">
       <header className="simulator-topbar">
-        <a href="/simulator" className="simulator-brand"><span className="simulator-brand-mark">A</span><span>AirCheck</span><span className="simulator-brand-subtitle">3D-стенд</span></a>
+        <a href="/simulator" className="simulator-brand">
+          <BrandLogo className="simulator-brand-logo" width={36} height={27} priority />
+          <span>AirCheck</span>
+          <span className="simulator-brand-subtitle">3D-стенд</span>
+        </a>
         <nav className="simulator-primary-nav" aria-label="Основная навигация"><a href="/">Панель</a><a href="/simulator" aria-current="page">3D-стенд</a></nav>
         <div className="simulator-topbar-center">
           <span className={'sim-status-pill ' + (connected ? 'is-online' : 'is-offline')}><i />{connected ? 'Симулятор подключён' : 'Нет потока симуляции'}</span>

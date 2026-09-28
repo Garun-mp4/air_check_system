@@ -1,8 +1,8 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import Image from 'next/image'
 
+import BrandLogo from '../BrandLogo'
 import AccountMenu from './AccountMenu'
 
 const links = [
@@ -16,7 +16,7 @@ export default function UtilityHeader() {
   return (
     <header className="utility-topbar">
       <a className="utility-brand" href="/" aria-label="AirCheck — панель управления">
-        <Image src="/aircheck-logo.png" alt="" width={38} height={30} priority />
+        <BrandLogo width={38} height={30} priority />
         <span>AirCheck</span>
       </a>
       <nav className="utility-primary-nav" aria-label="Основная навигация">
