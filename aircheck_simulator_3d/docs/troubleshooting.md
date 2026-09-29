@@ -2,11 +2,11 @@
 
 ## Страница пишет, что 3D-стенд недоступен
 
-Проверьте профиль и состояние контейнеров:
+Проверьте состояние стандартного стека и контейнеров:
 
 ```powershell
-docker compose --profile web-demo up -d web-simulator
-docker compose --profile web-demo ps
+docker compose up -d web-simulator
+docker compose ps
 docker compose logs --tail 100 web-simulator backend
 ```
 
@@ -26,14 +26,14 @@ docker compose logs -f web-simulator backend
 
 ## Другой simulator пишет telemetry того же устройства
 
-Для одного `DEVICE_ID` разрешён один активный источник. Выберите `web-demo` или профиль `demo` с REST-only simulator; общий lock volume остановит второй процесс, если оба претендуют на один узел.
+Для одного `DEVICE_ID` разрешён один активный источник. Стандартный стек использует `web-simulator`; профиль `demo` запускает REST-only simulator. Общий lock volume остановит второй процесс, если оба претендуют на один узел.
 
 ## Применены старые frontend-файлы
 
 Пересоберите только сервисы приложения и headless-узла:
 
 ```powershell
-docker compose --profile web-demo up --build -d backend web-simulator
+docker compose up --build -d backend web-simulator
 ```
 
 Это пересоздаёт контейнеры, но не удаляет PostgreSQL/ML volumes. Интерактивная сцена доступна в браузерной панели, а её состояние рассчитывает headless simulator.

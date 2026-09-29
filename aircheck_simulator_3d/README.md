@@ -7,8 +7,8 @@
 Из корня репозитория запустите веб-стек:
 
 ```powershell
-docker compose --profile web-demo up --build -d
-docker compose --profile web-demo ps
+docker compose up --build -d
+docker compose ps
 ```
 
 Откройте `https://aircheck.home.arpa/simulator`. Контейнер `web-simulator` запускает `SimulationCoordinator`, публикует состояние через внутренний API/SSE и использует тот же REST-контракт backend для telemetry, команд и ACK.

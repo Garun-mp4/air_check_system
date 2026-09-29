@@ -285,7 +285,7 @@ def test_git_ignores_local_env_but_keeps_the_example_template() -> None:
 
 def test_default_compose_config_contains_only_core_services(compose_runner: ComposeRunner) -> None:
     services = set(_services(compose_runner.config()))
-    assert services == {"postgres", "ml-service", "backend", "https-proxy"}
+    assert services == {"postgres", "ml-service", "backend", "https-proxy", "web-simulator"}
 
 
 def test_compose_render_requires_better_auth_secret(compose_runner: ComposeRunner) -> None:
@@ -298,7 +298,6 @@ def test_compose_render_requires_better_auth_secret(compose_runner: ComposeRunne
     ("profile", "expected_optional_service"),
     [
         ("demo", "simulator"),
-        ("web-demo", "web-simulator"),
         ("maintenance", "owner-cli"),
     ],
 )
@@ -306,13 +305,10 @@ def test_each_optional_profile_enables_only_its_service(
     compose_runner: ComposeRunner, profile: str, expected_optional_service: str
 ) -> None:
     services = set(_services(compose_runner.config(profile)))
-    assert services == {
-        "postgres",
-        "ml-service",
-        "backend",
-        "https-proxy",
-        expected_optional_service,
-    }
+    expected = {"postgres", "ml-service", "backend", "https-proxy", "web-simulator"}
+    if expected_optional_service != "web-simulator":
+        expected.add(expected_optional_service)
+    assert services == expected
 
 
 def test_backend_waits_for_healthy_database_and_started_ml_service(
@@ -327,7 +323,7 @@ def test_backend_waits_for_healthy_database_and_started_ml_service(
 def test_both_simulators_wait_for_backend_and_share_device_lease(
     compose_runner: ComposeRunner,
 ) -> None:
-    services = _services(compose_runner.config("demo", "web-demo"))
+    services = _services(compose_runner.config("demo"))
     legacy = services["simulator"]
     web = services["web-simulator"]
     assert legacy["depends_on"]["backend"]["condition"] == "service_started"
@@ -342,7 +338,7 @@ def test_both_simulators_wait_for_backend_and_share_device_lease(
 def test_machine_and_internal_tokens_are_wired_to_separate_purposes(
     compose_runner: ComposeRunner,
 ) -> None:
-    services = _services(compose_runner.config("demo", "web-demo"))
+    services = _services(compose_runner.config("demo"))
     backend_env = services["backend"]["environment"]
     legacy_env = services["simulator"]["environment"]
     web_env = services["web-simulator"]["environment"]
@@ -376,7 +372,7 @@ def test_backend_port_is_configurable_and_bound_to_loopback(
 
 
 def test_caddy_is_only_publicly_published_service(compose_runner: ComposeRunner) -> None:
-    services = _services(compose_runner.config("demo", "web-demo", "maintenance"))
+    services = _services(compose_runner.config("demo", "maintenance"))
     proxy_ports = services["https-proxy"].get("ports", [])
     assert {port["target"] for port in proxy_ports} == {80, 443}
     assert all("host_ip" not in port or port["host_ip"] != "127.0.0.1" for port in proxy_ports)
@@ -390,7 +386,7 @@ def test_caddy_is_only_publicly_published_service(compose_runner: ComposeRunner)
 
 
 def test_python_simulators_do_not_publish_direct_http_ports(compose_runner: ComposeRunner) -> None:
-    services = _services(compose_runner.config("demo", "web-demo"))
+    services = _services(compose_runner.config("demo"))
     assert services["simulator"].get("ports", []) == []
     assert services["web-simulator"].get("ports", []) == []
 
@@ -406,7 +402,7 @@ def test_postgres_healthcheck_and_read_only_migration_mount(compose_runner: Comp
 
 
 def test_web_simulator_has_local_healthcheck(compose_runner: ComposeRunner) -> None:
-    web = _services(compose_runner.config("web-demo"))["web-simulator"]
+    web = _services(compose_runner.config())["web-simulator"]
     healthcheck = web["healthcheck"]
     assert "http://127.0.0.1:8090/healthz" in " ".join(healthcheck["test"])
     assert healthcheck["interval"] == "10s"
@@ -426,7 +422,7 @@ def test_owner_cli_uses_the_maintenance_profile_and_healthy_database(
 def test_named_volumes_cover_database_model_tls_and_simulator_lease(
     compose_runner: ComposeRunner,
 ) -> None:
-    config = compose_runner.config("demo", "web-demo")
+    config = compose_runner.config("demo")
     assert {
         "postgres-data",
         "ml-model",
@@ -456,7 +452,7 @@ def test_caddy_routes_the_configured_host_over_internal_tls_to_backend() -> None
 
 
 def test_all_compose_build_contexts_and_dockerfiles_exist(compose_runner: ComposeRunner) -> None:
-    services = _services(compose_runner.config("demo", "web-demo", "maintenance"))
+    services = _services(compose_runner.config("demo", "maintenance"))
     build_services = {name: service for name, service in services.items() if "build" in service}
     assert set(build_services) == {
         "backend",

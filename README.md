@@ -76,7 +76,7 @@ Copy-Item .env.example .env
 
 ```powershell
 docker compose stop simulator
-docker compose --profile web-demo up --build -d
+docker compose up --build -d
 ```
 
 Проверить состояние контейнеров:
@@ -128,13 +128,13 @@ Backend автоматически удаляет записи старше 24 �
 
 ### Варианты симулятора
 
-3D-стенд доступен во вкладке веб-панели `/simulator`. Python headless simulator запускается вместе с веб-стеком через профиль `web-demo` и передаёт браузеру состояние через внутренний API/SSE.
+3D-стенд доступен во вкладке веб-панели `/simulator`. Python headless simulator запускается вместе со стандартным веб-стеком и передаёт браузеру состояние через внутренний API/SSE. Старый REST-only simulator оставлен отдельным профилем `demo`.
 
 Для веб-сцены и общей физической модели запустите headless-симулятор:
 
 ```powershell
 docker compose stop simulator
-docker compose --profile web-demo up --build -d web-simulator
+docker compose up --build -d web-simulator
 docker compose logs -f web-simulator
 ```
 

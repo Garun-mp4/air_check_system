@@ -11,6 +11,7 @@ export function useSimulatorState() {
 
   useEffect(() => {
     let active = true
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
     const loadSnapshot = async () => {
       try {
         const response = await fetch('/api/simulator/state', { cache: 'no-store' })
@@ -25,6 +26,9 @@ export function useSimulatorState() {
         if (active) {
           setConnected(false)
           setError(loadError instanceof Error ? loadError.message : 'Нет связи с симулятором')
+          retryTimer = setTimeout(() => {
+            void loadSnapshot()
+          }, 3000)
         }
       }
     }
@@ -46,6 +50,7 @@ export function useSimulatorState() {
     }
     return () => {
       active = false
+      if (retryTimer) clearTimeout(retryTimer)
       stream.close()
     }
   }, [])

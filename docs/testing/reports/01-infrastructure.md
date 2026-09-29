@@ -2,7 +2,7 @@
 
 ## Область проверки
 
-Проверены декларативная конфигурация Docker Compose, переменные `.env.example`, профили `demo`, `web-demo` и `maintenance`, порядок запуска зависимых сервисов, health checks, публикация портов, именованные volumes, read-only mounts, Caddy и ссылки на build contexts/Dockerfile.
+Проверены декларативная конфигурация Docker Compose, переменные `.env.example`, стандартный `web-simulator`, профили `demo` и `maintenance`, порядок запуска зависимых сервисов, health checks, публикация портов, именованные volumes, read-only mounts, Caddy и ссылки на build contexts/Dockerfile.
 
 Production-файлы не изменялись. Контейнеры и volumes не запускались, не останавливались и не удалялись.
 
@@ -18,7 +18,7 @@ Production-файлы не изменялись. Контейнеры и volumes
 | Группа | Что проверяется |
 |---|---|
 | Env-шаблон и секреты | Уникальность и синтаксис ключей; для каждой Compose interpolation проверяется, что ключ документирован в `.env.example` либо задан явный fallback; пустые значения для секретов в примере; правила Git для `.env` и `.env.example` |
-| Запуск и профили | Набор сервисов по умолчанию; отдельный сервис для каждого из профилей `demo`, `web-demo`, `maintenance`; обязательность `BETTER_AUTH_SECRET` |
+| Запуск и профили | Набор сервисов по умолчанию включает `web-simulator`; отдельные профили `demo` и `maintenance`; обязательность `BETTER_AUTH_SECRET` |
 | Зависимости и симуляторы | Порядок запуска backend, PostgreSQL и ML; общий device lease для двух вариантов simulator; раздельное назначение device и internal token |
 | Сеть и health checks | Loopback для PostgreSQL, ML и backend; проверка backend host/container port по умолчанию и после override `PORT=4300`; публичные 80/443 только через Caddy; отсутствие опубликованных портов у Python simulator; health checks PostgreSQL и web simulator |
 | Хранилища и маршрутизация | Именованные volumes для БД, модели, TLS и lease; read-only mounts миграций/Caddyfile; TLS и reverse proxy в Caddyfile |

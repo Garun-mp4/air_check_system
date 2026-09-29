@@ -6,7 +6,7 @@
 
 ## Что проверялось
 
-В проекте уже были раздельные контракты backend и simulator: POST `/api/v1/measurements`, GET `/api/v1/prediction/latest`, очередь `/api/v1/controls/commands`, подтверждение actual state через `/api/v1/controls/state`; headless simulator предоставляет защищённые `/v1/state` и `/v1/actions`. В Compose legacy simulator находится под профилем `demo`, headless — под `web-demo`; оба используют project-scoped volume блокировки одного `DEVICE_ID`.
+В проекте уже были раздельные контракты backend и simulator: POST `/api/v1/measurements`, GET `/api/v1/prediction/latest`, очередь `/api/v1/controls/commands`, подтверждение actual state через `/api/v1/controls/state`; headless simulator предоставляет защищённые `/v1/state` и `/v1/actions`. В Compose legacy simulator находится под профилем `demo`, headless входит в стандартный стек; оба используют project-scoped volume блокировки одного `DEVICE_ID`.
 
 Для E2E использован именно существующий backend REST API. Координатор/Device Layer исполнял команды, а backend принимал телеметрию и ACK. Код приложения, API, Compose-файл, миграции и общий pytest-конфиг не менялись.
 
@@ -26,7 +26,7 @@ E2E suite по умолчанию помечен `skipif`. Docker запуска
 ## Изоляция и окружение
 
 - Windows, Python 3.12.10, pytest 8.3.5, Docker Engine 29.6.1, Docker Compose 5.1.4.
-- Успешный прогон использовал уникальный project name `aircheck-e2e-a1ad4203b2` и только сервисы профиля `web-demo` с его зависимостями PostgreSQL, ML и backend. Caddy и `owner-cli` не запускались.
+- Успешный прогон использовал уникальный project name `aircheck-e2e-a1ad4203b2` и стандартный набор сервисов с зависимостями PostgreSQL, ML и backend. Caddy и `owner-cli` не запускались.
 - Backend и simulator публиковались на случайные свободные порты, привязанные только к `127.0.0.1`. Опубликованные порты PostgreSQL и ML-service временно отключались override-файлом.
 - Внешний временный env-файл содержал случайные синтетические database/auth/device/service credentials. Для обучения передано 70 тестовых измерений через REST в БД этого Compose-проекта; ML-service обучался существующим `ml-service/train.py` и записывал модель в отдельный project-scoped volume.
 - Старый simulator запускался только как короткая проверка отказа lease, а не как второй работающий источник. Профиль `maintenance` не запускался.
@@ -61,11 +61,11 @@ git diff --check
 
 В opt-in прогоне настоящие Compose-сервисы обменивались данными: simulator → backend/PostgreSQL → ML forecast; автоматический контур создал команды; Device Layer завершил виртуальное движение и включение вентиляторов; backend зафиксировал actual state и статус ACK как `applied`. Offline/reconnect и защита от одновременного legacy/headless источника также прошли.
 
-Проверка dashboard ограничена HTTP-ответом настоящей страницы Next.js (`200`, `text/html`, содержимое `AirCheck`); браузерный визуальный рендеринг здесь не тестировался. Caddy/TLS/LAN-маршрутизация не проверялись, потому что задача была проверить внутренний E2E маршрут профиля `web-demo`, а Caddy в Compose запускается отдельно как общий сервис. Модель проверялась на факте обучения, загрузки и выдачи forecast; точность ML на синтетической постоянной истории не оценивалась.
+Проверка dashboard ограничена HTTP-ответом настоящей страницы Next.js (`200`, `text/html`, содержимое `AirCheck`); браузерный визуальный рендеринг здесь не тестировался. Caddy/TLS/LAN-маршрутизация не проверялись, потому что задача была проверить внутренний E2E маршрут стандартного веб-стека, а Caddy в Compose запускается отдельно как общий сервис. Модель проверялась на факте обучения, загрузки и выдачи forecast; точность ML на синтетической постоянной истории не оценивалась.
 
 Исходный прогон проверял одну последовательную автоматическую партию команд. Он не являлся проверкой одновременного enqueue/dedup; на тот момент риск оставался открытым. Текущее состояние после отдельного исправления и повторной проверки указано ниже.
 
-**Итог блока 14:** E2E-сценарий Compose `web-demo`, offline/reconnect и эксклюзивность источника проверены. Suite не запускается без явного opt-in и не меняет production/Compose конфигурацию.
+**Итог блока 14:** E2E-сценарий стандартного веб-стека, offline/reconnect и эксклюзивность источника проверены. Suite не меняет production/Compose конфигурацию.
 
 ## Повторный прогон после remediation
 

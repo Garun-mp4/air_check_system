@@ -1,4 +1,4 @@
-"""Opt-in end-to-end checks for the isolated web-demo Compose profile.
+"""Opt-in end-to-end checks for the standard web simulator Compose stack.
 
 The tests never start Docker during an ordinary pytest run. Set
 ``AIRCHECK_RUN_COMPOSE_E2E=1`` explicitly to build and run a uniquely named
@@ -139,7 +139,7 @@ class IsolatedComposeStack:
     def compose(
         self,
         *args: str,
-        profiles: tuple[str, ...] = ("web-demo",),
+        profiles: tuple[str, ...] = (),
         timeout: float = 180.0,
         check: bool = True,
     ) -> subprocess.CompletedProcess[str]:
@@ -183,7 +183,7 @@ class IsolatedComposeStack:
                 "--remove-orphans",
                 "--rmi",
                 "local",
-                profiles=("web-demo", "demo"),
+                profiles=("demo",),
                 timeout=180.0,
                 check=False,
             )
@@ -340,7 +340,7 @@ def e2e_stack(request: pytest.FixtureRequest) -> IsolatedComposeStack:
     return stack
 
 
-def test_web_demo_publishes_telemetry_and_real_ml_forecast(e2e_stack: IsolatedComposeStack) -> None:
+def test_web_simulator_publishes_telemetry_and_real_ml_forecast(e2e_stack: IsolatedComposeStack) -> None:
     started_at = e2e_stack.simulator_started_at
     assert started_at is not None
 
@@ -478,16 +478,16 @@ def test_backend_offline_and_reconnect_preserve_running_simulation(e2e_stack: Is
     assert latest["data"]["measurement"] is not None
 
 
-def test_legacy_simulator_cannot_acquire_web_demo_device_lease(e2e_stack: IsolatedComposeStack) -> None:
+def test_legacy_simulator_cannot_acquire_web_simulator_device_lease(e2e_stack: IsolatedComposeStack) -> None:
     result = e2e_stack.compose(
         "run",
         "--rm",
         "--no-deps",
         "simulator",
-        profiles=("web-demo", "demo"),
+        profiles=("demo",),
         timeout=300,
         check=False,
     )
     combined = f"{result.stdout}\n{result.stderr}".lower()
-    assert result.returncode != 0, "legacy simulator unexpectedly acquired the active web-demo device lease"
+    assert result.returncode != 0, "legacy simulator unexpectedly acquired the active web simulator device lease"
     assert "already served by another simulator process" in combined

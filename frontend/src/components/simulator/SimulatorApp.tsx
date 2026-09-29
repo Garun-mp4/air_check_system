@@ -187,7 +187,7 @@ export default function SimulatorApp() {
           <span className="sim-status-dot is-offline" />
           <h1>3D-симулятор пока недоступен</h1>
           <p>{error ?? 'Ожидаем запуска headless simulator.'}</p>
-          <p className="sim-muted">Для веб-сцены запустите Compose с профилем <code>web-demo</code>. Если backend не отвечает, headless-процесс всё равно должен продолжать локальную симуляцию.</p>
+          <p className="sim-muted">Запустите стандартный Compose-стек и обновите страницу. Headless-процесс продолжает локальную симуляцию даже при временно недоступном backend.</p>
           <div className="simulator-unavailable-actions"><a className="sim-button sim-button-primary" href="/">Вернуться к панели</a><a className="sim-button" href={getLoginHref('/simulator')}>Войти</a></div>
         </section>
       </main>
