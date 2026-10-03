@@ -119,9 +119,10 @@ describe('Better Auth API routing and access projection', () => {
   })
 
   it('returns only the current access projection with no-store caching', async () => {
+    const operatorExpiresAt = new Date(Date.now() + 60 * 60 * 1000)
     state.sessionUserId = 'person-1'
     state.role = 'operator'
-    state.operatorExpiresAt = new Date('2026-10-01T00:00:00.000Z')
+    state.operatorExpiresAt = operatorExpiresAt
     const response = await accessGet(new Request('https://aircheck.example/api/auth/access', {
       headers: { cookie: 'better-auth.session_token=browser-secret' },
     }))
@@ -135,7 +136,7 @@ describe('Better Auth API routing and access projection', () => {
         name: 'Person',
         image: null,
         role: 'operator',
-        operatorExpiresAt: '2026-10-01T00:00:00.000Z',
+        operatorExpiresAt: operatorExpiresAt.toISOString(),
       },
     })
     expect(response.headers.has('set-cookie')).toBe(false)

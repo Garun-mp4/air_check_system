@@ -9111,14 +9111,14 @@ body.is-chart-expanded {
 
 /* R3F measures its parent box. Pin the renderer wrapper to that box so flex
    sizing and mobile viewport changes cannot leave an undersized canvas. */
-.simulator-canvas-host > div {
+.simulator-canvas-host > .simulator-renderer-root {
   position: absolute !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
 }
 
-.simulator-canvas-host > div > canvas {
+.simulator-renderer-root canvas {
   width: 100% !important;
   height: 100% !important;
 }

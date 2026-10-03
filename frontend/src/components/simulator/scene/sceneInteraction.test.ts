@@ -73,6 +73,7 @@ describe('3D scene interaction wiring', () => {
       })
       const canvas = elements(tree).find((element) => element.type === Canvas)
       expect(canvas).toBeDefined()
+      expect(canvas!.props.className).toBe('simulator-renderer-root')
       expect((canvas!.props.gl as { toneMapping: number }).toneMapping).toBe(ACESFilmicToneMapping)
       expect((canvas!.props.gl as { toneMappingExposure: number }).toneMappingExposure).toBe(1)
 

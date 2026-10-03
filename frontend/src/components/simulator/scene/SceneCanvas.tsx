@@ -44,6 +44,7 @@ export default function SceneCanvas({
   return (
     <div className={'simulator-canvas-host' + touchClass} role="application" aria-label="Интерактивная 3D-сцена стенда AirCheck">
       <Canvas
+        className="simulator-renderer-root"
         shadows
         dpr={[1, 1.5]}
         camera={{ position: [7, 3.1, -9], fov: snapshot.simulation.camera.field_of_view_degrees, near: snapshot.simulation.camera.near_plane_m, far: snapshot.simulation.camera.far_plane_m }}
