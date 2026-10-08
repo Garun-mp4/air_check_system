@@ -1,0 +1,2304 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/yca5t4",
+    "id": "yca5t4",
+    "slide": 4,
+    "layoutId": "20cf6c22-f175-4e5e-ad74-deb696733997",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "c918077d-76bf-4222-8638-b305508c963d",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#F8F9FA",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "20cf6c22-f175-4e5e-ad74-deb696733997",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "c918077d-76bf-4222-8638-b305508c963d",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "c918077d-76bf-4222-8638-b305508c963d",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/srax4zmx",
+      "id": "1",
+      "bbox": [
+        64,
+        44,
+        1000,
+        56
+      ],
+      "geometry": "rect",
+      "text": "Аналоги закрывают отдельные части задачи",
+      "textPreview": "Аналоги закрывают отдельные части задачи",
+      "resolvedFontSize": 39,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 39,
+        "typeface": "Helvetica Neue",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 2,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Аналоги закрывают отдельные части задачи"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Аналоги закрывают отдельные части задачи",
+          "resolvedTextStyle": {
+            "fontSize": 39,
+            "typeface": "Helvetica Neue",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Аналоги закрывают отдельные части задачи",
+              "fontSize": 39,
+              "typeface": "Helvetica Neue",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rq1wbulc",
+      "id": "2",
+      "bbox": [
+        66,
+        104,
+        1040,
+        30
+      ],
+      "geometry": "rect",
+      "text": "Сравнение функций в выбранном масштабе одной комнаты",
+      "textPreview": "Сравнение функций в выбранном масштабе одной комнаты",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 16,
+        "typeface": "Helvetica Neue",
+        "color": "#6B7280",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Сравнение функций в выбранном масштабе одной комнаты"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Сравнение функций в выбранном масштабе одной комнаты",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Helvetica Neue",
+            "color": "#6B7280",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Сравнение функций в выбранном масштабе одной комнаты",
+              "fontSize": 16,
+              "typeface": "Helvetica Neue",
+              "color": "#6B7280",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "table",
+      "scope": "slide",
+      "aid": "tb/3y5sred4",
+      "id": "3",
+      "bbox": [
+        64,
+        164,
+        1152,
+        372
+      ],
+      "text": "Решение | Датчики | История | Прогноз | Рекомендация | Вентиляция | Окно | Локально\nAranet4 HOME | CO₂, T, RH | + | - | ± | - | - | ±\nAirthings View Plus | CO₂, PM2.5, T/RH | + | - | ± | - | - | ±\nSanobreeze | CO₂ | - | - | - | + | - | +\nAirGradient + Home Assistant | CO₂, PM2.5, T/RH | + | - | ± | + | ± | +\nAirCheck | CO₂, PM2.5, T/RH | + | + | + | + | + | +",
+      "textPreview": "Решение | Датчики | История | Прогноз | Рекомендация | Вентиляция | Окно | Локально | Aranet4 HOME | CO₂, T, RH | + | - | ± | - | - | ± |...",
+      "rows": 6,
+      "cols": 8,
+      "cells": [
+        {
+          "index": 1,
+          "row": 1,
+          "column": 1,
+          "bbox": [
+            64,
+            164,
+            290,
+            52
+          ],
+          "text": "Решение",
+          "textPreview": "Решение",
+          "fillColor": "#F5F5F5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Решение",
+              "resolvedTextStyle": {
+                "fontSize": 14,
+                "typeface": "Helvetica Neue",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Решение",
+                  "fontSize": 14,
+                  "typeface": "Helvetica Neue",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "column": 2,
+          "bbox": [
+            354,
+            164,
+            230,
+            52
+          ],
+          "text": "Датчики",
+          "textPreview": "Датчики",
+          "fillColor": "#F5F5F5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Датчики",
+              "resolvedTextStyle": {
+                "fontSize": 14,
+                "typeface": "Helvetica Neue",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Датчики",
+                  "fontSize": 14,
+                  "typeface": "Helvetica Neue",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "row": 1,
+          "column": 3,
+          "bbox": [
+            584,
+            164,
+            95,
+            52
+          ],
+          "text": "История",
+          "textPreview": "История",
+          "fillColor": "#F5F5F5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "История",
+              "resolvedTextStyle": {
+                "fontSize": 14,
+                "typeface": "Helvetica Neue",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "История",
+                  "fontSize": 14,
+                  "typeface": "Helvetica Neue",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "row": 1,
+          "column": 4,
+          "bbox": [
+            679,
+            164,
+            100,
+            52
+          ],
+          "text": "Прогноз",
+          "textPreview": "Прогноз",
+          "fillColor": "#F5F5F5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Прогноз",
+              "resolvedTextStyle": {
+                "fontSize": 14,
+                "typeface": "Helvetica Neue",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Прогноз",
+                  "fontSize": 14,
+                  "typeface": "Helvetica Neue",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "row": 1,
+          "column": 5,
+          "bbox": [
+            779,
+            164,
+            130,
+            52
+          ],
+          "text": "Рекомендация",
+          "textPreview": "Рекомендация",
+          "fillColor": "#F5F5F5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Рекомендация",
+              "resolvedTextStyle": {
+                "fontSize": 14,
+                "typeface": "Helvetica Neue",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Рекомендация",
+                  "fontSize": 14,
+                  "typeface": "Helvetica Neue",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "row": 1,
+          "column": 6,
+          "bbox": [
+            909,
+            164,
+            125,
+            52
+          ],
+          "text": "Вентиляция",
+          "textPreview": "Вентиляция",
+          "fillColor": "#F5F5F5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Вентиляция",
+              "resolvedTextStyle": {
+                "fontSize": 14,
+                "typeface": "Helvetica Neue",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Вентиляция",
+                  "fontSize": 14,
+                  "typeface": "Helvetica Neue",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "row": 1,
+          "column": 7,
+          "bbox": [
+            1034,
+            164,
+            85,
+            52
+          ],
+          "text": "Окно",
+          "textPreview": "Окно",
+          "fillColor": "#F5F5F5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Окно",
+              "resolvedTextStyle": {
+                "fontSize": 14,
+                "typeface": "Helvetica Neue",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Окно",
+                  "fontSize": 14,
+                  "typeface": "Helvetica Neue",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "row": 1,
+          "column": 8,
+          "bbox": [
+            1119,
+            164,
+            97,
+            52
+          ],
+          "text": "Локально",
+          "textPreview": "Локально",
+          "fillColor": "#F5F5F5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Локально",
+              "resolvedTextStyle": {
+                "fontSize": 14,
+                "typeface": "Helvetica Neue",
+                "color": "#111111",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Локально",
+                  "fontSize": 14,
+                  "typeface": "Helvetica Neue",
+                  "color": "#111111",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "row": 2,
+          "column": 1,
+          "bbox": [
+            64,
+            216,
+            290,
+            64
+          ],
+          "text": "Aranet4 HOME",
+          "textPreview": "Aranet4 HOME",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Aranet4 HOME",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Aranet4 HOME",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "row": 2,
+          "column": 2,
+          "bbox": [
+            354,
+            216,
+            230,
+            64
+          ],
+          "text": "CO₂, T, RH",
+          "textPreview": "CO₂, T, RH",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "CO₂, T, RH",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "CO₂, T, RH",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "row": 2,
+          "column": 3,
+          "bbox": [
+            584,
+            216,
+            95,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "row": 2,
+          "column": 4,
+          "bbox": [
+            679,
+            216,
+            100,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "row": 2,
+          "column": 5,
+          "bbox": [
+            779,
+            216,
+            130,
+            64
+          ],
+          "text": "±",
+          "textPreview": "±",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "±",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#B45309",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "±",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#B45309",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "row": 2,
+          "column": 6,
+          "bbox": [
+            909,
+            216,
+            125,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "row": 2,
+          "column": 7,
+          "bbox": [
+            1034,
+            216,
+            85,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "row": 2,
+          "column": 8,
+          "bbox": [
+            1119,
+            216,
+            97,
+            64
+          ],
+          "text": "±",
+          "textPreview": "±",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "±",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#B45309",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "±",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#B45309",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 17,
+          "row": 3,
+          "column": 1,
+          "bbox": [
+            64,
+            280,
+            290,
+            64
+          ],
+          "text": "Airthings View Plus",
+          "textPreview": "Airthings View Plus",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Airthings View Plus",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Airthings View Plus",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 18,
+          "row": 3,
+          "column": 2,
+          "bbox": [
+            354,
+            280,
+            230,
+            64
+          ],
+          "text": "CO₂, PM2.5, T/RH",
+          "textPreview": "CO₂, PM2.5, T/RH",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "CO₂, PM2.5, T/RH",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "CO₂, PM2.5, T/RH",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 19,
+          "row": 3,
+          "column": 3,
+          "bbox": [
+            584,
+            280,
+            95,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "row": 3,
+          "column": 4,
+          "bbox": [
+            679,
+            280,
+            100,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 21,
+          "row": 3,
+          "column": 5,
+          "bbox": [
+            779,
+            280,
+            130,
+            64
+          ],
+          "text": "±",
+          "textPreview": "±",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "±",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#B45309",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "±",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#B45309",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 22,
+          "row": 3,
+          "column": 6,
+          "bbox": [
+            909,
+            280,
+            125,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 23,
+          "row": 3,
+          "column": 7,
+          "bbox": [
+            1034,
+            280,
+            85,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 24,
+          "row": 3,
+          "column": 8,
+          "bbox": [
+            1119,
+            280,
+            97,
+            64
+          ],
+          "text": "±",
+          "textPreview": "±",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "±",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#B45309",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "±",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#B45309",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 25,
+          "row": 4,
+          "column": 1,
+          "bbox": [
+            64,
+            344,
+            290,
+            64
+          ],
+          "text": "Sanobreeze",
+          "textPreview": "Sanobreeze",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Sanobreeze",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Sanobreeze",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 26,
+          "row": 4,
+          "column": 2,
+          "bbox": [
+            354,
+            344,
+            230,
+            64
+          ],
+          "text": "CO₂",
+          "textPreview": "CO₂",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "CO₂",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "CO₂",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 27,
+          "row": 4,
+          "column": 3,
+          "bbox": [
+            584,
+            344,
+            95,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 28,
+          "row": 4,
+          "column": 4,
+          "bbox": [
+            679,
+            344,
+            100,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 29,
+          "row": 4,
+          "column": 5,
+          "bbox": [
+            779,
+            344,
+            130,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 30,
+          "row": 4,
+          "column": 6,
+          "bbox": [
+            909,
+            344,
+            125,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 31,
+          "row": 4,
+          "column": 7,
+          "bbox": [
+            1034,
+            344,
+            85,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 32,
+          "row": 4,
+          "column": 8,
+          "bbox": [
+            1119,
+            344,
+            97,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#FBFBFB",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 33,
+          "row": 5,
+          "column": 1,
+          "bbox": [
+            64,
+            408,
+            290,
+            64
+          ],
+          "text": "AirGradient + Home Assistant",
+          "textPreview": "AirGradient + Home Assistant",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "AirGradient + Home Assistant",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "AirGradient + Home Assistant",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 34,
+          "row": 5,
+          "column": 2,
+          "bbox": [
+            354,
+            408,
+            230,
+            64
+          ],
+          "text": "CO₂, PM2.5, T/RH",
+          "textPreview": "CO₂, PM2.5, T/RH",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "CO₂, PM2.5, T/RH",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "CO₂, PM2.5, T/RH",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 35,
+          "row": 5,
+          "column": 3,
+          "bbox": [
+            584,
+            408,
+            95,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 36,
+          "row": 5,
+          "column": 4,
+          "bbox": [
+            679,
+            408,
+            100,
+            64
+          ],
+          "text": "-",
+          "textPreview": "-",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "-",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#6B7280",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "-",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#6B7280",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 37,
+          "row": 5,
+          "column": 5,
+          "bbox": [
+            779,
+            408,
+            130,
+            64
+          ],
+          "text": "±",
+          "textPreview": "±",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "±",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#B45309",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "±",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#B45309",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 38,
+          "row": 5,
+          "column": 6,
+          "bbox": [
+            909,
+            408,
+            125,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 39,
+          "row": 5,
+          "column": 7,
+          "bbox": [
+            1034,
+            408,
+            85,
+            64
+          ],
+          "text": "±",
+          "textPreview": "±",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "±",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#B45309",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "±",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#B45309",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 40,
+          "row": 5,
+          "column": 8,
+          "bbox": [
+            1119,
+            408,
+            97,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#FFFFFF",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 41,
+          "row": 6,
+          "column": 1,
+          "bbox": [
+            64,
+            472,
+            290,
+            64
+          ],
+          "text": "AirCheck",
+          "textPreview": "AirCheck",
+          "fillColor": "#ECFDF5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "AirCheck",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "bold": true,
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "AirCheck",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "bold": true,
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 42,
+          "row": 6,
+          "column": 2,
+          "bbox": [
+            354,
+            472,
+            230,
+            64
+          ],
+          "text": "CO₂, PM2.5, T/RH",
+          "textPreview": "CO₂, PM2.5, T/RH",
+          "fillColor": "#ECFDF5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "CO₂, PM2.5, T/RH",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#374151",
+                "bold": true,
+                "alignment": "left"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "CO₂, PM2.5, T/RH",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#374151",
+                  "bold": true,
+                  "alignment": "left"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 43,
+          "row": 6,
+          "column": 3,
+          "bbox": [
+            584,
+            472,
+            95,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#ECFDF5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 44,
+          "row": 6,
+          "column": 4,
+          "bbox": [
+            679,
+            472,
+            100,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#ECFDF5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 45,
+          "row": 6,
+          "column": 5,
+          "bbox": [
+            779,
+            472,
+            130,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#ECFDF5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 46,
+          "row": 6,
+          "column": 6,
+          "bbox": [
+            909,
+            472,
+            125,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#ECFDF5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 47,
+          "row": 6,
+          "column": 7,
+          "bbox": [
+            1034,
+            472,
+            85,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#ECFDF5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 48,
+          "row": 6,
+          "column": 8,
+          "bbox": [
+            1119,
+            472,
+            97,
+            64
+          ],
+          "text": "+",
+          "textPreview": "+",
+          "fillColor": "#ECFDF5",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "+",
+              "resolvedTextStyle": {
+                "fontSize": 15,
+                "typeface": "Helvetica Neue",
+                "color": "#047857",
+                "bold": true,
+                "alignment": "center"
+              },
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "+",
+                  "fontSize": 15,
+                  "typeface": "Helvetica Neue",
+                  "color": "#047857",
+                  "bold": true,
+                  "alignment": "center"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5oje9knm",
+      "id": "4",
+      "bbox": [
+        66,
+        566,
+        920,
+        38
+      ],
+      "geometry": "rect",
+      "text": "Плюс означает заявленную или реализованную функцию. Минус означает, что функция не заявлена в рассмотренных материалах. Плюс-минус показывает частичную поддержку или необходимость настройки.",
+      "textPreview": "Плюс означает заявленную или реализованную функцию. Минус означает, что функция не заявлена в рассмотренных материалах. Плюс-минус показы...",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "Helvetica Neue",
+        "color": "#6B7280",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Плюс означает заявленную или реализованную функцию. Минус означает, что функция не заявлена в рассмотренных материалах. Плюс-минус"
+          },
+          {
+            "index": 2,
+            "text": "показывает частичную поддержку или необходимость настройки."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Плюс означает заявленную или реализованную функцию. Минус означает, что функция не заявлена в рассмотренных материалах. Плюс-минус показывает частичную поддержку или необходимость настройки.",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "typeface": "Helvetica Neue",
+            "color": "#6B7280",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Плюс означает заявленную или реализованную функцию. Минус означает, что функция не заявлена в рассмотренных материалах. Плюс-минус показывает частичную поддержку или необходимость настройки.",
+              "fontSize": 13,
+              "typeface": "Helvetica Neue",
+              "color": "#6B7280",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4nqx0fm1",
+      "id": "5",
+      "bbox": [
+        970,
+        570,
+        246,
+        22
+      ],
+      "geometry": "rect",
+      "text": "Источники: официальные описания решений",
+      "textPreview": "Источники: официальные описания решений",
+      "resolvedFontSize": 11.63,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 12,
+        "typeface": "Helvetica Neue",
+        "color": "#898989",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.97,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Источники: официальные описания решений"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Источники: официальные описания решений",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "typeface": "Helvetica Neue",
+            "color": "#898989",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Источники: официальные описания решений",
+              "fontSize": 12,
+              "typeface": "Helvetica Neue",
+              "color": "#898989",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jmhw7a5g",
+      "id": "6",
+      "bbox": [
+        64,
+        682,
+        120,
+        18
+      ],
+      "geometry": "rect",
+      "text": "AirCheck",
+      "textPreview": "AirCheck",
+      "resolvedFontSize": 12,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 12,
+        "typeface": "Helvetica Neue",
+        "color": "#898989",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AirCheck"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AirCheck",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "typeface": "Helvetica Neue",
+            "color": "#898989",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "AirCheck",
+              "fontSize": 12,
+              "typeface": "Helvetica Neue",
+              "color": "#898989",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/il8fy54v",
+      "id": "7",
+      "bbox": [
+        1110,
+        682,
+        106,
+        18
+      ],
+      "geometry": "rect",
+      "text": "04 / 06",
+      "textPreview": "04 / 06",
+      "resolvedFontSize": 12,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 12,
+        "typeface": "Helvetica Neue",
+        "color": "#898989",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "04 / 06"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "04 / 06",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "typeface": "Helvetica Neue",
+            "color": "#898989",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "04 / 06",
+              "fontSize": 12,
+              "typeface": "Helvetica Neue",
+              "color": "#898989",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

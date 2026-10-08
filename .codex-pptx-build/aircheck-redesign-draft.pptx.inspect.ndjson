@@ -1,0 +1,268 @@
+{"kind":"deck","id":"pr/9xejwc","name":"Deck"}
+{"kind":"layout","layoutId":"c639e5af-be9e-4762-8ef1-d17af18ca099","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"09a20f67-6b82-469a-bbbb-a4ee6f433bb7","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/tu7h3i","slide":1,"title":"ДИПЛОМНЫЙ ПРОЕКТ / AIRCHECK","textShapes":13}
+{"kind":"textbox","id":"sh/m10j2tcb","slide":1,"text":"ДИПЛОМНЫЙ ПРОЕКТ / AIRCHECK","textPreview":"ДИПЛОМНЫЙ ПРОЕКТ / AIRCHECK","textChars":27,"textLines":1,"bbox":[72,48,300,18]}
+{"kind":"textbox","id":"sh/94r2x8v2","slide":1,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[70,88,500,82]}
+{"kind":"textbox","id":"sh/83i143uh","slide":1,"text":"Мониторинг и управление\nкачеством воздуха\nв помещении","textPreview":"Мониторинг и управление | качеством воздуха | в помещении","textChars":53,"textLines":3,"bbox":[74,200,520,138]}
+{"kind":"textbox","id":"sh/zepkryd0","slide":1,"text":"Интеллектуальная IoT-система на основе прогноза CO₂","textPreview":"Интеллектуальная IoT-система на основе прогноза CO₂","textChars":51,"textLines":1,"bbox":[76,370,500,28]}
+{"kind":"shape","id":"sh/ydgjytcf","slide":1,"bbox":[76,430,430,1]}
+{"kind":"textbox","id":"sh/l0r2tov6","slide":1,"text":"ОДНА КОМНАТА","textPreview":"ОДНА КОМНАТА","textChars":12,"textLines":1,"bbox":[76,456,190,28]}
+{"kind":"textbox","id":"sh/kzy10jul","slide":1,"text":"локальный узел, история, прогноз, действие","textPreview":"локальный узел, история, прогноз, действие","textChars":42,"textLines":1,"bbox":[76,493,420,26]}
+{"kind":"textbox","id":"sh/bapknedo","slide":1,"text":"Система превращает состояние помещения в проверяемый рабочий контур.","textPreview":"Система превращает состояние помещения в проверяемый рабочий контур.","textChars":68,"textLines":1,"bbox":[76,548,430,44]}
+{"kind":"textbox","id":"sh/cbitgveh","slide":1,"text":"ПОМЕЩЕНИЕ / ROOM-01","textPreview":"ПОМЕЩЕНИЕ / ROOM-01","textChars":19,"textLines":1,"bbox":[842,122,220,18]}
+{"kind":"textbox","id":"sh/dcba90v2","slide":1,"text":"CO₂ 780 ppm","textPreview":"CO₂ 780 ppm","textChars":11,"textLines":1,"bbox":[902,254,132,22]}
+{"kind":"shape","id":"sh/q90belwb","slide":1,"bbox":[1030,271,22,15]}
+{"kind":"textbox","id":"sh/ra9s7qdw","slide":1,"text":"прогноз через 15 минут","textPreview":"прогноз через 15 минут","textChars":22,"textLines":1,"bbox":[902,552,190,22]}
+{"kind":"shape","id":"sh/47itcvel","slide":1,"bbox":[1000,532,1,16]}
+{"kind":"textbox","id":"sh/p8ra5gfq","slide":1,"text":"локальный контур","textPreview":"локальный контур","textChars":16,"textLines":1,"bbox":[1020,588,160,22]}
+{"kind":"shape","id":"sh/250balwf","slide":1,"bbox":[64,668,1152,1]}
+{"kind":"textbox","id":"sh/369s3qx0","slide":1,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,680,150,18]}
+{"kind":"textbox","id":"sh/o3mtofep","slide":1,"text":"01 / 06","textPreview":"01 / 06","textChars":7,"textLines":1,"bbox":[1110,680,106,18]}
+{"kind":"image","id":"im/f29sryl4","slide":1,"name":"","alt":"Реалистичная визуализация комнаты с сенсорным узлом и потоками воздуха","bbox":[560,112,670,430]}
+{"kind":"notes","id":"nt/tu7h3i","slide":1,"text":"Содержание слайда основано на фактической архитектуре AirCheck: README.md, docs/ml.md и docs/ТЗ-поправка-03-climate-control.md. Значения 780 ppm и 15 минут используются как аннотации. Визуальный ассет комнаты создан специально для этой презентации и не содержит текста."}
+{"kind":"slide","id":"sl/njaebu","slide":2,"title":"Параметры воздуха меняются в течение дня","textShapes":14}
+{"kind":"textbox","id":"sh/3e1wf258","slide":2,"text":"Параметры воздуха меняются в течение дня","textPreview":"Параметры воздуха меняются в течение дня","textChars":40,"textLines":1,"bbox":[64,46,600,78]}
+{"kind":"textbox","id":"sh/4faxo7md","slide":2,"text":"Состояние комнаты зависит от условий\nвнутри и снаружи.","textPreview":"Состояние комнаты зависит от условий | внутри и снаружи.","textChars":54,"textLines":2,"bbox":[66,178,400,72]}
+{"kind":"textbox","id":"sh/5gjehsny","slide":2,"text":"CO₂ и PM2.5 могут расти постепенно.\nБез измерений изменение легко пропустить.","textPreview":"CO₂ и PM2.5 могут расти постепенно. | Без измерений изменение легко пропустить.","textChars":77,"textLines":2,"bbox":[68,300,390,56]}
+{"kind":"textbox","id":"sh/qhsfqx4j","slide":2,"text":"ОДНА КОМНАТА","textPreview":"ОДНА КОМНАТА","textChars":12,"textLines":1,"bbox":[68,404,170,18]}
+{"kind":"textbox","id":"sh/r21wj254","slide":2,"text":"Внутри находятся люди и датчики.\nОкно и вентиляция связывают комнату\nс внешней средой.","textPreview":"Внутри находятся люди и датчики. | Окно и вентиляция связывают комнату | с внешней средой.","textChars":86,"textLines":3,"bbox":[68,432,400,76]}
+{"kind":"textbox","id":"sh/d4jelc3a","slide":2,"text":"ПОМЕЩЕНИЕ / ROOM-01","textPreview":"ПОМЕЩЕНИЕ / ROOM-01","textChars":19,"textLines":1,"bbox":[638,154,220,18]}
+{"kind":"textbox","id":"sh/6loved4f","slide":2,"text":"ВЫТЯЖКА","textPreview":"ВЫТЯЖКА","textChars":7,"textLines":1,"bbox":[572,192,96,18]}
+{"kind":"textbox","id":"sh/7mhw7i50","slide":2,"text":"ПРИТОК","textPreview":"ПРИТОК","textChars":6,"textLines":1,"bbox":[572,498,96,18]}
+{"kind":"textbox","id":"sh/v65s36d0","slide":2,"text":"ОКНО / НАРУЖНАЯ СРЕДА","textPreview":"ОКНО / НАРУЖНАЯ СРЕДА","textChars":21,"textLines":1,"bbox":[1012,526,220,20]}
+{"kind":"textbox","id":"sh/u5wbu1cv","slide":2,"text":"CO₂ / PM2.5","textPreview":"CO₂ / PM2.5","textChars":11,"textLines":1,"bbox":[908,548,120,20]}
+{"kind":"shape","id":"sh/h8nu5wv6","slide":2,"bbox":[66,596,1148,1]}
+{"kind":"textbox","id":"sh/w7etwrul","slide":2,"text":"НОРМАТИВНАЯ РАМКА","textPreview":"НОРМАТИВНАЯ РАМКА","textChars":17,"textLines":1,"bbox":[66,620,190,18]}
+{"kind":"textbox","id":"sh/72lszmd4","slide":2,"text":"СанПиН 1.2.3685-21, СП 60.13330.2020 и ASHRAE связывают качество воздуха с микроклиматом и вентиляцией.","textPreview":"СанПиН 1.2.3685-21, СП 60.13330.2020 и ASHRAE связывают качество воздуха с микроклиматом и вентиляцией.","textChars":103,"textLines":1,"bbox":[276,617,870,26]}
+{"kind":"shape","id":"sh/m1cbqhcj","slide":2,"bbox":[64,668,1152,1]}
+{"kind":"textbox","id":"sh/943a1wva","slide":2,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,680,150,18]}
+{"kind":"textbox","id":"sh/83utsrup","slide":2,"text":"02 / 06","textPreview":"02 / 06","textChars":7,"textLines":1,"bbox":[1110,680,106,18]}
+{"kind":"image","id":"im/hofa5c3i","slide":2,"name":"","alt":"Реалистичная пространственная сцена комнаты с людьми, окном, вентиляцией и сенсором","bbox":[535,142,700,400]}
+{"kind":"notes","id":"nt/njaebu","slide":2,"text":"Источники: https://www.epa.gov/indoor-air-quality-iaq/indoor-pollutants-and-sources ; https://www.ashrae.org/technical-resources/bookstore/standards-62-1-62-2 ; https://www.consultant.ru/document/cons_doc_LAW_375839/ ; https://protect.gost.ru/sp/details/b00f766e-b861-4cc7-a448-c65906490262 . Визуальный ассет комнаты создан специально для этой презентации и не содержит текста."}
+{"kind":"slide","id":"sl/veh3cy","slide":3,"title":"Текущего значения недостаточно","textShapes":22}
+{"kind":"textbox","id":"sh/atw329kb","slide":3,"text":"Текущего значения недостаточно","textPreview":"Текущего значения недостаточно","textChars":30,"textLines":1,"bbox":[64,46,660,70]}
+{"kind":"textbox","id":"sh/xwn2do32","slide":3,"text":"Прогноз сдвигает\nрешение раньше","textPreview":"Прогноз сдвигает | решение раньше","textChars":31,"textLines":2,"bbox":[816,54,350,66]}
+{"kind":"textbox","id":"sh/cvel4j2h","slide":3,"text":"ТЕКУЩИЙ СЦЕНАРИЙ","textPreview":"ТЕКУЩИЙ СЦЕНАРИЙ","textChars":16,"textLines":1,"bbox":[82,166,220,18]}
+{"kind":"textbox","id":"sh/nqlk7ul0","slide":3,"text":"действие после изменения","textPreview":"действие после изменения","textChars":24,"textLines":1,"bbox":[82,190,260,22]}
+{"kind":"shape","id":"sh/2pcjy94f","slide":3,"bbox":[180,298,940,2]}
+{"kind":"shape","id":"sh/psn29436","slide":3,"bbox":[183,291,14,14]}
+{"kind":"shape","id":"sh/orel0z2l","slide":3,"bbox":[190,298,1,18]}
+{"kind":"textbox","id":"sh/f2lk3ulo","slide":3,"text":"текущее\nзначение","textPreview":"текущее | значение","textChars":16,"textLines":2,"bbox":[120,244,140,38]}
+{"kind":"shape","id":"sh/e1cjup4j","slide":3,"bbox":[443,291,14,14]}
+{"kind":"shape","id":"sh/8vmlonyh","slide":3,"bbox":[450,298,1,18]}
+{"kind":"textbox","id":"sh/twvmxsz2","slide":3,"text":"рост CO₂","textPreview":"рост CO₂","textChars":8,"textLines":1,"bbox":[380,244,140,38]}
+{"kind":"shape","id":"sh/6tk3mdgr","slide":3,"bbox":[663,291,14,14]}
+{"kind":"shape","id":"sh/7ut4vihw","slide":3,"bbox":[670,298,1,18]}
+{"kind":"textbox","id":"sh/kr2lk3il","slide":3,"text":"человек\nзамечает","textPreview":"человек | замечает","textChars":16,"textLines":2,"bbox":[600,244,140,38]}
+{"kind":"shape","id":"sh/lsbmt8z6","slide":3,"bbox":[993,291,14,14]}
+{"kind":"shape","id":"sh/y5k3it0f","slide":3,"bbox":[1000,298,1,18]}
+{"kind":"textbox","id":"sh/j6t4ryh0","slide":3,"text":"вентиляция","textPreview":"вентиляция","textChars":10,"textLines":1,"bbox":[930,244,140,38]}
+{"kind":"shape","id":"sh/4n65w7yp","slide":3,"bbox":[450,316,1,32]}
+{"kind":"shape","id":"sh/pofm5cza","slide":3,"bbox":[1000,316,1,32]}
+{"kind":"shape","id":"sh/dkbm9sre","slide":3,"bbox":[450,348,550,1]}
+{"kind":"textbox","id":"sh/cj2lg7qt","slide":3,"text":"реакция начинается после изменения","textPreview":"реакция начинается после изменения","textChars":34,"textLines":1,"bbox":[600,356,250,20]}
+{"kind":"textbox","id":"sh/bit47298","slide":3,"text":"ЦЕЛЕВОЙ СЦЕНАРИЙ","textPreview":"ЦЕЛЕВОЙ СЦЕНАРИЙ","textChars":16,"textLines":1,"bbox":[82,410,220,18]}
+{"kind":"textbox","id":"sh/qh03ex83","slide":3,"text":"прогноз добавляет момент для решения","textPreview":"прогноз добавляет момент для решения","textChars":36,"textLines":1,"bbox":[82,434,340,22]}
+{"kind":"shape","id":"sh/pgrm5sri","slide":3,"bbox":[180,500,940,2.2]}
+{"kind":"shape","id":"sh/4filcnqx","slide":3,"bbox":[182,492,16,16]}
+{"kind":"shape","id":"sh/3e943i9c","slide":3,"bbox":[190,500,1,18]}
+{"kind":"textbox","id":"sh/2d03ad8r","slide":3,"text":"показания","textPreview":"показания","textChars":9,"textLines":1,"bbox":[120,535,140,38]}
+{"kind":"shape","id":"sh/hcrm18r6","slide":3,"bbox":[402,492,16,16]}
+{"kind":"shape","id":"sh/gbil8nql","slide":3,"bbox":[410,500,1,18]}
+{"kind":"textbox","id":"sh/6hwji9oj","slide":3,"text":"прогноз\n15 минут","textPreview":"прогноз | 15 минут","textChars":16,"textLines":2,"bbox":[340,535,140,38]}
+{"kind":"shape","id":"sh/7ip0bep4","slide":3,"bbox":[612,492,16,16]}
+{"kind":"shape","id":"sh/sjy1kj6p","slide":3,"bbox":[620,500,1,18]}
+{"kind":"textbox","id":"sh/tk7ido7a","slide":3,"text":"рекомендация","textPreview":"рекомендация","textChars":12,"textLines":1,"bbox":[550,535,140,38]}
+{"kind":"shape","id":"sh/itwje9on","slide":3,"bbox":[792,492,16,16]}
+{"kind":"shape","id":"sh/ju507ep8","slide":3,"bbox":[800,500,1,18]}
+{"kind":"textbox","id":"sh/kve1gj6d","slide":3,"text":"команда","textPreview":"команда","textChars":7,"textLines":1,"bbox":[730,535,140,38]}
+{"kind":"shape","id":"sh/5wni9o7y","slide":3,"bbox":[1032,492,16,16]}
+{"kind":"shape","id":"sh/apcjapob","slide":3,"bbox":[1040,500,1,18]}
+{"kind":"textbox","id":"sh/vql03upw","slide":3,"text":"подтверждение","textPreview":"подтверждение","textChars":13,"textLines":1,"bbox":[970,535,140,38]}
+{"kind":"shape","id":"sh/ni5gfats","slide":3,"bbox":[920,450,1,85]}
+{"kind":"textbox","id":"sh/mhwfm5s7","slide":3,"text":"критический рост","textPreview":"критический рост","textChars":16,"textLines":1,"bbox":[858,426,124,18]}
+{"kind":"textbox","id":"sh/9k7yh0bi","slide":3,"text":"Решение появляется до критического роста и остаётся проверяемым.","textPreview":"Решение появляется до критического роста и остаётся проверяемым.","textChars":64,"textLines":1,"bbox":[690,570,500,36]}
+{"kind":"shape","id":"sh/ojexofad","slide":3,"bbox":[64,614,1152,1]}
+{"kind":"textbox","id":"sh/ze5wbqtg","slide":3,"text":"ПРАКТИЧЕСКАЯ ЗАДАЧА","textPreview":"ПРАКТИЧЕСКАЯ ЗАДАЧА","textChars":19,"textLines":1,"bbox":[64,632,200,18]}
+{"kind":"textbox","id":"sh/edwfilsv","slide":3,"text":"Связать измерение, прогноз, рекомендацию и управление в одном локальном контуре.","textPreview":"Связать измерение, прогноз, рекомендацию и управление в одном локальном контуре.","textChars":80,"textLines":1,"bbox":[284,630,810,24]}
+{"kind":"shape","id":"sh/1gned0bm","slide":3,"bbox":[64,668,1152,1]}
+{"kind":"textbox","id":"sh/0fexkva1","slide":3,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,680,150,18]}
+{"kind":"textbox","id":"sh/ralw7qtk","slide":3,"text":"03 / 06","textPreview":"03 / 06","textChars":7,"textLines":1,"bbox":[1110,680,106,18]}
+{"kind":"notes","id":"nt/veh3cy","slide":3,"text":"Логика сравнения основана на описании проблемы и ограничений AirCheck в docs/актуальность-темы.md. Научный контекст по кратковременному воздействию CO₂: https://www.sciencedirect.com/science/article/pii/S036013232300358X . Практические ограничения воздухообмена: https://www.epa.gov/indoor-air-quality-iaq/improving-indoor-air-quality ."}
+{"kind":"slide","id":"sl/4bfx4s","slide":4,"title":"Аналоги закрывают отдельные части задачи","textShapes":61}
+{"kind":"textbox","id":"sh/lgfyt4nq","slide":4,"text":"Аналоги закрывают отдельные части задачи","textPreview":"Аналоги закрывают отдельные части задачи","textChars":40,"textLines":1,"bbox":[64,46,1000,70]}
+{"kind":"textbox","id":"sh/yt4zip4z","slide":4,"text":"AirCheck объединяет всю цепочку","textPreview":"AirCheck объединяет всю цепочку","textChars":31,"textLines":1,"bbox":[64,116,470,30]}
+{"kind":"textbox","id":"sh/judgru5k","slide":4,"text":"Матрица показывает заявленные возможности в масштабе одной комнаты","textPreview":"Матрица показывает заявленные возможности в масштабе одной комнаты","textChars":66,"textLines":1,"bbox":[64,151,620,22]}
+{"kind":"shape","id":"sh/wrmxgzmt","slide":4,"bbox":[64,180,1152,1]}
+{"kind":"textbox","id":"sh/xsvypkne","slide":4,"text":"РЕШЕНИЕ","textPreview":"РЕШЕНИЕ","textChars":7,"textLines":1,"bbox":[72,184,254,18]}
+{"kind":"textbox","id":"sh/ap4fep43","slide":4,"text":"ИЗМЕРЕНИЕ","textPreview":"ИЗМЕРЕНИЕ","textChars":9,"textLines":1,"bbox":[342,184,254,18]}
+{"kind":"textbox","id":"sh/bqdgnu58","slide":4,"text":"ИНТЕЛЛЕКТ","textPreview":"ИНТЕЛЛЕКТ","textChars":9,"textLines":1,"bbox":[612,184,224,18]}
+{"kind":"textbox","id":"sh/gnqhsjmd","slide":4,"text":"ДЕЙСТВИЕ","textPreview":"ДЕЙСТВИЕ","textChars":8,"textLines":1,"bbox":[852,184,207,18]}
+{"kind":"textbox","id":"sh/hozy1oni","slide":4,"text":"ЛОКАЛЬНОСТЬ","textPreview":"ЛОКАЛЬНОСТЬ","textChars":11,"textLines":1,"bbox":[1075,184,133,18]}
+{"kind":"shape","id":"sh/t0nmlkb2","slide":4,"bbox":[64,210,1152,1]}
+{"kind":"shape","id":"sh/8zelsfah","slide":4,"bbox":[72,218,254,20]}
+{"kind":"textbox","id":"sh/7y5kjatc","slide":4,"text":"Датчики","textPreview":"Датчики","textChars":7,"textLines":1,"bbox":[342,218,154,20]}
+{"kind":"textbox","id":"sh/6xc3q5sr","slide":4,"text":"История","textPreview":"История","textChars":7,"textLines":1,"bbox":[512,218,84,20]}
+{"kind":"textbox","id":"sh/lw32h0b6","slide":4,"text":"Прогноз","textPreview":"Прогноз","textChars":7,"textLines":1,"bbox":[612,218,89,20]}
+{"kind":"textbox","id":"sh/kvulofal","slide":4,"text":"Рекомендация","textPreview":"Рекомендация","textChars":12,"textLines":1,"bbox":[717,218,119,20]}
+{"kind":"textbox","id":"sh/jalkfat0","slide":4,"text":"Вентиляция","textPreview":"Вентиляция","textChars":10,"textLines":1,"bbox":[852,218,119,20]}
+{"kind":"textbox","id":"sh/y9c3m5sf","slide":4,"text":"Окно","textPreview":"Окно","textChars":4,"textLines":1,"bbox":[987,218,72,20]}
+{"kind":"textbox","id":"sh/5s7mt4ba","slide":4,"text":"Локально","textPreview":"Локально","textChars":8,"textLines":1,"bbox":[1075,218,133,20]}
+{"kind":"shape","id":"sh/4ryl0zap","slide":4,"bbox":[64,244,1152,1]}
+{"kind":"shape","id":"sh/onqxc7md","slide":4,"bbox":[604,180,1,327]}
+{"kind":"shape","id":"sh/98zelcny","slide":4,"bbox":[844,180,1,327]}
+{"kind":"shape","id":"sh/mlofax47","slide":4,"bbox":[1067,180,1,327]}
+{"kind":"textbox","id":"sh/nmhwj25s","slide":4,"text":"Aranet4 HOME","textPreview":"Aranet4 HOME","textChars":12,"textLines":1,"bbox":[72,265,254,24]}
+{"kind":"textbox","id":"sh/0j6x8nm1","slide":4,"text":"CO₂, T, RH","textPreview":"CO₂, T, RH","textChars":10,"textLines":1,"bbox":[342,265,154,24]}
+{"kind":"textbox","id":"sh/1kfehsnm","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[512,265,84,24]}
+{"kind":"textbox","id":"sh/ehov6x4b","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[612,265,89,24]}
+{"kind":"textbox","id":"sh/fixwfi5g","slide":4,"text":"±","textPreview":"±","textChars":1,"textLines":1,"bbox":[717,265,119,24]}
+{"kind":"textbox","id":"sh/sf6d4nm5","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[852,265,119,24]}
+{"kind":"textbox","id":"sh/dgfedsnq","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[987,265,72,24]}
+{"kind":"textbox","id":"sh/vqdgnipc","slide":4,"text":"±","textPreview":"±","textChars":1,"textLines":1,"bbox":[1075,265,133,24]}
+{"kind":"shape","id":"sh/up4fedor","slide":4,"bbox":[64,303,1152,1]}
+{"kind":"textbox","id":"sh/hcvyps7i","slide":4,"text":"Airthings View Plus","textPreview":"Airthings View Plus","textChars":19,"textLines":1,"bbox":[72,316,254,24]}
+{"kind":"textbox","id":"sh/gbmxgn6x","slide":4,"text":"CO₂, PM2.5, T/RH","textPreview":"CO₂, PM2.5, T/RH","textChars":16,"textLines":1,"bbox":[342,316,154,24]}
+{"kind":"textbox","id":"sh/3edgripo","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[512,316,84,24]}
+{"kind":"textbox","id":"sh/id4fido3","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[612,316,89,24]}
+{"kind":"textbox","id":"sh/5gfyts7e","slide":4,"text":"±","textPreview":"±","textChars":1,"textLines":1,"bbox":[717,316,119,24]}
+{"kind":"textbox","id":"sh/4f6xkn69","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[852,316,119,24]}
+{"kind":"textbox","id":"sh/rixgv2pk","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[987,316,72,24]}
+{"kind":"textbox","id":"sh/qhofmxoz","slide":4,"text":"±","textPreview":"±","textChars":1,"textLines":1,"bbox":[1075,316,133,24]}
+{"kind":"shape","id":"sh/alwzy1wb","slide":4,"bbox":[64,354,1152,1]}
+{"kind":"textbox","id":"sh/bm50r6xw","slide":4,"text":"Sanobreeze","textPreview":"Sanobreeze","textChars":10,"textLines":1,"bbox":[72,367,254,24]}
+{"kind":"textbox","id":"sh/cneh0beh","slide":4,"text":"CO₂","textPreview":"CO₂","textChars":3,"textLines":1,"bbox":[342,367,154,24]}
+{"kind":"textbox","id":"sh/xonitgf2","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[512,367,84,24]}
+{"kind":"textbox","id":"sh/ypwz2lw7","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[612,367,89,24]}
+{"kind":"textbox","id":"sh/zq50vqxs","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[717,367,119,24]}
+{"kind":"textbox","id":"sh/kryh4bed","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[852,367,119,24]}
+{"kind":"textbox","id":"sh/ls7ixgfy","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[987,367,72,24]}
+{"kind":"textbox","id":"sh/etczqhw3","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[1075,367,133,24]}
+{"kind":"shape","id":"sh/fulgjmxo","slide":4,"bbox":[64,405,1152,1]}
+{"kind":"textbox","id":"sh/hkbulo3i","slide":4,"text":"AirGradient ONE / Open Air +\nHome Assistant","textPreview":"AirGradient ONE / Open Air + | Home Assistant","textChars":43,"textLines":2,"bbox":[72,412,254,36]}
+{"kind":"textbox","id":"sh/gj2tcj2x","slide":4,"text":"CO₂, PM2.5, T/RH","textPreview":"CO₂, PM2.5, T/RH","textChars":16,"textLines":1,"bbox":[342,418,154,24]}
+{"kind":"textbox","id":"sh/vytcjelc","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[512,418,84,24]}
+{"kind":"textbox","id":"sh/uxkba9kr","slide":4,"text":"−","textPreview":"−","textChars":1,"textLines":1,"bbox":[612,418,89,24]}
+{"kind":"textbox","id":"sh/5ovu9o3e","slide":4,"text":"±","textPreview":"±","textChars":1,"textLines":1,"bbox":[717,418,119,24]}
+{"kind":"textbox","id":"sh/4nmtgj2t","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[852,418,119,24]}
+{"kind":"textbox","id":"sh/3mtcnyl8","slide":4,"text":"±","textPreview":"±","textChars":1,"textLines":1,"bbox":[987,418,72,24]}
+{"kind":"textbox","id":"sh/ilkbetk3","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[1075,418,133,24]}
+{"kind":"shape","id":"sh/lsrad43a","slide":4,"bbox":[64,456,1152,1]}
+{"kind":"textbox","id":"sh/krit4z2p","slide":4,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[72,469,254,24]}
+{"kind":"textbox","id":"sh/cbmtkzal","slide":4,"text":"CO₂, PM2.5, T/RH","textPreview":"CO₂, PM2.5, T/RH","textChars":16,"textLines":1,"bbox":[342,469,154,24]}
+{"kind":"textbox","id":"sh/xcvut4b6","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[512,469,84,24]}
+{"kind":"textbox","id":"sh/a94bipsf","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[612,469,89,24]}
+{"kind":"textbox","id":"sh/badcrut0","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[717,469,119,24]}
+{"kind":"textbox","id":"sh/kzmtojah","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[852,469,119,24]}
+{"kind":"textbox","id":"sh/l0vuxob2","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[987,469,72,24]}
+{"kind":"textbox","id":"sh/yd4bm9sr","slide":4,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[1075,469,133,24]}
+{"kind":"shape","id":"sh/zydcvetw","slide":4,"bbox":[64,507,1152,1]}
+{"kind":"shape","id":"sh/836dsjat","slide":4,"bbox":[64,456,3,51]}
+{"kind":"textbox","id":"sh/94fu1obe","slide":4,"text":"+ заявлено или реализовано","textPreview":"+ заявлено или реализовано","textChars":26,"textLines":1,"bbox":[66,558,220,18]}
+{"kind":"textbox","id":"sh/jyhwridg","slide":4,"text":"− не заявлено","textPreview":"− не заявлено","textChars":13,"textLines":1,"bbox":[330,558,150,18]}
+{"kind":"textbox","id":"sh/ix8fidcv","slide":4,"text":"± частичная поддержка или настройка","textPreview":"± частичная поддержка или настройка","textChars":35,"textLines":1,"bbox":[520,558,290,18]}
+{"kind":"textbox","id":"sh/50jetsvm","slide":4,"text":"Сравнение по официальным описаниям решений","textPreview":"Сравнение по официальным описаниям решений","textChars":42,"textLines":1,"bbox":[900,558,280,18]}
+{"kind":"shape","id":"sh/4zqxknu1","slide":4,"bbox":[64,668,1152,1]}
+{"kind":"textbox","id":"sh/vuhwnid4","slide":4,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,680,150,18]}
+{"kind":"textbox","id":"sh/ut8fedcz","slide":4,"text":"04 / 06","textPreview":"04 / 06","textChars":7,"textLines":1,"bbox":[1110,680,106,18]}
+{"kind":"notes","id":"nt/4bfx4s","slide":4,"text":"Источники аналогов: https://help.aranet.com/aranet4/aranet4-home/general/what-does-the-aranet4-do ; https://www.airthings.com/en/view-plus ; https://www.rylosystems.com/en_US/products/sanobreeze-co2-vent-controller ; https://www.airgradient.com/home-assistant/ ; https://www.home-assistant.io/docs/automation . Знак минус показывает отсутствие заявленной функции в выбранных материалах, а не невозможность интеграции."}
+{"kind":"slide","id":"sl/vhxjvz","slide":5,"title":"AirCheck связывает измерение с действием","textShapes":28}
+{"kind":"textbox","id":"sh/ed4jml8n","slide":5,"text":"AirCheck связывает измерение с действием","textPreview":"AirCheck связывает измерение с действием","textChars":40,"textLines":1,"bbox":[64,46,880,70]}
+{"kind":"textbox","id":"sh/10v2x0ry","slide":5,"text":"СИГНАЛЬНЫЙ ПУТЬ ПРОГРАММНОГО ПРОТОТИПА","textPreview":"СИГНАЛЬНЫЙ ПУТЬ ПРОГРАММНОГО ПРОТОТИПА","textChars":38,"textLines":1,"bbox":[930,62,270,18]}
+{"kind":"shape","id":"sh/gfmlovqd","slide":5,"bbox":[138,270,912,1]}
+{"kind":"shape","id":"sh/32dkza94","slide":5,"bbox":[195,269,2,2]}
+{"kind":"shape","id":"sh/2143q58j","slide":5,"bbox":[365,269,2,2]}
+{"kind":"shape","id":"sh/p4f210ra","slide":5,"bbox":[197,270,168,0]}
+{"kind":"shape","id":"sh/o3mlsfqp","slide":5,"bbox":[416,269,2,2]}
+{"kind":"shape","id":"sh/j6tkn690","slide":5,"bbox":[582,269,2,2]}
+{"kind":"shape","id":"sh/i5kje1sf","slide":5,"bbox":[418,270,164,0]}
+{"kind":"shape","id":"sh/0ji14b21","slide":5,"bbox":[637,269,2,2]}
+{"kind":"shape","id":"sh/1kr2xgjm","slide":5,"bbox":[801,269,2,2]}
+{"kind":"shape","id":"sh/ex0j21kb","slide":5,"bbox":[639,270,162,0]}
+{"kind":"shape","id":"sh/zi9kv61w","slide":5,"bbox":[857,269,2,2]}
+{"kind":"shape","id":"sh/on218bid","slide":5,"bbox":[1021,269,2,2]}
+{"kind":"shape","id":"sh/9ob21gjy","slide":5,"bbox":[859,270,162,0]}
+{"kind":"textbox","id":"sh/ml0j6lk7","slide":5,"text":"01 / ИСТОЧНИК","textPreview":"01 / ИСТОЧНИК","textChars":13,"textLines":1,"bbox":[80,218,180,18]}
+{"kind":"shape","id":"sh/nm9kzq1s","slide":5,"bbox":[153.8,253.8,32.4,32.4]}
+{"kind":"shape","id":"sh/4ry1wr2t","slide":5,"bbox":[164.6,264.6,10.8,10.8]}
+{"kind":"shape","id":"sh/ps7ipwje","slide":5,"bbox":[147.5,270,12.6,1]}
+{"kind":"shape","id":"sh/lcfqdo76","slide":5,"bbox":[179.9,270,12.6,1]}
+{"kind":"shape","id":"sh/kb694jql","slide":5,"bbox":[170,247.5,1,12.6]}
+{"kind":"shape","id":"sh/jax8bep0","slide":5,"bbox":[170,279.9,1,12.6]}
+{"kind":"shape","id":"sh/y9o7298f","slide":5,"bbox":[149,238,10,10]}
+{"kind":"shape","id":"sh/t0zqh872","slide":5,"bbox":[165,238,10,10]}
+{"kind":"shape","id":"sh/8fq983qh","slide":5,"bbox":[181,238,10,10]}
+{"kind":"textbox","id":"sh/7eh8fypc","slide":5,"text":"датчики","textPreview":"датчики","textChars":7,"textLines":1,"bbox":[90,312,160,24]}
+{"kind":"textbox","id":"sh/6dor6t8r","slide":5,"text":"внутри и снаружи","textPreview":"внутри и снаружи","textChars":16,"textLines":1,"bbox":[80,348,180,20]}
+{"kind":"textbox","id":"sh/h4zql87e","slide":5,"text":"02 / ХРАНЕНИЕ","textPreview":"02 / ХРАНЕНИЕ","textChars":13,"textLines":1,"bbox":[300,218,180,18]}
+{"kind":"shape","id":"sh/g3q9c3qt","slide":5,"bbox":[370,248,1.4,44]}
+{"kind":"shape","id":"sh/epkn65ob","slide":5,"bbox":[410,248,1.4,44]}
+{"kind":"shape","id":"sh/zatofa5w","slide":5,"bbox":[370,248,40,1.4]}
+{"kind":"shape","id":"sh/0b258f6h","slide":5,"bbox":[370,270,40,1.2]}
+{"kind":"shape","id":"sh/1cb6hknm","slide":5,"bbox":[370,292,40,1.4]}
+{"kind":"textbox","id":"sh/mdkna5o7","slide":5,"text":"история","textPreview":"история","textChars":7,"textLines":1,"bbox":[310,312,160,24]}
+{"kind":"textbox","id":"sh/netoja5s","slide":5,"text":"PostgreSQL","textPreview":"PostgreSQL","textChars":10,"textLines":1,"bbox":[300,348,180,20]}
+{"kind":"textbox","id":"sh/ofm5cf6d","slide":5,"text":"03 / АНАЛИЗ","textPreview":"03 / АНАЛИЗ","textChars":11,"textLines":1,"bbox":[520,218,180,18]}
+{"kind":"shape","id":"sh/9gv6lkny","slide":5,"bbox":[580,240,60,60]}
+{"kind":"textbox","id":"sh/ah4nepoj","slide":5,"text":"15 мин","textPreview":"15 мин","textChars":6,"textLines":1,"bbox":[582,258,56,20]}
+{"kind":"textbox","id":"sh/bido7u54","slide":5,"text":"прогноз","textPreview":"прогноз","textChars":7,"textLines":1,"bbox":[530,312,160,24]}
+{"kind":"textbox","id":"sh/jy9orux8","slide":5,"text":"CO₂ / 15 минут","textPreview":"CO₂ / 15 минут","textChars":14,"textLines":1,"bbox":[520,348,180,20]}
+{"kind":"textbox","id":"sh/ix0nypgn","slide":5,"text":"04 / РЕШЕНИЕ","textPreview":"04 / РЕШЕНИЕ","textChars":12,"textLines":1,"bbox":[740,218,180,18]}
+{"kind":"shape","id":"sh/50r6tkfy","slide":5,"bbox":[801,241,58,58]}
+{"kind":"textbox","id":"sh/kzi50zyt","slide":5,"text":"решение","textPreview":"решение","textChars":7,"textLines":1,"bbox":[750,312,160,24]}
+{"kind":"textbox","id":"sh/72tovux4","slide":5,"text":"рекомендация","textPreview":"рекомендация","textChars":12,"textLines":1,"bbox":[740,348,180,20]}
+{"kind":"textbox","id":"sh/61kn2pgj","slide":5,"text":"05 / ИСПОЛНЕНИЕ","textPreview":"05 / ИСПОЛНЕНИЕ","textChars":15,"textLines":1,"bbox":[960,218,180,18]}
+{"kind":"shape","id":"sh/t4b6x4fa","slide":5,"bbox":[1040,260,20,20]}
+{"kind":"textbox","id":"sh/s3254zyp","slide":5,"text":"команды","textPreview":"команды","textChars":7,"textLines":1,"bbox":[970,312,160,24]}
+{"kind":"shape","id":"sh/n6p4jax0","slide":5,"bbox":[1060,270,50,1]}
+{"kind":"shape","id":"sh/m5gnq5gf","slide":5,"bbox":[1110,270,1.8,110]}
+{"kind":"shape","id":"sh/cbel0bed","slide":5,"bbox":[1109,299,2,2]}
+{"kind":"shape","id":"sh/dcn2twvy","slide":5,"bbox":[1177,299,2,2]}
+{"kind":"shape","id":"sh/q9cjy1w7","slide":5,"bbox":[1111,300,66,0]}
+{"kind":"shape","id":"sh/balkr6ds","slide":5,"bbox":[1109,339,2,2]}
+{"kind":"shape","id":"sh/o7u1wre1","slide":5,"bbox":[1177,339,2,2]}
+{"kind":"shape","id":"sh/p832pwvm","slide":5,"bbox":[1111,340,66,0]}
+{"kind":"shape","id":"sh/25cjuhwb","slide":5,"bbox":[1109,379,2,2]}
+{"kind":"shape","id":"sh/36lknmdg","slide":5,"bbox":[1177,379,2,2]}
+{"kind":"shape","id":"sh/83yl8vel","slide":5,"bbox":[1111,380,66,0]}
+{"kind":"textbox","id":"sh/94721gvq","slide":5,"text":"вытяжка","textPreview":"вытяжка","textChars":7,"textLines":1,"bbox":[1184,292,64,18]}
+{"kind":"textbox","id":"sh/xoju5wjy","slide":5,"text":"приток","textPreview":"приток","textChars":6,"textLines":1,"bbox":[1184,332,64,18]}
+{"kind":"textbox","id":"sh/wnatwr2d","slide":5,"text":"окно","textPreview":"окно","textChars":4,"textLines":1,"bbox":[1184,372,64,18]}
+{"kind":"shape","id":"sh/vm1s3m1s","slide":5,"bbox":[64,420,1152,1]}
+{"kind":"shape","id":"sh/alsbuhk7","slide":5,"bbox":[830,372,1,48]}
+{"kind":"shape","id":"sh/9kja1cjm","slide":5,"bbox":[1050,372,1,48]}
+{"kind":"shape","id":"sh/8jqts72h","slide":5,"bbox":[1178,380,1,40]}
+{"kind":"textbox","id":"sh/nihsz21w","slide":5,"text":"РУЧНОЕ УПРАВЛЕНИЕ","textPreview":"РУЧНОЕ УПРАВЛЕНИЕ","textChars":17,"textLines":1,"bbox":[610,438,190,18]}
+{"kind":"textbox","id":"sh/mh8bqhkb","slide":5,"text":"Команда оператора сохраняется до следующего решения.","textPreview":"Команда оператора сохраняется до следующего решения.","textChars":52,"textLines":1,"bbox":[610,464,190,56]}
+{"kind":"textbox","id":"sh/lgzaxcjq","slide":5,"text":"DESIRED / REPORTED","textPreview":"DESIRED / REPORTED","textChars":18,"textLines":1,"bbox":[830,438,190,18]}
+{"kind":"textbox","id":"sh/0fqto725","slide":5,"text":"Состояние считается изменённым только после подтверждения узла.","textPreview":"Состояние считается изменённым только после подтверждения узла.","textChars":63,"textLines":1,"bbox":[830,464,190,60]}
+{"kind":"textbox","id":"sh/qloryd03","slide":5,"text":"ONLINE / STALE / OFFLINE","textPreview":"ONLINE / STALE / OFFLINE","textChars":24,"textLines":1,"bbox":[1048,438,166,18]}
+{"kind":"textbox","id":"sh/rmx8riho","slide":5,"text":"Ожидающая команда остаётся в очереди.","textPreview":"Ожидающая команда остаётся в очереди.","textChars":37,"textLines":1,"bbox":[1048,464,166,56]}
+{"kind":"shape","id":"sh/cn6903it","slide":5,"bbox":[64,668,1152,1]}
+{"kind":"textbox","id":"sh/dofqt8ze","slide":5,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,680,150,18]}
+{"kind":"textbox","id":"sh/2x47ut0r","slide":5,"text":"05 / 06","textPreview":"05 / 06","textChars":7,"textLines":1,"bbox":[1110,680,106,18]}
+{"kind":"notes","id":"nt/vhxjvz","slide":5,"text":"Фактическая архитектура и состояния подтверждения: README.md, docs/ml.md и docs/ТЗ-поправка-03-climate-control.md. В проекте различаются desired и reported состояния, очередь команд и статусы online, stale, offline."}
+{"kind":"slide","id":"sl/s72cv4","slide":6,"title":"Цель и границы проекта","textShapes":15}
+{"kind":"textbox","id":"sh/byhovixk","slide":6,"text":"Цель и границы проекта","textPreview":"Цель и границы проекта","textChars":22,"textLines":1,"bbox":[64,46,600,70]}
+{"kind":"textbox","id":"sh/czqp4nep","slide":6,"text":"ОБЪЁМ ПРОВЕРКИ","textPreview":"ОБЪЁМ ПРОВЕРКИ","textChars":14,"textLines":1,"bbox":[690,126,180,18]}
+{"kind":"textbox","id":"sh/x0j6xsfa","slide":6,"text":"Проверить локальный\nсценарий\nдля одной комнаты","textPreview":"Проверить локальный | сценарий | для одной комнаты","textChars":46,"textLines":3,"bbox":[66,164,520,142]}
+{"kind":"textbox","id":"sh/2987ydwn","slide":6,"text":"Система по данным датчиков оценивает состояние воздуха, прогнозирует изменение CO₂ и поддерживает ручное или автоматическое управление проветриванием.","textPreview":"Система по данным датчиков оценивает состояние воздуха, прогнозирует изменение CO₂ и поддерживает ручное или автоматическое управление пр...","textChars":150,"textLines":1,"bbox":[68,348,480,72]}
+{"kind":"shape","id":"sh/nahorix8","slide":6,"bbox":[626,152,1,386]}
+{"kind":"textbox","id":"sh/ovqp03et","slide":6,"text":"01  УЖЕ РЕАЛИЗОВАНО","textPreview":"01  УЖЕ РЕАЛИЗОВАНО","textChars":19,"textLines":1,"bbox":[690,166,500,18]}
+{"kind":"textbox","id":"sh/pwz6t8fe","slide":6,"text":"панель, REST-контракт, PostgreSQL, прогноз, рекомендации, очередь команд","textPreview":"панель, REST-контракт, PostgreSQL, прогноз, рекомендации, очередь команд","textChars":72,"textLines":1,"bbox":[690,198,500,42]}
+{"kind":"shape","id":"sh/m5s7axw7","slide":6,"bbox":[690,262,500,1]}
+{"kind":"textbox","id":"sh/761832xc","slide":6,"text":"02  ПРОВЕРЯЕТСЯ В ДИПЛОМНОЙ РАБОТЕ","textPreview":"02  ПРОВЕРЯЕТСЯ В ДИПЛОМНОЙ РАБОТЕ","textChars":34,"textLines":1,"bbox":[690,286,500,18]}
+{"kind":"textbox","id":"sh/vqp8rids","slide":6,"text":"рост CO₂, ручное управление окном, автоматическое проветривание, подтверждение состояния","textPreview":"рост CO₂, ручное управление окном, автоматическое проветривание, подтверждение состояния","textChars":88,"textLines":1,"bbox":[690,318,500,46]}
+{"kind":"shape","id":"sh/upgryxcn","slide":6,"bbox":[690,386,500,1]}
+{"kind":"textbox","id":"sh/hsrqtsvy","slide":6,"text":"03  ВНЕ ТЕКУЩЕГО ЭТАПА","textPreview":"03  ВНЕ ТЕКУЩЕГО ЭТАПА","textChars":22,"textLines":1,"bbox":[690,410,500,18]}
+{"kind":"textbox","id":"sh/wri90nud","slide":6,"text":"физическая ESP32, реальные датчики, фильтр, моторы, механизм окна","textPreview":"физическая ESP32, реальные датчики, фильтр, моторы, механизм окна","textChars":65,"textLines":1,"bbox":[690,442,500,42]}
+{"kind":"textbox","id":"sh/3u9sv2t4","slide":6,"text":"программный прототип","textPreview":"программный прототип","textChars":20,"textLines":1,"bbox":[690,516,190,20]}
+{"kind":"shape","id":"sh/it0r2xcj","slide":6,"bbox":[890,525,128,2]}
+{"kind":"textbox","id":"sh/5wraxcba","slide":6,"text":"физическое подключение","textPreview":"физическое подключение","textChars":22,"textLines":1,"bbox":[1034,516,156,20]}
+{"kind":"shape","id":"sh/4vi947up","slide":6,"bbox":[66,574,110,3]}
+{"kind":"textbox","id":"sh/rytsz2t0","slide":6,"text":"Связать данные датчиков, прогноз и подтверждённое действие в одном локальном контуре.","textPreview":"Связать данные датчиков, прогноз и подтверждённое действие в одном локальном контуре.","textChars":85,"textLines":1,"bbox":[66,596,1100,34]}
+{"kind":"shape","id":"sh/qx0r6hcf","slide":6,"bbox":[64,668,1152,1]}
+{"kind":"textbox","id":"sh/2d4by1wn","slide":6,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,680,150,18]}
+{"kind":"textbox","id":"sh/nedcr6d8","slide":6,"text":"06 / 06","textPreview":"06 / 06","textChars":7,"textLines":1,"bbox":[1110,680,106,18]}
+{"kind":"notes","id":"nt/s72cv4","slide":6,"text":"Границы проекта сверены с README.md, docs/актуальность-темы.md и docs/ТЗ-поправка-03-climate-control.md. Физическая ESP32, реальные датчики, фильтр, моторы и механизм окна на текущем этапе не подключены; simulator использует предусмотренный REST-контракт."}

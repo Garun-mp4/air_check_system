@@ -1,0 +1,173 @@
+{"kind":"deck","id":"pr/w046sw","name":"Deck"}
+{"kind":"layout","layoutId":"c918077d-76bf-4222-8638-b305508c963d","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"20cf6c22-f175-4e5e-ad74-deb696733997","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/oxgu7y","slide":1,"title":"Актуальность темы дипломной работы","textShapes":25}
+{"kind":"textbox","id":"sh/7ytwf2pg","slide":1,"text":"Актуальность темы дипломной работы","textPreview":"Актуальность темы дипломной работы","textChars":34,"textLines":1,"bbox":[72,48,420,20]}
+{"kind":"textbox","id":"sh/8z2do7q1","slide":1,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[72,96,560,76]}
+{"kind":"textbox","id":"sh/tkvehc7m","slide":1,"text":"Мониторинг и управление\nкачеством воздуха в помещении","textPreview":"Мониторинг и управление | качеством воздуха в помещении","textChars":53,"textLines":2,"bbox":[76,192,570,122]}
+{"kind":"textbox","id":"sh/ytkvix8z","slide":1,"text":"Интеллектуальная IoT-система на основе прогноза CO₂","textPreview":"Интеллектуальная IoT-система на основе прогноза CO₂","textChars":51,"textLines":1,"bbox":[76,340,510,32]}
+{"kind":"shape","id":"sh/jutcb2p4","slide":1,"bbox":[76,410,488,1]}
+{"kind":"textbox","id":"sh/kv2dk7qp","slide":1,"text":"Одна комната. Данные датчиков. Решение о проветривании.","textPreview":"Одна комната. Данные датчиков. Решение о проветривании.","textChars":55,"textLines":1,"bbox":[76,430,520,28]}
+{"kind":"textbox","id":"sh/lwbeds7a","slide":1,"text":"Дипломная работа","textPreview":"Дипломная работа","textChars":16,"textLines":1,"bbox":[76,634,210,20]}
+{"kind":"shape","id":"sh/ip4vuh83","slide":1,"bbox":[726,92,456,520]}
+{"kind":"textbox","id":"sh/3qdwnmpo","slide":1,"text":"Состояние комнаты","textPreview":"Состояние комнаты","textChars":17,"textLines":1,"bbox":[762,128,260,28]}
+{"kind":"textbox","id":"sh/zq9ovy10","slide":1,"text":"локальный узел room-01","textPreview":"локальный узел room-01","textChars":22,"textLines":1,"bbox":[762,158,230,20]}
+{"kind":"shape","id":"sh/yp0n2d0f","slide":1,"bbox":[1066,128,78,28]}
+{"kind":"textbox","id":"sh/lsr6x8j6","slide":1,"text":"online","textPreview":"online","textChars":6,"textLines":1,"bbox":[1066,129,78,26]}
+{"kind":"shape","id":"sh/kri543il","slide":1,"bbox":[762,204,384,1]}
+{"kind":"textbox","id":"sh/7utozi1c","slide":1,"text":"CO₂ сейчас","textPreview":"CO₂ сейчас","textChars":10,"textLines":1,"bbox":[762,228,180,20]}
+{"kind":"textbox","id":"sh/mt0n6d0r","slide":1,"text":"780","textPreview":"780","textChars":3,"textLines":1,"bbox":[762,249,180,48]}
+{"kind":"textbox","id":"sh/9gb61sj2","slide":1,"text":"ppm, в пределах нормы","textPreview":"ppm, в пределах нормы","textChars":21,"textLines":1,"bbox":[762,300,180,22]}
+{"kind":"textbox","id":"sh/8v258nix","slide":1,"text":"Прогноз","textPreview":"Прогноз","textChars":7,"textLines":1,"bbox":[1000,228,150,20]}
+{"kind":"textbox","id":"sh/vito3218","slide":1,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1000,249,150,48]}
+{"kind":"textbox","id":"sh/uhknax0n","slide":1,"text":"минут до следующей оценки","textPreview":"минут до следующей оценки","textChars":25,"textLines":1,"bbox":[1000,300,150,22]}
+{"kind":"shape","id":"sh/6dor21kv","slide":1,"bbox":[762,342,384,1]}
+{"kind":"textbox","id":"sh/rex8vmlg","slide":1,"text":"Климатический контур","textPreview":"Климатический контур","textChars":20,"textLines":1,"bbox":[762,366,250,22]}
+{"kind":"textbox","id":"sh/sf694r21","slide":1,"text":"Вытяжка","textPreview":"Вытяжка","textChars":7,"textLines":1,"bbox":[762,402,132,24]}
+{"kind":"textbox","id":"sh/dgfqxw3m","slide":1,"text":"выкл.","textPreview":"выкл.","textChars":5,"textLines":1,"bbox":[1044,402,102,24]}
+{"kind":"shape","id":"sh/ip4ryhkz","slide":1,"bbox":[762,433,384,1]}
+{"kind":"textbox","id":"sh/jad8rmlk","slide":1,"text":"Приток","textPreview":"Приток","textChars":6,"textLines":1,"bbox":[762,447,132,24]}
+{"kind":"textbox","id":"sh/4bm90r25","slide":1,"text":"выкл.","textPreview":"выкл.","textChars":5,"textLines":1,"bbox":[1044,447,102,24]}
+{"kind":"shape","id":"sh/5cvqtw3a","slide":1,"bbox":[762,478,384,1]}
+{"kind":"textbox","id":"sh/258ralk3","slide":1,"text":"Окно","textPreview":"Окно","textChars":4,"textLines":1,"bbox":[762,492,132,24]}
+{"kind":"textbox","id":"sh/n6h836lo","slide":1,"text":"закрыто","textPreview":"закрыто","textChars":7,"textLines":1,"bbox":[1044,492,102,24]}
+{"kind":"shape","id":"sh/x0ju9knq","slide":1,"bbox":[762,523,384,1]}
+{"kind":"textbox","id":"sh/czat0fm5","slide":1,"text":"прогноз, рекомендация, команда","textPreview":"прогноз, рекомендация, команда","textChars":30,"textLines":1,"bbox":[762,560,350,22]}
+{"kind":"textbox","id":"sh/be1c7a50","slide":1,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,682,120,18]}
+{"kind":"textbox","id":"sh/adsby54f","slide":1,"text":"01 / 06","textPreview":"01 / 06","textChars":7,"textLines":1,"bbox":[1110,682,106,18]}
+{"kind":"notes","id":"nt/oxgu7y","slide":1,"text":"Содержание основано на README AirCheck и документах проекта. Физические датчики и ESP32 пока не подключены. Визуальный блок на слайде является редактируемой схемой интерфейса, а не показанием реального устройства."}
+{"kind":"slide","id":"sl/bpemxa","slide":2,"title":"Параметры воздуха меняются в течение дня","textShapes":14}
+{"kind":"textbox","id":"sh/rqpoval4","slide":2,"text":"Параметры воздуха меняются в течение дня","textPreview":"Параметры воздуха меняются в течение дня","textChars":40,"textLines":1,"bbox":[64,44,1000,56]}
+{"kind":"textbox","id":"sh/cry5ofmp","slide":2,"text":"Контекст задачи: одна комната с локальным IoT-узлом","textPreview":"Контекст задачи: одна комната с локальным IoT-узлом","textChars":51,"textLines":1,"bbox":[66,104,1040,30]}
+{"kind":"textbox","id":"sh/ds76xk3a","slide":2,"text":"На состояние воздуха влияют\nусловия внутри комнаты\nи за окном.","textPreview":"На состояние воздуха влияют | условия внутри комнаты | и за окном.","textChars":62,"textLines":3,"bbox":[66,194,360,125]}
+{"kind":"textbox","id":"sh/21wni54n","slide":2,"text":"Без измерений рост CO₂ и PM2.5\nможет оставаться незаметным.","textPreview":"Без измерений рост CO₂ и PM2.5 | может оставаться незаметным.","textChars":59,"textLines":2,"bbox":[68,350,340,56]}
+{"kind":"shape","id":"sh/3254ral8","slide":2,"bbox":[760,254,230,146]}
+{"kind":"textbox","id":"sh/43e5kfmd","slide":2,"text":"состояние\nвоздуха","textPreview":"состояние | воздуха","textChars":17,"textLines":2,"bbox":[784,284,182,75]}
+{"kind":"shape","id":"sh/pon6tk3y","slide":2,"bbox":[510,164,190,62]}
+{"kind":"textbox","id":"sh/uxcnel4b","slide":2,"text":"Люди","textPreview":"Люди","textChars":4,"textLines":1,"bbox":[522,174,166,40]}
+{"kind":"shape","id":"sh/fy54nq5w","slide":2,"bbox":[1028,164,190,62]}
+{"kind":"textbox","id":"sh/z6lsvi9c","slide":2,"text":"Вентиляция","textPreview":"Вентиляция","textChars":10,"textLines":1,"bbox":[1040,174,166,40]}
+{"kind":"shape","id":"sh/y5cbmd8r","slide":2,"bbox":[510,462,190,62]}
+{"kind":"textbox","id":"sh/l8naxsri","slide":2,"text":"Окно","textPreview":"Окно","textChars":4,"textLines":1,"bbox":[522,472,166,40]}
+{"kind":"shape","id":"sh/k7utonqx","slide":2,"bbox":[1028,462,190,62]}
+{"kind":"textbox","id":"sh/7a5sz298","slide":2,"text":"Внешняя среда","textPreview":"Внешняя среда","textChars":13,"textLines":1,"bbox":[1040,472,166,40]}
+{"kind":"shape","id":"sh/m9wbqx8n","slide":2,"bbox":[700,195,175,59]}
+{"kind":"shape","id":"sh/tcnu1cre","slide":2,"bbox":[875,195,153,59]}
+{"kind":"shape","id":"sh/8bets7qt","slide":2,"bbox":[700,400,175,93]}
+{"kind":"shape","id":"sh/ne1sny94","slide":2,"bbox":[875,400,153,93]}
+{"kind":"shape","id":"sh/2dsbet8j","slide":2,"bbox":[66,544,1110,1]}
+{"kind":"textbox","id":"sh/q5kni5wj","slide":2,"text":"Нормативная рамка","textPreview":"Нормативная рамка","textChars":17,"textLines":1,"bbox":[66,570,190,20]}
+{"kind":"textbox","id":"sh/r6t4baxo","slide":2,"text":"СанПиН 1.2.3685-21 и СП 60.13330.2020 задают требования к микроклимату, вентиляции и качеству воздуха в зданиях.","textPreview":"СанПиН 1.2.3685-21 и СП 60.13330.2020 задают требования к микроклимату, вентиляции и качеству воздуха в зданиях.","textChars":112,"textLines":1,"bbox":[260,567,620,34]}
+{"kind":"textbox","id":"sh/c725kfe9","slide":2,"text":"EPA и ASHRAE связывают качество воздуха с источниками загрязнения, воздухообменом и эксплуатацией вентиляции.","textPreview":"EPA и ASHRAE связывают качество воздуха с источниками загрязнения, воздухообменом и эксплуатацией вентиляции.","textChars":109,"textLines":1,"bbox":[900,567,280,42]}
+{"kind":"textbox","id":"sh/d8bmdkfu","slide":2,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,682,120,18]}
+{"kind":"textbox","id":"sh/2h0nelw7","slide":2,"text":"02 / 06","textPreview":"02 / 06","textChars":7,"textLines":1,"bbox":[1110,682,106,18]}
+{"kind":"notes","id":"nt/bpemxa","slide":2,"text":"Источники: https://www.epa.gov/indoor-air-quality-iaq/indoor-pollutants-and-sources ; https://www.ashrae.org/technical-resources/bookstore/standards-62-1-62-2 ; https://www.consultant.ru/document/cons_doc_LAW_375839/ ; https://protect.gost.ru/sp/details/b00f766e-b861-4cc7-a448-c65906490262 ."}
+{"kind":"slide","id":"sl/tg7i3o","slide":3,"title":"Текущего значения недостаточно","textShapes":21}
+{"kind":"textbox","id":"sh/nipwfm5g","slide":3,"text":"Текущего значения недостаточно","textPreview":"Текущего значения недостаточно","textChars":30,"textLines":1,"bbox":[64,44,1000,56]}
+{"kind":"textbox","id":"sh/8jyxor6l","slide":3,"text":"Решение о проветривании зависит от того, видит ли система динамику","textPreview":"Решение о проветривании зависит от того, видит ли система динамику","textChars":66,"textLines":1,"bbox":[66,104,1040,30]}
+{"kind":"textbox","id":"sh/9k7ehwn6","slide":3,"text":"Текущий сценарий","textPreview":"Текущий сценарий","textChars":16,"textLines":1,"bbox":[84,168,360,26]}
+{"kind":"textbox","id":"sh/ytgfihoj","slide":3,"text":"Человек реагирует после роста показателя.","textPreview":"Человек реагирует после роста показателя.","textChars":41,"textLines":1,"bbox":[84,200,400,30]}
+{"kind":"shape","id":"sh/zupwbm54","slide":3,"bbox":[84,292,132,78]}
+{"kind":"textbox","id":"sh/0fyxkr6p","slide":3,"text":"Текущее значение","textPreview":"Текущее значение","textChars":16,"textLines":1,"bbox":[94,307,112,48]}
+{"kind":"shape","id":"sh/lg7edwna","slide":3,"bbox":[242,292,132,78]}
+{"kind":"textbox","id":"sh/ip0fu1o3","slide":3,"text":"Человек замечает рост","textPreview":"Человек замечает рост","textChars":21,"textLines":1,"bbox":[252,307,112,48]}
+{"kind":"shape","id":"sh/jq9gn658","slide":3,"bbox":[400,292,132,78]}
+{"kind":"textbox","id":"sh/3ehwbepc","slide":3,"text":"Ручное решение","textPreview":"Ручное решение","textChars":14,"textLines":1,"bbox":[410,307,112,48]}
+{"kind":"shape","id":"sh/id8fi98r","slide":3,"bbox":[558,292,132,78]}
+{"kind":"textbox","id":"sh/5gzedo7i","slide":3,"text":"Включение","textPreview":"Включение","textChars":9,"textLines":1,"bbox":[568,307,112,48]}
+{"kind":"shape","id":"sh/4fqxkjqx","slide":3,"bbox":[216,331,26,0]}
+{"kind":"shape","id":"sh/ri1wfypo","slide":3,"bbox":[374,331,26,0]}
+{"kind":"shape","id":"sh/qhsfmt83","slide":3,"bbox":[532,331,26,0]}
+{"kind":"textbox","id":"sh/dkjyh87e","slide":3,"text":"Реакция начинается после изменения.","textPreview":"Реакция начинается после изменения.","textChars":35,"textLines":1,"bbox":[84,402,380,24]}
+{"kind":"textbox","id":"sh/sjaxo3q9","slide":3,"text":"Целевой сценарий","textPreview":"Целевой сценарий","textChars":16,"textLines":1,"bbox":[700,168,360,26]}
+{"kind":"textbox","id":"sh/fm1gjypk","slide":3,"text":"Система учитывает динамику и подтверждает результат.","textPreview":"Система учитывает динамику и подтверждает результат.","textChars":52,"textLines":1,"bbox":[700,200,490,56]}
+{"kind":"shape","id":"sh/elsfqt8z","slide":3,"bbox":[700,292,98,92]}
+{"kind":"textbox","id":"sh/a1wzixs7","slide":3,"text":"Показания","textPreview":"Показания","textChars":9,"textLines":1,"bbox":[708,308,82,58]}
+{"kind":"shape","id":"sh/b250b29s","slide":3,"bbox":[814,292,98,92]}
+{"kind":"textbox","id":"sh/c3ehk7ad","slide":3,"text":"Прогноз\n15 минут","textPreview":"Прогноз | 15 минут","textChars":16,"textLines":2,"bbox":[822,308,82,58]}
+{"kind":"shape","id":"sh/x4nidcry","slide":3,"bbox":[928,292,98,92]}
+{"kind":"textbox","id":"sh/2dczexsb","slide":3,"text":"Рекомендация","textPreview":"Рекомендация","textChars":12,"textLines":1,"bbox":[936,308,82,58]}
+{"kind":"shape","id":"sh/nel0729w","slide":3,"bbox":[1042,292,98,92]}
+{"kind":"textbox","id":"sh/ofuhg7ah","slide":3,"text":"Команда","textPreview":"Команда","textChars":7,"textLines":1,"bbox":[1050,308,82,58]}
+{"kind":"shape","id":"sh/pgni9srm","slide":3,"bbox":[1156,292,98,92]}
+{"kind":"textbox","id":"sh/69gjqhsf","slide":3,"text":"Подтверждение","textPreview":"Подтверждение","textChars":13,"textLines":1,"bbox":[1164,308,82,58]}
+{"kind":"shape","id":"sh/7ap0jm90","slide":3,"bbox":[798,338,16,0]}
+{"kind":"shape","id":"sh/h4r29gb2","slide":3,"bbox":[912,338,16,0]}
+{"kind":"shape","id":"sh/g3ilgvuh","slide":3,"bbox":[1026,338,16,0]}
+{"kind":"shape","id":"sh/v29k7qtc","slide":3,"bbox":[1140,338,16,0]}
+{"kind":"textbox","id":"sh/u103elcr","slide":3,"text":"Решение появляется до критического роста и остаётся проверяемым.","textPreview":"Решение появляется до критического роста и остаётся проверяемым.","textChars":64,"textLines":1,"bbox":[700,416,480,24]}
+{"kind":"shape","id":"sh/t0r25gb6","slide":3,"bbox":[64,520,1110,1]}
+{"kind":"textbox","id":"sh/8zilcbul","slide":3,"text":"Практическая задача","textPreview":"Практическая задача","textChars":19,"textLines":1,"bbox":[64,550,190,20]}
+{"kind":"textbox","id":"sh/7ypk36t0","slide":3,"text":"Связать измерение, прогноз, рекомендацию и управление в одном локальном контуре для одной комнаты.","textPreview":"Связать измерение, прогноз, рекомендацию и управление в одном локальном контуре для одной комнаты.","textChars":98,"textLines":1,"bbox":[280,544,780,36]}
+{"kind":"textbox","id":"sh/6xg3a1cf","slide":3,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,682,120,18]}
+{"kind":"textbox","id":"sh/dwbmh0ba","slide":3,"text":"03 / 06","textPreview":"03 / 06","textChars":7,"textLines":1,"bbox":[1110,682,106,18]}
+{"kind":"notes","id":"nt/tg7i3o","slide":3,"text":"Содержание основано на проблемной формулировке из docs/актуальность-темы.md и на требованиях проекта к прогнозу CO₂, автоматике, ручному режиму окна, очереди команд и подтверждённому состоянию."}
+{"kind":"slide","id":"sl/yca5t4","slide":4,"title":"Аналоги закрывают отдельные части задачи","textShapes":6}
+{"kind":"textbox","id":"sh/srax4zmx","slide":4,"text":"Аналоги закрывают отдельные части задачи","textPreview":"Аналоги закрывают отдельные части задачи","textChars":40,"textLines":1,"bbox":[64,44,1000,56]}
+{"kind":"textbox","id":"sh/rq1wbulc","slide":4,"text":"Сравнение функций в выбранном масштабе одной комнаты","textPreview":"Сравнение функций в выбранном масштабе одной комнаты","textChars":52,"textLines":1,"bbox":[66,104,1040,30]}
+{"kind":"textbox","id":"sh/5oje9knm","slide":4,"text":"Плюс означает заявленную или реализованную функцию. Минус означает, что функция не заявлена в рассмотренных материалах. Плюс-минус показывает частичную поддержку или необходимость настройки.","textPreview":"Плюс означает заявленную или реализованную функцию. Минус означает, что функция не заявлена в рассмотренных материалах. Плюс-минус показы...","textChars":190,"textLines":1,"bbox":[66,566,920,38]}
+{"kind":"textbox","id":"sh/4nqx0fm1","slide":4,"text":"Источники: официальные описания решений","textPreview":"Источники: официальные описания решений","textChars":39,"textLines":1,"bbox":[970,570,246,22]}
+{"kind":"textbox","id":"sh/jmhw7a5g","slide":4,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,682,120,18]}
+{"kind":"textbox","id":"sh/il8fy54v","slide":4,"text":"04 / 06","textPreview":"04 / 06","textChars":7,"textLines":1,"bbox":[1110,682,106,18]}
+{"kind":"table","id":"tb/3y5sred4","slide":4,"name":"","rows":6,"cols":8,"preview":"Решение | Датчики | История | Прогноз | Рекомендация | Вентиляция | Окно | Локально","bbox":[64,164,1152,376]}
+{"kind":"notes","id":"nt/yca5t4","slide":4,"text":"Источники аналогов: https://help.aranet.com/aranet4/aranet4-home/general/what-does-the-aranet4-do ; https://www.airthings.com/en/view-plus ; https://www.rylosystems.com/en_US/products/sanobreeze-co2-vent-controller ; https://www.airgradient.com/home-assistant/ ; https://www.home-assistant.io/docs/automation . Минус в таблице означает отсутствие функции в рассмотренном официальном описании. Таблица создана как редактируемый объект."}
+{"kind":"slide","id":"sl/zu1zr4","slide":5,"title":"AirCheck связывает измерение с действием","textShapes":23}
+{"kind":"textbox","id":"sh/i5szyxgj","slide":5,"text":"AirCheck связывает измерение с действием","textPreview":"AirCheck связывает измерение с действием","textChars":40,"textLines":1,"bbox":[64,44,1000,56]}
+{"kind":"textbox","id":"sh/58jitsfu","slide":5,"text":"Проектный контур для одной комнаты","textPreview":"Проектный контур для одной комнаты","textChars":34,"textLines":1,"bbox":[66,104,1040,30]}
+{"kind":"shape","id":"sh/k7ah0nyp","slide":5,"bbox":[66,218,202,128]}
+{"kind":"textbox","id":"sh/7u10v2x0","slide":5,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[84,236,32,20]}
+{"kind":"textbox","id":"sh/69sz2xgf","slide":5,"text":"Датчики","textPreview":"Датчики","textChars":7,"textLines":1,"bbox":[84,264,166,30]}
+{"kind":"textbox","id":"sh/tw3ixcf6","slide":5,"text":"внутри / снаружи","textPreview":"внутри / снаружи","textChars":16,"textLines":1,"bbox":[84,304,166,24]}
+{"kind":"shape","id":"sh/svah47yl","slide":5,"bbox":[302,218,202,128]}
+{"kind":"textbox","id":"sh/nehgjyxw","slide":5,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[320,236,32,20]}
+{"kind":"textbox","id":"sh/mdozqtgb","slide":5,"text":"История","textPreview":"История","textChars":7,"textLines":1,"bbox":[320,264,166,30]}
+{"kind":"textbox","id":"sh/4z2xofa9","slide":5,"text":"PostgreSQL","textPreview":"PostgreSQL","textChars":10,"textLines":1,"bbox":[320,304,166,24]}
+{"kind":"shape","id":"sh/p0byhkbu","slide":5,"bbox":[538,218,202,128]}
+{"kind":"textbox","id":"sh/2xkfmps3","slide":5,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[556,236,32,20]}
+{"kind":"textbox","id":"sh/3ytgfuto","slide":5,"text":"Прогноз","textPreview":"Прогноз","textChars":7,"textLines":1,"bbox":[556,264,166,30]}
+{"kind":"textbox","id":"sh/c3mxsza5","slide":5,"text":"CO₂, 15 минут","textPreview":"CO₂, 15 минут","textChars":13,"textLines":1,"bbox":[556,304,166,24]}
+{"kind":"shape","id":"sh/d4vyl4bq","slide":5,"bbox":[774,218,202,128]}
+{"kind":"textbox","id":"sh/q14fqpsf","slide":5,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[792,236,32,20]}
+{"kind":"textbox","id":"sh/r2dgjut0","slide":5,"text":"Решение","textPreview":"Решение","textChars":7,"textLines":1,"bbox":[792,264,166,30]}
+{"kind":"textbox","id":"sh/s7ixgvu1","slide":5,"text":"рекомендация","textPreview":"рекомендация","textChars":12,"textLines":1,"bbox":[792,304,166,24]}
+{"kind":"shape","id":"sh/t8ry90bm","slide":5,"bbox":[1010,218,202,128]}
+{"kind":"textbox","id":"sh/9szmxszy","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1028,236,32,20]}
+{"kind":"textbox","id":"sh/orq5o7it","slide":5,"text":"Команды","textPreview":"Команды","textChars":7,"textLines":1,"bbox":[1028,264,166,30]}
+{"kind":"textbox","id":"sh/nqh4v2h8","slide":5,"text":"вытяжка / приток / окно","textPreview":"вытяжка / приток / окно","textChars":23,"textLines":1,"bbox":[1028,304,166,24]}
+{"kind":"shape","id":"sh/mp8nmx0n","slide":5,"bbox":[268,282,34,0]}
+{"kind":"shape","id":"sh/xgjm1cza","slide":5,"bbox":[504,282,34,0]}
+{"kind":"shape","id":"sh/wfa5s7ip","slide":5,"bbox":[740,282,34,0]}
+{"kind":"shape","id":"sh/be14z2h4","slide":5,"bbox":[976,282,34,0]}
+{"kind":"shape","id":"sh/adsnqx0j","slide":5,"bbox":[66,416,1110,1]}
+{"kind":"textbox","id":"sh/lk3m5wz6","slide":5,"text":"Состояние и управление","textPreview":"Состояние и управление","textChars":22,"textLines":1,"bbox":[66,447,220,22]}
+{"kind":"textbox","id":"sh/kja5wril","slide":5,"text":"Ручная команда сохраняется до следующего решения оператора.","textPreview":"Ручная команда сохраняется до следующего решения оператора.","textChars":59,"textLines":1,"bbox":[66,481,330,44]}
+{"kind":"textbox","id":"sh/2p4jq9g3","slide":5,"text":"desired и reported состояния разделены. Команда считается выполненной только после подтверждения от узла.","textPreview":"desired и reported состояния разделены. Команда считается выполненной только после подтверждения от узла.","textChars":105,"textLines":1,"bbox":[456,481,356,56]}
+{"kind":"textbox","id":"sh/3qdkzexo","slide":5,"text":"Статус узла: online, stale или offline. Ожидающие команды остаются в очереди.","textPreview":"Статус узла: online, stale или offline. Ожидающие команды остаются в очереди.","textChars":77,"textLines":1,"bbox":[888,481,328,56]}
+{"kind":"textbox","id":"sh/4rm1sjy9","slide":5,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,682,120,18]}
+{"kind":"textbox","id":"sh/psv21ofu","slide":5,"text":"05 / 06","textPreview":"05 / 06","textChars":7,"textLines":1,"bbox":[1110,682,106,18]}
+{"kind":"notes","id":"nt/zu1zr4","slide":5,"text":"Содержание основано на README AirCheck, docs/ml.md и docs/ТЗ-поправка-03-climate-control.md. В проекте предусмотрены измерения внутри и снаружи, прогноз CO₂ на 15 минут, рекомендации, отдельные каналы вытяжки и притока, автоматическое окно, reported/desired состояния и очередь команд."}
+{"kind":"slide","id":"sl/faa3a5","slide":6,"title":"Цель и границы проекта","textShapes":15}
+{"kind":"textbox","id":"sh/zi10jml8","slide":6,"text":"Цель и границы проекта","textPreview":"Цель и границы проекта","textChars":22,"textLines":1,"bbox":[64,44,1000,56]}
+{"kind":"textbox","id":"sh/0jahcr2t","slide":6,"text":"Что именно должна проверить дипломная работа","textPreview":"Что именно должна проверить дипломная работа","textChars":44,"textLines":1,"bbox":[66,104,1040,30]}
+{"kind":"textbox","id":"sh/lkjilw3e","slide":6,"text":"Проверить локальный сценарий\nдля одной комнаты","textPreview":"Проверить локальный сценарий | для одной комнаты","textChars":46,"textLines":2,"bbox":[66,174,450,106]}
+{"kind":"textbox","id":"sh/mlsze1kz","slide":6,"text":"Система по данным датчиков оценивает состояние воздуха, прогнозирует изменение CO₂ и поддерживает ручное или автоматическое управление проветриванием.","textPreview":"Система по данным датчиков оценивает состояние воздуха, прогнозирует изменение CO₂ и поддерживает ручное или автоматическое управление пр...","textChars":150,"textLines":1,"bbox":[66,320,450,100]}
+{"kind":"shape","id":"sh/7m10n6lk","slide":6,"bbox":[610,174,1,1]}
+{"kind":"shape","id":"sh/87ahgb2p","slide":6,"bbox":[642,178,14,14]}
+{"kind":"textbox","id":"sh/98jipg3a","slide":6,"text":"В проекте уже есть","textPreview":"В проекте уже есть","textChars":18,"textLines":1,"bbox":[680,174,250,22]}
+{"kind":"textbox","id":"sh/u9czi1kv","slide":6,"text":"панель, PostgreSQL, прогноз CO₂, рекомендации, настройки автоматики и очередь команд","textPreview":"панель, PostgreSQL, прогноз CO₂, рекомендации, настройки автоматики и очередь команд","textChars":84,"textLines":1,"bbox":[680,205,472,58]}
+{"kind":"shape","id":"sh/val0r6lg","slide":6,"bbox":[680,286,472,1]}
+{"kind":"shape","id":"sh/va5cn61w","slide":6,"bbox":[642,326,14,14]}
+{"kind":"textbox","id":"sh/a9cve1kr","slide":6,"text":"Проверяется","textPreview":"Проверяется","textChars":11,"textLines":1,"bbox":[680,322,250,22]}
+{"kind":"textbox","id":"sh/xcnupgj2","slide":6,"text":"рост CO₂, ручное управление окном, автоматическое проветривание и подтверждение состояния","textPreview":"рост CO₂, ручное управление окном, автоматическое проветривание и подтверждение состояния","textChars":89,"textLines":1,"bbox":[680,353,472,58]}
+{"kind":"shape","id":"sh/wbedgb2h","slide":6,"bbox":[680,434,472,1]}
+{"kind":"shape","id":"sh/n6lcjm10","slide":6,"bbox":[642,474,14,14]}
+{"kind":"textbox","id":"sh/m5cvahkf","slide":6,"text":"Пока отсутствует","textPreview":"Пока отсутствует","textChars":16,"textLines":1,"bbox":[680,470,250,22]}
+{"kind":"textbox","id":"sh/983ulwj6","slide":6,"text":"физическая ESP32, реальные датчики, фильтр, моторы и механизм окна","textPreview":"физическая ESP32, реальные датчики, фильтр, моторы и механизм окна","textChars":66,"textLines":1,"bbox":[680,501,472,58]}
+{"kind":"shape","id":"sh/87udcr2l","slide":6,"bbox":[680,582,472,1]}
+{"kind":"shape","id":"sh/72pwvq14","slide":6,"bbox":[0,606,1280,114]}
+{"kind":"textbox","id":"sh/61gvmlkj","slide":6,"text":"Актуальность","textPreview":"Актуальность","textChars":12,"textLines":1,"bbox":[66,630,180,22]}
+{"kind":"textbox","id":"sh/2x0fep4r","slide":6,"text":"Связать данные датчиков, прогноз и подтверждённое действие в одном локальном контуре.","textPreview":"Связать данные датчиков, прогноз и подтверждённое действие в одном локальном контуре.","textChars":85,"textLines":1,"bbox":[264,626,820,38]}
+{"kind":"textbox","id":"sh/3y9gnulc","slide":6,"text":"AirCheck / дипломная работа","textPreview":"AirCheck / дипломная работа","textChars":27,"textLines":1,"bbox":[264,670,260,20]}
+{"kind":"textbox","id":"sh/ozixgzmx","slide":6,"text":"AirCheck","textPreview":"AirCheck","textChars":8,"textLines":1,"bbox":[64,682,120,18]}
+{"kind":"textbox","id":"sh/p0byp43i","slide":6,"text":"06 / 06","textPreview":"06 / 06","textChars":7,"textLines":1,"bbox":[1110,682,106,18]}
+{"kind":"notes","id":"nt/faa3a5","slide":6,"text":"Содержание основано на README AirCheck и разделах docs/ТЗ-поправка-03-climate-control.md и docs/ml.md. Ограничения отражают текущее состояние проекта: физическая ESP32 и реальные датчики ещё не подключены, simulator использует будущий контракт устройства."}

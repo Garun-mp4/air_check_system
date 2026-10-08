@@ -1,0 +1,1279 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/s72cv4",
+    "id": "s72cv4",
+    "slide": 6,
+    "layoutId": "09a20f67-6b82-469a-bbbb-a4ee6f433bb7",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "c639e5af-be9e-4762-8ef1-d17af18ca099",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#F8F9FA",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "09a20f67-6b82-469a-bbbb-a4ee6f433bb7",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "c639e5af-be9e-4762-8ef1-d17af18ca099",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "c639e5af-be9e-4762-8ef1-d17af18ca099",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/byhovixk",
+      "id": "1",
+      "bbox": [
+        64,
+        46,
+        600,
+        70
+      ],
+      "geometry": "rect",
+      "text": "Цель и границы проекта",
+      "textPreview": "Цель и границы проекта",
+      "resolvedFontSize": 36,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 36,
+        "typeface": "Helvetica Neue",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 2,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Цель и границы проекта"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Цель и границы проекта",
+          "resolvedTextStyle": {
+            "fontSize": 36,
+            "typeface": "Helvetica Neue",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Цель и границы проекта",
+              "fontSize": 36,
+              "typeface": "Helvetica Neue",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/czqp4nep",
+      "id": "2",
+      "bbox": [
+        690,
+        126,
+        180,
+        18
+      ],
+      "geometry": "rect",
+      "text": "ОБЪЁМ ПРОВЕРКИ",
+      "textPreview": "ОБЪЁМ ПРОВЕРКИ",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "Helvetica Neue",
+        "color": "#6B7280",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "ОБЪЁМ ПРОВЕРКИ"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "ОБЪЁМ ПРОВЕРКИ",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "typeface": "Helvetica Neue",
+            "color": "#6B7280",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "ОБЪЁМ ПРОВЕРКИ",
+              "fontSize": 11,
+              "typeface": "Helvetica Neue",
+              "color": "#6B7280",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x0j6xsfa",
+      "id": "3",
+      "bbox": [
+        66,
+        164,
+        520,
+        142
+      ],
+      "geometry": "rect",
+      "text": "Проверить локальный\nсценарий\nдля одной комнаты",
+      "textPreview": "Проверить локальный | сценарий | для одной комнаты",
+      "resolvedFontSize": 39.44,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 45,
+        "typeface": "Helvetica Neue",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.88,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Проверить локальный"
+          },
+          {
+            "index": 2,
+            "text": "сценарий"
+          },
+          {
+            "index": 3,
+            "text": "для одной комнаты"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Проверить локальный",
+          "resolvedTextStyle": {
+            "fontSize": 45,
+            "typeface": "Helvetica Neue",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Проверить локальный",
+              "fontSize": 45,
+              "typeface": "Helvetica Neue",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "сценарий",
+          "resolvedTextStyle": {
+            "fontSize": 45,
+            "typeface": "Helvetica Neue",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "сценарий",
+              "fontSize": 45,
+              "typeface": "Helvetica Neue",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "для одной комнаты",
+          "resolvedTextStyle": {
+            "fontSize": 45,
+            "typeface": "Helvetica Neue",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "для одной комнаты",
+              "fontSize": 45,
+              "typeface": "Helvetica Neue",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2987ydwn",
+      "id": "4",
+      "bbox": [
+        68,
+        348,
+        480,
+        72
+      ],
+      "geometry": "rect",
+      "text": "Система по данным датчиков оценивает состояние воздуха, прогнозирует изменение CO₂ и поддерживает ручное или автоматическое управление проветриванием.",
+      "textPreview": "Система по данным датчиков оценивает состояние воздуха, прогнозирует изменение CO₂ и поддерживает ручное или автоматическое управление пр...",
+      "resolvedFontSize": 17.68,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 18,
+        "typeface": "Helvetica Neue",
+        "color": "#374151",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.98,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 4,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Система по данным датчиков оценивает состояние"
+          },
+          {
+            "index": 2,
+            "text": "воздуха, прогнозирует изменение CO₂ и поддерживает"
+          },
+          {
+            "index": 3,
+            "text": "ручное или автоматическое управление"
+          },
+          {
+            "index": 4,
+            "text": "проветриванием."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Система по данным датчиков оценивает состояние воздуха, прогнозирует изменение CO₂ и поддерживает ручное или автоматическое управление проветриванием.",
+          "resolvedTextStyle": {
+            "fontSize": 18,
+            "typeface": "Helvetica Neue",
+            "color": "#374151",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Система по данным датчиков оценивает состояние воздуха, прогнозирует изменение CO₂ и поддерживает ручное или автоматическое управление проветриванием.",
+              "fontSize": 18,
+              "typeface": "Helvetica Neue",
+              "color": "#374151",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nahorix8",
+      "id": "5",
+      "bbox": [
+        626,
+        152,
+        1,
+        386
+      ],
+      "geometry": "rect",
+      "fillColor": "#E5E7EB",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ovqp03et",
+      "id": "6",
+      "bbox": [
+        690,
+        166,
+        500,
+        18
+      ],
+      "geometry": "rect",
+      "text": "01  УЖЕ РЕАЛИЗОВАНО",
+      "textPreview": "01  УЖЕ РЕАЛИЗОВАНО",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "Helvetica Neue",
+        "color": "#6B7280",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "01  УЖЕ РЕАЛИЗОВАНО"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "01  УЖЕ РЕАЛИЗОВАНО",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "typeface": "Helvetica Neue",
+            "color": "#6B7280",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "01  УЖЕ РЕАЛИЗОВАНО",
+              "fontSize": 11,
+              "typeface": "Helvetica Neue",
+              "color": "#6B7280",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pwz6t8fe",
+      "id": "7",
+      "bbox": [
+        690,
+        198,
+        500,
+        42
+      ],
+      "geometry": "rect",
+      "text": "панель, REST-контракт, PostgreSQL, прогноз, рекомендации, очередь команд",
+      "textPreview": "панель, REST-контракт, PostgreSQL, прогноз, рекомендации, очередь команд",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "Helvetica Neue",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "панель, REST-контракт, PostgreSQL, прогноз, рекомендации,"
+          },
+          {
+            "index": 2,
+            "text": "очередь команд"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "панель, REST-контракт, PostgreSQL, прогноз, рекомендации, очередь команд",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "typeface": "Helvetica Neue",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "панель, REST-контракт, PostgreSQL, прогноз, рекомендации, очередь команд",
+              "fontSize": 17,
+              "typeface": "Helvetica Neue",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/m5s7axw7",
+      "id": "8",
+      "bbox": [
+        690,
+        262,
+        500,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#E5E7EB",
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/761832xc",
+      "id": "9",
+      "bbox": [
+        690,
+        286,
+        500,
+        18
+      ],
+      "geometry": "rect",
+      "text": "02  ПРОВЕРЯЕТСЯ В ДИПЛОМНОЙ РАБОТЕ",
+      "textPreview": "02  ПРОВЕРЯЕТСЯ В ДИПЛОМНОЙ РАБОТЕ",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "Helvetica Neue",
+        "color": "#3B82F6",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "02  ПРОВЕРЯЕТСЯ В ДИПЛОМНОЙ РАБОТЕ"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "02  ПРОВЕРЯЕТСЯ В ДИПЛОМНОЙ РАБОТЕ",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "typeface": "Helvetica Neue",
+            "color": "#3B82F6",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "02  ПРОВЕРЯЕТСЯ В ДИПЛОМНОЙ РАБОТЕ",
+              "fontSize": 11,
+              "typeface": "Helvetica Neue",
+              "color": "#3B82F6",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vqp8rids",
+      "id": "10",
+      "bbox": [
+        690,
+        318,
+        500,
+        46
+      ],
+      "geometry": "rect",
+      "text": "рост CO₂, ручное управление окном, автоматическое проветривание, подтверждение состояния",
+      "textPreview": "рост CO₂, ручное управление окном, автоматическое проветривание, подтверждение состояния",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "Helvetica Neue",
+        "color": "#111111",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "рост CO₂, ручное управление окном, автоматическое"
+          },
+          {
+            "index": 2,
+            "text": "проветривание, подтверждение состояния"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "рост CO₂, ручное управление окном, автоматическое проветривание, подтверждение состояния",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "typeface": "Helvetica Neue",
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "рост CO₂, ручное управление окном, автоматическое проветривание, подтверждение состояния",
+              "fontSize": 17,
+              "typeface": "Helvetica Neue",
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/upgryxcn",
+      "id": "11",
+      "bbox": [
+        690,
+        386,
+        500,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#E5E7EB",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hsrqtsvy",
+      "id": "12",
+      "bbox": [
+        690,
+        410,
+        500,
+        18
+      ],
+      "geometry": "rect",
+      "text": "03  ВНЕ ТЕКУЩЕГО ЭТАПА",
+      "textPreview": "03  ВНЕ ТЕКУЩЕГО ЭТАПА",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "Helvetica Neue",
+        "color": "#6B7280",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "03  ВНЕ ТЕКУЩЕГО ЭТАПА"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "03  ВНЕ ТЕКУЩЕГО ЭТАПА",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "typeface": "Helvetica Neue",
+            "color": "#6B7280",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "03  ВНЕ ТЕКУЩЕГО ЭТАПА",
+              "fontSize": 11,
+              "typeface": "Helvetica Neue",
+              "color": "#6B7280",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wri90nud",
+      "id": "13",
+      "bbox": [
+        690,
+        442,
+        500,
+        42
+      ],
+      "geometry": "rect",
+      "text": "физическая ESP32, реальные датчики, фильтр, моторы, механизм окна",
+      "textPreview": "физическая ESP32, реальные датчики, фильтр, моторы, механизм окна",
+      "resolvedFontSize": 17,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 17,
+        "typeface": "Helvetica Neue",
+        "color": "#374151",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "физическая ESP32, реальные датчики, фильтр, моторы,"
+          },
+          {
+            "index": 2,
+            "text": "механизм окна"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "физическая ESP32, реальные датчики, фильтр, моторы, механизм окна",
+          "resolvedTextStyle": {
+            "fontSize": 17,
+            "typeface": "Helvetica Neue",
+            "color": "#374151",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "физическая ESP32, реальные датчики, фильтр, моторы, механизм окна",
+              "fontSize": 17,
+              "typeface": "Helvetica Neue",
+              "color": "#374151",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3u9sv2t4",
+      "id": "14",
+      "bbox": [
+        690,
+        516,
+        190,
+        20
+      ],
+      "geometry": "rect",
+      "text": "программный прототип",
+      "textPreview": "программный прототип",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "Helvetica Neue",
+        "color": "#3B82F6",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "программный прототип"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "программный прототип",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "typeface": "Helvetica Neue",
+            "color": "#3B82F6",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "программный прототип",
+              "fontSize": 14,
+              "typeface": "Helvetica Neue",
+              "color": "#3B82F6",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/it0r2xcj",
+      "id": "15",
+      "bbox": [
+        890,
+        525,
+        128,
+        2
+      ],
+      "geometry": "rect",
+      "fillColor": "#3B82F6",
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5wraxcba",
+      "id": "16",
+      "bbox": [
+        1034,
+        516,
+        156,
+        20
+      ],
+      "geometry": "rect",
+      "text": "физическое подключение",
+      "textPreview": "физическое подключение",
+      "resolvedFontSize": 12.83,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "Helvetica Neue",
+        "color": "#6B7280",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.92,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "физическое"
+          },
+          {
+            "index": 2,
+            "text": "подключение"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "физическое подключение",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "typeface": "Helvetica Neue",
+            "color": "#6B7280",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "физическое подключение",
+              "fontSize": 14,
+              "typeface": "Helvetica Neue",
+              "color": "#6B7280",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4vi947up",
+      "id": "17",
+      "bbox": [
+        66,
+        574,
+        110,
+        3
+      ],
+      "geometry": "rect",
+      "fillColor": "#3B82F6",
+      "lineWidth": 0
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rytsz2t0",
+      "id": "18",
+      "bbox": [
+        66,
+        596,
+        1100,
+        34
+      ],
+      "geometry": "rect",
+      "text": "Связать данные датчиков, прогноз и подтверждённое действие в одном локальном контуре.",
+      "textPreview": "Связать данные датчиков, прогноз и подтверждённое действие в одном локальном контуре.",
+      "resolvedFontSize": 23.69,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Helvetica Neue",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.99,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Связать данные датчиков, прогноз и подтверждённое действие в одном локальном"
+          },
+          {
+            "index": 2,
+            "text": "контуре."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Связать данные датчиков, прогноз и подтверждённое действие в одном локальном контуре.",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "typeface": "Helvetica Neue",
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Связать данные датчиков, прогноз и подтверждённое действие в одном локальном контуре.",
+              "fontSize": 24,
+              "typeface": "Helvetica Neue",
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qx0r6hcf",
+      "id": "19",
+      "bbox": [
+        64,
+        668,
+        1152,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#E5E7EB",
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2d4by1wn",
+      "id": "20",
+      "bbox": [
+        64,
+        680,
+        150,
+        18
+      ],
+      "geometry": "rect",
+      "text": "AirCheck",
+      "textPreview": "AirCheck",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "Helvetica Neue",
+        "color": "#898989",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AirCheck"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AirCheck",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "typeface": "Helvetica Neue",
+            "color": "#898989",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "AirCheck",
+              "fontSize": 11,
+              "typeface": "Helvetica Neue",
+              "color": "#898989",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nedcr6d8",
+      "id": "21",
+      "bbox": [
+        1110,
+        680,
+        106,
+        18
+      ],
+      "geometry": "rect",
+      "text": "06 / 06",
+      "textPreview": "06 / 06",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "Helvetica Neue",
+        "color": "#898989",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "06 / 06"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "06 / 06",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "typeface": "Helvetica Neue",
+            "color": "#898989",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "06 / 06",
+              "fontSize": 11,
+              "typeface": "Helvetica Neue",
+              "color": "#898989",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}
