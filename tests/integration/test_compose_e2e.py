@@ -246,6 +246,7 @@ class IsolatedComposeStack:
         for offset in range(70, 0, -1):
             timestamp = ending - timedelta(minutes=offset)
             payload = {
+                "data_source": "simulator",
                 "timestamp": timestamp.isoformat().replace("+00:00", "Z"),
                 "indoor": {"co2": 650, "temperature": 23, "humidity": 45, "pm25": 5},
                 "outdoor": {"temperature": 18, "humidity": 60, "pm25": 8},

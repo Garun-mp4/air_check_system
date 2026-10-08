@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hmac
 import json
 import logging
 import os
@@ -9,12 +10,20 @@ from typing import Any
 
 from feature_schema import FeatureError
 from predict import ModelUnavailableError, Predictor
+from jobs import ModelJobs, BusyError
 
 
 LOGGER = logging.getLogger("ml-service")
 MODEL_PATH = os.environ.get("MODEL_PATH", "model/model.joblib")
 MODEL_VERSION = os.environ.get("MODEL_VERSION", "1.0")
 MAX_BODY_BYTES = 1_048_576
+JOBS = None
+
+def model_jobs():
+    global JOBS
+    if JOBS is None:
+        JOBS = ModelJobs(MODEL_PATH, int(os.environ.get("MIN_TRAINING_ROWS", "30")))
+    return JOBS
 PREDICTOR = Predictor(MODEL_PATH, MODEL_VERSION)
 
 
@@ -41,7 +50,19 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
 
+    def _management_auth(self):
+        expected = os.environ.get('ML_MANAGEMENT_TOKEN','').strip()
+        actual = self.headers.get('Authorization','').removeprefix('Bearer ')
+        if len(expected)<32 or not hmac.compare_digest(actual,expected):
+            self._write_json(HTTPStatus.UNAUTHORIZED,error_payload('unauthorized','Management authorization required'))
+            return False
+        return True
+
     def do_GET(self) -> None:
+        if self.path == '/management/status':
+            if self._management_auth():
+                self._write_json(HTTPStatus.OK,{'model':PREDICTOR.info(),**model_jobs().status()})
+            return
         if self.path == "/healthz":
             self._write_json(HTTPStatus.OK, {"status": "ok", "model": PREDICTOR.info()})
             return
@@ -54,6 +75,24 @@ class RequestHandler(BaseHTTPRequestHandler):
         )
 
     def do_POST(self) -> None:
+        if self.path in ('/management/train','/management/rollback'):
+            if not self._management_auth(): return
+            try:
+                if self.path.endswith('/rollback'):
+                    self._write_json(HTTPStatus.OK,model_jobs().rollback()); return
+                length = int(self.headers.get('Content-Length','0'))
+                if not 0<length<=10_485_760: raise ValueError('Request too large or empty')
+                payload = json.loads(self.rfile.read(length))
+                job = model_jobs().submit(payload.get('measurements'),payload.get('source'))
+                self._write_json(HTTPStatus.ACCEPTED,job)
+            except BusyError as exc:
+                self._write_json(HTTPStatus.CONFLICT,error_payload('training_busy',str(exc)))
+            except (ValueError,TypeError,AttributeError) as exc:
+                self._write_json(HTTPStatus.BAD_REQUEST,error_payload('invalid_training_request',str(exc)))
+            except Exception:
+                LOGGER.exception('model management failed')
+                self._write_json(HTTPStatus.INTERNAL_SERVER_ERROR,error_payload('management_error','Не удалось изменить модель; действующая модель сохранена'))
+            return
         if self.path != "/predict":
             self._write_json(
                 HTTPStatus.NOT_FOUND,

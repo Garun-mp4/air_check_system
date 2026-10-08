@@ -196,6 +196,7 @@ def build_training_rows(measurements: list[dict[str, Any]]) -> list[dict[str, An
                 "timestamp": current["timestamp"],
                 "features": features,
                 "co2_after_15min": target["co2"],
+                "target_timestamp": target["timestamp"],
             }
         )
     return rows

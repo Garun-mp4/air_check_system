@@ -535,11 +535,84 @@ async function runConcurrentCommandDeduplication(repository) {
   }
 }
 
+async function runCommandLifecycle(repository, pool) {
+  const deviceId = 'lifecycle-node'
+  const [first, second] = await repository.queueControlCommands([
+    command(deviceId, 'exhaust', true, 'partial'), command(deviceId, 'intake', true, 'partial'),
+  ])
+  await repository.reportControlState({ deviceId, timestamp: new Date(), reported: { exhaustOn: true, intakeOn: false, windowOpen: false }, appliedCommandIds: [first.id], failedCommands: [{ id: second.id, reason: 'blocked' }] })
+  let batch = await repository.getControlBatch(deviceId, first.id)
+  assert.deepEqual(batch.map(c => c.status), ['applied', 'failed'])
+  assert.equal(batch[1].failureReason, 'blocked')
+  const [expired] = await repository.queueControlCommands([command(deviceId, 'window', true, 'expiry')])
+  await pool.query("UPDATE actuator_commands SET expires_at = clock_timestamp() - INTERVAL '1 second' WHERE id = $1", [expired.id])
+  assert.equal((await repository.listPendingControlCommands(deviceId, 20)).length, 0)
+  await repository.reportControlState({ deviceId, timestamp: new Date(), reported: { exhaustOn: true, intakeOn: false, windowOpen: true }, appliedCommandIds: [expired.id] })
+  assert.equal((await repository.getControlBatch(deviceId, expired.id))[0].status, 'expired')
+  const [old] = await repository.queueControlCommands([command(deviceId, 'exhaust', false, 'off')])
+  const [replacement] = await repository.queueControlCommands([command(deviceId, 'exhaust', true, 'on')])
+  assert.equal((await repository.getControlBatch(deviceId, old.id))[0].status, 'cancelled')
+  await Promise.all([repository.cancelControlBatch(deviceId, replacement.id), repository.reportControlState({ deviceId, timestamp: new Date(), reported: { exhaustOn: true, intakeOn: false, windowOpen: true }, appliedCommandIds: [replacement.id] })])
+  batch = await repository.getControlBatch(deviceId, replacement.id)
+  assert.ok(['applied', 'cancelled'].includes(batch[0].status))
+  const after = await repository.reportControlState({ deviceId, timestamp: new Date(), reported: { exhaustOn: true, intakeOn: false, windowOpen: true }, appliedCommandIds: [replacement.id] })
+  assert.equal((await repository.getControlBatch(deviceId, replacement.id))[0].status, batch[0].status)
+  assert.equal(after.pendingCommands, 0)
+  assert.deepEqual(after.desired, after.reported)
+  assert.ok(batch[0].completedAt instanceof Date)
+}
+
+async function runOutdoorPolicy(repository, pool) {
+  const deviceId = 'outdoor-node'
+  const policy = { maxPm25: 35, pm25Recovery: 30, minTemperature: 5, temperatureRecovery: 7, filteredIntake: false, maxAgeSeconds: 90 }
+  await repository.updateNodeSettings(deviceId, { outdoorPolicy: policy }, defaults)
+  assert.deepEqual((await repository.getNodeSettings(deviceId, defaults)).outdoorPolicy, policy)
+  const m = measurement(new Date().toISOString(), 1200); m.outdoor.pm25 = 40
+  const first = await repository.assessOutdoorAir(deviceId, { ...m, id: 1, createdAt: new Date() }, policy)
+  assert.equal(first.allowWindow, false)
+  const independent = new PostgresRepository(databaseUrl)
+  try {
+    m.outdoor.pm25 = 33
+    const still = await independent.assessOutdoorAir(deviceId, { ...m, id: 2, createdAt: new Date() }, policy)
+    assert.equal(still.pollutionBlocked, true)
+    assert.equal((await independent.getControlState(deviceId)).outdoorSafety.pollutionBlocked, true)
+    m.outdoor.pm25 = 29
+    const safe = await independent.assessOutdoorAir(deviceId, { ...m, id: 3, createdAt: new Date() }, policy)
+    assert.equal(safe.allowWindow, true)
+  } finally { await independent.close() }
+}
+
+async function runPredictionProvenance(repository, pool) {
+  const first = await repository.createMeasurement(measurement(new Date().toISOString(), 950))
+  const linked = await repository.createPrediction({measurementId:first.id, sourceTimestamp:first.timestamp, targetTime:new Date(Date.now()+900000), predictedCo2:1050, modelName:'test', modelVersion:'1'})
+  await repository.setPredictionOutcome(first.id,'ready',null,null)
+  const second = await repository.createMeasurement(measurement(new Date().toISOString(), 960))
+  await repository.setPredictionOutcome(second.id,'unavailable','not trained','model_unavailable')
+  assert.equal((await repository.getPredictionForMeasurement(first.id)).id,linked.id)
+  assert.equal(await repository.getPredictionForMeasurement(second.id),null)
+  assert.equal((await repository.getLatestMeasurement()).predictionErrorCode,'model_unavailable')
+  const legacy = await repository.createPrediction({targetTime:new Date(Date.now()+1000000),predictedCo2:1060,modelName:'legacy',modelVersion:'0'})
+  assert.equal(legacy.measurementId,null);assert.equal(legacy.sourceTimestamp,null)
+  await pool.query('DELETE FROM measurements WHERE id = $1',[first.id])
+  const detached = await pool.query('SELECT measurement_id, source_timestamp FROM predictions WHERE id=$1',[linked.id])
+  assert.equal(detached.rows[0].measurement_id,null)
+  assert.equal(detached.rows[0].source_timestamp.getTime(),first.timestamp.getTime())
+}
+
 const repository = new PostgresRepository(databaseUrl)
 const pool = new Pool({ connectionString: databaseUrl, max: 2 })
 
 try {
   switch (scenario) {
+    case 'prediction-provenance':
+      await runPredictionProvenance(repository, pool)
+      break
+    case 'outdoor-policy':
+      await runOutdoorPolicy(repository, pool)
+      break
+    case 'command-lifecycle':
+      await runCommandLifecycle(repository, pool)
+      break
     case 'measurement-history':
       await runMeasurementHistory(repository)
       break

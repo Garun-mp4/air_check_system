@@ -18,7 +18,7 @@ from simulator_lease import SimulatorLeaseError, SimulatorProcessLease
 
 
 LOGGER = logging.getLogger("sensor-simulator")
-SCENARIOS = {"normal", "closed", "open", "surge", "ventilate", "outdoor_bad"}
+SCENARIOS = {"normal", "closed", "open", "surge", "ventilate", "outdoor_bad", "cold_weather"}
 
 
 @dataclass(frozen=True)
@@ -103,6 +103,8 @@ class SensorSimulator:
         indoor_temperature = self.config.base_temperature + math.sin(phase / 2) * 0.45 + self.random.uniform(-0.08, 0.08)
         indoor_humidity = self.config.base_humidity + math.cos(phase / 3) * 1.4 + self.random.uniform(-0.3, 0.3)
         outdoor_temperature = self.config.base_temperature - 5 + math.sin(phase / 4) * 1.2
+        if self.config.scenario == "cold_weather":
+            outdoor_temperature = -5
         outdoor_humidity = 62 + math.cos(phase / 5) * 4 + self.random.uniform(-0.5, 0.5)
         outdoor_pm25 = 42 if self.config.scenario == "outdoor_bad" else 8 + math.sin(phase) * 1.5
         filtered_outdoor_pm25 = outdoor_pm25 * 0.18 if self.intake_on else outdoor_pm25
@@ -112,6 +114,7 @@ class SensorSimulator:
         window_open = self.window_open
         self.step += 1
         return {
+            "data_source": "simulator",
             "timestamp": timestamp.isoformat().replace("+00:00", "Z"),
             "indoor": {
                 "co2": round(clamp(self.co2, 250, 10000), 2),
@@ -202,6 +205,13 @@ def sync_controls(config: SimulatorConfig, simulator: SensorSimulator) -> None:
     commands = get_pending_control_commands(config)
     applied: list[int] = []
     for command in commands:
+        if command.get("expires_at") is not None:
+            try:
+                expiry = datetime.fromisoformat(command["expires_at"].replace("Z", "+00:00"))
+                if expiry.tzinfo is None or expiry <= datetime.now(timezone.utc):
+                    continue
+            except (ValueError, TypeError, AttributeError):
+                continue
         target = command.get("target")
         desired_state = command.get("desired_state")
         command_id = command.get("id")

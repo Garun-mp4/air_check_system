@@ -65,5 +65,7 @@ class Predictor:
             "model": artifact.get("model_name"),
             "model_version": artifact.get("model_version", self.default_model_version),
             "feature_names": FEATURE_NAMES,
+            "trained_at": artifact.get("trained_at"),
+            "training": artifact.get("training_report"),
         }
 

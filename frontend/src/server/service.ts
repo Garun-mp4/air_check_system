@@ -1,3 +1,4 @@
+import { defaultOutdoorPolicy, validateOutdoorPolicy } from './outdoor-policy'
 import {
   buildFeatureVector,
   InsufficientHistoryError,
@@ -48,10 +49,16 @@ export class AirQualityService {
 
   async ingest(input: MeasurementInput): Promise<IngestResult> {
     const settings = await this.nodeSettings()
-    const measurement = await this.repository.createMeasurement(input)
+    const controls = await this.repository.getControlState(this.config.deviceId)
+    const reportFresh = controls.lastReportedAt && Date.now()-controls.lastReportedAt.getTime()<=this.config.deviceHeartbeatTimeoutMs && Date.now()-controls.lastReportedAt.getTime()>=-5000 && input.timestamp.getTime()-controls.lastReportedAt.getTime()>=-5000 && input.timestamp.getTime()-controls.lastReportedAt.getTime()<=this.config.deviceHeartbeatTimeoutMs
+    const measurement = await this.repository.createMeasurement({...input,
+      co2Limit:settings.co2CriticalThreshold,pm25Limit:settings.pm25ElevatedLimit,
+      ventilationOn:reportFresh ? controls.reported.intakeOn||controls.reported.exhaustOn : null,
+    })
     let prediction: Prediction | null = null
     let predictionStatus: PredictionStatus = 'insufficient_history'
     let predictionError: string | null = null
+    let predictionErrorCode: string | null = null
 
     try {
       const history = await this.repository.listMeasurements({
@@ -61,7 +68,8 @@ export class AirQualityService {
         to: measurement.timestamp,
         limit: this.config.mlHistoryLimit,
       })
-      const features = buildFeatureVector(history, measurement)
+      const sourceHistory = history.filter(point => (point.dataSource ?? 'unknown') === (measurement.dataSource ?? 'unknown'))
+      const features = buildFeatureVector(sourceHistory, measurement)
       const result = await this.predictor.predict(toMlPredictionPayload(features))
       prediction = await this.savePrediction(measurement, result)
       predictionStatus = 'ready'
@@ -76,26 +84,31 @@ export class AirQualityService {
             ? 'insufficient_history'
             : 'unavailable'
         predictionError = error.message
+        predictionErrorCode = error instanceof MlServiceError ? error.code ?? 'service_error' : error instanceof InvalidMlResponseError ? 'invalid_response' : 'insufficient_history'
       } else {
         throw error
       }
     }
 
+    await this.repository.setPredictionOutcome(measurement.id, predictionStatus, predictionError, predictionErrorCode)
+    measurement.predictionStatus = predictionStatus; measurement.predictionError = predictionError; measurement.predictionErrorCode = predictionErrorCode
+    const safety = await this.repository.assessOutdoorAir(this.config.deviceId, measurement, settings.outdoorPolicy ?? defaultOutdoorPolicy)
     const recommendation = await this.repository.createRecommendation(
-      evaluateRecommendation(
+      { ...evaluateRecommendation(
         measurement,
         prediction,
         {
+          outdoorSafety: safety,
           normal: settings.co2NormalThreshold,
           critical: settings.co2CriticalThreshold,
           pm25Good: settings.pm25GoodLimit,
           pm25Elevated: settings.pm25ElevatedLimit,
           alertsEnabled: settings.alertsEnabled,
         },
-      ),
+      ), measurementId: measurement.id },
     )
     try {
-      await this.controlService.reconcile(measurement, prediction)
+      await this.controlService.reconcile(measurement, prediction, safety)
     } catch (error) {
       console.error('automatic control reconciliation failed', error)
     }
@@ -110,26 +123,42 @@ export class AirQualityService {
 
   async latest(): Promise<DashboardResult> {
     const measurement = await this.repository.getLatestMeasurement()
-    if (!measurement) {
-      return {
-        measurement: null,
-        prediction: null,
-        recommendation: null,
-      }
-    }
+    const candidate = measurement ? await this.repository.getPredictionForMeasurement(measurement.id) : null
+    const candidateRecommendation = measurement ? await this.repository.getRecommendationForMeasurement(measurement.id) : null
+    const control = await this.controlService.status()
+    const lastPrediction = candidate ? null : await this.repository.getLatestPrediction()
+    const legacy = !!lastPrediction && lastPrediction.measurementId == null && !lastPrediction.sourceTimestamp
+    const now = new Date()
+    const age = measurement ? now.getTime() - measurement.timestamp.getTime() : null
+    const freshness = age === null ? 'missing' : age < -5000 || age > this.config.deviceHeartbeatTimeoutMs ? 'stale' : 'fresh'
+    const prediction = candidate && freshness === 'fresh' && candidate.targetTime > now ? candidate : null
+    const recommendation = freshness === 'fresh' ? candidateRecommendation : null
+    const status = candidate && !prediction ? 'stale' : prediction ? 'ready'
+      : measurement?.predictionErrorCode === 'model_unavailable' ? 'model_untrained'
+      : measurement?.predictionErrorCode === 'invalid_response' ? 'error'
+      : measurement?.predictionStatus === 'unavailable' ? 'unavailable'
+      : measurement?.predictionStatus === 'insufficient_history' ? 'insufficient_history'
+      : measurement?.predictionStatus === 'ready' ? 'error' : legacy ? 'legacy' : 'pending'
     return {
-      measurement,
-      prediction: await this.repository.getLatestPrediction(),
-      recommendation: await this.repository.getLatestRecommendation(),
+      measurement, prediction, recommendation,
+      diagnostics: { measurement: freshness, device: control.connectionStatus, prediction: status,
+        predictionMessage: status === 'stale' ? 'Измерение или прогноз устарели; ожидается новая телеметрия' : measurement?.predictionError ?? (status === 'legacy' ? 'Старый прогноз не связан с текущим измерением' : null),
+        measuredAt: measurement?.timestamp.toISOString() ?? null, assessedAt: now.toISOString() },
     }
   }
 
   async latestPrediction(): Promise<Prediction | null> {
-    return this.repository.getLatestPrediction()
+    const measurement = await this.repository.getLatestMeasurement()
+    if (!measurement) return null
+    const age = Date.now() - measurement.timestamp.getTime()
+    if (age < -5000 || age > this.config.deviceHeartbeatTimeoutMs) return null
+    const prediction = await this.repository.getPredictionForMeasurement(measurement.id)
+    return prediction && prediction.targetTime.getTime() > Date.now() ? prediction : null
   }
 
   async latestRecommendation(): Promise<Recommendation | null> {
-    return this.repository.getLatestRecommendation()
+    const measurement = await this.repository.getLatestMeasurement()
+    return measurement && Date.now() - measurement.timestamp.getTime() >= -5000 && Date.now() - measurement.timestamp.getTime() <= this.config.deviceHeartbeatTimeoutMs ? this.repository.getRecommendationForMeasurement(measurement.id) : null
   }
 
   async history(query: HistoryQuery): Promise<Measurement[]> {
@@ -157,6 +186,10 @@ export class AirQualityService {
   ): Promise<NodeSettings> {
     const current = await this.nodeSettings(deviceId)
     const next = { ...current, ...patch }
+    if (patch.outdoorPolicy) {
+      try { validateOutdoorPolicy(patch.outdoorPolicy) }
+      catch (e) { throw new ValidationError([{ field: 'outdoor_policy', message: e instanceof Error ? e.message : 'Недопустимые правила' }]) }
+    }
     const numericRules: Array<[
       keyof NodeSettings,
       string,
@@ -228,6 +261,10 @@ export class AirQualityService {
     return this.controlService.pendingCommands(deviceId, limit)
   }
 
+  async commandAction(deviceId: string, id: number, action: 'cancel' | 'retry'): Promise<ControlCommandResult> {
+    return this.controlService.commandAction(deviceId, id, action)
+  }
+
   async reportControlState(input: DeviceStateReport): Promise<ControlStatus> {
     return this.controlService.report(input)
   }
@@ -237,6 +274,9 @@ export class AirQualityService {
     result: MlPredictionResult,
   ): Promise<Prediction> {
     return this.repository.createPrediction({
+      measurementId: measurement.id,
+      dataSource: measurement.dataSource,
+      sourceTimestamp: measurement.timestamp,
       targetTime: new Date(
         measurement.timestamp.getTime() + PREDICTION_HORIZON_MS,
       ),

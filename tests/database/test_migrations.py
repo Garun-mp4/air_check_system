@@ -52,6 +52,12 @@ def test_migration_files_are_ordered_and_complete() -> None:
         "003_retention_indexes.sql",
         "004_node_settings.sql",
         "005_auth.sql",
+        "006_command_lifecycle.sql",
+        "007_outdoor_policy.sql",
+        "008_prediction_provenance.sql",
+        "009_measurement_sources.sql",
+        "010_long_term_history.sql",
+        "011_notifications.sql",
     ]
 
 
@@ -129,7 +135,7 @@ def test_history_pending_and_retention_indexes_have_expected_definitions(
         "SELECT pg_get_expr(indpred, indrelid) FROM pg_index "
         "WHERE indexrelid = 'idx_actuator_commands_retention'::regclass;"
     ).stdout.strip()
-    assert "status" in predicate and "applied" in predicate
+    assert "status" in predicate and "pending" in predicate and "<>" in predicate
 
 
 @pytest.mark.parametrize(
@@ -339,3 +345,38 @@ def test_actuator_state_delete_cascades_commands_but_audit_keeps_nullable_actor(
         "SELECT actor_user_id IS NULL FROM aircheck_access_audit WHERE action = 'role.update';"
     ).stdout.strip()
     assert nullable_actor == "t"
+
+
+def test_lifecycle_upgrade_preserves_existing_commands(postgres_db: IsolatedPostgres) -> None:
+    legacy = (MIGRATIONS / "002_controls.sql").read_text(encoding="utf-8")
+    migration = (MIGRATIONS / "006_command_lifecycle.sql").read_text(encoding="utf-8")
+    sql = "BEGIN; CREATE SCHEMA lifecycle_upgrade; SET LOCAL search_path TO lifecycle_upgrade; " + legacy
+    sql += "INSERT INTO actuator_states (device_id) VALUES ('legacy'); "
+    sql += "INSERT INTO actuator_commands (device_id,target,desired_state,source,reason,batch_id,status,applied_at) VALUES ('legacy','exhaust',true,'manual','old','old','applied',NOW()), ('legacy','intake',true,'automatic','old','old','pending',NULL); "
+    sql += migration + migration
+    sql += "SELECT status || ':' || (expires_at IS NOT NULL)::text || ':' || (completed_at IS NOT NULL)::text FROM actuator_commands ORDER BY id; ROLLBACK;"
+    output = postgres_db.psql(sql).stdout
+    assert "applied:true:true" in output
+    assert "pending:true:false" in output
+
+
+def test_prediction_upgrade_keeps_legacy_rows_unlinked(postgres_db: IsolatedPostgres) -> None:
+    legacy = (MIGRATIONS / "001_init.sql").read_text(encoding="utf-8")
+    migration = (MIGRATIONS / "008_prediction_provenance.sql").read_text(encoding="utf-8")
+    sql = "BEGIN; CREATE SCHEMA prediction_upgrade; SET LOCAL search_path TO prediction_upgrade; " + legacy
+    sql += "INSERT INTO predictions (target_time,predicted_co2,model_name,model_version) VALUES (NOW()+INTERVAL '15 minutes',900,'legacy','1'); "
+    sql += migration + migration
+    sql += "SELECT model_name || ':' || (measurement_id IS NULL)::text || ':' || (source_timestamp IS NULL)::text FROM predictions; ROLLBACK;"
+    assert "legacy:true:true" in postgres_db.psql(sql).stdout
+
+def test_source_upgrade_preserves_unlabelled_history(postgres_db):
+    schema = 'source_upgrade'
+    initial = (MIGRATIONS/'001_init.sql').read_text()
+    migration = (MIGRATIONS/'009_measurement_sources.sql').read_text()
+    postgres_db.psql(f'CREATE SCHEMA {schema}; SET search_path TO {schema}; '+initial+'''
+      INSERT INTO measurements(timestamp,indoor_co2,indoor_temperature,indoor_humidity,indoor_pm25,outdoor_temperature,outdoor_humidity,outdoor_pm25,window_open)
+      VALUES(now(),850,23,45,5,18,60,8,false);
+    '''+migration+migration)
+    result = postgres_db.psql(f'SET search_path TO {schema}; SELECT indoor_co2::int,data_source FROM measurements;')
+    assert '850|unknown' in result.stdout
+    postgres_db.psql(f'DROP SCHEMA {schema} CASCADE;')

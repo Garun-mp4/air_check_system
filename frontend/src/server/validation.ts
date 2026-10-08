@@ -1,3 +1,4 @@
+import { validateOutdoorPolicy } from './outdoor-policy'
 import type {
   ControlAction,
   ControlTarget,
@@ -92,6 +93,9 @@ export function parseMeasurementInput(payload: unknown): MeasurementInput {
     throw new ValidationError([{ field: 'body', message: 'требуется JSON-объект' }])
   }
 
+  if (payload.data_source !== undefined && (typeof payload.data_source !== 'string' || !['real', 'simulator', 'unknown'].includes(payload.data_source))) {
+    issues.push({ field: 'data_source', message: 'должно быть real, simulator или unknown' })
+  }
   const indoor = requiredObject(payload.indoor, 'indoor', issues)
   const outdoor = requiredObject(payload.outdoor, 'outdoor', issues)
   const timestamp = timestampField(payload.timestamp, 'timestamp', issues)
@@ -147,6 +151,7 @@ export function parseMeasurementInput(payload: unknown): MeasurementInput {
   }
   return {
     timestamp,
+    ...(payload.data_source !== undefined ? { dataSource: payload.data_source as MeasurementInput['dataSource'] } : {}),
     indoor: indoorValues,
     outdoor: outdoorValues,
     windowOpen: windowOpen as boolean,
@@ -298,6 +303,10 @@ export function parseNodeSettingsPatch(
   }
 
   const patch: NodeSettingsPatch = {}
+  if (payload.outdoor_policy !== undefined) {
+    try { patch.outdoorPolicy = validateOutdoorPolicy(payload.outdoor_policy) }
+    catch (e) { issues.push({ field: 'outdoor_policy', message: e instanceof Error ? e.message : 'Недопустимые правила' }) }
+  }
   optionalBooleanField(payload, 'automation_enabled', 'automationEnabled', 'automation_enabled', patch, issues)
   optionalBooleanField(payload, 'auto_window_enabled', 'autoWindowEnabled', 'auto_window_enabled', patch, issues)
   optionalBooleanField(payload, 'alerts_enabled', 'alertsEnabled', 'alerts_enabled', patch, issues)
@@ -552,6 +561,21 @@ export function parseDeviceStateReport(
       appliedCommandIds.push(...(payload.applied_command_ids as number[]))
     }
   }
+  const failedCommands: Array<{ id: number; reason: string }> = []
+  if (payload.failed_commands !== undefined) {
+    if (!Array.isArray(payload.failed_commands) || payload.failed_commands.length > 100) {
+      issues.push({ field: 'failed_commands', message: 'требуется массив до 100 ошибок' })
+    } else {
+      for (const failure of payload.failed_commands) {
+        if (!isRecord(failure) || !Number.isSafeInteger(failure.id) || (failure.id as number) < 1 || typeof failure.reason !== 'string' || !failure.reason.trim() || failure.reason.length > 500) {
+          issues.push({ field: 'failed_commands', message: 'ошибка должна содержать положительный id и причину до 500 символов' })
+        } else { failedCommands.push({ id: failure.id as number, reason: failure.reason.trim() }) }
+      }
+    }
+  }
+  if (appliedCommandIds.length > 100 || new Set(appliedCommandIds).size !== appliedCommandIds.length || new Set(failedCommands.map(c => c.id)).size !== failedCommands.length || failedCommands.some(c => appliedCommandIds.includes(c.id))) {
+    issues.push({ field: 'applied_command_ids', message: 'не более 100 уникальных ACK, без пересечения с ошибками' })
+  }
   if (issues.length > 0) {
     throw new ValidationError(issues)
   }
@@ -564,6 +588,7 @@ export function parseDeviceStateReport(
       windowOpen: values.window_open,
     },
     appliedCommandIds,
+    ...(failedCommands.length ? { failedCommands } : {}),
   }
 }
 

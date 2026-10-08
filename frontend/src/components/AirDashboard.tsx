@@ -1,4 +1,8 @@
 'use client'
+import ModelPanel from './ModelPanel'
+import LongHistoryPanel from './LongHistoryPanel'
+import NotificationPanel from './NotificationPanel'
+import EventJournal from './EventJournal'
 
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
@@ -39,6 +43,9 @@ import { getLoginHref } from '../lib/auth-navigation'
 import BrandLogo from './BrandLogo'
 import { getCo2Thresholds, LineChart, type ChartViewport } from './Charts'
 import AccountMenu from './auth/AccountMenu'
+import CommandHistory from './CommandHistory'
+import OutdoorPolicyPanel from './OutdoorPolicyPanel'
+import DataStatus, { predictionStatusLabels } from './DataStatus'
 import { useAccessSession } from './auth/AccessSessionProvider'
 
 export type RangeKey = '30m' | '1h' | '6h' | '24h'
@@ -1435,6 +1442,7 @@ export function SettingsPanel({
   settingsSaving,
   settingsNotice,
   canEdit,
+  canTrain = false,
   onSave,
 }: {
   presentation?: 'drawer' | 'page'
@@ -1453,6 +1461,7 @@ export function SettingsPanel({
   settingsSaving: boolean
   settingsNotice: string | null
   canEdit: boolean
+  canTrain?: boolean
   onSave: (patch: ClientNodeSettingsPatch) => Promise<void>
 }) {
   const isPage = presentation === 'page'
@@ -1615,7 +1624,7 @@ export function SettingsPanel({
             <div className="settings-panel-heading">
               <div>
                 <h3>Технические сведения</h3>
-                <p>Диагностическая информация без управляющих действий.</p>
+                <p>Диагностика и обучение модели владельцем установки.</p>
               </div>
               <span className={'settings-status settings-status-' + systemTone}>
                 <span className={'status-dot status-dot-' + systemTone} />
@@ -1660,6 +1669,8 @@ export function SettingsPanel({
                 note="Старые измерения, прогнозы и рекомендации удаляются автоматически."
               />
             </dl>
+            <ModelPanel canTrain={canTrain} />
+            <NotificationPanel canManage={canTrain} />
           </div>
         ) : (
           <div
@@ -1725,7 +1736,7 @@ export function SettingsPanel({
                     <SettingsNumberField
                       id="settings-auto-ventilation-minimum"
                       label="Минимальное проветривание"
-                      description="Не выключать автоматический контур раньше этого времени."
+                      description="Минимальное время штатного проветривания. Ограничения наружного воздуха действуют сразу."
                       value={draft.autoVentilationMinimumMinutes}
                       unit="мин"
                       min={1}
@@ -1741,9 +1752,9 @@ export function SettingsPanel({
                     <span className="eyebrow">Логика решения</span>
                     <strong>CO₂ ≥ {formatValue(draft.co2CriticalThreshold)} ppm</strong>
                     <span className="settings-rule-arrow">→</span>
-                    <span>{draft.autoWindowEnabled ? 'открыть окно' : 'не открывать окно автоматически'}</span>
+                    <span>{draft.autoWindowEnabled ? 'открыть окно при допустимом наружном воздухе' : 'не открывать окно автоматически'}</span>
                     <span className="settings-rule-arrow">→</span>
-                    <span>включить вытяжку и приток</span>
+                    <span>включить вытяжку и приток, если наружные условия допускают</span>
                     <small>После снижения ниже {formatValue(draft.co2NormalThreshold)} ppm контур остановится не раньше чем через {formatValue(draft.autoVentilationMinimumMinutes)} мин.</small>
                   </div>
                 </>
@@ -1850,6 +1861,7 @@ export function SettingsPanel({
               {!canEdit ? <p className="settings-readonly-note">Просмотр настроек доступен всем. Изменять параметры может только оператор. <a href={getLoginHref('/#settings')}>Войти →</a></p> : null}
             </form>
 
+            {tab === 'automation' ? <OutdoorPolicyPanel settings={settings} canEdit={canEdit} saving={settingsSaving} onSave={onSave} /> : null}
             {tab === 'automation' ? (
               <div className="settings-current-state">
                 <span className="eyebrow">Сейчас на узле</span>
@@ -2305,8 +2317,8 @@ export default function AirDashboard() {
   const sourceLabel = lastUpdated
     ? 'обновлено в ' + formatTime(lastUpdated)
     : 'ожидание синхронизации'
-  const systemStatus = error ? 'нужна проверка' : measurement ? 'в сети' : 'ожидание'
-  const systemTone = error ? 'error' : measurement ? 'success' : 'neutral'
+  const systemStatus = error ? 'нужна проверка' : dashboard?.diagnostics?.measurement === 'stale' ? 'данные устарели' : dashboard?.diagnostics?.device === 'offline' ? 'устройство не на связи' : measurement ? 'в сети' : 'ожидание'
+  const systemTone = error ? 'error' : dashboard?.diagnostics?.measurement === 'stale' || dashboard?.diagnostics?.device === 'offline' ? 'warning' : measurement ? 'success' : 'neutral'
   const currentWindowOpen = controls
     ? controls.reported.window_open
     : measurement?.window_open ?? null
@@ -2403,6 +2415,7 @@ export default function AirDashboard() {
             settingsSaving={settingsSaving}
             settingsNotice={settingsNotice}
             canEdit={canOperate}
+            canTrain={accessStatus === 'ready' && access?.role === 'owner'}
             onSave={saveNodeSettings}
           />
         ) : (
@@ -2464,6 +2477,7 @@ export default function AirDashboard() {
               </div>
             </div>
 
+            <DataStatus diagnostics={dashboard?.diagnostics} />
             <div className="current-air-body">
               <div className="current-reading">
                 <span className="reading-label">CO₂</span>
@@ -2476,9 +2490,9 @@ export default function AirDashboard() {
 
               <div className="forecast-reading">
                 <div className="forecast-reading-head">
-                  <span>Прогноз через 15 мин</span>
+                  <span>{prediction ? 'Прогноз на ' + formatTime(prediction.target_time) : 'Прогноз через 15 мин'}</span>
                   <span className={'forecast-status forecast-status-' + (prediction ? 'ready' : 'waiting')}>
-                    {prediction ? 'готов' : 'нет данных'}
+                    {dashboard?.diagnostics ? predictionStatusLabels[dashboard.diagnostics.prediction] : prediction ? 'готов' : 'нет данных'}
                   </span>
                 </div>
                 <div className="forecast-reading-values">
@@ -2508,8 +2522,8 @@ export default function AirDashboard() {
               <span className="action-strip-icon"><Icon name={recommendation?.type === 'normal' ? 'air' : 'window'} /></span>
               <div className="action-strip-copy">
                 <span className="action-strip-label">Следующее действие</span>
-                <strong>{recommendation?.message ?? 'Рекомендация появится после первого измерения'}</strong>
-                <span>{recommendation?.reason ?? 'Правила учитывают текущий CO₂, прогноз и состояние окна.'}</span>
+                <strong>{recommendation?.message ?? (dashboard?.diagnostics?.measurement === 'stale' ? 'Для рекомендации нужны свежие измерения' : measurement ? 'Рекомендация для этой точки пока недоступна' : 'Рекомендация появится после первого измерения')}</strong>
+                <span>{recommendation?.reason ?? (dashboard?.diagnostics?.measurement === 'stale' ? 'Проверьте связь с устройством; старые данные не используются как текущие.' : 'Правила учитывают CO₂, прогноз, состояние окна и наружный воздух.')}</span>
               </div>
               <span className="action-strip-duration">
                 {recommendation ? recommendationLabels[recommendation.type] : 'ожидание'}
@@ -2668,6 +2682,10 @@ export default function AirDashboard() {
             </article>
           </div>
 
+          {controls?.outdoor_safety && !controls.outdoor_safety.allowWindow ? <p className="control-feedback" role="status">{controls.outdoor_safety.reason}</p> : null}
+          <CommandHistory controls={controls} canOperate={canOperate} onUpdated={setControls} />
+          <EventJournal canView={accessStatus === 'ready' && access?.role !== 'guest'} />
+
           {controlError ? (
             <div className="control-feedback control-feedback-error" role="alert" aria-live="assertive">
               <span>{controlError}</span>
@@ -2700,6 +2718,7 @@ export default function AirDashboard() {
 
         {activeSection === 'history' ? (
         <section className="container dashboard-section dashboard-history dashboard-view dashboard-view-history" id="history" key="history">
+          <LongHistoryPanel />
           <div className="section-toolbar history-toolbar">
             <div>
               <span className="eyebrow">История</span>

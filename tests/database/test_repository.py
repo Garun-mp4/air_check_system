@@ -18,7 +18,7 @@ PG_PACKAGE = ROOT / "frontend" / "node_modules" / "pg" / "package.json"
 def repository_db(postgres_db: IsolatedPostgres) -> IsolatedPostgres:
     """Give each repository test a clean schema while reusing only this temporary DB."""
     postgres_db.psql(
-        'TRUNCATE TABLE measurements, predictions, recommendations, actuator_commands, '
+        'TRUNCATE TABLE history_bridge, archived_air_stats, live_air_stats, history_watermark, measurements, predictions, recommendations, actuator_commands, '
         'actuator_states, node_settings, aircheck_access_audit, aircheck_access_roles, '
         '"session", "account", verification, "user" RESTART IDENTITY CASCADE;'
     )
@@ -103,3 +103,15 @@ def test_postgres_repository_concurrent_identical_commands_are_deduplicated(
     repository_db: IsolatedPostgres,
 ) -> None:
     _run_repository_probe(repository_db, "concurrent-command-deduplication")
+
+
+def test_command_lifecycle_partial_failure_expiry_supersession_and_racing_ack(repository_db: IsolatedPostgres) -> None:
+    _run_repository_probe(repository_db, "command-lifecycle")
+
+
+def test_outdoor_policy_settings_and_hysteresis_persist_across_repository_instances(repository_db: IsolatedPostgres) -> None:
+    _run_repository_probe(repository_db, "outdoor-policy")
+
+
+def test_prediction_provenance_outcomes_and_legacy_preservation(repository_db: IsolatedPostgres) -> None:
+    _run_repository_probe(repository_db, "prediction-provenance")

@@ -104,3 +104,18 @@ describe('ML HTTP client contract', () => {
     )
   })
 })
+
+it('times out reading an HTTP body even after valid response headers arrive', async () => {
+  const { createServer } = await import('node:http')
+  const server=createServer((_req,res)=>{
+    res.writeHead(200,{'Content-Type':'application/json'})
+    res.write('{"predicted_co2_15min":')
+    // Deliberately leave the body open; the client must abort its read.
+  })
+  await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve))
+  const address=server.address()
+  if(!address || typeof address==='string')throw new Error('Expected a TCP listener')
+  try {
+    await expect(new MlClient(`http://127.0.0.1:${address.port}`,100).predict(payload)).rejects.toMatchObject({name:'MlServiceError',code:'timeout'})
+  } finally { server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve())) }
+})

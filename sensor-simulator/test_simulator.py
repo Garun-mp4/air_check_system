@@ -36,7 +36,8 @@ def test_sample_uses_the_public_esp32_contract(scenario):
 
     payload = simulator.sample(datetime(2026, 9, 6, tzinfo=timezone.utc))
 
-    assert set(payload) == {"timestamp", "indoor", "outdoor", "window_open"}
+    assert set(payload) == {"timestamp", "indoor", "outdoor", "window_open", "data_source"}
+    assert payload["data_source"] == "simulator"
     assert set(payload["indoor"]) == {"co2", "temperature", "humidity", "pm25"}
     assert set(payload["outdoor"]) == {"temperature", "humidity", "pm25"}
     assert isinstance(payload["window_open"], bool)

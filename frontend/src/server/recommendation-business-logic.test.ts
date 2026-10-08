@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ControlService } from './control-service'
 import type { AppConfig } from './config'
@@ -6,6 +6,10 @@ import { MemoryRepository } from './repository'
 import { evaluateRecommendation } from './recommendation'
 import { AirQualityService } from './service'
 import type { Measurement, MeasurementInput, Prediction } from './types'
+
+// Historical fixtures use a matching wall clock; separate policy tests exercise stale data.
+beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-09-28T12:01:00Z')) })
+afterEach(() => vi.useRealTimers())
 
 const config: AppConfig = {
   databaseUrl: 'postgres://test',
@@ -189,7 +193,9 @@ describe('recommendation settings integration', () => {
         outdoorPm25: 120,
       }),
     )
-    expect(alertsDisabled.recommendation?.type).toBe('normal')
+    // Turning off display alerts cannot disable the outdoor safety restriction.
+    expect(alertsDisabled.recommendation?.type).toBe('monitor')
+    expect(alertsDisabled.recommendation?.reason).toContain('Наружный PM2.5')
   })
 
   it('keeps PM2.5 alerts separate from CO2-driven automatic commands', async () => {

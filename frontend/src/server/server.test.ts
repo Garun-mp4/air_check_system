@@ -591,9 +591,9 @@ describe('memory repository', () => {
       appliedCommandIds: [started.id, stopped.id],
     })
 
-    expect(state.pendingCommands).toBe(1)
-    expect((await repository.listPendingControlCommands('room-01', 10)).map((command) => command.id))
-      .toEqual([started.id])
+    expect(state.pendingCommands).toBe(0)
+    expect(await repository.listPendingControlCommands('room-01', 10)).toEqual([])
+    expect((await repository.getControlBatch('room-01', started.id)).find(c => c.id === started.id)?.status).toBe('cancelled')
     expect((await repository.getLatestControlCommand('room-01', 'exhaust'))?.status).toBe('applied')
   })
 })
@@ -831,7 +831,7 @@ describe('air quality service', () => {
       })),
     }
     const service = new AirQualityService(repository, predictor, config)
-    const start = new Date('2026-09-06T10:00:00Z')
+    const start = new Date(Date.now() - 10 * 60_000)
     for (let index = 0; index < 20; index += 1) {
       await repository.createMeasurement(
         inputAt(new Date(start.getTime() + index * 30_000), 650 + index * 3),
@@ -875,7 +875,7 @@ describe('air quality service', () => {
     const service = new AirQualityService(repository, predictor, config)
 
     const result = await service.ingest(
-      inputAt(new Date('2026-09-06T10:00:00Z'), 1150),
+      inputAt(new Date(), 1150),
     )
 
     expect(result.measurement.indoor.co2).toBe(1150)

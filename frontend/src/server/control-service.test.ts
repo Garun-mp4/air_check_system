@@ -128,7 +128,8 @@ describe('climate control service', () => {
 
       const commands = await service.reconcile(measurement(1200), null)
 
-      expect(commands.map((command) => command.target)).toEqual(['exhaust', 'intake'])
+      // The manual window command expired during the override: automation must issue a fresh one.
+      expect(commands.map((command) => command.target)).toEqual(['window', 'exhaust', 'intake'])
       expect(commands.every((command) => command.source === 'automatic')).toBe(true)
       expect((await service.status()).windowMode).toBe('auto')
     } finally {

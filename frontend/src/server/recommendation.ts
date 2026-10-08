@@ -1,3 +1,4 @@
+import type { OutdoorSafety } from './outdoor-policy'
 import type {
   Measurement,
   Prediction,
@@ -5,6 +6,7 @@ import type {
 } from './types'
 
 export interface RecommendationThresholds {
+  outdoorSafety?: OutdoorSafety
   normal: number
   critical: number
   pm25Good?: number
@@ -29,6 +31,18 @@ export function evaluateRecommendation(
   const pm25Good = thresholds.pm25Good ?? 15
   const pm25Elevated = thresholds.pm25Elevated ?? 35
   const alertsEnabled = thresholds.alertsEnabled ?? true
+
+  const safety = thresholds.outdoorSafety
+  if (safety && !safety.allowWindow) {
+    const needsVentilation = currentCo2 >= thresholds.normal || predictedCo2 !== null && predictedCo2 >= thresholds.normal
+    const filtered = safety.allowVentilation && needsVentilation
+    return {
+      type: filtered ? 'ventilate_now' : 'monitor',
+      message: filtered ? 'Используйте фильтрованный приток и вытяжку, оставьте окно закрытым' : needsVentilation ? 'CO₂ повышен: автоматическое проветривание ограничено' : 'Наружные условия ограничивают проветривание',
+      durationMinutes: filtered ? 10 : null,
+      reason: safety.reason + (alertsEnabled && measurement.indoor.pm25 >= pm25Elevated ? ' PM2.5 внутри выше границы ' + pm25Elevated + ' µg/m³.' : ''),
+    }
+  }
 
   if (currentCo2 >= thresholds.critical) {
     if (measurement.windowOpen) {

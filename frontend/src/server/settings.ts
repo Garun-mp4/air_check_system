@@ -1,8 +1,10 @@
+import { defaultOutdoorPolicy } from './outdoor-policy'
 import type { AppConfig } from './config'
 import type { NodeSettingsDefaults } from './types'
 
 export function getNodeSettingsDefaults(config: AppConfig): NodeSettingsDefaults {
   return {
+    outdoorPolicy: { ...defaultOutdoorPolicy },
     automationEnabled: config.automationEnabled,
     autoWindowEnabled: config.autoWindowEnabled,
     manualOverrideMinutes: config.windowManualOverrideMinutes,

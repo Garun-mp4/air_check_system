@@ -251,7 +251,7 @@ def test_training_split_fits_only_the_oldest_rows_and_evaluates_the_newest(
 
     report = train_and_evaluate(rows, tmp_path, min_training_rows=10)
 
-    assert report["split"] == "time_ordered_80_20"
+    assert report["split"] == "time_ordered_80_20_purged"
     assert report["train_rows"] == 8
     assert report["test_rows"] == 2
     assert set(regressors) == {"linear_regression", "random_forest"}
@@ -280,8 +280,9 @@ def test_trained_artifact_round_trips_schema_metrics_and_model_version(tmp_path)
     assert artifact["model_version"] == "2.4"
     assert artifact["training_rows"] == report["train_rows"]
     assert artifact["test_rows"] == report["test_rows"]
-    assert report["train_rows"] + report["test_rows"] == len(rows)
-    assert report["train_rows"] == int(len(rows) * 0.8)
+    assert report["train_rows"] + report["test_rows"] + report["purged_rows"] == len(rows)
+    assert report["train_rows"] + report["purged_rows"] == int(len(rows) * 0.8)
+    assert report["train_last_target"] < report["test_start"]
     assert metrics == report
     assert set(metrics["models"]) == {"linear_regression", "random_forest"}
     assert all(

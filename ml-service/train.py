@@ -5,13 +5,14 @@ import csv
 import json
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from feature_schema import FEATURE_NAMES, build_training_rows
-from modeling import train_and_evaluate
+from jobs import ModelJobs
 
 
 def fetch_measurements(source_url: str, timeout: float = 10.0) -> list[dict[str, Any]]:
@@ -73,6 +74,7 @@ def parse_args() -> argparse.Namespace:
         default=int(os.environ.get("MIN_TRAINING_ROWS", "30")),
     )
     parser.add_argument("--model-version", default=os.environ.get("MODEL_VERSION", "1.0"))
+    parser.add_argument("--data-source", choices=("real","simulator","unknown"))
     parser.add_argument("--timeout", type=float, default=10.0)
     return parser.parse_args()
 
@@ -88,14 +90,21 @@ def main() -> int:
             if args.source_url
             else read_measurements(args.input_file)
         )
+        sources = {record.get('data_source','unknown') for record in measurements}
+        if args.data_source is None and len(sources)>1:
+            raise ValueError('Mixed data sources: choose --data-source explicitly')
+        source = args.data_source or next(iter(sources),'unknown')
+        measurements = [m for m in measurements if m.get('data_source','unknown')==source]
         rows = build_training_rows(measurements)
         save_dataset(rows, args.dataset_output)
-        report = train_and_evaluate(
-            rows,
-            args.output_dir,
-            min_training_rows=args.min_rows,
-            model_version=args.model_version,
-        )
+        manager = ModelJobs(Path(args.output_dir)/'model.joblib',args.min_rows)
+        manager.submit(measurements,source,args.model_version)
+        while True:
+            state = manager.status()['job']
+            if state['status']=='failed': raise ValueError(state['error'])
+            if state['status']=='succeeded':
+                report = state['report']; break
+            time.sleep(.1)
     except (RuntimeError, ValueError, OSError) as exc:
         print(f"training failed: {exc}", file=sys.stderr)
         return 1

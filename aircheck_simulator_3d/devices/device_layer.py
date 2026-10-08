@@ -33,6 +33,9 @@ class DeviceLayer:
     def request_window_open(self) -> None:
         self._state.window = self._window.open()
 
+    def stop_window(self) -> None:
+        self._state.window = self._window.stop()
+
     def request_window_close(self) -> None:
         self._state.window = self._window.close()
 

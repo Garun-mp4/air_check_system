@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { startNotificationWorker } from './notifications'
 import { getConfig } from './config'
 import { MlClient } from './ml-client'
 import { NotFoundError, getRepository } from './repository'
@@ -19,6 +20,7 @@ export class ApiError extends Error {
 }
 
 let service: AirQualityService | null = null
+let automationTimer: ReturnType<typeof setInterval> | null = null
 let retentionTimer: ReturnType<typeof setInterval> | null = null
 
 const RETENTION_CLEANUP_INTERVAL_MS = 15 * 60 * 1000
@@ -45,6 +47,12 @@ function startRetentionCleanup(nextService: AirQualityService): void {
     }
   }
 
+  if (automationTimer === null) {
+    automationTimer = setInterval(() => {
+      void nextService.controlsStatus().catch(error => console.error('automatic safety refresh failed', error))
+    }, 10_000)
+    automationTimer.unref?.()
+  }
   void runCleanup()
   retentionTimer = setInterval(() => void runCleanup(), RETENTION_CLEANUP_INTERVAL_MS)
   retentionTimer.unref?.()
@@ -60,11 +68,13 @@ export function getAirQualityService(): AirQualityService {
     )
     service = nextService
     startRetentionCleanup(nextService)
+    startNotificationWorker()
   }
   return service
 }
 
 export function errorResponse(error: unknown): NextResponse {
+  if (error instanceof Error && 'code' in error && error.code === '22023') return NextResponse.json({error:{code:'history_finalized',message:'Измерение старше сохранённой границы истории; архив уже сформирован'}},{status:422})
   if (error instanceof ValidationError) {
     return NextResponse.json(
       {

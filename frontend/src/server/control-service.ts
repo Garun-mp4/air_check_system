@@ -1,4 +1,6 @@
+import { defaultOutdoorPolicy, type OutdoorSafety } from './outdoor-policy'
 import { randomUUID } from 'node:crypto'
+import { ValidationError } from './validation'
 
 import type { AppConfig } from './config'
 import type { Repository } from './repository'
@@ -153,6 +155,12 @@ export class ControlService {
     ) {
       state = await this.repository.setWindowControlMode(deviceId, 'auto', null)
     }
+    const measurement = await this.repository.getLatestMeasurement()
+    if (measurement) {
+      const safety = await this.repository.assessOutdoorAir(deviceId, measurement, settings.outdoorPolicy ?? defaultOutdoorPolicy)
+      if (safety.unavailable && deviceId === this.config.deviceId) await this.reconcile(measurement, null, safety)
+      state = await this.repository.getControlState(deviceId)
+    }
     const current = new Date()
     return withAutomationSummary(
       {
@@ -224,6 +232,25 @@ export class ControlService {
     return { commands, status: await this.status(request.deviceId) }
   }
 
+  async commandAction(deviceId: string, id: number, action: 'cancel' | 'retry'): Promise<ControlCommandResult> {
+    if (action === 'cancel') {
+      await this.repository.cancelControlBatch(deviceId, id)
+      return { commands: [], status: await this.status(deviceId) }
+    }
+    const batch = await this.repository.getControlBatch(deviceId, id)
+    if (batch.some(c => c.status === 'pending') || batch.every(c => c.status === 'applied')) {
+      throw new ValidationError([{ field: 'action', message: 'Повтор доступен только для завершённой неуспешной группы' }])
+    }
+    const retry = batch.filter(c => c.status !== 'applied')
+    if (retry.some(c => c.target === 'window')) {
+      const settings = await this.settings(deviceId)
+      await this.repository.setWindowControlMode(deviceId, 'manual', new Date(Date.now() + settings.manualOverrideMinutes * 60_000))
+    }
+    const batchId = randomUUID()
+    const commands = await this.repository.queueControlCommands(retry.map(c => ({ deviceId, target: c.target, desiredState: c.desiredState, source: 'manual', reason: 'Повтор оператором команды №' + c.id, batchId })))
+    return { commands, status: await this.status(deviceId) }
+  }
+
   async report(input: DeviceStateReport): Promise<ControlStatus> {
     return this.statusFromState(await this.repository.reportControlState(input))
   }
@@ -231,6 +258,7 @@ export class ControlService {
   async reconcile(
     measurement: Measurement,
     prediction: Prediction | null,
+    outdoorSafety?: OutdoorSafety,
   ): Promise<ControlCommand[]> {
     const settings = await this.settings(this.config.deviceId)
     if (!settings.automationEnabled) {
@@ -253,6 +281,9 @@ export class ControlService {
       return []
     }
 
+    const latestMeasurement = await this.repository.getLatestMeasurement()
+    if (latestMeasurement && latestMeasurement.timestamp > measurement.timestamp) return []
+    const safety = outdoorSafety ?? await this.repository.assessOutdoorAir(this.config.deviceId, measurement, settings.outdoorPolicy ?? defaultOutdoorPolicy)
     const currentCo2 = measurement.indoor.co2
     const predictedCo2 = predictedValue(prediction)
     const critical =
@@ -288,6 +319,21 @@ export class ControlService {
       return latestCommand?.source === 'automatic' && latestCommand.desiredState
     }
 
+    if (!safety.allowWindow) {
+      if (settings.autoWindowEnabled && (state.desired.windowOpen || state.reported.windowOpen)) addPlan('window', false, safety.reason)
+      if (safety.allowVentilation && (critical || shouldSupportOpenWindow)) {
+        if (!state.desired.exhaustOn || !state.reported.exhaustOn) addPlan('exhaust', true, safety.reason)
+        if (!state.desired.intakeOn || !state.reported.intakeOn) addPlan('intake', true, safety.reason)
+      } else if (!safety.allowVentilation || currentCo2 < settings.co2NormalThreshold && (predictedCo2 === null || predictedCo2 < settings.co2NormalThreshold)) {
+        const minimumElapsed = !state.ventilationStartedAt || Date.now() - state.ventilationStartedAt.getTime() >= settings.autoVentilationMinimumMinutes * 60_000
+        if (!safety.allowVentilation || minimumElapsed) {
+          if (await shouldStopAutomaticFan('exhaust')) addPlan('exhaust', false, safety.reason)
+          if (await shouldStopAutomaticFan('intake')) addPlan('intake', false, safety.reason)
+        }
+      }
+      const batchId = randomUUID()
+      return commandPlans.length ? this.repository.queueControlCommands(commandPlans.map(plan => ({ ...plan, deviceId: this.config.deviceId, source: 'automatic', batchId }))) : []
+    }
     if (critical) {
       const reason =
         'Автоматика: CO₂ достиг критического порога или прогнозирует его через 15 минут.'
@@ -344,7 +390,8 @@ export class ControlService {
         currentCo2 < settings.co2NormalThreshold &&
         (predictedCo2 === null || predictedCo2 < settings.co2NormalThreshold) &&
         !state.desired.windowOpen &&
-        !state.reported.windowOpen
+        !state.reported.windowOpen &&
+        (!state.ventilationStartedAt || Date.now() - state.ventilationStartedAt.getTime() >= settings.autoVentilationMinimumMinutes * 60_000)
       ) {
         const reason =
           'Автоматика: поддержание выключенного воздушного контура после восстановления CO₂.'

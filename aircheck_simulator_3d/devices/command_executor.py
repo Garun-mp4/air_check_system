@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict, deque
+from datetime import datetime, timezone
 
 from aircheck_simulator_3d.devices.device_layer import DeviceLayer
 from aircheck_simulator_3d.devices.models import WindowMotorState
@@ -29,6 +30,8 @@ class DeviceCommandExecutor:
         return len(self._active) + sum(len(commands) for commands in self._queued.values())
 
     def enqueue(self, command: PendingControlCommand) -> None:
+        if command.expires_at and command.expires_at <= datetime.now(timezone.utc):
+            return
         if command.command_id in self._seen_command_ids:
             if command.command_id in self._completed_unacknowledged:
                 self._duplicate_acknowledgements.append(command.command_id)
@@ -46,9 +49,16 @@ class DeviceCommandExecutor:
                 if not commands:
                     continue
                 command = commands.popleft()
+                if command.expires_at and command.expires_at <= datetime.now(timezone.utc):
+                    continue
                 self._active[target] = command
                 self._apply(command)
 
+            if command.expires_at and command.expires_at <= datetime.now(timezone.utc):
+                if target is CommandTarget.WINDOW:
+                    self._devices.stop_window()
+                del self._active[target]
+                continue
             self._maintain_target(command)
             if self._is_complete(command):
                 completed.append(command.command_id)

@@ -32,6 +32,9 @@ export function serializeControlCommand(command: ControlCommand) {
     status: command.status,
     created_at: command.createdAt.toISOString(),
     applied_at: command.appliedAt?.toISOString() ?? null,
+    expires_at: command.expiresAt?.toISOString() ?? null,
+    completed_at: command.completedAt?.toISOString() ?? null,
+    failure_reason: command.failureReason ?? null,
   }
 }
 
@@ -62,6 +65,8 @@ export function serializeControlStatus(status: ControlStatus) {
     last_command: status.lastCommand
       ? serializeControlCommand(status.lastCommand)
       : null,
+    outdoor_safety: status.outdoorSafety ?? null,
+    recent_commands: (status.recentCommands ?? []).map(serializeControlCommand),
     updated_at: status.updatedAt.toISOString(),
   }
 }
@@ -69,6 +74,7 @@ export function serializeControlStatus(status: ControlStatus) {
 export function serializeNodeSettings(settings: NodeSettings) {
   return {
     device_id: settings.deviceId,
+    outdoor_policy: settings.outdoorPolicy,
     automation_enabled: settings.automationEnabled,
     auto_window_enabled: settings.autoWindowEnabled,
     manual_override_minutes: settings.manualOverrideMinutes,
@@ -88,6 +94,7 @@ export function serializeMeasurement(measurement: Measurement) {
     id: measurement.id,
     created_at: measurement.createdAt.toISOString(),
     timestamp: measurement.timestamp.toISOString(),
+    ...(measurement.dataSource ? { data_source: measurement.dataSource } : {}),
     indoor: {
       co2: measurement.indoor.co2,
       temperature: measurement.indoor.temperature,
@@ -110,6 +117,9 @@ export function serializePrediction(prediction: Prediction | null) {
   return {
     id: prediction.id,
     created_at: prediction.createdAt.toISOString(),
+    measurement_id: prediction.measurementId ?? null,
+    source_timestamp: prediction.sourceTimestamp?.toISOString() ?? null,
+    provenance: prediction.measurementId != null ? 'linked' : prediction.sourceTimestamp ? 'archived' : 'legacy',
     target_time: prediction.targetTime.toISOString(),
     predicted_co2_15min: prediction.predictedCo2,
     model_name: prediction.modelName,
@@ -133,6 +143,7 @@ export function serializeRecommendation(recommendation: Recommendation | null) {
 
 export function serializeDashboard(result: DashboardResult) {
   return {
+    ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
     measurement: result.measurement
       ? serializeMeasurement(result.measurement)
       : null,

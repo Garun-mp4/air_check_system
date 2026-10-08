@@ -1,3 +1,4 @@
+import type { OutdoorPolicy, OutdoorSafety } from './outdoor-policy'
 export interface SensorValues {
   co2: number
   temperature: number
@@ -5,7 +6,13 @@ export interface SensorValues {
   pm25: number
 }
 
+export type DataSource = 'real' | 'simulator' | 'unknown'
+
 export interface MeasurementInput {
+  dataSource?: DataSource
+  co2Limit?: number
+  pm25Limit?: number
+  ventilationOn?: boolean | null
   timestamp: Date
   indoor: SensorValues
   outdoor: Omit<SensorValues, 'co2'>
@@ -13,6 +20,9 @@ export interface MeasurementInput {
 }
 
 export interface Measurement extends MeasurementInput {
+  predictionStatus?: PredictionStatus | 'pending'
+  predictionError?: string | null
+  predictionErrorCode?: string | null
   id: number
   createdAt: Date
 }
@@ -20,6 +30,9 @@ export interface Measurement extends MeasurementInput {
 export type PredictionStatus = 'ready' | 'insufficient_history' | 'unavailable'
 
 export interface PredictionInput {
+  dataSource?: DataSource
+  measurementId?: number | null
+  sourceTimestamp?: Date | null
   targetTime: Date
   predictedCo2: number
   modelName: string
@@ -39,6 +52,7 @@ export type RecommendationType =
   | 'ventilating'
 
 export interface RecommendationDraft {
+  measurementId?: number | null
   type: RecommendationType
   message: string
   durationMinutes: number | null
@@ -64,7 +78,17 @@ export interface RetentionCleanupResult {
   commands: number
 }
 
+export interface DashboardDiagnostics {
+  measurement: 'missing' | 'fresh' | 'stale'
+  device: DeviceConnectionStatus
+  prediction: 'stale' | 'ready' | 'pending' | 'insufficient_history' | 'model_untrained' | 'unavailable' | 'error' | 'legacy'
+  predictionMessage: string | null
+  measuredAt: string | null
+  assessedAt: string
+}
+
 export interface DashboardResult {
+  diagnostics?: DashboardDiagnostics
   measurement: Measurement | null
   prediction: Prediction | null
   recommendation: Recommendation | null
@@ -84,7 +108,7 @@ export type VentilationAction = 'on' | 'off'
 
 export type ControlSource = 'manual' | 'automatic'
 
-export type ControlCommandStatus = 'pending' | 'applied'
+export type ControlCommandStatus = 'pending' | 'applied' | 'failed' | 'cancelled' | 'expired'
 
 export type WindowControlMode = 'auto' | 'manual'
 
@@ -110,6 +134,9 @@ export interface ControlCommand extends ControlCommandInput {
   status: ControlCommandStatus
   createdAt: Date
   appliedAt: Date | null
+  expiresAt?: Date
+  completedAt?: Date | null
+  failureReason?: string | null
 }
 
 export interface ControlState {
@@ -123,6 +150,9 @@ export interface ControlState {
   updatedAt: Date
   pendingCommands: number
   lastCommand: ControlCommand | null
+  outdoorSafety?: OutdoorSafety | null
+  ventilationStartedAt?: Date | null
+  recentCommands?: ControlCommand[]
 }
 
 export interface ControlStatus extends ControlState {
@@ -144,6 +174,7 @@ export interface DeviceStateReport {
   timestamp: Date
   reported: ControlSnapshot
   appliedCommandIds: number[]
+  failedCommands?: Array<{ id: number; reason: string }>
 }
 
 export interface ControlCommandResult {
@@ -152,6 +183,7 @@ export interface ControlCommandResult {
 }
 
 export interface NodeSettingsDefaults {
+  outdoorPolicy?: OutdoorPolicy
   automationEnabled: boolean
   autoWindowEnabled: boolean
   manualOverrideMinutes: number

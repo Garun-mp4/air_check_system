@@ -135,6 +135,7 @@ def test_rest_adapter_emits_the_exact_measurement_payload_and_device_token(monke
     assert measurement_request.get_header("Content-type") == "application/json"
     assert timeout == 0.2
     assert json.loads(measurement_request.data.decode("utf-8")) == {
+        "data_source": "simulator",
         "timestamp": "2026-09-25T10:00:00Z",
         "indoor": {"co2": 720.0, "temperature": 23.4, "humidity": 45.0, "pm25": 5.2},
         "outdoor": {"temperature": 18.0, "humidity": 60.0, "pm25": 8.0},

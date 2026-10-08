@@ -129,3 +129,9 @@ export function requireDeviceToken(request: Request): void {
     throw new AccessDeniedError(401, 'Valid device credentials are required')
   }
 }
+
+export async function requireSignedIn(request: Request): Promise<AccessContext> {
+  const access = await readAccess(request)
+  if (access.role === 'guest') throw new AccessDeniedError(401, 'Для просмотра архива войдите в аккаунт')
+  return access
+}

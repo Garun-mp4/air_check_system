@@ -22,7 +22,8 @@ def test_measurement_matches_aircheck_contract() -> None:
     state = new_simulation(load_config(CONFIG_DIR, {})).state
     payload = MeasurementPayload.from_state(state, datetime(2026, 9, 6, 10, tzinfo=timezone.utc)).to_mapping()
 
-    assert set(payload) == {"timestamp", "indoor", "outdoor", "window_open"}
+    assert set(payload) == {"timestamp", "indoor", "outdoor", "window_open", "data_source"}
+    assert payload["data_source"] == "simulator"
     assert payload["timestamp"] == "2026-09-06T10:00:00Z"
     assert set(payload["indoor"]) == {"co2", "temperature", "humidity", "pm25"}
     assert set(payload["outdoor"]) == {"temperature", "humidity", "pm25"}

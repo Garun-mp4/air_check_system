@@ -27,9 +27,14 @@ def train_and_evaluate(
     rows = sorted(rows, key=lambda row: row["timestamp"])
     matrix, target = rows_to_matrix(rows)
     split_index = max(1, min(len(rows) - 1, int(len(rows) * 0.8)))
-    train_x = np.asarray(matrix[:split_index], dtype=float)
+    test_start = rows[split_index]['timestamp']
+    # Purge training labels reaching into the test period. Ordering alone leaks future labels.
+    train_indices = [i for i in range(split_index) if rows[i].get('target_timestamp', rows[i]['timestamp']) < test_start]
+    if len(train_indices) < 2:
+        raise ValueError('insufficient independent training rows after temporal purge')
+    train_x = np.asarray([matrix[i] for i in train_indices], dtype=float)
     test_x = np.asarray(matrix[split_index:], dtype=float)
-    train_y = np.asarray(target[:split_index], dtype=float)
+    train_y = np.asarray([target[i] for i in train_indices], dtype=float)
     test_y = np.asarray(target[split_index:], dtype=float)
     if len(test_y) == 0:
         raise ValueError("time split produced an empty test set")
@@ -77,7 +82,12 @@ def train_and_evaluate(
         "total_rows": len(rows),
         "train_rows": len(train_y),
         "test_rows": len(test_y),
-        "split": "time_ordered_80_20",
+        "split": "time_ordered_80_20_purged",
+        "purged_rows": split_index-len(train_indices),
+        "data_from": rows[0]["timestamp"].isoformat(),
+        "data_to": rows[-1].get("target_timestamp", rows[-1]["timestamp"]).isoformat(),
+        "train_last_target": max(rows[i].get("target_timestamp",rows[i]["timestamp"]) for i in train_indices).isoformat(),
+        "test_start": test_start.isoformat(),
         "models": metrics,
         "selected_model": selected_name,
         "model_version": model_version,

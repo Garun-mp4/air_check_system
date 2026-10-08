@@ -16,8 +16,12 @@ coverage/
 *.log
 ml-service/model/*.joblib
 ml-service/model/*.json
+ml-service/model/*.lock
 ml-service/data/*.csv
 pgdata/
 .idea/
 .vscode/
 .tools/
+
+# Browser diagnostics may contain authenticated test sessions.
+tests/browser/artifacts/

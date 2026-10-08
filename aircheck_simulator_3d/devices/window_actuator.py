@@ -34,6 +34,9 @@ class WindowActuator:
     def open(self) -> WindowDeviceState:
         return self._set_target(100.0)
 
+    def stop(self) -> WindowDeviceState:
+        return self._set_target(self._state.actual_position_percent)
+
     def close(self) -> WindowDeviceState:
         return self._set_target(0.0)
 

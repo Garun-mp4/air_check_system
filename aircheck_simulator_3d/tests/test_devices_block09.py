@@ -330,3 +330,25 @@ def test_offline_sensor_prevents_zone_readings_instead_of_returning_stale_values
 
     with pytest.raises(SensorReadingUnavailable, match="is offline"):
         read_zone_values(state, "indoor")
+
+
+def test_expired_command_is_not_executed_and_active_window_stops(monkeypatch):
+    from datetime import datetime, timedelta, timezone
+    from aircheck_simulator_3d.devices import command_executor as module
+    now = datetime.now(timezone.utc)
+    simulation = _simulation()
+    executor = DeviceCommandExecutor(simulation.device_layer)
+    executor.enqueue(PendingControlCommand(999, CommandTarget.EXHAUST, True, expires_at=now - timedelta(seconds=1)))
+    assert executor.update() == ()
+    assert not simulation.device_layer.simulation_state.ventilation.exhaust.enabled
+    executor.enqueue(PendingControlCommand(1000, CommandTarget.WINDOW, True, expires_at=now + timedelta(seconds=5)))
+    executor.update()
+    simulation.device_layer.advance(0.5)
+    class FutureDateTime:
+        @staticmethod
+        def now(tz): return now + timedelta(seconds=6)
+    monkeypatch.setattr(module, "datetime", FutureDateTime)
+    assert executor.update() == ()
+    state = simulation.device_layer.simulation_state.window
+    assert state.target_position_percent == state.actual_position_percent
+    assert state.motor_state is WindowMotorState.STOPPED

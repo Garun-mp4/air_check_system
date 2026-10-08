@@ -1,3 +1,5 @@
+import type { DashboardDiagnostics } from '../server/types'
+import type { OutdoorPolicy, OutdoorSafety } from '../server/outdoor-policy'
 export interface ClientMeasurement {
   id: number
   created_at: string
@@ -17,6 +19,9 @@ export interface ClientMeasurement {
 }
 
 export interface ClientPrediction {
+  measurement_id?: number | null
+  source_timestamp?: string | null
+  provenance?: 'legacy' | 'linked' | 'archived'
   id: number
   created_at: string
   target_time: string
@@ -35,6 +40,7 @@ export interface ClientRecommendation {
 }
 
 export interface DashboardData {
+  diagnostics?: DashboardDiagnostics
   measurement: ClientMeasurement | null
   prediction: ClientPrediction | null
   recommendation: ClientRecommendation | null
@@ -53,12 +59,16 @@ export interface ClientControlCommand {
   source: 'manual' | 'automatic'
   reason: string
   batch_id: string
-  status: 'pending' | 'applied'
+  status: 'pending' | 'applied' | 'failed' | 'cancelled' | 'expired'
   created_at: string
   applied_at: string | null
+  expires_at?: string | null
+  completed_at?: string | null
+  failure_reason?: string | null
 }
 
 export interface ClientControlStatus {
+  outdoor_safety?: OutdoorSafety | null
   device_id: string
   connection: {
     status: 'online' | 'stale' | 'offline'
@@ -91,10 +101,12 @@ export interface ClientControlStatus {
   }
   pending_commands: number
   last_command: ClientControlCommand | null
+  recent_commands?: ClientControlCommand[]
   updated_at: string
 }
 
 export interface ClientNodeSettings {
+  outdoor_policy?: OutdoorPolicy
   device_id: string
   automation_enabled: boolean
   auto_window_enabled: boolean
@@ -110,6 +122,7 @@ export interface ClientNodeSettings {
 }
 
 export interface ClientNodeSettingsPatch {
+  outdoor_policy?: OutdoorPolicy
   automation_enabled?: boolean
   auto_window_enabled?: boolean
   manual_override_minutes?: number
@@ -356,4 +369,8 @@ export async function sendVentilationCommand(
     action,
   })
   return payload.data
+}
+
+export async function commandAction(id: number, action: 'cancel' | 'retry', deviceId: string) {
+  return postJson<{ data: { controls: ClientControlStatus } }>('/api/v1/controls/commands/actions', { id, action, device_id: deviceId })
 }

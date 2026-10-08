@@ -12,11 +12,13 @@ export interface Predictor {
 
 export class MlServiceError extends Error {
   readonly status: number | null
+  readonly code: string | null
 
-  constructor(message: string, status: number | null = null) {
+  constructor(message: string, status: number | null = null, code: string | null = null) {
     super(message)
     this.name = 'MlServiceError'
     this.status = status
+    this.code = code
   }
 }
 
@@ -58,9 +60,8 @@ export class MlClient implements Predictor {
   async predict(payload: MlPredictionPayload): Promise<MlPredictionResult> {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs)
-    let response: Response
     try {
-      response = await fetch(this.serviceUrl + '/predict', {
+      const response = await fetch(this.serviceUrl + '/predict', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -69,46 +70,43 @@ export class MlClient implements Predictor {
         body: JSON.stringify(payload),
         signal: controller.signal,
       })
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new MlServiceError('ML-сервис не ответил за отведённое время')
+      const parsed = parseJson(await response.text())
+      if (!response.ok) {
+        throw new MlServiceError(
+          apiErrorMessage(parsed, 'ML-сервис не смог построить прогноз'),
+          response.status,
+          isRecord(parsed) && isRecord(parsed.error) && typeof parsed.error.code === 'string' ? parsed.error.code : 'service_error',
+        )
       }
-      throw new MlServiceError('ML-сервис недоступен')
-    } finally {
-      clearTimeout(timeout)
-    }
+      if (!isRecord(parsed)) {
+        throw new InvalidMlResponseError()
+      }
 
-    const parsed = parseJson(await response.text())
-    if (!response.ok) {
-      throw new MlServiceError(
-        apiErrorMessage(parsed, 'ML-сервис не смог построить прогноз'),
-        response.status,
-      )
-    }
-    if (!isRecord(parsed)) {
-      throw new InvalidMlResponseError()
-    }
-
-    const predicted = parsed.predicted_co2_15min
-    const model = parsed.model
-    const modelVersion = parsed.model_version
-    if (
-      typeof predicted !== 'number' ||
-      !Number.isFinite(predicted) ||
-      predicted < 0 ||
-      typeof model !== 'string' ||
-      model.trim() === '' ||
-      typeof modelVersion !== 'string' ||
-      modelVersion.trim() === ''
-    ) {
-      throw new InvalidMlResponseError(
-        'ML-сервис вернул прогноз без обязательных полей',
-      )
-    }
-    return {
-      predictedCo2_15min: predicted,
-      model,
-      modelVersion,
-    }
+      const predicted = parsed.predicted_co2_15min
+      const model = parsed.model
+      const modelVersion = parsed.model_version
+      if (
+        typeof predicted !== 'number' ||
+        !Number.isFinite(predicted) ||
+        predicted < 0 ||
+        typeof model !== 'string' ||
+        model.trim() === '' ||
+        typeof modelVersion !== 'string' ||
+        modelVersion.trim() === ''
+      ) {
+        throw new InvalidMlResponseError(
+          'ML-сервис вернул прогноз без обязательных полей',
+        )
+      }
+      return {
+        predictedCo2_15min: predicted,
+        model,
+        modelVersion,
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') throw new MlServiceError('ML-сервис не ответил за отведённое время', null, 'timeout')
+      if (error instanceof MlServiceError || error instanceof InvalidMlResponseError) throw error
+      throw new MlServiceError('ML-сервис недоступен', null, 'unreachable')
+    } finally { clearTimeout(timeout) }
   }
 }

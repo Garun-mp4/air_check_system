@@ -1,0 +1,30 @@
+name: Browser integration
+on: [push, pull_request]
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+        working-directory: frontend
+      - run: pip install -r ml-service/requirements.txt -r aircheck_simulator_3d/requirements-headless.txt
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npm run typecheck && npm test && npm run build
+        working-directory: frontend
+      - run: python tests/browser/run.py
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-diagnostics
+          path: tests/browser/artifacts/
+          retention-days: 3

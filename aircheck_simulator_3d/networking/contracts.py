@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 import math
 from typing import Mapping, Protocol
@@ -46,6 +46,7 @@ class PendingControlCommand:
     source: str | None = None
     reason: str | None = None
     batch_id: str | None = None
+    expires_at: datetime | None = None
 
     @classmethod
     def from_mapping(cls, raw: Mapping[str, object]) -> PendingControlCommand:
@@ -62,7 +63,15 @@ class PendingControlCommand:
             parsed_target = CommandTarget(target)
         except ValueError as exc:
             raise ValueError(f"unsupported control command target: {target}") from exc
+        expires_at = None
+        if raw.get("expires_at") is not None:
+            if not isinstance(raw["expires_at"], str):
+                raise ValueError("expires_at must be a timestamp")
+            expires_at = datetime.fromisoformat(raw["expires_at"].replace("Z", "+00:00"))
+            if expires_at.tzinfo is None:
+                raise ValueError("expires_at must include timezone")
         return cls(
+            expires_at=expires_at,
             command_id=command_id,
             target=parsed_target,
             desired_state=desired_state,
@@ -107,6 +116,7 @@ class MeasurementPayload:
     def to_mapping(self) -> dict[str, object]:
         return {
             "timestamp": self.timestamp,
+            "data_source": "simulator",
             "indoor": dict(self.indoor),
             "outdoor": dict(self.outdoor),
             "window_open": self.window_open,

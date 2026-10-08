@@ -1,3 +1,4 @@
+import { assessOutdoor, defaultOutdoorPolicy, type OutdoorPolicy, type OutdoorSafety } from './outdoor-policy.ts'
 import { Pool } from 'pg'
 
 import type {
@@ -13,6 +14,7 @@ import type {
   NodeSettingsPatch,
   Prediction,
   PredictionInput,
+  PredictionStatus,
   Recommendation,
   RecommendationDraft,
   RetentionCleanupResult,
@@ -25,6 +27,9 @@ export interface Repository {
   listMeasurements(query: HistoryQuery): Promise<Measurement[]>
   createPrediction(input: PredictionInput): Promise<Prediction>
   getLatestPrediction(): Promise<Prediction | null>
+  getPredictionForMeasurement(id: number): Promise<Prediction | null>
+  getRecommendationForMeasurement(id: number): Promise<Recommendation | null>
+  setPredictionOutcome(id: number, status: PredictionStatus, error: string | null, code: string | null): Promise<void>
   createRecommendation(input: RecommendationDraft): Promise<Recommendation>
   getLatestRecommendation(): Promise<Recommendation | null>
   purgeExpiredData(cutoff: Date): Promise<RetentionCleanupResult>
@@ -36,6 +41,9 @@ export interface Repository {
   queueControlCommands(input: ControlCommandInput[]): Promise<ControlCommand[]>
   listPendingControlCommands(deviceId: string, limit: number): Promise<ControlCommand[]>
   reportControlState(input: DeviceStateReport): Promise<ControlState>
+  assessOutdoorAir(deviceId: string, measurement: Measurement, policy: OutdoorPolicy): Promise<OutdoorSafety>
+  cancelControlBatch(deviceId: string, commandId: number): Promise<ControlState>
+  getControlBatch(deviceId: string, commandId: number): Promise<ControlCommand[]>
   setWindowControlMode(
     deviceId: string,
     mode: WindowControlMode,
@@ -178,6 +186,18 @@ export class MemoryRepository implements Repository {
     return [...this.predictions].sort(sortPredictions)[0] ?? null
   }
 
+  async getPredictionForMeasurement(id: number): Promise<Prediction | null> {
+    return this.predictions.filter(p => p.measurementId === id).sort(sortPredictions)[0] ?? null
+  }
+  async getRecommendationForMeasurement(id: number): Promise<Recommendation | null> {
+    return this.recommendations.filter(p => p.measurementId === id).sort(sortRecommendations)[0] ?? null
+  }
+  async setPredictionOutcome(id: number, status: PredictionStatus, error: string | null, code: string | null): Promise<void> {
+    const measurement = this.measurements.find(m => m.id === id)
+    if (!measurement) throw new NotFoundError()
+    measurement.predictionStatus = status; measurement.predictionError = error; measurement.predictionErrorCode = code
+  }
+
   async createRecommendation(input: RecommendationDraft): Promise<Recommendation> {
     const recommendation: Recommendation = {
       ...input,
@@ -194,6 +214,7 @@ export class MemoryRepository implements Repository {
   }
 
   async purgeExpiredData(cutoff: Date): Promise<RetentionCleanupResult> {
+    for (const deviceId of this.controlStates.keys()) this.settleCommands(deviceId)
     const before = {
       measurements: this.measurements.length,
       predictions: this.predictions.length,
@@ -204,6 +225,8 @@ export class MemoryRepository implements Repository {
     this.measurements = this.measurements.filter(
       (measurement) => measurement.timestamp >= cutoff,
     )
+    for (const prediction of this.predictions) if (prediction.measurementId && !this.measurements.some(m => m.id === prediction.measurementId)) prediction.measurementId = null
+    for (const rec of this.recommendations) if (rec.measurementId && !this.measurements.some(m => m.id === rec.measurementId)) rec.measurementId = null
     this.predictions = this.predictions.filter(
       (prediction) => prediction.createdAt >= cutoff,
     )
@@ -246,7 +269,49 @@ export class MemoryRepository implements Repository {
     return state
   }
 
+  private settleCommands(deviceId: string): void {
+    const state = this.ensureControlState(deviceId)
+    for (const command of this.controlCommands) {
+      if (command.deviceId === deviceId && command.status === 'pending' && command.expiresAt && command.expiresAt.getTime() <= Date.now()) {
+        command.status = 'expired'
+        command.completedAt = new Date()
+        command.failureReason = 'Срок действия команды истёк'
+      }
+    }
+    for (const [target, key] of [['exhaust', 'exhaustOn'], ['intake', 'intakeOn'], ['window', 'windowOpen']] as const) {
+      const pending = this.controlCommands.filter(c => c.deviceId === deviceId && c.target === target && c.status === 'pending').at(-1)
+      state.desired[key] = pending?.desiredState ?? state.reported[key]
+    }
+  }
+
+  async assessOutdoorAir(deviceId: string, measurement: Measurement, policy: OutdoorPolicy): Promise<OutdoorSafety> {
+    const state = this.ensureControlState(deviceId)
+    const safety = assessOutdoor(measurement, policy, state.outdoorSafety)
+    if (!state.outdoorSafety || new Date(state.outdoorSafety.measurementAt) <= measurement.timestamp) state.outdoorSafety = safety
+    return safety
+  }
+
+  async getControlBatch(deviceId: string, commandId: number): Promise<ControlCommand[]> {
+    this.settleCommands(deviceId)
+    const command = this.controlCommands.find(c => c.id === commandId && c.deviceId === deviceId)
+    if (!command) throw new NotFoundError('Команда не найдена')
+    return this.controlCommands.filter(c => c.deviceId === deviceId && c.batchId === command.batchId).map(c => ({ ...c }))
+  }
+
+  async cancelControlBatch(deviceId: string, commandId: number): Promise<ControlState> {
+    this.settleCommands(deviceId)
+    const command = this.controlCommands.find(c => c.deviceId === deviceId && c.id === commandId)
+    if (!command) throw new NotFoundError('Команда не найдена')
+    for (const c of this.controlCommands) {
+      if (c.deviceId === deviceId && c.batchId === command.batchId && c.status === 'pending') {
+        c.status = 'cancelled'; c.completedAt = new Date(); c.failureReason = 'Отменено оператором'
+      }
+    }
+    return this.getControlState(deviceId)
+  }
+
   async getControlState(deviceId: string): Promise<ControlState> {
+    this.settleCommands(deviceId)
     const state = this.ensureControlState(deviceId)
     const commands = this.controlCommands.filter(
       (command) => command.deviceId === deviceId,
@@ -255,6 +320,8 @@ export class MemoryRepository implements Repository {
       (command) => command.status === 'pending',
     ).length
     state.lastCommand = [...commands].sort(sortCommands)[0] ?? null
+    const batches = new Set([...commands].sort(sortCommands).map(c => c.batchId).filter((batch, index, all) => all.indexOf(batch) === index).slice(0, 20))
+    state.recentCommands = [...commands].sort(sortCommands).filter(c => batches.has(c.batchId)).map(c => ({ ...c }))
     return cloneControlState(state)
   }
 
@@ -274,8 +341,10 @@ export class MemoryRepository implements Repository {
     if (input.length === 0) {
       return []
     }
+    if (input.some(item => item.deviceId !== input[0].deviceId)) throw new Error('Batch must belong to one device')
     const created: ControlCommand[] = []
     for (const item of input) {
+      this.settleCommands(item.deviceId)
       const state = this.ensureControlState(item.deviceId)
       const currentDesired =
         item.target === 'exhaust'
@@ -289,6 +358,8 @@ export class MemoryRepository implements Repository {
           : item.target === 'intake'
             ? state.reported.intakeOn
             : state.reported.windowOpen
+      const previous = this.controlCommands.filter(c => c.deviceId === item.deviceId && c.target === item.target).at(-1)
+      if (item.source === 'automatic' && previous?.source === 'automatic' && previous.desiredState === item.desiredState && ['failed', 'expired', 'cancelled'].includes(previous.status)) continue
       const pendingForTarget = this.controlCommands.some(
         (command) =>
           command.deviceId === item.deviceId &&
@@ -302,12 +373,20 @@ export class MemoryRepository implements Repository {
       ) {
         continue
       }
+      for (const previous of this.controlCommands) {
+        if (previous.deviceId === item.deviceId && previous.target === item.target && previous.status === 'pending' && previous.desiredState !== item.desiredState) {
+          previous.status = 'cancelled'; previous.completedAt = new Date(); previous.failureReason = 'Заменено новой командой'
+        }
+      }
       const command: ControlCommand = {
         ...item,
         id: this.nextId,
         status: 'pending',
         createdAt: new Date(),
         appliedAt: null,
+        expiresAt: new Date(Date.now() + (item.source === 'manual' ? 300_000 : 120_000)),
+        completedAt: null,
+        failureReason: null,
       }
       this.nextId += 1
       this.controlCommands.push(command)
@@ -328,6 +407,7 @@ export class MemoryRepository implements Repository {
     deviceId: string,
     limit: number,
   ): Promise<ControlCommand[]> {
+    this.settleCommands(deviceId)
     return this.controlCommands
       .filter(
         (command) =>
@@ -339,6 +419,7 @@ export class MemoryRepository implements Repository {
   }
 
   async reportControlState(input: DeviceStateReport): Promise<ControlState> {
+    this.settleCommands(input.deviceId)
     const state = this.ensureControlState(input.deviceId)
     const reportedAt = new Date(input.timestamp)
     if (
@@ -357,6 +438,7 @@ export class MemoryRepository implements Repository {
     )
     const previouslyOpen = state.reported.windowOpen
     state.reported = { ...input.reported }
+    state.ventilationStartedAt = input.reported.exhaustOn || input.reported.intakeOn ? state.ventilationStartedAt ?? reportedAt : null
     if (!pendingTargets.has('exhaust')) {
       state.desired.exhaustOn = input.reported.exhaustOn
     }
@@ -378,6 +460,10 @@ export class MemoryRepository implements Repository {
       intake: input.reported.intakeOn,
       window: input.reported.windowOpen,
     }
+    for (const failure of input.failedCommands ?? []) {
+      const command = this.controlCommands.find(c => c.id === failure.id && c.deviceId === input.deviceId && c.status === 'pending')
+      if (command) { command.status = 'failed'; command.completedAt = new Date(); command.failureReason = failure.reason }
+    }
     for (const commandId of input.appliedCommandIds) {
       const command = this.controlCommands.find(
         (item) =>
@@ -388,6 +474,7 @@ export class MemoryRepository implements Repository {
       if (command && actualStateByTarget[command.target] === command.desiredState) {
         command.status = 'applied'
         command.appliedAt = new Date()
+        command.completedAt = command.appliedAt
       }
     }
     state.updatedAt = new Date()
@@ -452,6 +539,10 @@ export class MemoryRepository implements Repository {
 }
 
 interface MeasurementRow {
+  data_source: Measurement['dataSource']
+  prediction_status: PredictionStatus | 'pending'
+  prediction_error: string | null
+  prediction_error_code: string | null
   id: number | string
   created_at: Date | string
   measurement_timestamp: Date | string
@@ -466,6 +557,9 @@ interface MeasurementRow {
 }
 
 interface PredictionRow {
+  data_source: Prediction['dataSource']
+  measurement_id: number | string | null
+  source_timestamp: Date | string | null
   id: number | string
   created_at: Date | string
   target_time: Date | string
@@ -475,6 +569,7 @@ interface PredictionRow {
 }
 
 interface RecommendationRow {
+  measurement_id: number | string | null
   id: number | string
   created_at: Date | string
   type: Recommendation['type']
@@ -484,6 +579,8 @@ interface RecommendationRow {
 }
 
 interface ControlStateRow {
+  outdoor_safety: OutdoorSafety | null
+  ventilation_started_at: Date | string | null
   device_id: string
   exhaust_on: boolean
   intake_on: boolean
@@ -509,9 +606,13 @@ interface ControlCommandRow {
   status: ControlCommand['status']
   created_at: Date | string
   applied_at: Date | string | null
+  expires_at: Date | string
+  completed_at: Date | string | null
+  failure_reason: string | null
 }
 
 interface NodeSettingsRow {
+  outdoor_policy: OutdoorPolicy
   device_id: string
   automation_enabled: boolean
   auto_window_enabled: boolean
@@ -538,6 +639,10 @@ function mapMeasurement(row: MeasurementRow): Measurement {
     id: Number(row.id),
     createdAt: asDate(row.created_at),
     timestamp: asDate(row.measurement_timestamp),
+    ...(row.data_source !== 'unknown' ? { dataSource: row.data_source } : {}),
+    predictionStatus: row.prediction_status,
+    predictionError: row.prediction_error,
+    predictionErrorCode: row.prediction_error_code,
     indoor: {
       co2: asNumber(row.indoor_co2),
       temperature: asNumber(row.indoor_temperature),
@@ -557,7 +662,10 @@ function mapPrediction(row: PredictionRow): Prediction {
   return {
     id: Number(row.id),
     createdAt: asDate(row.created_at),
+    measurementId: row.measurement_id == null ? null : Number(row.measurement_id),
+    sourceTimestamp: row.source_timestamp ? asDate(row.source_timestamp) : null,
     targetTime: asDate(row.target_time),
+    ...(row.data_source !== 'unknown' ? { dataSource: row.data_source } : {}),
     predictedCo2: asNumber(row.predicted_co2),
     modelName: row.model_name,
     modelVersion: row.model_version,
@@ -568,6 +676,7 @@ function mapRecommendation(row: RecommendationRow): Recommendation {
   return {
     id: Number(row.id),
     createdAt: asDate(row.created_at),
+    measurementId: row.measurement_id == null ? null : Number(row.measurement_id),
     type: row.type,
     message: row.message,
     durationMinutes:
@@ -588,6 +697,9 @@ function mapControlCommand(row: ControlCommandRow): ControlCommand {
     status: row.status,
     createdAt: asDate(row.created_at),
     appliedAt: row.applied_at === null ? null : asDate(row.applied_at),
+    expiresAt: asDate(row.expires_at),
+    completedAt: row.completed_at ? asDate(row.completed_at) : null,
+    failureReason: row.failure_reason,
   }
 }
 
@@ -608,6 +720,8 @@ function mapControlState(
       intakeOn: row.desired_intake_on,
       windowOpen: row.desired_window_open,
     },
+    outdoorSafety: row.outdoor_safety,
+    ventilationStartedAt: row.ventilation_started_at ? asDate(row.ventilation_started_at) : null,
     windowMode: row.window_mode,
     overrideUntil:
       row.override_until === null ? null : asDate(row.override_until),
@@ -627,6 +741,7 @@ function mapNodeSettings(
 ): NodeSettings {
   return {
     deviceId: row.device_id,
+    outdoorPolicy: row.outdoor_policy ?? { ...defaultOutdoorPolicy },
     automationEnabled: row.automation_enabled,
     autoWindowEnabled: row.auto_window_enabled,
     manualOverrideMinutes: asNumber(row.manual_override_minutes),
@@ -653,6 +768,7 @@ const measurementColumns = [
   'outdoor_humidity',
   'outdoor_pm25',
   'window_open',
+  'prediction_status', 'prediction_error', 'prediction_error_code', 'data_source',
 ].join(', ')
 
 export class PostgresRepository implements Repository {
@@ -670,8 +786,8 @@ export class PostgresRepository implements Repository {
   async createMeasurement(input: MeasurementInput): Promise<Measurement> {
     const result = await this.pool.query<MeasurementRow>(
       'INSERT INTO measurements ("timestamp", indoor_co2, indoor_temperature, indoor_humidity, ' +
-        'indoor_pm25, outdoor_temperature, outdoor_humidity, outdoor_pm25, window_open) ' +
-        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING ' +
+        'indoor_pm25, outdoor_temperature, outdoor_humidity, outdoor_pm25, window_open, data_source, co2_limit, pm25_limit, ventilation_on) ' +
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING ' +
         measurementColumns,
       [
         input.timestamp,
@@ -683,6 +799,8 @@ export class PostgresRepository implements Repository {
         input.outdoor.humidity,
         input.outdoor.pm25,
         input.windowOpen,
+        input.dataSource ?? 'unknown',
+        input.co2Limit ?? null, input.pm25Limit ?? null, input.ventilationOn ?? null,
       ],
     )
     return mapMeasurement(result.rows[0])
@@ -723,33 +841,46 @@ export class PostgresRepository implements Repository {
 
   async createPrediction(input: PredictionInput): Promise<Prediction> {
     const result = await this.pool.query<PredictionRow>(
-      'INSERT INTO predictions (target_time, predicted_co2, model_name, model_version) ' +
-        'VALUES ($1, $2, $3, $4) RETURNING id, created_at, target_time, predicted_co2, model_name, model_version',
-      [input.targetTime, input.predictedCo2, input.modelName, input.modelVersion],
+      'INSERT INTO predictions (target_time, predicted_co2, model_name, model_version, measurement_id, source_timestamp, data_source) ' +
+        'VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at, target_time, predicted_co2, model_name, model_version, measurement_id, source_timestamp, data_source',
+      [input.targetTime, input.predictedCo2, input.modelName, input.modelVersion, input.measurementId ?? null, input.sourceTimestamp ?? null, input.dataSource ?? 'unknown'],
     )
     return mapPrediction(result.rows[0])
   }
 
   async getLatestPrediction(): Promise<Prediction | null> {
     const result = await this.pool.query<PredictionRow>(
-      'SELECT id, created_at, target_time, predicted_co2, model_name, model_version ' +
+      'SELECT id, created_at, target_time, predicted_co2, model_name, model_version, measurement_id, source_timestamp, data_source ' +
         'FROM predictions ORDER BY target_time DESC, created_at DESC, id DESC LIMIT 1',
     )
     return result.rows[0] ? mapPrediction(result.rows[0]) : null
   }
 
+  async getPredictionForMeasurement(id: number): Promise<Prediction | null> {
+    const result = await this.pool.query<PredictionRow>('SELECT * FROM predictions WHERE measurement_id = $1 ORDER BY created_at DESC, id DESC LIMIT 1', [id])
+    return result.rows[0] ? mapPrediction(result.rows[0]) : null
+  }
+  async getRecommendationForMeasurement(id: number): Promise<Recommendation | null> {
+    const result = await this.pool.query<RecommendationRow>('SELECT * FROM recommendations WHERE measurement_id = $1 ORDER BY created_at DESC, id DESC LIMIT 1', [id])
+    return result.rows[0] ? mapRecommendation(result.rows[0]) : null
+  }
+  async setPredictionOutcome(id: number, status: PredictionStatus, error: string | null, code: string | null): Promise<void> {
+    const result = await this.pool.query('UPDATE measurements SET prediction_status = $2, prediction_error = $3, prediction_error_code = $4 WHERE id = $1', [id, status, error, code])
+    if (!result.rowCount) throw new NotFoundError()
+  }
+
   async createRecommendation(input: RecommendationDraft): Promise<Recommendation> {
     const result = await this.pool.query<RecommendationRow>(
-      'INSERT INTO recommendations (type, message, duration_minutes, reason) ' +
-        'VALUES ($1, $2, $3, $4) RETURNING id, created_at, type, message, duration_minutes, reason',
-      [input.type, input.message, input.durationMinutes, input.reason],
+      'INSERT INTO recommendations (type, message, duration_minutes, reason, measurement_id) ' +
+        'VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at, type, message, duration_minutes, reason, measurement_id',
+      [input.type, input.message, input.durationMinutes, input.reason, input.measurementId ?? null],
     )
     return mapRecommendation(result.rows[0])
   }
 
   async getLatestRecommendation(): Promise<Recommendation | null> {
     const result = await this.pool.query<RecommendationRow>(
-      'SELECT id, created_at, type, message, duration_minutes, reason ' +
+      'SELECT id, created_at, type, message, duration_minutes, reason, measurement_id ' +
         'FROM recommendations ORDER BY created_at DESC, id DESC LIMIT 1',
     )
     return result.rows[0] ? mapRecommendation(result.rows[0]) : null
@@ -759,10 +890,9 @@ export class PostgresRepository implements Repository {
     const client = await this.pool.connect()
     try {
       await client.query('BEGIN')
-      const measurements = await client.query(
-        'DELETE FROM measurements WHERE "timestamp" < $1',
-        [cutoff],
-      )
+      const nodes = await client.query<{ device_id: string }>('SELECT device_id FROM actuator_states ORDER BY device_id FOR UPDATE')
+      for (const node of nodes.rows) await this.settleCommands(node.device_id, client)
+      const measurements = await client.query<{ count: number }>('SELECT archive_air_history($1) AS count', [cutoff])
       const predictions = await client.query(
         'DELETE FROM predictions WHERE created_at < $1',
         [cutoff],
@@ -771,17 +901,16 @@ export class PostgresRepository implements Repository {
         'DELETE FROM recommendations WHERE created_at < $1',
         [cutoff],
       )
-      // Pending commands are deliberately retained: the ESP32 may still need
-      // to receive and acknowledge them. The current actuator state is kept
+      // Only unexpired pending commands are retained. The current actuator state is kept
       // in actuator_states and is never part of retention cleanup.
       const commands = await client.query(
-        "DELETE FROM actuator_commands WHERE created_at < $1 AND status = 'applied'",
+        "DELETE FROM actuator_commands WHERE created_at < $1 AND status <> 'pending'",
         [cutoff],
       )
       await client.query('COMMIT')
       return {
         cutoff: new Date(cutoff),
-        measurements: Number(measurements.rowCount ?? 0),
+        measurements: Number(measurements.rows[0].count),
         predictions: Number(predictions.rowCount ?? 0),
         recommendations: Number(recommendations.rowCount ?? 0),
         commands: Number(commands.rowCount ?? 0),
@@ -808,7 +937,7 @@ export class PostgresRepository implements Repository {
     const stateResult = await client.query<ControlStateRow>(
       'SELECT device_id, exhaust_on, intake_on, window_open, desired_exhaust_on, ' +
         'desired_intake_on, desired_window_open, window_mode, override_until, ' +
-        'window_open_since, last_reported_at, updated_at FROM actuator_states ' +
+        'window_open_since, last_reported_at, updated_at, outdoor_safety, ventilation_started_at FROM actuator_states ' +
         'WHERE device_id = $1',
       [deviceId],
     )
@@ -820,22 +949,78 @@ export class PostgresRepository implements Repository {
       [deviceId],
     )
     const lastCommandResult = await client.query<ControlCommandRow>(
-      'SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at ' +
+      'SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at, expires_at, completed_at, failure_reason ' +
         'FROM actuator_commands WHERE device_id = $1 ORDER BY created_at DESC, id DESC LIMIT 1',
       [deviceId],
     )
-    return mapControlState(
+    const recent = await client.query<ControlCommandRow>('SELECT * FROM actuator_commands WHERE device_id = $1 AND batch_id IN (SELECT batch_id FROM actuator_commands WHERE device_id = $1 GROUP BY batch_id ORDER BY MAX(id) DESC LIMIT 20) ORDER BY created_at DESC, id DESC', [deviceId])
+    return { ...mapControlState(
       stateResult.rows[0],
       Number(pendingResult.rows[0]?.count ?? 0),
       lastCommandResult.rows[0]
         ? mapControlCommand(lastCommandResult.rows[0])
         : null,
-    )
+    ), recentCommands: recent.rows.map(mapControlCommand) }
+  }
+
+  private async settleCommands(deviceId: string, client: Pick<Pool, 'query'>): Promise<void> {
+    await client.query("UPDATE actuator_commands SET status = 'expired', completed_at = NOW(), failure_reason = 'Срок действия команды истёк' WHERE device_id = $1 AND status = 'pending' AND expires_at <= clock_timestamp()", [deviceId])
+    await this.syncDesired(deviceId, client)
+  }
+
+  private async syncDesired(deviceId: string, client: Pick<Pool, 'query'>): Promise<void> {
+    await client.query(`UPDATE actuator_states s SET
+      desired_exhaust_on = COALESCE((SELECT desired_state FROM actuator_commands WHERE device_id = s.device_id AND target = 'exhaust' AND status = 'pending' ORDER BY id DESC LIMIT 1), exhaust_on),
+      desired_intake_on = COALESCE((SELECT desired_state FROM actuator_commands WHERE device_id = s.device_id AND target = 'intake' AND status = 'pending' ORDER BY id DESC LIMIT 1), intake_on),
+      desired_window_open = COALESCE((SELECT desired_state FROM actuator_commands WHERE device_id = s.device_id AND target = 'window' AND status = 'pending' ORDER BY id DESC LIMIT 1), window_open)
+      WHERE device_id = $1`, [deviceId])
+  }
+
+  private async withControlLock<T>(deviceId: string, work: (client: Pick<Pool, 'query'>) => Promise<T>): Promise<T> {
+    await this.ensureControlState(deviceId)
+    const client = await this.pool.connect()
+    try {
+      await client.query('BEGIN')
+      await client.query('SELECT device_id FROM actuator_states WHERE device_id = $1 FOR UPDATE', [deviceId])
+      await this.settleCommands(deviceId, client)
+      const result = await work(client)
+      await client.query('COMMIT')
+      return result
+    } catch (error) { await client.query('ROLLBACK'); throw error }
+    finally { client.release() }
+  }
+
+  async assessOutdoorAir(deviceId: string, measurement: Measurement, policy: OutdoorPolicy): Promise<OutdoorSafety> {
+    return this.withControlLock(deviceId, async client => {
+      const state = await this.readControlState(deviceId, client)
+      const safety = assessOutdoor(measurement, policy, state.outdoorSafety)
+      if (!state.outdoorSafety || new Date(state.outdoorSafety.measurementAt) <= measurement.timestamp) {
+        await client.query('UPDATE actuator_states SET outdoor_safety = $2::jsonb WHERE device_id = $1', [deviceId, JSON.stringify(safety)])
+      }
+      return safety
+    })
+  }
+
+  async getControlBatch(deviceId: string, commandId: number): Promise<ControlCommand[]> {
+    return this.withControlLock(deviceId, async client => {
+      const commands = await client.query<ControlCommandRow>('SELECT * FROM actuator_commands WHERE device_id = $1 AND batch_id = (SELECT batch_id FROM actuator_commands WHERE device_id = $1 AND id = $2) ORDER BY id', [deviceId, commandId])
+      if (!commands.rows.length) throw new NotFoundError('Команда не найдена')
+      return commands.rows.map(mapControlCommand)
+    })
+  }
+
+  async cancelControlBatch(deviceId: string, commandId: number): Promise<ControlState> {
+    return this.withControlLock(deviceId, async client => {
+      const found = await client.query<{ batch_id: string }>('SELECT batch_id FROM actuator_commands WHERE device_id = $1 AND id = $2', [deviceId, commandId])
+      if (!found.rows[0]) throw new NotFoundError('Команда не найдена')
+      await client.query("UPDATE actuator_commands SET status = 'cancelled', completed_at = NOW(), failure_reason = 'Отменено оператором' WHERE device_id = $1 AND batch_id = $2 AND status = 'pending'", [deviceId, found.rows[0].batch_id])
+      await this.syncDesired(deviceId, client)
+      return this.readControlState(deviceId, client)
+    })
   }
 
   async getControlState(deviceId: string): Promise<ControlState> {
-    await this.ensureControlState(deviceId)
-    return this.readControlState(deviceId)
+    return this.withControlLock(deviceId, client => this.readControlState(deviceId, client))
   }
 
   async getLatestControlCommand(
@@ -843,7 +1028,7 @@ export class PostgresRepository implements Repository {
     target: ControlCommand['target'],
   ): Promise<ControlCommand | null> {
     const result = await this.pool.query<ControlCommandRow>(
-      'SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at ' +
+      'SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at, expires_at, completed_at, failure_reason ' +
         'FROM actuator_commands WHERE device_id = $1 AND target = $2 ' +
         'ORDER BY created_at DESC, id DESC LIMIT 1',
       [deviceId, target],
@@ -866,6 +1051,8 @@ export class PostgresRepository implements Repository {
         'SELECT device_id FROM actuator_states WHERE device_id = $1 FOR UPDATE',
         [input[0].deviceId],
       )
+      if (input.some(item => item.deviceId !== input[0].deviceId)) throw new Error('Batch must belong to one device')
+      await this.settleCommands(input[0].deviceId, client)
       const current = await this.readControlState(input[0].deviceId, client)
       const pendingResult = await client.query<{
         target: ControlCommand['target']
@@ -888,6 +1075,9 @@ export class PostgresRepository implements Repository {
             : item.target === 'intake'
               ? current.reported.intakeOn
               : current.reported.windowOpen
+        const previousResult = await client.query<ControlCommandRow>('SELECT * FROM actuator_commands WHERE device_id = $1 AND target = $2 ORDER BY id DESC LIMIT 1', [item.deviceId, item.target])
+        const previous = previousResult.rows[0]
+        if (item.source === 'automatic' && previous?.source === 'automatic' && previous.desired_state === item.desiredState && ['failed', 'expired', 'cancelled'].includes(previous.status)) continue
         const pendingForTarget = pendingResult.rows.some(
           (row) =>
             row.target === item.target &&
@@ -899,9 +1089,11 @@ export class PostgresRepository implements Repository {
         ) {
           continue
         }
+        await client.query("UPDATE actuator_commands SET status = 'cancelled', completed_at = NOW(), failure_reason = 'Заменено новой командой' WHERE device_id = $1 AND target = $2 AND status = 'pending' AND desired_state <> $3", [item.deviceId, item.target, item.desiredState])
+        pendingResult.rows = pendingResult.rows.filter(row => row.target !== item.target || row.desired_state === item.desiredState)
         const result = await client.query<ControlCommandRow>(
-          'INSERT INTO actuator_commands (device_id, target, desired_state, source, reason, batch_id) ' +
-            'VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at',
+          'INSERT INTO actuator_commands (device_id, target, desired_state, source, reason, batch_id, expires_at) ' +
+            "VALUES ($1, $2, $3, $4, $5, $6, clock_timestamp() + CASE WHEN $4 = 'manual' THEN INTERVAL '5 minutes' ELSE INTERVAL '2 minutes' END) RETURNING id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at, expires_at, completed_at, failure_reason",
           [
             item.deviceId,
             item.target,
@@ -950,17 +1142,22 @@ export class PostgresRepository implements Repository {
     deviceId: string,
     limit: number,
   ): Promise<ControlCommand[]> {
-    const result = await this.pool.query<ControlCommandRow>(
-      "SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at FROM actuator_commands WHERE device_id = $1 AND status = 'pending' ORDER BY id ASC LIMIT $2",
+    return this.withControlLock(deviceId, async client => {
+    const result = await client.query<ControlCommandRow>(
+      "SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at, expires_at, completed_at, failure_reason FROM actuator_commands WHERE device_id = $1 AND status = 'pending' ORDER BY id ASC LIMIT $2",
       [deviceId, Math.floor(limit)],
     )
     return result.rows.map(mapControlCommand)
+    })
   }
 
   async reportControlState(input: DeviceStateReport): Promise<ControlState> {
     const client = await this.pool.connect()
     try {
       await client.query('BEGIN')
+      await client.query('INSERT INTO actuator_states (device_id) VALUES ($1) ON CONFLICT DO NOTHING', [input.deviceId])
+      await client.query('SELECT device_id FROM actuator_states WHERE device_id = $1 FOR UPDATE', [input.deviceId])
+      await this.settleCommands(input.deviceId, client)
       const reportResult = await client.query<{ device_id: string }>(
         'INSERT INTO actuator_states (device_id, exhaust_on, intake_on, window_open, desired_exhaust_on, desired_intake_on, desired_window_open, last_reported_at, window_open_since) ' +
           'VALUES ($1, $2::boolean, $3::boolean, $4::boolean, $2::boolean, $3::boolean, $4::boolean, $5::timestamptz, CASE WHEN $4::boolean THEN $5::timestamptz ELSE NULL::timestamptz END) ' +
@@ -969,6 +1166,7 @@ export class PostgresRepository implements Repository {
           "desired_exhaust_on = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'exhaust' AND status = 'pending') THEN actuator_states.desired_exhaust_on ELSE EXCLUDED.exhaust_on END, " +
           "desired_intake_on = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'intake' AND status = 'pending') THEN actuator_states.desired_intake_on ELSE EXCLUDED.intake_on END, " +
           "desired_window_open = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'window' AND status = 'pending') THEN actuator_states.desired_window_open ELSE EXCLUDED.window_open END, " +
+          'ventilation_started_at = CASE WHEN EXCLUDED.exhaust_on OR EXCLUDED.intake_on THEN COALESCE(actuator_states.ventilation_started_at, EXCLUDED.last_reported_at) ELSE NULL END, ' +
           'last_reported_at = EXCLUDED.last_reported_at, updated_at = NOW() ' +
           'WHERE actuator_states.last_reported_at IS NULL OR EXCLUDED.last_reported_at >= actuator_states.last_reported_at ' +
           'RETURNING device_id',
@@ -980,14 +1178,19 @@ export class PostgresRepository implements Repository {
           input.timestamp,
         ],
       )
+      if ((reportResult.rowCount ?? 0) > 0) {
+        for (const failure of input.failedCommands ?? []) {
+          await client.query("UPDATE actuator_commands SET status = 'failed', completed_at = NOW(), failure_reason = $3 WHERE device_id = $1 AND id = $2 AND status = 'pending' AND expires_at > clock_timestamp()", [input.deviceId, failure.id, failure.reason])
+        }
+      }
       if (
         reportResult.rowCount !== null &&
         reportResult.rowCount > 0 &&
         input.appliedCommandIds.length > 0
       ) {
         await client.query(
-          "UPDATE actuator_commands SET status = 'applied', applied_at = NOW() " +
-            "WHERE device_id = $1 AND status = 'pending' AND id = ANY($2::bigint[]) " +
+          "UPDATE actuator_commands SET status = 'applied', applied_at = NOW(), completed_at = NOW() " +
+            "WHERE device_id = $1 AND status = 'pending' AND expires_at > clock_timestamp() AND id = ANY($2::bigint[]) " +
             "AND ((target = 'exhaust' AND desired_state = $3::boolean) " +
             "OR (target = 'intake' AND desired_state = $4::boolean) " +
             "OR (target = 'window' AND desired_state = $5::boolean))",
@@ -1000,8 +1203,11 @@ export class PostgresRepository implements Repository {
           ],
         )
       }
+      if ((reportResult.rowCount ?? 0) > 0) await client.query('UPDATE actuator_states SET ventilation_started_at = CASE WHEN exhaust_on OR intake_on THEN COALESCE(ventilation_started_at, last_reported_at) ELSE NULL END WHERE device_id = $1', [input.deviceId])
+      await this.syncDesired(input.deviceId, client)
+      const state = await this.readControlState(input.deviceId, client)
       await client.query('COMMIT')
-      return this.readControlState(input.deviceId)
+      return state
     } catch (error) {
       await client.query('ROLLBACK')
       throw error
@@ -1031,8 +1237,8 @@ export class PostgresRepository implements Repository {
       'INSERT INTO node_settings (' +
         'device_id, automation_enabled, auto_window_enabled, manual_override_minutes, ' +
         'auto_ventilation_minimum_minutes, co2_normal_threshold, co2_critical_threshold, ' +
-        'pm25_good_limit, pm25_elevated_limit, alerts_enabled' +
-        ') VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) ' +
+        'pm25_good_limit, pm25_elevated_limit, alerts_enabled, outdoor_policy' +
+        ') VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb) ' +
         'ON CONFLICT (device_id) DO NOTHING',
       [
         deviceId,
@@ -1045,6 +1251,7 @@ export class PostgresRepository implements Repository {
         defaults.pm25GoodLimit,
         defaults.pm25ElevatedLimit,
         defaults.alertsEnabled,
+        JSON.stringify(defaults.outdoorPolicy ?? defaultOutdoorPolicy),
       ],
     )
   }
@@ -1056,7 +1263,7 @@ export class PostgresRepository implements Repository {
     const result = await this.pool.query<NodeSettingsRow>(
       'SELECT device_id, automation_enabled, auto_window_enabled, manual_override_minutes, ' +
         'auto_ventilation_minimum_minutes, co2_normal_threshold, co2_critical_threshold, ' +
-        'pm25_good_limit, pm25_elevated_limit, alerts_enabled, updated_at ' +
+        'pm25_good_limit, pm25_elevated_limit, alerts_enabled, updated_at, outdoor_policy ' +
         'FROM node_settings WHERE device_id = $1',
       [deviceId],
     )
@@ -1085,7 +1292,7 @@ export class PostgresRepository implements Repository {
       'UPDATE node_settings SET automation_enabled = $2, auto_window_enabled = $3, ' +
         'manual_override_minutes = $4, auto_ventilation_minimum_minutes = $5, ' +
         'co2_normal_threshold = $6, co2_critical_threshold = $7, pm25_good_limit = $8, ' +
-        'pm25_elevated_limit = $9, alerts_enabled = $10, updated_at = NOW() ' +
+        'pm25_elevated_limit = $9, alerts_enabled = $10, outdoor_policy = $11::jsonb, updated_at = NOW() ' +
         'WHERE device_id = $1',
       [
         deviceId,
@@ -1098,6 +1305,7 @@ export class PostgresRepository implements Repository {
         next.pm25GoodLimit,
         next.pm25ElevatedLimit,
         next.alertsEnabled,
+        JSON.stringify(next.outdoorPolicy ?? defaultOutdoorPolicy),
       ],
     )
     return this.readNodeSettings(deviceId, defaults)
