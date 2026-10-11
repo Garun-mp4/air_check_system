@@ -1,0 +1,166 @@
+{
+  "files": [
+    {
+      "file": "drawings/AC-02-sheet-01-R01.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1229
+      ]
+    },
+    {
+      "file": "drawings/AC-02-sheet-02-R01.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        940
+      ]
+    },
+    {
+      "file": "drawings/AC-02-sheet-03-R01.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1045
+      ]
+    },
+    {
+      "file": "drawings/AC-02-sheet-04-R01.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1094
+      ]
+    },
+    {
+      "file": "drawings/AC-02-sheet-05-R01.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1111
+      ]
+    },
+    {
+      "file": "drawings/AC-02-sheet-06-R01.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1310
+      ]
+    },
+    {
+      "file": "drawings/AC-02-drawings-R01.pdf",
+      "pages": 6,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ],
+        [
+          420.0,
+          297.0
+        ],
+        [
+          420.0,
+          297.0
+        ],
+        [
+          420.0,
+          297.0
+        ],
+        [
+          420.0,
+          297.0
+        ],
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1229,
+        940,
+        1045,
+        1094,
+        1111,
+        1310
+      ]
+    },
+    {
+      "file": "documentation/AC-02-documentation-R01.pdf",
+      "pages": 7,
+      "page_sizes_mm": [
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        531,
+        2780,
+        3197,
+        2601,
+        3061,
+        3358,
+        1294
+      ]
+    }
+  ],
+  "source_layout_issues": [],
+  "rotation_source": "entity.rotation in drawing-entities.json",
+  "font": "GOST_BU embedded subset for drawings; Arial for documentation"
+}

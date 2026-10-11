@@ -1,0 +1,287 @@
+[
+  {
+    "file": "cad/design.json",
+    "bytes": 22429,
+    "sha256": "2ab5e6e2b31a6dbcb652530f567008cfd174dd2a7a2150647aaa7767c3824445"
+  },
+  {
+    "file": "cad/design.py",
+    "bytes": 4318,
+    "sha256": "645d887cf54c703b8d0f675ea1a8a4696f92ceef000b963c2f365f5c21195245"
+  },
+  {
+    "file": "cad/model/AC-02-000-assembly-R01.step",
+    "bytes": 16901610,
+    "sha256": "6256daacefd33d2c4253c498696106157e661354e206d79d281f16d8654a7ab0"
+  },
+  {
+    "file": "cad/model/AC-02-001-base-assembly-R01.step",
+    "bytes": 568485,
+    "sha256": "763b9ca39a03f1613cad618f694de9110cc04a56ede3df8ec3df65e8abd7dd85"
+  },
+  {
+    "file": "cad/model/AC-02-001-base-print-R01.step",
+    "bytes": 545027,
+    "sha256": "1a1dd44cc6c2f4e54037460bc39192fcfe52d99affc0f9482bcd5199fc50ac21"
+  },
+  {
+    "file": "cad/model/AC-02-002-lid-assembly-R01.step",
+    "bytes": 59436,
+    "sha256": "9f5ab39d5bcf7d2edc4a8f6ae4a99bad925638b2b5d6fc2670a4e7d9d671780b"
+  },
+  {
+    "file": "cad/model/AC-02-002-lid-print-R01.step",
+    "bytes": 58204,
+    "sha256": "b1134aa178c05f6187aeae4937a3bf491b98021ea796ea4679fc622a853796d6"
+  },
+  {
+    "file": "cad/model/AC-02-003-hood-assembly-R01.step",
+    "bytes": 141668,
+    "sha256": "8582af32f9b785a9e03249c63ae4018b19bff34add1496359e13e0abca5bcdf9"
+  },
+  {
+    "file": "cad/model/AC-02-003-hood-print-R01.step",
+    "bytes": 143418,
+    "sha256": "784bb7d4384cec7b7477326b8a96c8c1e3aa3835a67ea72eaeb09d11791cb2ae"
+  },
+  {
+    "file": "cad/model/AC-02-004-bracket-assembly-R01.step",
+    "bytes": 152466,
+    "sha256": "78d9e364fafa67df609a298ce943f15acb9ea62476dc8315b548dde03dd668f5"
+  },
+  {
+    "file": "cad/model/AC-02-004-bracket-print-R01.step",
+    "bytes": 149275,
+    "sha256": "1d5c0020f73ae138e015547c4628c1de5a03b6460ab9a62adb88d1fe8d8b2335"
+  },
+  {
+    "file": "cad/model/AC-02-005-sht-screen-assembly-R01.step",
+    "bytes": 137578,
+    "sha256": "a244e9d35a6f4426f44af17c0d2df2f22070faaa0d0f5cc3a63b9c3a9c0868ab"
+  },
+  {
+    "file": "cad/model/AC-02-005-sht-screen-print-R01.step",
+    "bytes": 135568,
+    "sha256": "62bcbd016f90becf4a6964d25accb42f4f0f3386458b294d8b2fd84234bb8a8d"
+  },
+  {
+    "file": "cad/model/AC-02-shell-preview-R00.dwg",
+    "bytes": 165679,
+    "sha256": "2f1627aa89b2fb98d3150aa753fc0ac693becbd6bac20cf87eae829857551c5a"
+  },
+  {
+    "file": "cad/reference/adafruit_license.txt",
+    "bytes": 22239,
+    "sha256": "075dad5e5fc96c27014fabc269f4f5732909cffd178a486f546d982b6cf86b74"
+  },
+  {
+    "file": "cad/reference/adafruit_sht45.brd",
+    "bytes": 800034,
+    "sha256": "eef8b6e16c1a6af780e679e4c011232093fe37cfa4250502ed3527b02008122c"
+  },
+  {
+    "file": "cad/reference/adafruit_sht45_5665.step",
+    "bytes": 823139,
+    "sha256": "f6f24bd429aa5997f6192d4b78d74701f1b3a1600a8e082a0b1f754c172f1420"
+  },
+  {
+    "file": "cad/reference/esp32_devkitc_v4_dimensions.dxf",
+    "bytes": 4106429,
+    "sha256": "130450f283a9bc2a47b77d33d2275286c5023aeaf53ca74d83f8a084b5ea60b0"
+  },
+  {
+    "file": "cad/reference/esp32_devkitc_v4_dimensions.pdf",
+    "bytes": 901070,
+    "sha256": "93769872f5640475a25e6c367230b407606771e4bbee0aba56903263b17d8d30"
+  },
+  {
+    "file": "cad/reference/sensirion_sps30_datasheet.pdf",
+    "bytes": 892579,
+    "sha256": "93573ca35f7e239b947b78b31568812972dc6ca49fe558837e2efc3d37b5421a"
+  },
+  {
+    "file": "cad/reference/sensirion_sps30_mechanical_guide.pdf",
+    "bytes": 830067,
+    "sha256": "8b79cdff84f9e6023193000875f299d704179cd42e741fc203ffbe5dbe1d0024"
+  },
+  {
+    "file": "cad/reference/sensirion_sps30_official.step",
+    "bytes": 8352101,
+    "sha256": "ddeb7de85c71c6f2f050057a75e64756f35cd62eddf3aaf38f929cdbfbdcef4f"
+  },
+  {
+    "file": "cad/reference/sensirion_sps30_step.zip",
+    "bytes": 1524887,
+    "sha256": "37a87850a2d8f35774b024be1531ed9e7d4b681327df3882bd4f75f50c16c681"
+  },
+  {
+    "file": "documentation/AC-02-000-RE.md",
+    "bytes": 9852,
+    "sha256": "11d05e75c2cfe238ad9b7fc25efe8478871f205e966b5fdfe98e8246ce5f5f54"
+  },
+  {
+    "file": "documentation/AC-02-000-SP.md",
+    "bytes": 4847,
+    "sha256": "49d402296bf91c967950a4820ad2448c30856df5f6811cab650011776721212c"
+  },
+  {
+    "file": "documentation/AC-02-connections-check-R01.drawio.png",
+    "bytes": 247190,
+    "sha256": "047d6a172bc7a7f72ca376e4515d3ed47e90497ac6ea83c433492a4afab5a659"
+  },
+  {
+    "file": "documentation/AC-02-connections.drawio",
+    "bytes": 4883,
+    "sha256": "970262be7034e0cb8819f9789bcabb8865d1d549dc65061888b07116fc5a9a86"
+  },
+  {
+    "file": "documentation/AC-02-connections.drawio.png",
+    "bytes": 247190,
+    "sha256": "047d6a172bc7a7f72ca376e4515d3ed47e90497ac6ea83c433492a4afab5a659"
+  },
+  {
+    "file": "documentation/AC-02-connections.png",
+    "bytes": 247190,
+    "sha256": "047d6a172bc7a7f72ca376e4515d3ed47e90497ac6ea83c433492a4afab5a659"
+  },
+  {
+    "file": "documentation/AC-02-documentation-R01.pdf",
+    "bytes": 122033,
+    "sha256": "71cd13801b56204e087d617a49206ba4c4e7d8a030356140652b6fdb01518776"
+  },
+  {
+    "file": "documentation/BOM.csv",
+    "bytes": 2787,
+    "sha256": "d760408f540b20fdd887deb33c8fe0dce4b24de2a89736762413a089a4ef3d3d"
+  },
+  {
+    "file": "documentation/build_pdf.py",
+    "bytes": 11536,
+    "sha256": "e561513b8315d9cea76ac80110760c68154c3a7ab8e9f8fb13f1dcf28619a47d"
+  },
+  {
+    "file": "documentation/dwg-verification.json",
+    "bytes": 830,
+    "sha256": "4951ca65f4883fa9de2db1e6b12a1fa03a989849f6b09a14e8d023472f5fc528"
+  },
+  {
+    "file": "documentation/finalize_assets.py",
+    "bytes": 5800,
+    "sha256": "47092b6b6fad1ada0903a47dfab9474113bfe3d97b37de2244869e5cf75cf9ac"
+  },
+  {
+    "file": "documentation/pdf-inspection.json",
+    "bytes": 2789,
+    "sha256": "4bb3877b461eaa898046b99099e7b071032d270dae4552bcfafe3e56cba658e6"
+  },
+  {
+    "file": "documentation/standards-and-sources.md",
+    "bytes": 6831,
+    "sha256": "dd2d708067e78c27d853628ebe17e54773b6fa5b9d2ec9d656f5eac2b9b4360c"
+  },
+  {
+    "file": "documentation/validation.md",
+    "bytes": 7907,
+    "sha256": "34aeaad3c0fd1476aa6c08022787d02660fa38f1ddbc64a1aef55ed924b13567"
+  },
+  {
+    "file": "drawings/AC-02-drawings-R01.dwg",
+    "bytes": 56902,
+    "sha256": "81e06c8908fa6c7e6f018cfe703b48cc1fbabe78962f2590c898e4745df60ec6"
+  },
+  {
+    "file": "drawings/AC-02-drawings-R01.pdf",
+    "bytes": 139600,
+    "sha256": "6fb458e269c4b3a64d315cb05df3134f1621884214099a7ae65736a670f05cfb"
+  },
+  {
+    "file": "drawings/AC-02-sheet-01-R01.pdf",
+    "bytes": 25505,
+    "sha256": "f6cb8fd3656cfbd3a8845fbe6a114d858f9c20a5ad8306d805019865b6178765"
+  },
+  {
+    "file": "drawings/AC-02-sheet-02-R01.pdf",
+    "bytes": 25570,
+    "sha256": "625789da17e72775ef622d00c19fb9de6cf933c1a64ce245330943cd48571a23"
+  },
+  {
+    "file": "drawings/AC-02-sheet-03-R01.pdf",
+    "bytes": 23222,
+    "sha256": "5ccd1303d639a1caf56ee2bd04fcd3aff02ffce0bfbe9a380e459663d5fe43b5"
+  },
+  {
+    "file": "drawings/AC-02-sheet-04-R01.pdf",
+    "bytes": 23495,
+    "sha256": "6140f38791344a41edb5cee3255c35cbdcf63c9f648925e6d53fcd742b5d0ecd"
+  },
+  {
+    "file": "drawings/AC-02-sheet-05-R01.pdf",
+    "bytes": 23459,
+    "sha256": "9ebcda44ae64ee64c421d9f4e23761c21de2ab7a0b35986e6fc538d25f6a487e"
+  },
+  {
+    "file": "drawings/AC-02-sheet-06-R01.pdf",
+    "bytes": 24263,
+    "sha256": "45320ad62612a146dc2528de084e2cdf3a685806f6041e37f28fd41916e55163"
+  },
+  {
+    "file": "drawings/build_drawing_source.py",
+    "bytes": 22175,
+    "sha256": "bc44ac3e28d49f2ada665fdb3485dc01bd408905c4d7a2c6e6ff01486b600f03"
+  },
+  {
+    "file": "drawings/check_layout.py",
+    "bytes": 4094,
+    "sha256": "36f339f174eb34f8a376d343e0441661c1b032a928c88f1d8cf4cb4206a0dd32"
+  },
+  {
+    "file": "drawings/drawing-entities.json",
+    "bytes": 208983,
+    "sha256": "fa5a66ba92219eee068cc122521c46cd82235b2357727955a478600d37eea01d"
+  },
+  {
+    "file": "drawings/layout-inspection.json",
+    "bytes": 233,
+    "sha256": "af19e55692a252da83d773fbe290ef1a0039a6c4d6b419ea9f0b4753dcc7eee8"
+  },
+  {
+    "file": "manufacturing/AC-02-001-base-print-R01.stl",
+    "bytes": 272284,
+    "sha256": "5284dcdb2623b06dc1682bdbb1f2f3d512701a88edf02305dba36ffc3cb2e857"
+  },
+  {
+    "file": "manufacturing/AC-02-002-lid-print-R01.stl",
+    "bytes": 43884,
+    "sha256": "6ab5ac71ad2652f9edce2bf06049beb43ea0df6f95f6737ed06750ca1b7294b7"
+  },
+  {
+    "file": "manufacturing/AC-02-003-hood-print-R01.stl",
+    "bytes": 47884,
+    "sha256": "250df190eaa42c8039331cd2c099e5f52c0e1ba58c1aab6ee924ffab182fdb07"
+  },
+  {
+    "file": "manufacturing/AC-02-004-bracket-print-R01.stl",
+    "bytes": 48084,
+    "sha256": "ae5ca424222c678109bb3e38d31b5186f847ee879257de07fa6c40f0c020fce9"
+  },
+  {
+    "file": "manufacturing/AC-02-005-sht-screen-print-R01.stl",
+    "bytes": 27084,
+    "sha256": "f82965edbe64e224e028d40c2724354f058e22e50ef0366de2df517f4a751a9e"
+  },
+  {
+    "file": "manufacturing/build_models.py",
+    "bytes": 11609,
+    "sha256": "2a6488057f3f4b78bb61ee7c435144ceb2a22ed1f7bc68f1986d76b8404e9214"
+  },
+  {
+    "file": "manufacturing/model-inspection.json",
+    "bytes": 8732,
+    "sha256": "b49941ce60b48e58620d3dce4dc617444498fa0aeb8cb60487b07988f1840e41"
+  },
+  {
+    "file": "README.md",
+    "bytes": 5455,
+    "sha256": "ab503c3ddb0ac44ce564fcb7aee4ab3c40cf1ec8404f65fbb246be85ef65ac32"
+  }
+]
