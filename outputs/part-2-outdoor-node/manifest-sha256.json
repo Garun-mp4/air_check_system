@@ -156,8 +156,8 @@
   },
   {
     "file": "documentation/AC-02-documentation-R03.pdf",
-    "bytes": 132927,
-    "sha256": "f3451921ef59b09a5be98d1f97fd9be1cded545ead047cbfa091d0b8e99f5649"
+    "bytes": 132938,
+    "sha256": "d87298d86e720ed41e55ace46cbf94e5268fcfde96d5d87dfa70a88a679d3acb"
   },
   {
     "file": "documentation/BOM.csv",
@@ -171,13 +171,13 @@
   },
   {
     "file": "documentation/drawing-audit-R02.md",
-    "bytes": 9936,
-    "sha256": "b2500b6ed924e4317ace47ec001000655ba2e6b5f5cc4709067016ab71e005e2"
+    "bytes": 9934,
+    "sha256": "d4c24f01d683415d16b37d7df753a5f3953140f23261a695770673aff706e554"
   },
   {
     "file": "documentation/drawing-audit-R03.md",
-    "bytes": 11113,
-    "sha256": "324b119ed08fb09a6d8ad5d0aa99d7e7f8c8ba165ac93f87c33b01261f7fa7c8"
+    "bytes": 11111,
+    "sha256": "208d8bd14d6e321900d61a5ba9b3bbe7ac2aad8545062a1343c3fefa9d53ac83"
   },
   {
     "file": "documentation/dwg-verification-R01.json",
@@ -196,13 +196,13 @@
   },
   {
     "file": "documentation/finalize_assets.py",
-    "bytes": 5884,
-    "sha256": "5546d220abef244e6c998c1c5dc641e9284f8047b6919b4265f237d4bfe1f642"
+    "bytes": 5935,
+    "sha256": "a34ff6dbf338da3d8fc51a963a5bb34c5149c274be70d777b39d9e7c4e58ec02"
   },
   {
     "file": "documentation/pdf-inspection.json",
     "bytes": 2935,
-    "sha256": "3ee6c52917e591c74901189f0e6eb9201e4ce380c325d9a770f53d7cc00a749d"
+    "sha256": "eec60750274a3c5bd94f072aa474defb3b71a328596542ddf52444f1928f258a"
   },
   {
     "file": "documentation/standards-and-sources.md",
@@ -257,7 +257,7 @@
   {
     "file": "drawings/AC-02-sheet-01-R03.pdf",
     "bytes": 29173,
-    "sha256": "f0f086345ef64533e1ba5fe83d3247166d9d167cb99412854ffc9d6d969617af"
+    "sha256": "cded2429d93890622d8bcd44a40734f5597476f55e7f5410cedc7741f918a814"
   },
   {
     "file": "drawings/AC-02-sheet-02-R01.pdf",
@@ -272,7 +272,7 @@
   {
     "file": "drawings/AC-02-sheet-02-R03.pdf",
     "bytes": 26222,
-    "sha256": "15454a59b0ba59d4552b924eb7201b4111ade3020f76cd382b8c991543945765"
+    "sha256": "333a7c93f92e47b2f4d4129cfdfb6e0cfe56dd3af2cb3dc2d052ecbcf9d28cc5"
   },
   {
     "file": "drawings/AC-02-sheet-03-R01.pdf",
@@ -287,7 +287,7 @@
   {
     "file": "drawings/AC-02-sheet-03-R03.pdf",
     "bytes": 23219,
-    "sha256": "feac1fe05fb3a5d9815da4cb35d93100fb54ad24084b737fce59db6a88f07f8a"
+    "sha256": "4d9c96bac78dbd96024db7937606b232944e7690f33f3188745a8321fd475547"
   },
   {
     "file": "drawings/AC-02-sheet-04-R01.pdf",
@@ -302,7 +302,7 @@
   {
     "file": "drawings/AC-02-sheet-04-R03.pdf",
     "bytes": 23493,
-    "sha256": "0b2ccd42f08a7d2fb2cb39baf74303d603e091cc7dc48ed98de87e7df7ccb422"
+    "sha256": "b93793c4027c102423e31a45f8cb5b7d36e29c909897fc782751e82e616a8d86"
   },
   {
     "file": "drawings/AC-02-sheet-05-R01.pdf",
@@ -317,7 +317,7 @@
   {
     "file": "drawings/AC-02-sheet-05-R03.pdf",
     "bytes": 23459,
-    "sha256": "fa31b790e89d9231ebf3155744a48daa89984398341fef8f780fbaeed8411c7f"
+    "sha256": "d7fdb4b947b004b3b4dfaf6625b9386f30bf34e5f8336cd4924271d1c06e4801"
   },
   {
     "file": "drawings/AC-02-sheet-06-R01.pdf",
@@ -332,7 +332,7 @@
   {
     "file": "drawings/AC-02-sheet-06-R03.pdf",
     "bytes": 24262,
-    "sha256": "c45b2f4ac02c8bdbc2f92a1da0bfb57e1f06973784d2422c625a98904b450f3b"
+    "sha256": "5645796983d6cff022c3b1d44833c6aa84f0ba0acacb8acee78ea3565be2948d"
   },
   {
     "file": "drawings/build_drawing_source.py",

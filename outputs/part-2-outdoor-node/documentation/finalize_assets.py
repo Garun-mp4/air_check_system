@@ -102,4 +102,5 @@ def manifest() -> Path:
 
 
 if __name__ == "__main__":
-    print(json.dumps({"diagram": str(connection_diagram()), "bom": str(bom_csv())}, ensure_ascii=False))
+    print(json.dumps({"diagram": str(connection_diagram()), "bom": str(bom_csv()),
+                      "manifest": str(manifest())}, ensure_ascii=False))
