@@ -12,9 +12,9 @@ FACE = pdfmetrics.getFont("AuditGOST").face
 
 
 def text_box(entity):
-    x, y, _ = entity["position"]
+    x, y, _ = entity.get("_pdf_position", entity["position"])
     h = entity["height"]
-    point_size = h * 1000 / FACE.capHeight
+    point_size = h * 72 / 25.4 * 1000 / FACE.capHeight
     width = pdfmetrics.stringWidth(entity["value"], "AuditGOST", point_size) * 25.4 / 72
     corners = [(-0.15, -0.22 * h), (width + 0.15, -0.22 * h),
                (width + 0.15, h + 0.15), (-0.15, h + 0.15)]
@@ -67,6 +67,14 @@ def main():
                 issues.append({"kind": "title_cell_clearance", "sheet": sheet,
                                "text": entity["value"], "bounds": box,
                                "cell": entity["_cell"]})
+            cad_width = len(entity["value"]) * entity["height"] * 0.6
+            cad_x = entity["position"][0]
+            if (cad_x < x + 0.4 or cad_x + cad_width > x + width - 0.4):
+                issues.append({"kind": "cad_title_cell_clearance", "sheet": sheet,
+                               "text": entity["value"],
+                               "bounds": [cad_x, entity["position"][1],
+                                          cad_x + cad_width, entity["position"][1] + entity["height"]],
+                               "cell": entity["_cell"]})
         for j, other, other_box in texts:
             if j > i and boxes_intersect(box, other_box):
                 issues.append({"kind": "text_text", "sheet": sheet,
@@ -86,7 +94,7 @@ def main():
         "entities": len(entities),
         "text_entities": len(texts),
         "issues": issues,
-        "method": "GOST BU font metrics, rotated text boxes, 0.4 mm title-cell clearance, segment intersection",
+        "method": "GOST BU PDF text metrics and native Standard/txt.shx cell metrics; rotated text boxes; 0.4 mm cell clearance; segment intersection",
     }
     (ROOT / "layout-inspection.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")

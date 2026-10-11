@@ -76,7 +76,7 @@
       0
     ],
     "height": 3.5,
-    "value": "AirCheck | внутренний узел | цифровой прототип R01 | размеры в мм",
+    "value": "AirCheck | внутренний узел | цифровой прототип R02 | размеры в мм",
     "_rotation": 0
   },
   {
@@ -483,13 +483,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      369.125,
+      369.5,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Лит.",
     "_rotation": 0,
+    "_pdf_position": [
+      369.125,
+      40.45,
+      0
+    ],
     "_cell": [
       365,
       38,
@@ -501,13 +506,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      383.125,
+      383.75,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Масса",
     "_rotation": 0,
+    "_pdf_position": [
+      383.125,
+      40.45,
+      0
+    ],
     "_cell": [
       380,
       38,
@@ -519,13 +529,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      400.75,
+      401.25,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Масш.",
     "_rotation": 0,
+    "_pdf_position": [
+      400.75,
+      40.45,
+      0
+    ],
     "_cell": [
       395,
       38,
@@ -537,13 +552,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      371.1,
+      371.45,
       32.45,
       0
     ],
     "height": 3.5,
     "value": "П",
     "_rotation": 0,
+    "_pdf_position": [
+      371.1,
+      32.45,
+      0
+    ],
     "_cell": [
       365,
       30,
@@ -555,13 +575,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      402.725,
+      401.85,
       32.45,
       0
     ],
     "height": 3.5,
     "value": "1:1",
     "_rotation": 0,
+    "_pdf_position": [
+      402.725,
+      32.45,
+      0
+    ],
     "_cell": [
       395,
       30,
@@ -621,13 +646,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      234.3125,
+      234.75,
       26.45,
       0
     ],
     "height": 2.5,
     "value": "Разраб.",
     "_rotation": 0,
+    "_pdf_position": [
+      234.3125,
+      26.45,
+      0
+    ],
     "_cell": [
       230,
       25,
@@ -639,13 +669,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      232.875,
+      234.0,
       21.45,
       0
     ],
     "height": 2.5,
     "value": "Проверил",
     "_rotation": 0,
+    "_pdf_position": [
+      232.875,
+      21.45,
+      0
+    ],
     "_cell": [
       230,
       20,
@@ -657,13 +692,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      232.875,
+      233.25,
       16.45,
       0
     ],
     "height": 2.5,
     "value": "Т. контр.",
     "_rotation": 0,
+    "_pdf_position": [
+      232.875,
+      16.45,
+      0
+    ],
     "_cell": [
       230,
       15,
@@ -675,13 +715,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      232.875,
+      233.25,
       11.45,
       0
     ],
     "height": 2.5,
     "value": "Н. контр.",
     "_rotation": 0,
+    "_pdf_position": [
+      232.875,
+      11.45,
+      0
+    ],
     "_cell": [
       230,
       10,
@@ -693,13 +738,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      236.625,
+      237.0,
       6.45,
       0
     ],
     "height": 2.5,
     "value": "Утв.",
     "_rotation": 0,
+    "_pdf_position": [
+      236.625,
+      6.45,
+      0
+    ],
     "_cell": [
       230,
       5,
@@ -711,13 +761,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      236.8125,
+      237.0,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Изм.",
     "_rotation": 0,
+    "_pdf_position": [
+      236.8125,
+      51.45,
+      0
+    ],
     "_cell": [
       230,
       50,
@@ -729,13 +784,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      254.75,
+      255.5,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Лист",
     "_rotation": 0,
+    "_pdf_position": [
+      254.75,
+      51.45,
+      0
+    ],
     "_cell": [
       250,
       50,
@@ -747,13 +807,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      270.5,
+      270.75,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Подп.",
     "_rotation": 0,
+    "_pdf_position": [
+      270.5,
+      51.45,
+      0
+    ],
     "_cell": [
       267,
       50,
@@ -765,13 +830,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      284.5,
+      285.5,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Дата",
     "_rotation": 0,
+    "_pdf_position": [
+      284.5,
+      51.45,
+      0
+    ],
     "_cell": [
       282,
       50,
@@ -3030,7 +3100,7 @@
       0
     ],
     "height": 3.5,
-    "value": "AirCheck | внутренний узел | цифровой прототип R01 | размеры в мм",
+    "value": "AirCheck | внутренний узел | цифровой прототип R02 | размеры в мм",
     "_rotation": 0
   },
   {
@@ -3425,13 +3495,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      819.125,
+      819.5,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Лит.",
     "_rotation": 0,
+    "_pdf_position": [
+      819.125,
+      40.45,
+      0
+    ],
     "_cell": [
       815,
       38,
@@ -3443,13 +3518,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      833.125,
+      833.75,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Масса",
     "_rotation": 0,
+    "_pdf_position": [
+      833.125,
+      40.45,
+      0
+    ],
     "_cell": [
       830,
       38,
@@ -3461,13 +3541,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      850.75,
+      851.25,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Масш.",
     "_rotation": 0,
+    "_pdf_position": [
+      850.75,
+      40.45,
+      0
+    ],
     "_cell": [
       845,
       38,
@@ -3479,13 +3564,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      821.1,
+      821.45,
       32.45,
       0
     ],
     "height": 3.5,
     "value": "П",
     "_rotation": 0,
+    "_pdf_position": [
+      821.1,
+      32.45,
+      0
+    ],
     "_cell": [
       815,
       30,
@@ -3497,13 +3587,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      852.725,
+      851.85,
       32.45,
       0
     ],
     "height": 3.5,
     "value": "1:1",
     "_rotation": 0,
+    "_pdf_position": [
+      852.725,
+      32.45,
+      0
+    ],
     "_cell": [
       845,
       30,
@@ -3563,13 +3658,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      684.3125,
+      684.75,
       26.45,
       0
     ],
     "height": 2.5,
     "value": "Разраб.",
     "_rotation": 0,
+    "_pdf_position": [
+      684.3125,
+      26.45,
+      0
+    ],
     "_cell": [
       680,
       25,
@@ -3581,13 +3681,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      682.875,
+      684.0,
       21.45,
       0
     ],
     "height": 2.5,
     "value": "Проверил",
     "_rotation": 0,
+    "_pdf_position": [
+      682.875,
+      21.45,
+      0
+    ],
     "_cell": [
       680,
       20,
@@ -3599,13 +3704,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      682.875,
+      683.25,
       16.45,
       0
     ],
     "height": 2.5,
     "value": "Т. контр.",
     "_rotation": 0,
+    "_pdf_position": [
+      682.875,
+      16.45,
+      0
+    ],
     "_cell": [
       680,
       15,
@@ -3617,13 +3727,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      682.875,
+      683.25,
       11.45,
       0
     ],
     "height": 2.5,
     "value": "Н. контр.",
     "_rotation": 0,
+    "_pdf_position": [
+      682.875,
+      11.45,
+      0
+    ],
     "_cell": [
       680,
       10,
@@ -3635,13 +3750,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      686.625,
+      687.0,
       6.45,
       0
     ],
     "height": 2.5,
     "value": "Утв.",
     "_rotation": 0,
+    "_pdf_position": [
+      686.625,
+      6.45,
+      0
+    ],
     "_cell": [
       680,
       5,
@@ -3653,13 +3773,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      686.8125,
+      687.0,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Изм.",
     "_rotation": 0,
+    "_pdf_position": [
+      686.8125,
+      51.45,
+      0
+    ],
     "_cell": [
       680,
       50,
@@ -3671,13 +3796,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      704.75,
+      705.5,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Лист",
     "_rotation": 0,
+    "_pdf_position": [
+      704.75,
+      51.45,
+      0
+    ],
     "_cell": [
       700,
       50,
@@ -3689,13 +3819,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      720.5,
+      720.75,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Подп.",
     "_rotation": 0,
+    "_pdf_position": [
+      720.5,
+      51.45,
+      0
+    ],
     "_cell": [
       717,
       50,
@@ -3707,13 +3842,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      734.5,
+      735.5,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Дата",
     "_rotation": 0,
+    "_pdf_position": [
+      734.5,
+      51.45,
+      0
+    ],
     "_cell": [
       732,
       50,
@@ -11492,7 +11632,7 @@
       0
     ],
     "height": 3.5,
-    "value": "AirCheck | внутренний узел | цифровой прототип R01 | размеры в мм",
+    "value": "AirCheck | внутренний узел | цифровой прототип R02 | размеры в мм",
     "_rotation": 0
   },
   {
@@ -11887,13 +12027,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1269.125,
+      1269.5,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Лит.",
     "_rotation": 0,
+    "_pdf_position": [
+      1269.125,
+      40.45,
+      0
+    ],
     "_cell": [
       1265,
       38,
@@ -11905,13 +12050,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1283.125,
+      1283.75,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Масса",
     "_rotation": 0,
+    "_pdf_position": [
+      1283.125,
+      40.45,
+      0
+    ],
     "_cell": [
       1280,
       38,
@@ -11923,13 +12073,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1300.75,
+      1301.25,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Масш.",
     "_rotation": 0,
+    "_pdf_position": [
+      1300.75,
+      40.45,
+      0
+    ],
     "_cell": [
       1295,
       38,
@@ -11941,13 +12096,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1271.1,
+      1271.45,
       32.45,
       0
     ],
     "height": 3.5,
     "value": "П",
     "_rotation": 0,
+    "_pdf_position": [
+      1271.1,
+      32.45,
+      0
+    ],
     "_cell": [
       1265,
       30,
@@ -11959,13 +12119,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1302.725,
+      1301.85,
       32.45,
       0
     ],
     "height": 3.5,
     "value": "1:1",
     "_rotation": 0,
+    "_pdf_position": [
+      1302.725,
+      32.45,
+      0
+    ],
     "_cell": [
       1295,
       30,
@@ -12025,13 +12190,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1134.3125,
+      1134.75,
       26.45,
       0
     ],
     "height": 2.5,
     "value": "Разраб.",
     "_rotation": 0,
+    "_pdf_position": [
+      1134.3125,
+      26.45,
+      0
+    ],
     "_cell": [
       1130,
       25,
@@ -12043,13 +12213,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1132.875,
+      1134.0,
       21.45,
       0
     ],
     "height": 2.5,
     "value": "Проверил",
     "_rotation": 0,
+    "_pdf_position": [
+      1132.875,
+      21.45,
+      0
+    ],
     "_cell": [
       1130,
       20,
@@ -12061,13 +12236,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1132.875,
+      1133.25,
       16.45,
       0
     ],
     "height": 2.5,
     "value": "Т. контр.",
     "_rotation": 0,
+    "_pdf_position": [
+      1132.875,
+      16.45,
+      0
+    ],
     "_cell": [
       1130,
       15,
@@ -12079,13 +12259,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1132.875,
+      1133.25,
       11.45,
       0
     ],
     "height": 2.5,
     "value": "Н. контр.",
     "_rotation": 0,
+    "_pdf_position": [
+      1132.875,
+      11.45,
+      0
+    ],
     "_cell": [
       1130,
       10,
@@ -12097,13 +12282,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1136.625,
+      1137.0,
       6.45,
       0
     ],
     "height": 2.5,
     "value": "Утв.",
     "_rotation": 0,
+    "_pdf_position": [
+      1136.625,
+      6.45,
+      0
+    ],
     "_cell": [
       1130,
       5,
@@ -12115,13 +12305,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1136.8125,
+      1137.0,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Изм.",
     "_rotation": 0,
+    "_pdf_position": [
+      1136.8125,
+      51.45,
+      0
+    ],
     "_cell": [
       1130,
       50,
@@ -12133,13 +12328,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1154.75,
+      1155.5,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Лист",
     "_rotation": 0,
+    "_pdf_position": [
+      1154.75,
+      51.45,
+      0
+    ],
     "_cell": [
       1150,
       50,
@@ -12151,13 +12351,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1170.5,
+      1170.75,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Подп.",
     "_rotation": 0,
+    "_pdf_position": [
+      1170.5,
+      51.45,
+      0
+    ],
     "_cell": [
       1167,
       50,
@@ -12169,13 +12374,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1184.5,
+      1185.5,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Дата",
     "_rotation": 0,
+    "_pdf_position": [
+      1184.5,
+      51.45,
+      0
+    ],
     "_cell": [
       1182,
       50,
@@ -16624,7 +16834,7 @@
       0
     ],
     "height": 3.5,
-    "value": "AirCheck | внутренний узел | цифровой прототип R01 | размеры в мм",
+    "value": "AirCheck | внутренний узел | цифровой прототип R02 | размеры в мм",
     "_rotation": 0
   },
   {
@@ -17019,13 +17229,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1719.125,
+      1719.5,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Лит.",
     "_rotation": 0,
+    "_pdf_position": [
+      1719.125,
+      40.45,
+      0
+    ],
     "_cell": [
       1715,
       38,
@@ -17037,13 +17252,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1733.125,
+      1733.75,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Масса",
     "_rotation": 0,
+    "_pdf_position": [
+      1733.125,
+      40.45,
+      0
+    ],
     "_cell": [
       1730,
       38,
@@ -17055,13 +17275,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1750.75,
+      1751.25,
       40.45,
       0
     ],
     "height": 2.5,
     "value": "Масш.",
     "_rotation": 0,
+    "_pdf_position": [
+      1750.75,
+      40.45,
+      0
+    ],
     "_cell": [
       1745,
       38,
@@ -17073,13 +17298,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1721.1,
+      1721.45,
       32.45,
       0
     ],
     "height": 3.5,
     "value": "П",
     "_rotation": 0,
+    "_pdf_position": [
+      1721.1,
+      32.45,
+      0
+    ],
     "_cell": [
       1715,
       30,
@@ -17091,13 +17321,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1752.725,
+      1751.85,
       32.45,
       0
     ],
     "height": 3.5,
     "value": "1:1",
     "_rotation": 0,
+    "_pdf_position": [
+      1752.725,
+      32.45,
+      0
+    ],
     "_cell": [
       1745,
       30,
@@ -17157,13 +17392,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1584.3125,
+      1584.75,
       26.45,
       0
     ],
     "height": 2.5,
     "value": "Разраб.",
     "_rotation": 0,
+    "_pdf_position": [
+      1584.3125,
+      26.45,
+      0
+    ],
     "_cell": [
       1580,
       25,
@@ -17175,13 +17415,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1582.875,
+      1584.0,
       21.45,
       0
     ],
     "height": 2.5,
     "value": "Проверил",
     "_rotation": 0,
+    "_pdf_position": [
+      1582.875,
+      21.45,
+      0
+    ],
     "_cell": [
       1580,
       20,
@@ -17193,13 +17438,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1582.875,
+      1583.25,
       16.45,
       0
     ],
     "height": 2.5,
     "value": "Т. контр.",
     "_rotation": 0,
+    "_pdf_position": [
+      1582.875,
+      16.45,
+      0
+    ],
     "_cell": [
       1580,
       15,
@@ -17211,13 +17461,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1582.875,
+      1583.25,
       11.45,
       0
     ],
     "height": 2.5,
     "value": "Н. контр.",
     "_rotation": 0,
+    "_pdf_position": [
+      1582.875,
+      11.45,
+      0
+    ],
     "_cell": [
       1580,
       10,
@@ -17229,13 +17484,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1586.625,
+      1587.0,
       6.45,
       0
     ],
     "height": 2.5,
     "value": "Утв.",
     "_rotation": 0,
+    "_pdf_position": [
+      1586.625,
+      6.45,
+      0
+    ],
     "_cell": [
       1580,
       5,
@@ -17247,13 +17507,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1586.8125,
+      1587.0,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Изм.",
     "_rotation": 0,
+    "_pdf_position": [
+      1586.8125,
+      51.45,
+      0
+    ],
     "_cell": [
       1580,
       50,
@@ -17265,13 +17530,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1604.75,
+      1605.5,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Лист",
     "_rotation": 0,
+    "_pdf_position": [
+      1604.75,
+      51.45,
+      0
+    ],
     "_cell": [
       1600,
       50,
@@ -17283,13 +17553,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1620.5,
+      1620.75,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Подп.",
     "_rotation": 0,
+    "_pdf_position": [
+      1620.5,
+      51.45,
+      0
+    ],
     "_cell": [
       1617,
       50,
@@ -17301,13 +17576,18 @@
     "type": "Text",
     "layer": "D-TEXT",
     "position": [
-      1634.5,
+      1635.5,
       51.45,
       0
     ],
     "height": 2.5,
     "value": "Дата",
     "_rotation": 0,
+    "_pdf_position": [
+      1634.5,
+      51.45,
+      0
+    ],
     "_cell": [
       1632,
       50,

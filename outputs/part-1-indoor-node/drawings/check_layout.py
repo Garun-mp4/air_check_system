@@ -8,7 +8,9 @@ pdfmetrics.registerFont(TTFont('AuditGOST',r'C:\Windows\Fonts\GOST_BU.ttf'))
 face=pdfmetrics.getFont('AuditGOST').face
 
 def bbox(e):
-    x,y,_=e['position'];h=e['height'];w=pdfmetrics.stringWidth(e['value'],'AuditGOST',h*1000/face.capHeight)
+    x,y,_=e.get('_pdf_position',e['position']);h=e['height']
+    point_size=h*72/25.4*1000/face.capHeight
+    w=pdfmetrics.stringWidth(e['value'],'AuditGOST',point_size)*25.4/72
     # Conservative allowance for descenders, thin stroke and overhang.
     corners=[(-.15,-.22*h),(w+.15,-.22*h),(w+.15,h+.15),(-.15,h+.15)]
     a=math.radians(e.get('_rotation',0));c,s=math.cos(a),math.sin(a)
@@ -39,11 +41,13 @@ if __name__=='__main__':
         if '_cell' in e:
             x,y,w,h=e['_cell'];m=.4
             if b[0]<x+m or b[2]>x+w-m or b[1]<y+m or b[3]>y+h-m:issues.append(dict(kind='cell_clearance',sheet=sheet,text=e['value'],bounds=b,cell=e['_cell']))
+            cad_x=e['position'][0];cad_width=len(e['value'])*e['height']*.6
+            if cad_x<x+m or cad_x+cad_width>x+w-m:issues.append(dict(kind='cad_cell_clearance',sheet=sheet,text=e['value'],bounds=[cad_x,e['position'][1],cad_x+cad_width,e['position'][1]+e['height']],cell=e['_cell']))
         for j,f,fb in T:
             if j>i and intersect(b,fb):issues.append(dict(kind='text_text',sheet=sheet,text=e['value'],other=f['value']))
         for f in E:
             if f['type']=='Line' and segment_hits(f['start'],f['end'],b):issues.append(dict(kind='text_line',sheet=sheet,text=e['value'],line=[f['start'][:2],f['end'][:2]],layer=f['layer']))
-    result=dict(checked_texts=len(T),checked_entities=len(E),issues=issues,method='GOST font metrics + conservative descender bounds; rotated text; segment clipping; 0.4 mm cell clearance')
+    result=dict(checked_texts=len(T),checked_entities=len(E),issues=issues,method='GOST BU PDF metrics and native Standard/txt.shx metrics; conservative descender bounds; rotated text; segment clipping; 0.4 mm cell clearance')
     (root/'layout-inspection.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(result,ensure_ascii=False,indent=2))
     raise SystemExit(bool(issues))

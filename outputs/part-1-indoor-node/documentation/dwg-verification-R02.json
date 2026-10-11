@@ -1,0 +1,29 @@
+{
+  "release": "AC-01 R02",
+  "source": "drawings/drawing-entities.json",
+  "saved": "drawings/AC-01-000-drawings-R02.dwg",
+  "format": "DWG 2018 / AC1032",
+  "verified": true,
+  "sha256": "e788637ac73a9a27ec6edf8e11dde03d597c5d86cda6029e5c267b6d755a8e16",
+  "bytes": 62377,
+  "dropped_on_save": 0,
+  "audit": {
+    "status": "passed",
+    "errors": 0,
+    "warnings": 0,
+    "issues": [],
+    "entities": 1377,
+    "text_entities": 193
+  },
+  "semantic_comparison": {
+    "text_entities": 193,
+    "mismatches": 0
+  },
+  "title_block": {
+    "sheets": 4,
+    "cell_texts": 56,
+    "max_center_error_mm": 0.0,
+    "min_horizontal_clearance_mm": 3.25
+  },
+  "repositioned_dimensions": 0
+}

@@ -1,7 +1,7 @@
 {
   "files": [
     {
-      "file": "drawings\\AC-01-sheet-1.pdf",
+      "file": "drawings\\AC-01-sheet-1-R02.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "file": "drawings\\AC-01-sheet-2.pdf",
+      "file": "drawings\\AC-01-sheet-2-R02.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -27,7 +27,7 @@
       ]
     },
     {
-      "file": "drawings\\AC-01-sheet-3.pdf",
+      "file": "drawings\\AC-01-sheet-3-R02.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "file": "drawings\\AC-01-sheet-4.pdf",
+      "file": "drawings\\AC-01-sheet-4-R02.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -53,7 +53,7 @@
       ]
     },
     {
-      "file": "drawings\\AC-01-drawings.pdf",
+      "file": "drawings\\AC-01-drawings-R02.pdf",
       "pages": 4,
       "page_sizes_mm": [
         [
@@ -81,9 +81,13 @@
       ]
     },
     {
-      "file": "documentation\\AC-01-documentation.pdf",
-      "pages": 11,
+      "file": "documentation\\AC-01-documentation-R02.pdf",
+      "pages": 12,
       "page_sizes_mm": [
+        [
+          210.0,
+          297.0
+        ],
         [
           210.0,
           297.0
@@ -130,7 +134,7 @@
         ]
       ],
       "characters": [
-        454,
+        515,
         2169,
         900,
         3172,
@@ -139,8 +143,9 @@
         1522,
         2253,
         2518,
-        3437,
-        1771
+        3443,
+        2959,
+        1944
       ]
     }
   ],

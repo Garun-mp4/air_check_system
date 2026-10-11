@@ -4,5 +4,5 @@
   "entities": 1365,
   "text_entities": 279,
   "issues": [],
-  "method": "GOST BU font metrics, rotated text boxes, 0.4 mm title-cell clearance, segment intersection"
+  "method": "GOST BU PDF text metrics and native Standard/txt.shx cell metrics; rotated text boxes; 0.4 mm cell clearance; segment intersection"
 }

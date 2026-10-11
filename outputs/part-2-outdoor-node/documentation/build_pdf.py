@@ -18,7 +18,7 @@ from pypdf import PdfReader, PdfWriter
 
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "documentation"
-RELEASE = "R03"
+RELEASE = "R04"
 FONT_DIR = Path(r"C:\Windows\Fonts")
 pdfmetrics.registerFont(TTFont("DrawingGOST", str(FONT_DIR / "GOST_BU.ttf")))
 pdfmetrics.registerFont(TTFont("Body", str(FONT_DIR / "arial.ttf")))
@@ -41,7 +41,8 @@ def drawing_pdfs() -> list[Path]:
         page.setSubject("Цифровой прототип; размерный чертёж, единицы мм")
         offset = sheet * 450
         for entity in entities:
-            p = entity.get("start", entity.get("position", entity.get("center")))
+            p = entity.get("start", entity.get("_pdf_position",
+                             entity.get("position", entity.get("center"))))
             if not offset <= p[0] < offset + 450:
                 continue
             x, y = p[0] - offset, p[1]
@@ -213,8 +214,8 @@ def documentation_pdf() -> Path:
         Paragraph("Установка по исходному условию — под навесом. Корпус не имеет заявленного IP-класса.", body),
     ]
     for name in ("AC-02-000-SP.md", "AC-02-000-RE.md",
-                 "standards-and-sources.md", "validation.md",
-                 "drawing-audit-R03.md"):
+                 "standards-and-sources.md", "validation-R04.md",
+                 "drawing-audit-R04.md"):
         story.append(PageBreak())
         story.extend(markdown_story(DOC / name))
     doc.build(story, onFirstPage=footer, onLaterPages=footer)

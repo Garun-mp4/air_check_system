@@ -1,25 +1,25 @@
 # AirCheck — часть 1: внутренний измерительный узел
 
-**Выпуск R01, 11.10.2026. Цифровой прототип под референсную комплектацию.**
+**Чертежи и протокол оформления R02, 11.10.2026. Геометрия корпуса и печатные детали — R01.**
 
-Корпус 150 × 190 × 68 мм для ESP32-DevKitC-32E V4, Adafruit SCD-41 #5190 и Sensirion SPS30. Детали ещё не куплены. Назначены исходные условия: сухое помещение, настенный монтаж, FDM/PETG, сопло 0.4 мм. Части 2 и 3 не выполнялись.
+Корпус 150 × 190 × 68 мм для ESP32-DevKitC-32E V4, Adafruit SCD-41 #5190 и Sensirion SPS30. Детали ещё не куплены. Назначены исходные условия: сухое помещение, настенный монтаж, FDM/PETG, сопло 0.4 мм. Часть 2 выпускается отдельно; часть 3 не выполнялась.
 
 ## Открыть комплект
 
 | Результат | Файл |
 |---|---|
-| 4 листа A3 одним PDF | [AC-01-drawings.pdf](drawings/AC-01-drawings.pdf) |
-| Спецификация, сборка, монтаж и проверки | [AC-01-documentation.pdf](documentation/AC-01-documentation.pdf) |
+| 4 листа A3 одним PDF, R02 | [AC-01-drawings-R02.pdf](drawings/AC-01-drawings-R02.pdf) |
+| Спецификация, сборка, монтаж и проверки, R02 | [AC-01-documentation-R02.pdf](documentation/AC-01-documentation-R02.pdf) |
 | Основная редактируемая 3D-сборка, мм, DWG 2018 | [AC-01-000-assembly-R01.dwg](cad/model/AC-01-000-assembly-R01.dwg) |
 | Основание / крышка DWG | [основание](cad/model/AC-01-001-base-R01.dwg), [крышка](cad/model/AC-01-002-lid.dwg) |
-| Редактируемые чертежи DWG, 4 листа в model space | [AC-01-000-drawings-R01.dwg](drawings/AC-01-000-drawings-R01.dwg) |
+| Редактируемые чертежи DWG, 4 листа в model space, R02 | [AC-01-000-drawings-R02.dwg](drawings/AC-01-000-drawings-R02.dwg) |
 | Обменная сборка STEP | [AC-01-000-assembly-exchange.step](cad/model/AC-01-000-assembly-exchange.step) |
 | STEP печатных деталей | [основание](cad/model/AC-01-001-base-exchange.step), [крышка](cad/model/AC-01-002-lid-exchange.step) |
 | **Печать: только эти два STL, единицы мм** | [основание](manufacturing/AC-01-001-base-print-R01.stl), [крышка](manufacturing/AC-01-002-lid-print.stl) |
 | Схема соединений, редактируемая | [AC-01-connections.drawio](documentation/AC-01-connections.drawio) |
 | Исходная спецификация / инструкция | [СП](documentation/AC-01-000-SP.md), [РЭ](documentation/AC-01-000-RE.md) |
 | Нормативная матрица и источники | [standards-and-sources.md](documentation/standards-and-sources.md) |
-| Протокол цифровой проверки | [validation.md](documentation/validation.md) |
+| Протокол цифровой проверки, аудит и сохранение DWG R02 | [validation-R02.md](documentation/validation-R02.md), [аудит](documentation/drawing-audit-R02.md), [DWG verification](documentation/dwg-verification-R02.json) |
 
 ## Перед изготовлением
 
@@ -33,6 +33,6 @@
 
 DWG — основной геометрический исходник. Обменные STEP корпуса содержат гранёные плоские BREP-поверхности из проверенного STL: открываются независимо, но не заменяют аналитическую геометрию DWG. Покупные изделия в сборке — упрощённые габариты LOD0, а не точные модели внутреннего устройства. Официальный STEP SPS30 сохранён отдельно в `cad/reference`.
 
-Чертежи оформлены с учётом выбранных правил ЕСКД; это не подписанный и не утверждённый комплект предприятия. Обозначения AC-01 условные проектные. Для воспроизведения PDF: `drawings/build_drawing_source.py`, затем `documentation/build_pdf.py`. Для STL/STEP см. скрипты и JSON в `manufacturing`.
+Чертежи оформлены с учётом выбранных правил ЕСКД; это не подписанный и не утверждённый комплект предприятия. Обозначения AC-01 условные проектные. В R02 исправлено центрирование табличных надписей и сохранён выпуск R01. Для воспроизведения R02 PDF: `drawings/build_drawing_source.py`, затем `documentation/build_pdf.py`. Для STL/STEP см. скрипты и JSON в `manufacturing`.
 
 Порядок восстановления геометрии экспорта: `manufacturing/inspect_stl.py` очищает исходную сетку, `manufacturing/finish_partition_clearance.py` воспроизводит окончательную подрезку перегородки, повторный `inspect_stl.py` проверяет сетки; затем `build_exchange_step.py` и `inspect_clearances.py`. Исходный `base-raw-R01.stl` относится к состоянию до подрезки и содержит дефекты экспорта — не использовать для печати. Для обновления сечений перед PDF выполнить `drawings/extract_sections.py`; для проверки оформления — `drawings/check_layout.py`.

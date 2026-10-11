@@ -11,6 +11,7 @@ from reportlab.lib import colors
 from pypdf import PdfReader,PdfWriter
 
 ROOT=Path(__file__).resolve().parents[1]
+RELEASE='R02'
 pdfmetrics.registerFont(TTFont('GOST',r'C:\Windows\Fonts\GOST_BU.ttf'))
 pdfmetrics.registerFont(TTFont('Body',r'C:\Windows\Fonts\arial.ttf'))
 pdfmetrics.registerFont(TTFont('Bold',r'C:\Windows\Fonts\arialbd.ttf'))
@@ -20,11 +21,11 @@ def drawings():
     entities=json.loads((ROOT/'drawings/drawing-entities.json').read_text(encoding='utf-8'))
     warnings=[]; paths=[]
     for sheet in range(4):
-        path=ROOT/f'drawings/AC-01-sheet-{sheet+1}.pdf';paths.append(path)
+        path=ROOT/f'drawings/AC-01-sheet-{sheet+1}-{RELEASE}.pdf';paths.append(path)
         c=canvas.Canvas(str(path),pagesize=(420*mm,297*mm),pageCompression=1)
-        c.setTitle(f'AirCheck AC-01 лист {sheet+1} R01');c.setAuthor('AirCheck project')
+        c.setTitle(f'AirCheck AC-01 лист {sheet+1} {RELEASE}');c.setAuthor('AirCheck project')
         for e in entities:
-            p=e.get('start',e.get('position',e.get('center')))
+            p=e.get('start',e.get('_pdf_position',e.get('position',e.get('center'))))
             if not sheet*450<=p[0]<(sheet+1)*450:continue
             x=p[0]-sheet*450;y=p[1];layer=e['layer']
             c.setStrokeColor(colors.black);c.setFillColor(colors.black)
@@ -43,7 +44,7 @@ def drawings():
         c.showPage();c.save()
     w=PdfWriter()
     for p in paths:w.append(str(p))
-    combined=ROOT/'drawings/AC-01-drawings.pdf'
+    combined=ROOT/f'drawings/AC-01-drawings-{RELEASE}.pdf'
     w.write(str(combined))
     return paths+[combined],warnings
 
@@ -94,14 +95,14 @@ def markdown(path):
 def footer(c,doc):
     c.saveState();c.setStrokeColor(colors.black);c.setLineWidth(.5)
     c.rect(20*mm,10*mm,185*mm,282*mm,stroke=1,fill=0)
-    c.setFont('Body',8);c.drawString(23*mm,13*mm,'AirCheck | AC-01 | R01 | 11.10.2026 | цифровой прототип')
+    c.setFont('Body',8);c.drawString(23*mm,13*mm,f'AirCheck | AC-01 | {RELEASE} | 11.10.2026 | цифровой прототип')
     c.drawRightString(202*mm,13*mm,f'Лист {doc.page}');c.restoreState()
 
 def manual():
-    path=ROOT/'documentation/AC-01-documentation.pdf'
-    d=SimpleDocTemplate(str(path),pagesize=(210*mm,297*mm),leftMargin=23*mm,rightMargin=7*mm,topMargin=10*mm,bottomMargin=21*mm,title='AirCheck AC-01: спецификация и руководство R01',author='AirCheck project')
-    story=[para('AirCheck. Внутренний измерительный узел',head),para('Комплект документации AC-01. Выпуск R01 от 11.10.2026.'),para('Состав: спецификация, изготовление и сборка, таблица соединений, установка и обслуживание, нормативная матрица, протокол цифровой проверки.'),para('Электроника не куплена; физическая приёмка не выполнена. Подписи, утверждение и полный нормоконтроль отсутствуют. См. границы готовности в конце комплекта.'),PageBreak()]
-    for j,name in enumerate(['AC-01-000-SP.md','AC-01-000-RE.md','standards-and-sources.md','validation.md']):
+    path=ROOT/f'documentation/AC-01-documentation-{RELEASE}.pdf'
+    d=SimpleDocTemplate(str(path),pagesize=(210*mm,297*mm),leftMargin=23*mm,rightMargin=7*mm,topMargin=10*mm,bottomMargin=21*mm,title=f'AirCheck AC-01: документация {RELEASE}',author='AirCheck project')
+    story=[para('AirCheck. Внутренний измерительный узел',head),para('Комплект документации AC-01. Выпуск R02 от 11.10.2026; корректировка оформления чертежей к цифровому прототипу R01.'),para('Состав: спецификация, изготовление и сборка, таблица соединений, установка и обслуживание, нормативная матрица, протокол цифровой проверки.'),para('Электроника не куплена; физическая приёмка не выполнена. Подписи, утверждение и полный нормоконтроль отсутствуют. См. границы готовности в конце комплекта.'),PageBreak()]
+    for j,name in enumerate(['AC-01-000-SP.md','AC-01-000-RE.md','standards-and-sources.md','validation-R02.md','drawing-audit-R02.md']):
         if j:story.append(PageBreak())
         story.extend(markdown(ROOT/'documentation'/name))
     d.build(story,onFirstPage=footer,onLaterPages=footer)

@@ -1,4 +1,4 @@
-"""Deterministic AC-02 R03 drawing source in millimetres.
+"""Deterministic AC-02 R04 drawing source in millimetres.
 
 The same entity list feeds the A3 PDFs and the editable OpenCAD Studio DWG.
 The assembly view follows the common Y datum in the CSG model; electronic
@@ -17,11 +17,13 @@ FONT_FACE = pdfmetrics.getFont("DrawingGOST").face
 
 E = []
 offset = 0
-RELEASE = "R03"
+RELEASE = "R04"
 
 
 def text_width(value, height):
-    size = height * 1000 / FONT_FACE.capHeight
+    # height is in drawing mm. Convert it to points before measuring the
+    # TrueType font, then convert the measured width back to mm.
+    size = height * 72 / 25.4 * 1000 / FONT_FACE.capHeight
     return pdfmetrics.stringWidth(value, "DrawingGOST", size) * 25.4 / 72
 
 
@@ -50,8 +52,15 @@ def text(x, y, value, height=3.5, angle=0, layer="D-TEXT"):
 
 
 def cell_text(x, y, width, height, value, size=2.4):
-    text(x + (width - text_width(value, size)) / 2,
-         y + (height - size) / 2 + 0.15, value, size)
+    baseline = y + (height - size) / 2 + 0.15
+    # OpenCAD's Standard/txt.shx font is fixed-width at 0.6 drawing units
+    # per character-height. Keep the editable DWG centered using that metric;
+    # store the GOST BU position separately for the TrueType PDF renderer.
+    cad_width = len(value) * size * 0.6
+    cad_x = x + (width - cad_width) / 2
+    pdf_x = x + (width - text_width(value, size)) / 2
+    text(cad_x, baseline, value, size)
+    E[-1]["_pdf_position"] = [pdf_x + offset, baseline, 0]
     E[-1]["_cell"] = [x + offset, y, width, height]
 
 

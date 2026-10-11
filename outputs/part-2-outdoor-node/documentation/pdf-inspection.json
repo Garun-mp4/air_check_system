@@ -1,7 +1,7 @@
 {
   "files": [
     {
-      "file": "drawings/AC-02-sheet-01-R03.pdf",
+      "file": "drawings/AC-02-sheet-01-R04.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "file": "drawings/AC-02-sheet-02-R03.pdf",
+      "file": "drawings/AC-02-sheet-02-R04.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -27,7 +27,7 @@
       ]
     },
     {
-      "file": "drawings/AC-02-sheet-03-R03.pdf",
+      "file": "drawings/AC-02-sheet-03-R04.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "file": "drawings/AC-02-sheet-04-R03.pdf",
+      "file": "drawings/AC-02-sheet-04-R04.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -53,7 +53,7 @@
       ]
     },
     {
-      "file": "drawings/AC-02-sheet-05-R03.pdf",
+      "file": "drawings/AC-02-sheet-05-R04.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -66,7 +66,7 @@
       ]
     },
     {
-      "file": "drawings/AC-02-sheet-06-R03.pdf",
+      "file": "drawings/AC-02-sheet-06-R04.pdf",
       "pages": 1,
       "page_sizes_mm": [
         [
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "file": "drawings/AC-02-drawings-R03.pdf",
+      "file": "drawings/AC-02-drawings-R04.pdf",
       "pages": 6,
       "page_sizes_mm": [
         [
@@ -117,7 +117,7 @@
       ]
     },
     {
-      "file": "documentation/AC-02-documentation-R03.pdf",
+      "file": "documentation/AC-02-documentation-R04.pdf",
       "pages": 9,
       "page_sizes_mm": [
         [
@@ -164,9 +164,9 @@
         2601,
         3062,
         3081,
-        2168,
-        4031,
-        2142
+        2790,
+        712,
+        2463
       ]
     }
   ],

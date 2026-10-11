@@ -5,8 +5,12 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 pdfmetrics.registerFont(TTFont('DrawingGOST',r'C:\Windows\Fonts\GOST_BU.ttf'))
+FONT_FACE=pdfmetrics.getFont('DrawingGOST').face
+RELEASE='R02'
 def text_width(s,h):
-    return pdfmetrics.stringWidth(s,'DrawingGOST',h*1000/pdfmetrics.getFont('DrawingGOST').face.capHeight)
+    # Drawing height is in millimetres; ReportLab font sizes are in points.
+    size=h*72/25.4*1000/FONT_FACE.capHeight
+    return pdfmetrics.stringWidth(s,'DrawingGOST',size)*25.4/72
 
 ROOT=Path(__file__).resolve().parent
 E=[]
@@ -19,8 +23,14 @@ def text(x,y,s,h=3.5,angle=0):
     E.append(dict(type='Text',layer='D-TEXT',position=[x+offset,y,0],height=h,value=s,_rotation=angle))
 
 def cell_text(x,y,w,h,s,size=2.5):
-    # Baseline with separate head/descender clearance from every cell border.
-    text(x+(w-text_width(s,size))/2,y+(h-size)/2+0.2,s,size)
+    # Use native Standard/txt.shx fixed-width metrics for the editable DWG;
+    # keep a separate GOST BU TrueType position for the PDF renderer.
+    baseline=y+(h-size)/2+0.2
+    cad_width=len(s)*size*0.6
+    cad_x=x+(w-cad_width)/2
+    pdf_x=x+(w-text_width(s,size))/2
+    text(cad_x,baseline,s,size)
+    E[-1]['_pdf_position']=[pdf_x+offset,baseline,0]
     E[-1]['_cell']=[x+offset,y,w,h]
 def circle(x,y,r,layer='D-OUTLINE'):
     E.append(dict(type='Circle',layer=layer,center=[x+offset,y,0],radius=r))
@@ -64,7 +74,7 @@ def frame(n,title,designation,material='Сборка',scale='1:1'):
     offset=(n-1)*450
     rect(20,5,395,287)
     text(26,282,title,5)
-    text(26,274,'AirCheck | внутренний узел | цифровой прототип R01 | размеры в мм',3.5)
+    text(26,274,f'AirCheck | внутренний узел | цифровой прототип {RELEASE} | размеры в мм',3.5)
     rect(230,5,185,55)
     line(295,5,295,60);line(295,45,415,45);line(295,20,415,20)
     line(365,5,365,45);line(365,30,415,30)
