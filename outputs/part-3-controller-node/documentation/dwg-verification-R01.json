@@ -1,0 +1,40 @@
+{
+  "verified": true,
+  "verification_date": "2026-10-11",
+  "application": {
+    "name": "OpenCAD Studio",
+    "version": "2026.40.1",
+    "build_rev": "7d5ee91665b1",
+    "tool_schema": "bb2640277721f23e08cf17085bd9204753f810ece27abf31402be876e2c4683d"
+  },
+  "source_document": {
+    "document_id": 14,
+    "title": "Drawing13",
+    "revision": 58,
+    "geometry_revision": 246,
+    "units": "mm",
+    "entities": 7,
+    "entity_type": "3D Solid"
+  },
+  "current_audit": {
+    "status": "passed",
+    "target_format": "dwg",
+    "target_version": "AC1032",
+    "errors": 0,
+    "warnings": 0,
+    "unknown_entities": 0,
+    "dropped_on_save": 0,
+    "lossless": true
+  },
+  "saved_artifact": {
+    "path_from_package_root": "cad/model/AC-03-000-assembly-R01.dwg",
+    "save_verified_result": true,
+    "sha256": "8977a7c5b444ab629e2181cc1e1acbbe1780cdc3ba44a38a97f75751eba252e1",
+    "sha256_matches_design_record": true,
+    "sha256_rechecked": true
+  },
+  "limitations": [
+    "The component solids other than the enclosure are provisional LOD0 envelopes, not certified manufacturer STEP files.",
+    "The audit verifies CAD file integrity and entity preservation, not physical fit, printability, electrical safety, or compliance approval."
+  ]
+}

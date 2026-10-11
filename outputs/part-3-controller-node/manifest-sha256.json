@@ -1,0 +1,132 @@
+[
+  {
+    "file": "cad/design.json",
+    "bytes": 6766,
+    "sha256": "239327d58896b30c582db4bd5812364f3c6ca210f843058f65082721e8b7efae"
+  },
+  {
+    "file": "cad/model/AC-03-000-assembly-R01.dwg",
+    "bytes": 57958,
+    "sha256": "8977a7c5b444ab629e2181cc1e1acbbe1780cdc3ba44a38a97f75751eba252e1"
+  },
+  {
+    "file": "cad/model/AC-03-000-assembly-R01.step",
+    "bytes": 261139,
+    "sha256": "281ceffc9e8911fa58220e9b0f1937cf91a416948d4f3f976a99191cf3b7f37d"
+  },
+  {
+    "file": "cad/model/AC-03-001-base-print-R01.step",
+    "bytes": 131522,
+    "sha256": "4c8b508eaa4d681837ca1718535446a1d536c2815adec35a6a17f4c594a4136b"
+  },
+  {
+    "file": "cad/model/AC-03-002-lid-print-R01.step",
+    "bytes": 43809,
+    "sha256": "acc91da6c266ab02ee79cb9cd8b65c2bc4974b4965197dcc264c4b4368506e49"
+  },
+  {
+    "file": "cad/reference/REF-ESP32-V4-envelope.step",
+    "bytes": 114657,
+    "sha256": "37f2ce32769cc2b985935c200ad8c491eb6945be87ecb5862803ad3e569ad409"
+  },
+  {
+    "file": "documentation/AC-03-000-RE.md",
+    "bytes": 13214,
+    "sha256": "24352f4a895a84c3af1795ddbd3faf6b12431212aa40a1b250bed483857da8db"
+  },
+  {
+    "file": "documentation/AC-03-000-SP.md",
+    "bytes": 10438,
+    "sha256": "cff0e66712c34c4033d3e4548ba08e00a7a321ca6ac6ea709f277dc9c9b0711b"
+  },
+  {
+    "file": "documentation/AC-03-connections.drawio",
+    "bytes": 10847,
+    "sha256": "4fb33d322f55b05c406bfe211ec9cac9585a70f08d2c849b24b6b343a63bcce5"
+  },
+  {
+    "file": "documentation/AC-03-documentation-R01.pdf",
+    "bytes": 140192,
+    "sha256": "d33c3ef0604c3cad4f6672699bd1eaba756228e947c72419535344ef75a9cbc7"
+  },
+  {
+    "file": "documentation/BOM.csv",
+    "bytes": 2763,
+    "sha256": "5b3b902001d351f67072ec79db25ac16fd66e91f1b89498e8ac673c6908e5a45"
+  },
+  {
+    "file": "documentation/build_documentation.py",
+    "bytes": 7247,
+    "sha256": "ec998d8da771fb5a3caded5748f8d7ee16b28cf9b63485c57c2e1a2ca7358668"
+  },
+  {
+    "file": "documentation/drawing-audit-R01.md",
+    "bytes": 6482,
+    "sha256": "4106e4fcde88d62170d0c40af68f682d013d448644c0a24e4e26118b14302898"
+  },
+  {
+    "file": "documentation/dwg-verification-R01.json",
+    "bytes": 1252,
+    "sha256": "4b665e3c719e519f24e601654defbd39cb23c33e58105c3883202fde40ef77e6"
+  },
+  {
+    "file": "documentation/standards-and-sources.md",
+    "bytes": 12394,
+    "sha256": "80b7f92ad18eeeba6ecbaf3d9970bc281bd0f958cf822d54628f262463b44688"
+  },
+  {
+    "file": "documentation/validation-R01.md",
+    "bytes": 8272,
+    "sha256": "63c8164b86d6391d874daa597c763051ec98ae010b7a332499be952f0d570522"
+  },
+  {
+    "file": "drawings/AC-03-drawings-R01.dxf",
+    "bytes": 125339,
+    "sha256": "d104d5a5f2252dfff52ae8eb7f3b17ed840ee41560ac81f9992170b4dfa161f0"
+  },
+  {
+    "file": "drawings/AC-03-drawings-R01.pdf",
+    "bytes": 43107,
+    "sha256": "501c5a58ff8553e7f01670cad266be2cadf9335d28a603172c69da1bf9deec11"
+  },
+  {
+    "file": "drawings/build_drawings.py",
+    "bytes": 30873,
+    "sha256": "00afa35e3606ab1712705bf12672fbdb00ed1860da556a547f92df97bc3895a9"
+  },
+  {
+    "file": "drawings/drawing-entities-R01.json",
+    "bytes": 155637,
+    "sha256": "eab3711c0518a38bdb707c71fbb035516bacb8ba9de15f6f158153b6854da29c"
+  },
+  {
+    "file": "drawings/layout-audit-R01.json",
+    "bytes": 262,
+    "sha256": "4deaa18d78581ebd54461c47bfc8c12dd08bea1dc450399fe9e84c63d05d210f"
+  },
+  {
+    "file": "manufacturing/AC-03-001-base-print-R01.stl",
+    "bytes": 53084,
+    "sha256": "4049ae09f411993f0a5e23541b327a5a55c567b3a581cf46544d914d352f9e47"
+  },
+  {
+    "file": "manufacturing/AC-03-002-lid-print-R01.stl",
+    "bytes": 48684,
+    "sha256": "46bf40d68b2a60c434a52b7303c7acd6eb24fcca9bd31e7052bd766470fcf1b6"
+  },
+  {
+    "file": "manufacturing/build_models.py",
+    "bytes": 14402,
+    "sha256": "3dad32f771fc6f3b82e5d3ab7e1aff770a2ec6645587700d766d4863aa01f431"
+  },
+  {
+    "file": "manufacturing/model-inspection-R01.json",
+    "bytes": 8707,
+    "sha256": "bf9fb98549fd6d0d98d3e644e2f1af4bf9253d11a6545184c2f6899d94161f02"
+  },
+  {
+    "file": "README.md",
+    "bytes": 5888,
+    "sha256": "b55afe09e8edbbd6e75e2df7ead54d74eb044a885d6595c50da8786d7a9686af"
+  }
+]

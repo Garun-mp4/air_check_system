@@ -1,0 +1,188 @@
+{
+  "project": "AirCheck",
+  "designation": "AC-03",
+  "revision": "R01",
+  "release_date": "2026-10-11",
+  "units": "mm",
+  "document_status": "digital prototype; component envelope is provisional until hardware is purchased and checked",
+  "assembly": {
+    "native_document": "AC-03-000-assembly-R01.dwg",
+    "coordinate_system": "X and Y in plan; Z vertical; origin at the outside lower front left corner of the base",
+    "closed_bounds": {
+      "min": [-3, -3, 0],
+      "max": [143, 113, 58]
+    },
+    "expected_solids": 7
+  },
+  "print_process": {
+    "candidate": "FDM",
+    "material_candidate": "PETG for indoor laboratory prototype",
+    "printer": "not selected",
+    "fit_clearance_per_side": 0.4,
+    "limits": [
+      "Printer, nozzle, material, orientation profile and shrink compensation are not selected.",
+      "Nominal clearances require a printed fit coupon and physical acceptance.",
+      "Do not claim an IP rating, outdoor suitability or environmental qualification."
+    ]
+  },
+  "lid_interface": {
+    "base_top_z_mm": 55.0,
+    "lid_cavity_start_z_mm": 50.0,
+    "lid_cavity_depth_mm": 5.4,
+    "side_wall_engagement_mm": 5.0,
+    "axial_clearance_over_base_wall_mm": 0.4,
+    "nominal_xy_clearance_per_side_mm": 0.4,
+    "physical_fit_confirmed": false
+  },
+  "parts": {
+    "AC-03-001-base": {
+      "name": "Основание корпуса",
+      "outer": {
+        "kind": "box",
+        "p": [0, 0, 0],
+        "size": [140, 110, 55]
+      },
+      "cavity": {
+        "kind": "box",
+        "p": [2.5, 2.5, 3],
+        "size": [135, 105, 52]
+      },
+      "bosses": [
+        {"kind": "box", "p": [1, 1, 2], "size": [14, 14, 53]},
+        {"kind": "box", "p": [125, 1, 2], "size": [14, 14, 53]},
+        {"kind": "box", "p": [1, 95, 2], "size": [14, 14, 53]},
+        {"kind": "box", "p": [125, 95, 2], "size": [14, 14, 53]}
+      ],
+      "apertures": [
+        {
+          "name": "USB service aperture",
+          "kind": "box",
+          "p": [61, 0, 5.6],
+          "size": [18, 2.5, 10.4]
+        },
+        {
+          "name": "rear signal cable passage",
+          "kind": "box",
+          "p": [92, 107.5, 7],
+          "size": [32, 2.5, 12]
+        }
+      ],
+      "pilot_holes": [
+        {"kind": "cylinder", "center": [8, 8], "z": 31.8, "radius": 1.25, "height": 23.2},
+        {"kind": "cylinder", "center": [132, 8], "z": 31.8, "radius": 1.25, "height": 23.2},
+        {"kind": "cylinder", "center": [8, 102], "z": 31.8, "radius": 1.25, "height": 23.2},
+        {"kind": "cylinder", "center": [132, 102], "z": 31.8, "radius": 1.25, "height": 23.2}
+      ],
+      "expected_bounds": {"min": [0, 0, 0], "max": [140, 110, 55]},
+      "print_transform": "identity"
+    },
+    "AC-03-002-lid": {
+      "name": "Крышка корпуса",
+      "outer": {
+        "kind": "box",
+        "p": [-3, -3, 50],
+        "size": [146, 116, 8]
+      },
+      "cavity": {
+        "kind": "box",
+        "p": [-0.4, -0.4, 50],
+        "size": [140.8, 110.8, 5.4]
+      },
+      "clearance_holes": [
+        {"kind": "cylinder", "center": [8, 8], "z": 50, "radius": 1.7, "height": 8},
+        {"kind": "cylinder", "center": [132, 8], "z": 50, "radius": 1.7, "height": 8},
+        {"kind": "cylinder", "center": [8, 102], "z": 50, "radius": 1.7, "height": 8},
+        {"kind": "cylinder", "center": [132, 102], "z": 50, "radius": 1.7, "height": 8}
+      ],
+      "expected_bounds": {"min": [-3, -3, 50], "max": [143, 113, 58]},
+      "print_transform": "top_face_on_bed"
+    }
+  },
+  "references": {
+    "REF-ESP32-PCB": {
+      "name": "ESP32-DevKitC-32E V4 PCB envelope, headerless procurement variant",
+      "kind": "box",
+      "p": [56.03, 3.5, 4.5],
+      "size": [27.94, 48.26, 1.6],
+      "fidelity": "LOD0 rectangular board outline from Espressif dimension drawing",
+      "printable": false
+    },
+    "REF-WROOM-32E": {
+      "name": "ESP32-WROOM-32E envelope",
+      "kind": "box",
+      "p": [61, 20.22, 6.1],
+      "size": [18, 25.5, 3.1],
+      "fidelity": "LOD0 module envelope; location within the PCB is provisional",
+      "printable": false
+    },
+    "REF-MICRO-USB": {
+      "name": "Micro-USB connector envelope",
+      "kind": "box",
+      "p": [64, 2.21, 6.1],
+      "size": [12, 5, 4.2],
+      "fidelity": "LOD0 clearance reference; not a connector CAD model",
+      "printable": false
+    },
+    "REF-ADHESIVE-PAD-L": {
+      "name": "Generic removable adhesive support strip L",
+      "kind": "box",
+      "p": [58, 10, 3],
+      "size": [3, 20, 1.5],
+      "fidelity": "reference only; material and location must be checked on the purchased PCB",
+      "printable": false
+    },
+    "REF-ADHESIVE-PAD-R": {
+      "name": "Generic removable adhesive support strip R",
+      "kind": "box",
+      "p": [79, 10, 3],
+      "size": [3, 20, 1.5],
+      "fidelity": "reference only; material and location must be checked on the purchased PCB",
+      "printable": false
+    }
+  },
+  "native_cad_observation": {
+    "document_id": 14,
+    "revision": 58,
+    "entity_handles": {
+      "base": "B0",
+      "lid": "D8",
+      "pcb": "F4",
+      "module": "F8",
+      "usb_connector_envelope": "FC",
+      "adhesive_supports": ["100", "104"]
+    },
+    "measurements": {
+      "AC-03-001-base": {
+        "handle": "B0",
+        "volume_mm3": 140517.20046887134,
+        "bounds": {"min": [0, 0, 0], "max": [140, 110, 55]}
+      },
+      "AC-03-002-lid": {
+        "handle": "D8",
+        "volume_mm3": 51150.27189856837,
+        "bounds": {"min": [-3, -3, 50], "max": [143, 113, 58]}
+      }
+    },
+    "audit": {
+      "target": "DWG AC1032",
+      "errors": 0,
+      "warnings": 0,
+      "unknown_entities": 0,
+      "dropped_on_save": 0,
+      "save_verified": true,
+      "sha256": "8977a7c5b444ab629e2181cc1e1acbbe1780cdc3ba44a38a97f75751eba252e1"
+    }
+  },
+  "interfaces": {
+    "data": "sensor nodes A/B -> ESP-NOW -> gateway C -> Wi-Fi -> AirCheck API, device_id room-01",
+    "supply": "Micro-USB 5 V to the ESP32 board only; motor power and driver power are external and out of scope",
+    "actuator_outputs": "GPIO25 exhaust enable; GPIO26 intake enable; GPIO27 window open; GPIO32 window close",
+    "limit_inputs": "GPIO33 open limit; GPIO18 close limit; normally-closed contact to signal ground is a provisional interface",
+    "constraints": [
+      "All GPIO signals are logic-level only and must not directly power a fan, relay coil or actuator.",
+      "Driver input thresholds, galvanic isolation, power supply and connector are not selected.",
+      "The firmware must interlock opposite window commands and hold external drivers inactive during reset.",
+      "Without tachometer/driver feedback, fan reported state is only controller output state, not proven airflow."
+    ]
+  }
+}
