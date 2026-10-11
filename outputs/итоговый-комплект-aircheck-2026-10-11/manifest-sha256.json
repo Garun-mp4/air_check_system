@@ -115,14 +115,14 @@
     "sha256": "8b79cdff84f9e6023193000875f299d704179cd42e741fc203ffbe5dbe1d0024"
   },
   {
-    "file": "AC-01-внутренний/cad/reference/sensirion_sps30_step/PS_CAD_SPS30_D1.STEP",
-    "bytes": 8352101,
-    "sha256": "ddeb7de85c71c6f2f050057a75e64756f35cd62eddf3aaf38f929cdbfbdcef4f"
-  },
-  {
     "file": "AC-01-внутренний/cad/reference/sensirion_sps30_step.zip",
     "bytes": 1524887,
     "sha256": "37a87850a2d8f35774b024be1531ed9e7d4b681327df3882bd4f75f50c16c681"
+  },
+  {
+    "file": "AC-01-внутренний/cad/reference/sensirion_sps30_step/PS_CAD_SPS30_D1.STEP",
+    "bytes": 8352101,
+    "sha256": "ddeb7de85c71c6f2f050057a75e64756f35cd62eddf3aaf38f929cdbfbdcef4f"
   },
   {
     "file": "AC-01-внутренний/cad/save-verification.json",
@@ -131,28 +131,28 @@
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-000-RE.md",
-    "bytes": 18901,
-    "sha256": "b13f310dcb405c71572c8874c18757d8da7fa83a4841f8e39dfb39b7cf8a7382"
+    "bytes": 19055,
+    "sha256": "d8c2071a70f1eda89e3cc1478710396e36b8bdcdf5abbf94017ee6d26689afe1"
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-000-SP.md",
-    "bytes": 5271,
-    "sha256": "b3e40514d607360b48a9e007dfd50b3332c0ad0bed17996c83ac0146ce11d8fc"
+    "bytes": 5549,
+    "sha256": "7469ba95d8b21d5b81c4962456bffc7f85ada7c5f144c7c149ec783e3298b2d0"
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-connections.drawio",
     "bytes": 4404,
-    "sha256": "916dbfa2597be1972c779bd54670d8761f19d3104d7e16dbad1f40f8f73bb5f8"
+    "sha256": "2373c3210d64e488b54ccfc7c49a3b125942d1f226912210a6e1099619cf16ca"
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-connections.png",
-    "bytes": 227806,
-    "sha256": "c450707f498929079b655372f0a84279c8bb9d836e47346ae33213342272bfe1"
+    "bytes": 227444,
+    "sha256": "eb2a0ffd9b73ef9be018cd1265c549c6411d3d6d87f9a41433b22300874ae5a1"
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-documentation-R02.pdf",
-    "bytes": 140076,
-    "sha256": "b69dcb84a518a2982955bc4d4aae39c878ba9faa77d8b9e06b93ad535c920e7a"
+    "bytes": 140318,
+    "sha256": "1594db9e5539cbc03b892b10e2bbdb6ab3ffba4e9ef09b141b4523efcac3316f"
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-documentation.pdf",
@@ -177,12 +177,12 @@
   {
     "file": "AC-01-внутренний/documentation/dwg-verification-R02.json",
     "bytes": 717,
-    "sha256": "2fbe2464c793506e95df5c42665bdc1bb6fca324a2ebc5968ccd93912d9c1d07"
+    "sha256": "2feb71ee2ba42272f08845178c43ddc8560b334f88a9a8ab8bdc5334c89809ee"
   },
   {
     "file": "AC-01-внутренний/documentation/finalize_assets.py",
     "bytes": 4365,
-    "sha256": "7877c96204302f8053f7a8fcb5ac891cef9dffef2e95e153ce41446a71ace6b8"
+    "sha256": "cef8ad7dfb70822ab42143ca563be53dd688dfae77ea26e79a1a4a8246fd0e54"
   },
   {
     "file": "AC-01-внутренний/documentation/model-release-R02.md",
@@ -196,13 +196,13 @@
   },
   {
     "file": "AC-01-внутренний/documentation/pdf-inspection.json",
-    "bytes": 2495,
-    "sha256": "3178abac746e0bd51a10c5a257a9b9c92aaefd89386d81d474eea86f954c7d81"
+    "bytes": 2496,
+    "sha256": "940af146331e10ab3e67f6bec7d107990f66b4b4f3bd062c6027bd1af4e430f3"
   },
   {
     "file": "AC-01-внутренний/documentation/standards-and-sources.md",
-    "bytes": 10019,
-    "sha256": "d2d3f091ffd2f51b813a349acc51f5614afe964561201689a1102e79f4c925df"
+    "bytes": 10114,
+    "sha256": "ab5f9d1dfd2493f3970a34c665b3a809a6c2ad1eca7e5511cb93f27dcce2490c"
   },
   {
     "file": "AC-01-внутренний/documentation/validation-R02.md",
@@ -211,8 +211,8 @@
   },
   {
     "file": "AC-01-внутренний/documentation/validation.md",
-    "bytes": 8387,
-    "sha256": "1c238bcc1c4604c2c8fb2ccee7162dc43857a38cf6148856d444f0e6f78e9bf2"
+    "bytes": 8623,
+    "sha256": "3dc7ee668f9c64b8c78f64e0e1c0c3efe85b240d68e6d10829aad25135d63f90"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-000-drawings-R01.dwg",
@@ -221,13 +221,13 @@
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-000-drawings-R02.dwg",
-    "bytes": 62377,
-    "sha256": "e788637ac73a9a27ec6edf8e11dde03d597c5d86cda6029e5c267b6d755a8e16"
+    "bytes": 62345,
+    "sha256": "580ade3582f1c87fbc1b336f684be418971fb921845391859cefeb44b0343ef3"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-drawings-R02.pdf",
-    "bytes": 101452,
-    "sha256": "f899d7dfa1ea29cf8d29f428b655efdefb48a42695b23d9b814dde2131ebb43f"
+    "bytes": 101436,
+    "sha256": "ba283d1ee6ec457dcf04f818df49c37634b20fc431d68695ae7e81e6307930d4"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-drawings.pdf",
@@ -237,7 +237,7 @@
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-1-R02.pdf",
     "bytes": 25602,
-    "sha256": "8cdc2e4da9fe5358f568a21199f5ab3071bc90df8586d4b31fe364cf914a55e8"
+    "sha256": "b068a42a358f5af62e8fb174932097ae94b285bd8a5babf4d63c012205eddcf1"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-1.pdf",
@@ -247,7 +247,7 @@
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-2-R02.pdf",
     "bytes": 30609,
-    "sha256": "3442b11d64b26b2878c38b50e36dde9a2f531be524fd7f3cedefe270420fb8f5"
+    "sha256": "baddc45449f9827388f89700a545e5a8df901b2a6a4e91aca9a1f75f8151b85f"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-2.pdf",
@@ -256,8 +256,8 @@
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-3-R02.pdf",
-    "bytes": 25114,
-    "sha256": "afd16d24e06700bd2999b9086018cec10b461cea19186ea06995455a54c176d6"
+    "bytes": 25098,
+    "sha256": "8120a1a1fbaa085be9ecd40b7baec3b059d2c210f76557c7fad73223495f23ed"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-3.pdf",
@@ -267,7 +267,7 @@
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-4-R02.pdf",
     "bytes": 23392,
-    "sha256": "2683eb387dbf026f8eff3aaea64d9d0548d7957756e6d3923d9597a486c9f9dd"
+    "sha256": "03679378a1d86eb427e880f595f1a71aada6164742ef89e0ce543859a1772b60"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-4.pdf",
@@ -276,8 +276,8 @@
   },
   {
     "file": "AC-01-внутренний/drawings/build_drawing_source.py",
-    "bytes": 13339,
-    "sha256": "dd76caa6e1ce39bd710644715f8932609eeac663a7d9cef8a7fb0494dbbdada6"
+    "bytes": 13337,
+    "sha256": "883ec71dadb25cd1f750cb0163136633f731ff12d4a53cb7b070f96aa5e271fb"
   },
   {
     "file": "AC-01-внутренний/drawings/check_layout.py",
@@ -286,8 +286,8 @@
   },
   {
     "file": "AC-01-внутренний/drawings/drawing-entities.json",
-    "bytes": 257876,
-    "sha256": "41056ea5263fdb76cc77fa02ef0240c8042159f83d50c29879d2d911a7b5995b"
+    "bytes": 257874,
+    "sha256": "cf1d8ffcad1e19980768884446a1e52c8bede7e8502fa46ad3021997aacd3942"
   },
   {
     "file": "AC-01-внутренний/drawings/extract_sections.py",
@@ -303,6 +303,11 @@
     "file": "AC-01-внутренний/drawings/model-sections.json",
     "bytes": 56433,
     "sha256": "54bda7ce88a7ea65e4c55ab73f5f792f3bf03996656f5158ae300b3a70ea2223"
+  },
+  {
+    "file": "AC-01-внутренний/manifest-sha256.json",
+    "bytes": 12073,
+    "sha256": "c26480fba44b062c8be2cd6b6d81e4a8e3a95c54a4ac612e6005aa7bb21ca907"
   },
   {
     "file": "AC-01-внутренний/manufacturing/AC-01-001-base-print-R02.stl",
@@ -366,8 +371,8 @@
   },
   {
     "file": "AC-01-внутренний/README.md",
-    "bytes": 3834,
-    "sha256": "a8c23bb8f1498d6ad527da1238c9ec739d8a5373d41af062715c9dc0e5e72678"
+    "bytes": 4066,
+    "sha256": "5cae1a4dcc383fd7d73e8d6efe38f93268d783520076c9248896216432209c6c"
   },
   {
     "file": "AC-02-наружный/cad/design.json",
@@ -562,12 +567,12 @@
   {
     "file": "AC-02-наружный/documentation/AC-02-connections.drawio",
     "bytes": 4883,
-    "sha256": "970262be7034e0cb8819f9789bcabb8865d1d549dc65061888b07116fc5a9a86"
+    "sha256": "49eda934374ae7fa13360b8ebe37bd6b379e2c8bfd3d59b60298f896c83ed3b7"
   },
   {
     "file": "AC-02-наружный/documentation/AC-02-connections.drawio.png",
-    "bytes": 247190,
-    "sha256": "047d6a172bc7a7f72ca376e4515d3ed47e90497ac6ea83c433492a4afab5a659"
+    "bytes": 246281,
+    "sha256": "9a6633a33285931af0ebed5eb6ea3edcfb3a1fe0bc28791d0cfd4ecc08a47a15"
   },
   {
     "file": "AC-02-наружный/documentation/AC-02-connections.png",
@@ -642,7 +647,7 @@
   {
     "file": "AC-02-наружный/documentation/finalize_assets.py",
     "bytes": 5935,
-    "sha256": "a34ff6dbf338da3d8fc51a963a5bb34c5149c274be70d777b39d9e7c4e58ec02"
+    "sha256": "1a3d8c9e662e16c38cca5d6dc420ed023f47e131cfdd0d0f0cc7844dfea31e35"
   },
   {
     "file": "AC-02-наружный/documentation/native-3d-verification-R04.json",
@@ -666,8 +671,8 @@
   },
   {
     "file": "AC-02-наружный/documentation/validation.md",
-    "bytes": 8902,
-    "sha256": "4608e0ba6ef7e6ee420e5676b91d92edf51d79e9f258341e19b326a51465c82c"
+    "bytes": 9138,
+    "sha256": "d96b5ede04d789582a7c3eb5a3c52727f8587230f3250fa77631c53ac7a97157"
   },
   {
     "file": "AC-02-наружный/drawings/AC-02-drawings-R01.dwg",
@@ -850,6 +855,11 @@
     "sha256": "5cd9e1bb6502734e4c0fbc853548ac7042ae4cfd739f570dc3fa22ac49ce0477"
   },
   {
+    "file": "AC-02-наружный/manifest-sha256.json",
+    "bytes": 17500,
+    "sha256": "e1deca11aa3bd758c85e6cd8b9a65ab52f7f4a96a0d2a8a3481921d4bf937987"
+  },
+  {
     "file": "AC-02-наружный/manufacturing/AC-02-001-base-print-R04.stl",
     "bytes": 272284,
     "sha256": "5284dcdb2623b06dc1682bdbb1f2f3d512701a88edf02305dba36ffc3cb2e857"
@@ -891,8 +901,8 @@
   },
   {
     "file": "AC-02-наружный/README.md",
-    "bytes": 3218,
-    "sha256": "8eadc8234748213751e4713a696ff3251b02869338a2dffe08096a39f2b315d3"
+    "bytes": 3427,
+    "sha256": "3e008f417cedcd20e86a817ad0c8d5815c45caea6f284822997b9646ab57d02b"
   },
   {
     "file": "AC-03-управление-и-связь/cad/design.json",
@@ -946,18 +956,18 @@
   },
   {
     "file": "AC-03-управление-и-связь/documentation/AC-03-000-RE.md",
-    "bytes": 13370,
-    "sha256": "4c69d2d45296b7025468c6edc5c00552007dba1a77a97d65a1afd59bfd4719e1"
+    "bytes": 13678,
+    "sha256": "27860b2b2ff780065a814b1ffdbdf8a1199abd90d2e181a1f7982c4de569fd54"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/AC-03-000-SP.md",
-    "bytes": 11129,
-    "sha256": "135d796e022f4919fdd7fe5a32045b93999f10ba29131396360c01cd43fe41c5"
+    "bytes": 11423,
+    "sha256": "bcb5008c0b1f9f35774690d0a5e0a2d5b93fa8b319f105b70c7b60501d58c1f9"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/AC-03-connections.drawio",
     "bytes": 10847,
-    "sha256": "4fb33d322f55b05c406bfe211ec9cac9585a70f08d2c849b24b6b343a63bcce5"
+    "sha256": "6b40dc1421bc63eab2530c3aeb5e528399245adf4060fdd8d2203e4323d336fd"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/AC-03-documentation-R01.pdf",
@@ -966,18 +976,18 @@
   },
   {
     "file": "AC-03-управление-и-связь/documentation/AC-03-documentation-R02.pdf",
-    "bytes": 143144,
-    "sha256": "af0a39175357d6747435ac95d358838f1fa47bd466c3a708b7af697b8b81cb60"
+    "bytes": 145246,
+    "sha256": "8c75557c719782511ea47ddca92c3688e87da239c9ee7a08596a06f5dcec1a7d"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/BOM.csv",
-    "bytes": 2763,
-    "sha256": "5b3b902001d351f67072ec79db25ac16fd66e91f1b89498e8ac673c6908e5a45"
+    "bytes": 3109,
+    "sha256": "b196c1809304eb4dcebc67484255c4d1e9913ec7524436c383e3229658133151"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/build_documentation.py",
-    "bytes": 8288,
-    "sha256": "9c50207987ea7e8b9c763ac4e9390fa01ef0301ca5c54016962846388c41bc27"
+    "bytes": 8351,
+    "sha256": "abdbfcc06ffede17ffe7f115b04066dc475b1b1e8edcda32f9dd1aae94d79638"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/drawing-audit-R01.md",
@@ -986,8 +996,8 @@
   },
   {
     "file": "AC-03-управление-и-связь/documentation/drawing-audit-R02.md",
-    "bytes": 9860,
-    "sha256": "97c8fd7a14e6d0f9360d5be66e96adbd9229dda7cbeeda2d1fb93d6acd4e89a7"
+    "bytes": 10122,
+    "sha256": "0f3afc64fb5588f0c19fcf593570a28d34a69fe730db2e1cb9b794b4bc91d02c"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/dwg-verification-R01.json",
@@ -1001,8 +1011,8 @@
   },
   {
     "file": "AC-03-управление-и-связь/documentation/standards-and-sources.md",
-    "bytes": 12506,
-    "sha256": "d891aa82d8bd5c5ea3d546d16d60b20d06c13644685692861821df94fe0fc337"
+    "bytes": 12687,
+    "sha256": "1add4c4e7d3bd4dfdee7228ba5c0ed849c344cea33f81a34ac4e94990cd69a9f"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/validation-R01.md",
@@ -1011,8 +1021,8 @@
   },
   {
     "file": "AC-03-управление-и-связь/documentation/validation-R02.md",
-    "bytes": 8876,
-    "sha256": "ac57599f544d5e8870bfa15100d22eabaeae99637da944b31935e8095b915958"
+    "bytes": 9376,
+    "sha256": "01a77067e2d451afed2283666a65b1f80c060584f20febe312f0280c24cdb46d"
   },
   {
     "file": "AC-03-управление-и-связь/drawings/AC-03-drawings-R01.dxf",
@@ -1036,8 +1046,8 @@
   },
   {
     "file": "AC-03-управление-и-связь/drawings/build_drawings.py",
-    "bytes": 45393,
-    "sha256": "c8bc0bbfe53ce3e3375c4bbd64c3247dde2f7e420202598a8fa9786b7faf5961"
+    "bytes": 45456,
+    "sha256": "bb29dfa92d8f4cbff914eedc879a428951a0cfd4b607ae3614ba9c09bf9cdd06"
   },
   {
     "file": "AC-03-управление-и-связь/drawings/drawing-entities-R01.json",
@@ -1058,6 +1068,11 @@
     "file": "AC-03-управление-и-связь/drawings/layout-audit-R02.json",
     "bytes": 1076,
     "sha256": "7b01ab24e5084d7340da68a040757af323246b98d2816a64fdfd4bcc2c264275"
+  },
+  {
+    "file": "AC-03-управление-и-связь/manifest-sha256.json",
+    "bytes": 6232,
+    "sha256": "660767f7c678285e40d506f651208b3193bc2ead59eb6e0a0b077ed623c9f447"
   },
   {
     "file": "AC-03-управление-и-связь/manufacturing/AC-03-001-base-print-R02.stl",
@@ -1086,13 +1101,13 @@
   },
   {
     "file": "AC-03-управление-и-связь/README.md",
-    "bytes": 2819,
-    "sha256": "32b4a83f5fba219ca4b3de046d2ec561c29858e02366e0c75fb1dd9a0d8934f7"
+    "bytes": 3026,
+    "sha256": "f4c83395207dc8f179fb96256c31b852fb694ebaac5cdfa87080fadd2f624224"
   },
   {
     "file": "README.md",
-    "bytes": 5152,
-    "sha256": "56fb8740e6ad84bd4d9a0575b7ec5c7ee348392353db8acf2df4e8abe3ba0136"
+    "bytes": 5620,
+    "sha256": "fc501dd3ccddf80837e7974b1e3000a40bfdc6d3f395be086e1f056e970f1c71"
   },
   {
     "file": "Общие-документы/api.md",
@@ -1121,8 +1136,8 @@
   },
   {
     "file": "Общие-документы/аудит-физической-части-aircheck-2026-10-11.md",
-    "bytes": 15664,
-    "sha256": "3bd2dbb77a34de0111f1e5f20996d068798ff291f4a00aeb52e1d3bb6cac767a"
+    "bytes": 20421,
+    "sha256": "e23887db1b8af6e6941ad255b26370a0e724ed8d81a2da5b244f37319ba859c2"
   },
   {
     "file": "Общие-документы/исходные-данные/devices.toml",
@@ -1141,8 +1156,8 @@
   },
   {
     "file": "Общие-документы/подготовка-физической-части-aircheck.md",
-    "bytes": 47427,
-    "sha256": "2642405715714e199076b545adbc72a13ac16a2220f86ac7f63c671a9e4aa549"
+    "bytes": 48350,
+    "sha256": "802da0ce399ba0da332cac193177d3779deead2e3ad6eddc244b773695168ebc"
   },
   {
     "file": "Общие-документы/ТЗ-поправка-01-стек.md",

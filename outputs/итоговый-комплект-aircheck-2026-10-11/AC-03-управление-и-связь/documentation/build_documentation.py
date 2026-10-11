@@ -17,7 +17,7 @@ from reportlab.platypus import (PageBreak, Paragraph, SimpleDocTemplate, Spacer,
 
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "documentation"
-RELEASE = "R01"
+RELEASE = "R02"
 pdfmetrics.registerFont(TTFont("Body", r"C:\Windows\Fonts\arial.ttf"))
 pdfmetrics.registerFont(TTFont("BodyBold", r"C:\Windows\Fonts\arialbd.ttf"))
 pdfmetrics.registerFontFamily("Body", normal="Body", bold="BodyBold",
@@ -146,12 +146,13 @@ def footer(pdf, doc) -> None:
 def main() -> None:
     global RELEASE
     parser = argparse.ArgumentParser(description="Build the AC-03 documentation PDF")
-    parser.add_argument("--release", default="R01", help="release label, for example R02")
+    parser.add_argument("--release", default="R02",
+                        help="release label (default: current release R02; use R01 for the archive)")
     parser.add_argument("--overwrite", action="store_true",
                         help="replace the PDF of the selected release")
     args = parser.parse_args()
     if not args.release.startswith("R") or not args.release[1:].isdigit():
-        parser.error("--release must look like R01")
+        parser.error("--release must look like R02")
     RELEASE = args.release
     output = DOC / f"AC-03-documentation-{RELEASE}.pdf"
     if output.exists() and not args.overwrite:

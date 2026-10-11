@@ -192,12 +192,12 @@
   {
     "file": "documentation/AC-02-connections.drawio",
     "bytes": 4883,
-    "sha256": "970262be7034e0cb8819f9789bcabb8865d1d549dc65061888b07116fc5a9a86"
+    "sha256": "49eda934374ae7fa13360b8ebe37bd6b379e2c8bfd3d59b60298f896c83ed3b7"
   },
   {
     "file": "documentation/AC-02-connections.drawio.png",
-    "bytes": 247190,
-    "sha256": "047d6a172bc7a7f72ca376e4515d3ed47e90497ac6ea83c433492a4afab5a659"
+    "bytes": 246281,
+    "sha256": "9a6633a33285931af0ebed5eb6ea3edcfb3a1fe0bc28791d0cfd4ecc08a47a15"
   },
   {
     "file": "documentation/AC-02-connections.png",
@@ -272,7 +272,7 @@
   {
     "file": "documentation/finalize_assets.py",
     "bytes": 5935,
-    "sha256": "a34ff6dbf338da3d8fc51a963a5bb34c5149c274be70d777b39d9e7c4e58ec02"
+    "sha256": "1a3d8c9e662e16c38cca5d6dc420ed023f47e131cfdd0d0f0cc7844dfea31e35"
   },
   {
     "file": "documentation/native-3d-verification-R04.json",
@@ -296,8 +296,8 @@
   },
   {
     "file": "documentation/validation.md",
-    "bytes": 8902,
-    "sha256": "4608e0ba6ef7e6ee420e5676b91d92edf51d79e9f258341e19b326a51465c82c"
+    "bytes": 9138,
+    "sha256": "d96b5ede04d789582a7c3eb5a3c52727f8587230f3250fa77631c53ac7a97157"
   },
   {
     "file": "drawings/AC-02-drawings-R01.dwg",
@@ -521,7 +521,7 @@
   },
   {
     "file": "README.md",
-    "bytes": 3218,
-    "sha256": "8eadc8234748213751e4713a696ff3251b02869338a2dffe08096a39f2b315d3"
+    "bytes": 3427,
+    "sha256": "3e008f417cedcd20e86a817ad0c8d5815c45caea6f284822997b9646ab57d02b"
   }
 ]

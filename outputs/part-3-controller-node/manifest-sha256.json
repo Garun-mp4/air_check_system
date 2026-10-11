@@ -51,18 +51,18 @@
   },
   {
     "file": "documentation/AC-03-000-RE.md",
-    "bytes": 13370,
-    "sha256": "4c69d2d45296b7025468c6edc5c00552007dba1a77a97d65a1afd59bfd4719e1"
+    "bytes": 13678,
+    "sha256": "27860b2b2ff780065a814b1ffdbdf8a1199abd90d2e181a1f7982c4de569fd54"
   },
   {
     "file": "documentation/AC-03-000-SP.md",
-    "bytes": 11011,
-    "sha256": "24d5eb83a37b1d69139febe1be4091339a86fff0636f2396dbc0efde06e7f3b4"
+    "bytes": 11379,
+    "sha256": "14cdbbf96e5fcc45229e54f3f4b06e27116e94289ca46cd49c6ce22ba2373384"
   },
   {
     "file": "documentation/AC-03-connections.drawio",
     "bytes": 10847,
-    "sha256": "4fb33d322f55b05c406bfe211ec9cac9585a70f08d2c849b24b6b343a63bcce5"
+    "sha256": "6b40dc1421bc63eab2530c3aeb5e528399245adf4060fdd8d2203e4323d336fd"
   },
   {
     "file": "documentation/AC-03-documentation-R01.pdf",
@@ -71,18 +71,18 @@
   },
   {
     "file": "documentation/AC-03-documentation-R02.pdf",
-    "bytes": 143144,
-    "sha256": "af0a39175357d6747435ac95d358838f1fa47bd466c3a708b7af697b8b81cb60"
+    "bytes": 145246,
+    "sha256": "8c75557c719782511ea47ddca92c3688e87da239c9ee7a08596a06f5dcec1a7d"
   },
   {
     "file": "documentation/BOM.csv",
-    "bytes": 2763,
-    "sha256": "5b3b902001d351f67072ec79db25ac16fd66e91f1b89498e8ac673c6908e5a45"
+    "bytes": 3109,
+    "sha256": "b196c1809304eb4dcebc67484255c4d1e9913ec7524436c383e3229658133151"
   },
   {
     "file": "documentation/build_documentation.py",
-    "bytes": 8288,
-    "sha256": "9c50207987ea7e8b9c763ac4e9390fa01ef0301ca5c54016962846388c41bc27"
+    "bytes": 8351,
+    "sha256": "abdbfcc06ffede17ffe7f115b04066dc475b1b1e8edcda32f9dd1aae94d79638"
   },
   {
     "file": "documentation/drawing-audit-R01.md",
@@ -91,8 +91,8 @@
   },
   {
     "file": "documentation/drawing-audit-R02.md",
-    "bytes": 9860,
-    "sha256": "97c8fd7a14e6d0f9360d5be66e96adbd9229dda7cbeeda2d1fb93d6acd4e89a7"
+    "bytes": 10122,
+    "sha256": "0f3afc64fb5588f0c19fcf593570a28d34a69fe730db2e1cb9b794b4bc91d02c"
   },
   {
     "file": "documentation/dwg-verification-R01.json",
@@ -106,8 +106,8 @@
   },
   {
     "file": "documentation/standards-and-sources.md",
-    "bytes": 12422,
-    "sha256": "12fcbac8f81aa61b213c67a753ee6c6a75482332ac05bd7c4bee742789317c87"
+    "bytes": 12643,
+    "sha256": "09d6f43179eb650fac171add1e5f4dd4d7778aeaab0f5e729770739d3c6d8056"
   },
   {
     "file": "documentation/validation-R01.md",
@@ -116,8 +116,8 @@
   },
   {
     "file": "documentation/validation-R02.md",
-    "bytes": 8876,
-    "sha256": "ac57599f544d5e8870bfa15100d22eabaeae99637da944b31935e8095b915958"
+    "bytes": 9376,
+    "sha256": "01a77067e2d451afed2283666a65b1f80c060584f20febe312f0280c24cdb46d"
   },
   {
     "file": "drawings/AC-03-drawings-R01.dxf",
@@ -141,8 +141,8 @@
   },
   {
     "file": "drawings/build_drawings.py",
-    "bytes": 45393,
-    "sha256": "c8bc0bbfe53ce3e3375c4bbd64c3247dde2f7e420202598a8fa9786b7faf5961"
+    "bytes": 45456,
+    "sha256": "bb29dfa92d8f4cbff914eedc879a428951a0cfd4b607ae3614ba9c09bf9cdd06"
   },
   {
     "file": "drawings/drawing-entities-R01.json",

@@ -11,7 +11,7 @@ DOC = ROOT / "documentation"
 
 def connection_diagram() -> Path:
     mx = ET.Element("mxfile", host="app.diagrams.net", version="26",
-                    modified="2026-10-11T00:00:00Z")
+                    modified="2026-10-12T00:00:00Z")
     diagram = ET.SubElement(mx, "diagram", id="aircheck-ac02", name="Соединения AC-02")
     model = ET.SubElement(diagram, "mxGraphModel", dx="1230", dy="900",
                           grid="1", gridSize="10", page="1",
@@ -41,7 +41,7 @@ def connection_diagram() -> Path:
                              source=source, target=target)
         ET.SubElement(cell, "mxGeometry", relative="1", attrib={"as": "geometry"})
 
-    vertex("title", "AirCheck AC-02 • наружный измерительный узел • R01\n"
+    vertex("title", "AirCheck AC-02 • наружный измерительный узел • R04\n"
            "Функциональная схема соединений; не принципиальная Э3", 25, 24, 1180, 74,
            "#e7edf0", 20)
     vertex("usb", "ПИТАНИЕ\n\nОдин адаптер USB\n5 В / 2 А\nMicro-USB ESP32\n\nНе подавать второй\nисточник на 5V / 3V3",

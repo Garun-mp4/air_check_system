@@ -20,7 +20,7 @@ from reportlab.pdfgen import canvas
 
 ROOT = Path(__file__).resolve().parents[1]
 DRAW = ROOT / "drawings"
-RELEASE = "R01"
+RELEASE = "R02"
 SHEETS = 5
 PAGE_W, PAGE_H = 420.0, 297.0
 DXF_GAP = 24.0
@@ -904,12 +904,13 @@ def layout_audit(entities: list[dict]) -> dict:
 def main():
     global RELEASE
     parser = argparse.ArgumentParser(description="Generate AC-03 A3 drawings and DXF")
-    parser.add_argument("--release", default="R01", help="release label, for example R02")
+    parser.add_argument("--release", default="R02",
+                        help="release label (default: current release R02; use R01 for the archive)")
     parser.add_argument("--overwrite", action="store_true",
                         help="replace outputs of the selected release")
     args = parser.parse_args()
     if not args.release.startswith("R") or not args.release[1:].isdigit():
-        parser.error("--release must look like R01")
+        parser.error("--release must look like R02")
     RELEASE = args.release
     DRAW.mkdir(parents=True, exist_ok=True)
     targets = [

@@ -1,11 +1,11 @@
-<mxfile host="app.diagrams.net" modified="2026-10-11T16:30:00.000Z" agent="Codex" version="31.5.3" type="device">
-  <diagram id="AC03-function-R01-20261011" name="Структура и интерфейсы">
+<mxfile host="app.diagrams.net" modified="2026-10-12T00:00:00.000Z" agent="Codex" version="31.5.3" type="device">
+  <diagram id="AC03-function-R02-20261012" name="Структура и интерфейсы">
     <mxGraphModel dx="1800" dy="1040" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1040" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
         <mxCell id="title" value="AirCheck AC-03 — узел управления и связи" style="text;html=1;align=left;verticalAlign=middle;fontSize=28;fontStyle=1;fontColor=#13202B;whiteSpace=wrap;" vertex="1" parent="1"><mxGeometry x="55" y="28" width="1300" height="45" as="geometry"/></mxCell>
-        <mxCell id="subtitle" value="Цифровой прототип R01 · ESP32-DevKitC-32E V4 · размеры корпуса в мм · 11.10.2026" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;fontColor=#52616B;whiteSpace=wrap;" vertex="1" parent="1"><mxGeometry x="58" y="75" width="1350" height="30" as="geometry"/></mxCell>
+        <mxCell id="subtitle" value="Цифровой прототип R02 · ESP32-DevKitC-32E V4 · размеры корпуса в мм · 12.10.2026" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;fontColor=#52616B;whiteSpace=wrap;" vertex="1" parent="1"><mxGeometry x="58" y="75" width="1350" height="30" as="geometry"/></mxCell>
         <mxCell id="zone-data" value="Сбор измерений и связь с AirCheck" style="swimlane;html=1;rounded=0;horizontal=1;startSize=38;collapsible=0;fillColor=#F8FAFC;swimlaneFillColor=#F8FAFC;strokeColor=#94A3B8;strokeWidth=1.5;fontColor=#334155;fontStyle=1;fontSize=17;align=left;spacingLeft=12;" vertex="1" parent="1"><mxGeometry x="45" y="125" width="1710" height="425" as="geometry"/></mxCell>
         <mxCell id="zone-act" value="Управляющие сигналы и внешние исполнительные устройства" style="swimlane;html=1;rounded=0;horizontal=1;startSize=38;collapsible=0;fillColor=#FBFCFD;swimlaneFillColor=#FBFCFD;strokeColor=#94A3B8;strokeWidth=1.5;fontColor=#334155;fontStyle=1;fontSize=17;align=left;spacingLeft=12;" vertex="1" parent="1"><mxGeometry x="45" y="580" width="1710" height="330" as="geometry"/></mxCell>
         <mxCell id="node-a" value="&lt;b&gt;Узел A · внутри помещения&lt;/b&gt;&lt;br&gt;ESP32 + SCD41 + SPS30&lt;br&gt;Формирует внутренние измерения" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F1F5;strokeColor=#497083;strokeWidth=2;fontColor=#172B34;fontSize=17;align=center;verticalAlign=middle;spacing=10;" vertex="1" parent="1"><mxGeometry x="90" y="205" width="315" height="125" as="geometry"/></mxCell>
