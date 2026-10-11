@@ -280,6 +280,34 @@ guide_overlap = next(
     if entry["part"] == "AC-01-001-base" and entry["reference"] == "REF-SPS30"
 )
 release_status = "PASS_WITH_TOLERANCE_NOTE" if guide_overlap["intersection_mm3"] > 0.05 else "PASS"
+review_notes = []
+if guide_overlap["intersection_mm3"] > 0.05:
+    review_notes.append({
+        "severity": "fit_check_required",
+        "reference": "REF-SPS30",
+        "intersection_mm3": guide_overlap["intersection_mm3"],
+        "nominal_fit": "The drawing sets 41.2 mm between SPS30 guide faces; the unscaled manufacturer STEP measures 41.20693 mm across that direction.",
+        "disposition": "No scaling or hidden housing correction was applied. Preserve the drawing geometry and verify the actual part with a printed fit sample before assembly.",
+    })
+
+# The board envelopes deliberately engage the retaining snaps by 0.1 mm.
+# Keep this documented as a functional print-fit check, not as an unexplained
+# clash or a reason to alter the drawing-controlled housing geometry.
+snap_references = {"REF-SCD41-PCB", "REF-ESP32-LOD0"}
+for entry in electronics_intersections:
+    if (
+        entry["part"] == "AC-01-001-base"
+        and entry["reference"] in snap_references
+        and entry["intersection_mm3"] > 0.05
+    ):
+        review_notes.append({
+            "severity": "intentional_snap_overlap_requires_print_test",
+            "reference": entry["reference"],
+            "intersection_mm3": entry["intersection_mm3"],
+            "intersection_bounds": entry.get("intersection_bounds"),
+            "nominal_fit": "The LOD0 PCB edge intentionally overlaps its retaining snaps by 0.1 mm, as documented in validation-R02.md.",
+            "disposition": "Do not remove the snap engagement or change drawing-controlled STL geometry from this LOD0 calculation. Confirm the exact purchased board outline, snap elasticity and assembly force with a test print.",
+        })
 inspection = {
     "status": release_status,
     "revision": REVISION,
@@ -305,13 +333,7 @@ inspection = {
     "step": step_results,
     "printed_part_intersections": printed_intersections,
     "housing_to_electronics_intersections": electronics_intersections,
-    "review_notes": ([{
-        "severity": "fit_check_required",
-        "reference": "REF-SPS30",
-        "intersection_mm3": guide_overlap["intersection_mm3"],
-        "nominal_fit": "The drawing sets 41.2 mm between SPS30 guide faces; the unscaled manufacturer STEP measures 41.20693 mm across that direction.",
-        "disposition": "No scaling or hidden housing correction was applied. Preserve the drawing geometry and verify the actual part with a printed fit sample before assembly.",
-    }] if guide_overlap["intersection_mm3"] > 0.05 else []),
+    "review_notes": review_notes,
     "limits": [
         "STL files have no embedded unit declaration; millimetres are the project convention.",
         "Printer, nozzle, material, slicer profile and shrink compensation are not selected.",

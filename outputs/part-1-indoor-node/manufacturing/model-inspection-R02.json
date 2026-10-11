@@ -324,6 +324,54 @@
       "intersection_mm3": 5.9152,
       "nominal_fit": "The drawing sets 41.2 mm between SPS30 guide faces; the unscaled manufacturer STEP measures 41.20693 mm across that direction.",
       "disposition": "No scaling or hidden housing correction was applied. Preserve the drawing geometry and verify the actual part with a printed fit sample before assembly."
+    },
+    {
+      "severity": "intentional_snap_overlap_requires_print_test",
+      "reference": "REF-SCD41-PCB",
+      "intersection_mm3": 1.6,
+      "intersection_bounds": {
+        "min_mm": [
+          32.0,
+          146.0,
+          29.5
+        ],
+        "max_mm": [
+          40.0,
+          168.86,
+          29.6
+        ],
+        "extents_mm": [
+          8.0,
+          22.86,
+          0.1
+        ]
+      },
+      "nominal_fit": "The LOD0 PCB edge intentionally overlaps its retaining snaps by 0.1 mm, as documented in validation-R02.md.",
+      "disposition": "Do not remove the snap engagement or change drawing-controlled STL geometry from this LOD0 calculation. Confirm the exact purchased board outline, snap elasticity and assembly force with a test print."
+    },
+    {
+      "severity": "intentional_snap_overlap_requires_print_test",
+      "reference": "REF-ESP32-LOD0",
+      "intersection_mm3": 2.80798,
+      "intersection_bounds": {
+        "min_mm": [
+          112.0,
+          115.0,
+          17.45
+        ],
+        "max_mm": [
+          120.0,
+          142.94,
+          17.6
+        ],
+        "extents_mm": [
+          8.0,
+          27.94,
+          0.15
+        ]
+      },
+      "nominal_fit": "The LOD0 PCB edge intentionally overlaps its retaining snaps by 0.1 mm, as documented in validation-R02.md.",
+      "disposition": "Do not remove the snap engagement or change drawing-controlled STL geometry from this LOD0 calculation. Confirm the exact purchased board outline, snap elasticity and assembly force with a test print."
     }
   ],
   "limits": [

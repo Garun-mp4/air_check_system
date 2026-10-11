@@ -16,7 +16,7 @@
     "audit_warnings": 0,
     "issues": [],
     "unknown_entities": 0,
-    "viewport_capture": "ocs_capture returned Unexpected response type; no visual capture is claimed"
+    "viewport_capture": "OpenCAD Studio viewport captured and visually reviewed on 2026-10-12: Gouraud Shaded + Edges, unannotated isometric extents. The closed housing, lid seam and exterior walls showed no visible overlaps. Physical fit is not verified."
   },
   "file": {
     "file": "cad/model/AC-02-000-assembly-R04.dwg",

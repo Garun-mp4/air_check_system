@@ -71,8 +71,8 @@
   },
   {
     "file": "documentation/AC-03-documentation-R02.pdf",
-    "bytes": 143169,
-    "sha256": "97b6359a05bcf6f9f740340fde21ecfc531983b5237f638df48c0b022913077c"
+    "bytes": 143144,
+    "sha256": "af0a39175357d6747435ac95d358838f1fa47bd466c3a708b7af697b8b81cb60"
   },
   {
     "file": "documentation/BOM.csv",
@@ -101,8 +101,8 @@
   },
   {
     "file": "documentation/native-3d-verification-R02.json",
-    "bytes": 809,
-    "sha256": "14b5541ccfbeec11e7b14163430979a5fda958464b610855bc10d1f8a135aabb"
+    "bytes": 981,
+    "sha256": "98d0a3c9983630e7a46c977f8d1b2e81fc1baf427f8c2ba5258a927e91934bbd"
   },
   {
     "file": "documentation/standards-and-sources.md",
@@ -116,8 +116,8 @@
   },
   {
     "file": "documentation/validation-R02.md",
-    "bytes": 8901,
-    "sha256": "34560d36f92737595ba10969041d073d9a9f5291e2a9d0eb9ddbeca0dd6b14a9"
+    "bytes": 8876,
+    "sha256": "ac57599f544d5e8870bfa15100d22eabaeae99637da944b31935e8095b915958"
   },
   {
     "file": "drawings/AC-03-drawings-R01.dxf",

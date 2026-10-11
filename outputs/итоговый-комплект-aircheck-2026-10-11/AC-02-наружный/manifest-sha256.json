@@ -221,8 +221,8 @@
   },
   {
     "file": "documentation/AC-02-documentation-R04.pdf",
-    "bytes": 128910,
-    "sha256": "4035c58f1847eb6e39415825bf14ac2c2e14afd3617fda03fe3e597ee5e2374c"
+    "bytes": 128964,
+    "sha256": "831da11b7d10529929c9787e4a16d9b24a50ba361627445d2cc39b74361dd934"
   },
   {
     "file": "documentation/BOM.csv",
@@ -276,13 +276,13 @@
   },
   {
     "file": "documentation/native-3d-verification-R04.json",
-    "bytes": 924,
-    "sha256": "a77cb90b7a7f96f0e9a5760403c124fe114fbc2d27bd2c611eb5bdaa47e1ae28"
+    "bytes": 1079,
+    "sha256": "ad6d2f06edfdd088de83b5cbbe338a0e81928a4a79e6d773b58c662d8c098a08"
   },
   {
     "file": "documentation/pdf-inspection.json",
     "bytes": 2935,
-    "sha256": "8fe4e351c6b9fdf3125b1ef36c68f909819bde936e79c306ed5862702c9df943"
+    "sha256": "5cc9d13b31b6731171f5a4c6296377f846c152eaf42e51b2d9b903b33b193dce"
   },
   {
     "file": "documentation/standards-and-sources.md",
@@ -291,8 +291,8 @@
   },
   {
     "file": "documentation/validation-R04.md",
-    "bytes": 11905,
-    "sha256": "0b977012b752c5124aaa668a4eb15409bde65130cf9bf8cc6aace8a73d2d4973"
+    "bytes": 12039,
+    "sha256": "26bc44b8d81d02400d0d4250faf3550258fa3b2193dfa8fb6af330ba5c053367"
   },
   {
     "file": "documentation/validation.md",

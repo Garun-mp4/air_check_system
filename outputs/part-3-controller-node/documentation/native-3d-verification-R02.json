@@ -14,7 +14,7 @@
     "semantic_roundtrip_verified": true,
     "audit_errors": 0,
     "audit_warnings": 0,
-    "viewport_capture": "ocs_capture returned Unexpected response type; no visual capture is claimed"
+    "viewport_capture": "OpenCAD Studio viewport captured and visually reviewed on 2026-10-12: Gouraud Shaded + Edges, unannotated isometric extents. The housing seam, four lid holes, USB opening and exterior walls showed no visible overlaps. Physical fit is not verified."
   },
   "file": {
     "file": "cad/model/AC-03-000-assembly-R02.dwg",

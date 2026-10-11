@@ -151,8 +151,8 @@
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-documentation-R02.pdf",
-    "bytes": 139692,
-    "sha256": "a7bf24c92c1d3ad41636d8fa68346de84c323c17dc8250e058ce6cff167ace0f"
+    "bytes": 140076,
+    "sha256": "b69dcb84a518a2982955bc4d4aae39c878ba9faa77d8b9e06b93ad535c920e7a"
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-documentation.pdf",
@@ -186,18 +186,18 @@
   },
   {
     "file": "AC-01-внутренний/documentation/model-release-R02.md",
-    "bytes": 5470,
-    "sha256": "c4893eefb1bcb6679271173cc9daf6fbdef82a00a88f17103382276721625531"
+    "bytes": 5974,
+    "sha256": "434979268cd27401e5a634c64659279e1a8accc709911237a915307bf78c9ff0"
   },
   {
     "file": "AC-01-внутренний/documentation/native-3d-verification-R02.json",
-    "bytes": 1387,
-    "sha256": "cceb0ac5cedfa1396bc026d76264053e7d7f144b33e0c20309c4cf305281a5fe"
+    "bytes": 1559,
+    "sha256": "bcae7cb8eeb68ee5bcd3ab93d25b843a15e7b1eff42c85aedbc13052d5d7c9e0"
   },
   {
     "file": "AC-01-внутренний/documentation/pdf-inspection.json",
-    "bytes": 2494,
-    "sha256": "df695c6d3fdc40adc40abbac019143abd382a5a04bfda9164465c9ee9700df19"
+    "bytes": 2495,
+    "sha256": "3178abac746e0bd51a10c5a257a9b9c92aaefd89386d81d474eea86f954c7d81"
   },
   {
     "file": "AC-01-внутренний/documentation/standards-and-sources.md",
@@ -206,8 +206,8 @@
   },
   {
     "file": "AC-01-внутренний/documentation/validation-R02.md",
-    "bytes": 12593,
-    "sha256": "f5e96cce02aa11f679d5edc847fb78a11f863898a2c3fb7dbf00218bc7468b45"
+    "bytes": 13257,
+    "sha256": "3d2b6bfcb0750ed929fd5f85576cf25ac409f5fba8d1f0626d3eb590659fa57d"
   },
   {
     "file": "AC-01-внутренний/documentation/validation.md",
@@ -321,8 +321,8 @@
   },
   {
     "file": "AC-01-внутренний/manufacturing/build_model_release_R02.py",
-    "bytes": 13480,
-    "sha256": "849285ea09ec2509024d648093b48018cb81c19e7d21bca6e4f707b56d263c7d"
+    "bytes": 14649,
+    "sha256": "0b8ef892fcb033f82c11cffa270dbc852a6a681829523c9f1871b69f3f9d55c7"
   },
   {
     "file": "AC-01-внутренний/manufacturing/clearance-inspection.json",
@@ -351,8 +351,8 @@
   },
   {
     "file": "AC-01-внутренний/manufacturing/model-inspection-R02.json",
-    "bytes": 7739,
-    "sha256": "e5e13704278f53e9c1991507b904e2c2aadb367b3c2ffc5bcb13a51f8c931b21"
+    "bytes": 9360,
+    "sha256": "d93063549b47d9344da928f3c01fd0d9e79971e704dfde49a1500cdd63058c57"
   },
   {
     "file": "AC-01-внутренний/manufacturing/step-inspection.json",
@@ -366,8 +366,8 @@
   },
   {
     "file": "AC-01-внутренний/README.md",
-    "bytes": 3559,
-    "sha256": "b66155ad4397771b55729524bb422d431d7d174bdd56b663ebe2094914dd671b"
+    "bytes": 3834,
+    "sha256": "a8c23bb8f1498d6ad527da1238c9ec739d8a5373d41af062715c9dc0e5e72678"
   },
   {
     "file": "AC-02-наружный/cad/design.json",
@@ -591,8 +591,8 @@
   },
   {
     "file": "AC-02-наружный/documentation/AC-02-documentation-R04.pdf",
-    "bytes": 128910,
-    "sha256": "4035c58f1847eb6e39415825bf14ac2c2e14afd3617fda03fe3e597ee5e2374c"
+    "bytes": 128964,
+    "sha256": "831da11b7d10529929c9787e4a16d9b24a50ba361627445d2cc39b74361dd934"
   },
   {
     "file": "AC-02-наружный/documentation/BOM.csv",
@@ -646,13 +646,13 @@
   },
   {
     "file": "AC-02-наружный/documentation/native-3d-verification-R04.json",
-    "bytes": 924,
-    "sha256": "a77cb90b7a7f96f0e9a5760403c124fe114fbc2d27bd2c611eb5bdaa47e1ae28"
+    "bytes": 1079,
+    "sha256": "ad6d2f06edfdd088de83b5cbbe338a0e81928a4a79e6d773b58c662d8c098a08"
   },
   {
     "file": "AC-02-наружный/documentation/pdf-inspection.json",
     "bytes": 2935,
-    "sha256": "8fe4e351c6b9fdf3125b1ef36c68f909819bde936e79c306ed5862702c9df943"
+    "sha256": "5cc9d13b31b6731171f5a4c6296377f846c152eaf42e51b2d9b903b33b193dce"
   },
   {
     "file": "AC-02-наружный/documentation/standards-and-sources.md",
@@ -661,8 +661,8 @@
   },
   {
     "file": "AC-02-наружный/documentation/validation-R04.md",
-    "bytes": 11905,
-    "sha256": "0b977012b752c5124aaa668a4eb15409bde65130cf9bf8cc6aace8a73d2d4973"
+    "bytes": 12039,
+    "sha256": "26bc44b8d81d02400d0d4250faf3550258fa3b2193dfa8fb6af330ba5c053367"
   },
   {
     "file": "AC-02-наружный/documentation/validation.md",
@@ -966,8 +966,8 @@
   },
   {
     "file": "AC-03-управление-и-связь/documentation/AC-03-documentation-R02.pdf",
-    "bytes": 143169,
-    "sha256": "97b6359a05bcf6f9f740340fde21ecfc531983b5237f638df48c0b022913077c"
+    "bytes": 143144,
+    "sha256": "af0a39175357d6747435ac95d358838f1fa47bd466c3a708b7af697b8b81cb60"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/BOM.csv",
@@ -996,8 +996,8 @@
   },
   {
     "file": "AC-03-управление-и-связь/documentation/native-3d-verification-R02.json",
-    "bytes": 809,
-    "sha256": "14b5541ccfbeec11e7b14163430979a5fda958464b610855bc10d1f8a135aabb"
+    "bytes": 981,
+    "sha256": "98d0a3c9983630e7a46c977f8d1b2e81fc1baf427f8c2ba5258a927e91934bbd"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/standards-and-sources.md",
@@ -1011,8 +1011,8 @@
   },
   {
     "file": "AC-03-управление-и-связь/documentation/validation-R02.md",
-    "bytes": 8901,
-    "sha256": "34560d36f92737595ba10969041d073d9a9f5291e2a9d0eb9ddbeca0dd6b14a9"
+    "bytes": 8876,
+    "sha256": "ac57599f544d5e8870bfa15100d22eabaeae99637da944b31935e8095b915958"
   },
   {
     "file": "AC-03-управление-и-связь/drawings/AC-03-drawings-R01.dxf",
