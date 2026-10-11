@@ -1096,7 +1096,7 @@
   },
   "refs": {
     "REF-SPS30": {
-      "name": "Sensirion SPS30 LOD0",
+      "name": "Sensirion SPS30 placement envelope; assembly uses manufacturer STEP",
       "shell": [
         {
           "kind": "box",
@@ -1116,7 +1116,7 @@
       "cut": []
     },
     "REF-SHT45": {
-      "name": "Adafruit SHT45 #5665 LOD0",
+      "name": "Adafruit SHT45 #5665 mounting envelope; assembly uses manufacturer STEP",
       "shell": [
         {
           "kind": "box",

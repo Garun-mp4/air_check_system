@@ -18,6 +18,7 @@ from pypdf import PdfReader, PdfWriter
 
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "documentation"
+RELEASE = "R03"
 FONT_DIR = Path(r"C:\Windows\Fonts")
 pdfmetrics.registerFont(TTFont("DrawingGOST", str(FONT_DIR / "GOST_BU.ttf")))
 pdfmetrics.registerFont(TTFont("Body", str(FONT_DIR / "arial.ttf")))
@@ -33,9 +34,9 @@ def drawing_pdfs() -> list[Path]:
         raise RuntimeError("Drawing geometry fails layout inspection")
     paths: list[Path] = []
     for sheet in range(6):
-        path = ROOT / "drawings" / f"AC-02-sheet-{sheet + 1:02d}-R01.pdf"
+        path = ROOT / "drawings" / f"AC-02-sheet-{sheet + 1:02d}-{RELEASE}.pdf"
         page = canvas.Canvas(str(path), pagesize=(420 * mm, 297 * mm), pageCompression=1)
-        page.setTitle(f"AirCheck AC-02 лист {sheet + 1} R01")
+        page.setTitle(f"AirCheck AC-02 лист {sheet + 1} {RELEASE}")
         page.setAuthor("AirCheck project")
         page.setSubject("Цифровой прототип; размерный чертёж, единицы мм")
         offset = sheet * 450
@@ -71,11 +72,11 @@ def drawing_pdfs() -> list[Path]:
         page.save()
         paths.append(path)
 
-    combined = ROOT / "drawings" / "AC-02-drawings-R01.pdf"
+    combined = ROOT / "drawings" / f"AC-02-drawings-{RELEASE}.pdf"
     writer = PdfWriter()
     for path in paths:
         writer.append(str(path))
-    writer.add_metadata({"/Title": "AirCheck AC-02 — комплект чертежей R01",
+    writer.add_metadata({"/Title": f"AirCheck AC-02 — комплект чертежей {RELEASE}",
                          "/Author": "AirCheck project",
                          "/Subject": "Шесть листов A3, единицы мм; цифровой прототип"})
     with combined.open("wb") as stream:
@@ -191,28 +192,29 @@ def footer(page: canvas.Canvas, doc) -> None:
     page.rect(14 * mm, 10 * mm, 182 * mm, 277 * mm, stroke=1, fill=0)
     page.setFont("Body", 7.4)
     page.setFillColor(colors.HexColor("#273b44"))
-    page.drawString(18 * mm, 13 * mm, "AirCheck | AC-02 | R01 | 11.10.2026 | цифровой прототип")
+    page.drawString(18 * mm, 13 * mm, f"AirCheck | AC-02 | {RELEASE} | 11.10.2026 | цифровой прототип")
     page.drawRightString(193 * mm, 13 * mm, f"Лист {doc.page}")
     page.restoreState()
 
 
 def documentation_pdf() -> Path:
-    path = DOC / "AC-02-documentation-R01.pdf"
+    path = DOC / f"AC-02-documentation-{RELEASE}.pdf"
     doc = SimpleDocTemplate(str(path), pagesize=(210 * mm, 297 * mm),
                             leftMargin=18 * mm, rightMargin=17 * mm,
                             topMargin=17 * mm, bottomMargin=21 * mm,
-                            title="AirCheck AC-02: спецификация и руководство R01",
+                            title=f"AirCheck AC-02: спецификация и руководство {RELEASE}",
                             author="AirCheck project")
     story = [
         Paragraph("AirCheck. Наружный измерительный узел", head1),
-        Paragraph("AC-02 • комплект документации R01 • 11.10.2026", body),
+        Paragraph(f"AC-02 • комплект документации {RELEASE} • 11.10.2026", body),
         Spacer(1, 8),
         Paragraph("В комплект входят рабочая спецификация, руководство по сборке/эксплуатации, нормативная матрица и протокол цифровой проверки.", body),
         Paragraph("Платы не куплены, принтер и пластик не выбраны. Чертежи и модели предназначены для прототипирования; фактическая посадка, наружная защита и точность измерений не испытаны.", body),
         Paragraph("Установка по исходному условию — под навесом. Корпус не имеет заявленного IP-класса.", body),
     ]
     for name in ("AC-02-000-SP.md", "AC-02-000-RE.md",
-                 "standards-and-sources.md", "validation.md"):
+                 "standards-and-sources.md", "validation.md",
+                 "drawing-audit-R03.md"):
         story.append(PageBreak())
         story.extend(markdown_story(DOC / name))
     doc.build(story, onFirstPage=footer, onLaterPages=footer)

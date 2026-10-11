@@ -89,7 +89,9 @@ def bom_csv() -> Path:
 def manifest() -> Path:
     rows = []
     for path in sorted(ROOT.rglob("*")):
-        if path.is_file() and path.name != "manifest-sha256.json" and "__pycache__" not in path.parts:
+        if (path.is_file() and path.name != "manifest-sha256.json"
+                and not path.name.endswith((".ocs.lock", ".sv$"))
+                and "__pycache__" not in path.parts):
             payload = path.read_bytes()
             rows.append({"file": path.relative_to(ROOT).as_posix(),
                          "bytes": len(payload),

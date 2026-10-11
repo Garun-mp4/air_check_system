@@ -15,7 +15,7 @@
 | [ГОСТ 2.304-81](https://protect.gost.ru/gost/details/2acb3258-c28c-4e4a-b7ac-208043f2d95e) | Чертёжный шрифт | PDF включает подмножество локального GOST Type BU; шрифт DWG зависит от CAD-среды |
 | [ГОСТ 2.305-2008](https://protect.gost.ru/gost/details/cbeccb9a-67df-45fa-9c67-c391a43bbbc9) | Виды, разрезы и обозначение компонентов | Посадки электроники отмечены как REF/LOD0; схемные условности не подменяют геометрию |
 | [ГОСТ 2.307-2011](https://protect.gost.ru/gost/details/62de9da6-e1a7-4023-955e-7dd9777eaab6) | Размеры и отклонения | На дату выпуска карточка указывает «Действует»; неуказанные линейные размеры прототипа ±0,3 мм |
-| [ГОСТ Р 2.307-2026](https://protect.gost.ru/gost/details/eddb3107-58be-4811-b237-5ab1d0d4c4d5) | Будущая редакция правил размеров | На карточке Росстандарта: введение 01.10.2027 с правом досрочного применения. R01 датирован ранее; редакции не смешаны |
+| [ГОСТ Р 2.307-2026](https://protect.gost.ru/gost/details/eddb3107-58be-4811-b237-5ab1d0d4c4d5) | Принят; правила размеров и предельных отклонений | Вводится 01.10.2027, допускает досрочное применение. Выбор редакции для R03 оставлен руководителю ВКР |
 | [ГОСТ Р 2.105-2019](https://protect.gost.ru/gost/details/0dd3cdfa-c15a-47b3-9e3b-4a90a43005c8), [ГОСТ Р 2.106-2019](https://protect.gost.ru/gost/details/a65c2b20-2cfb-4326-abd5-3aad62db747c) | Текстовая документация и содержание спецификации | Рабочие Markdown/CSV/PDF, не заполненные подлинные формы 1/1а |
 | [ГОСТ Р 2.201-2023](https://protect.gost.ru/gost/details/b62e1df9-57a5-4e54-85c1-e27376e06648) | Принцип условных обозначений | Код кафедры/организации не назначен |
 
@@ -30,8 +30,6 @@
 
 ## Первичные источники компонентов и геометрии
 
-| Компонент | Источник | Применение в AC-02 |
-| --- | --- | --- |
-| ESP32-DevKitC V4 | [Руководство Espressif](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32/esp32-devkitc/user_guide.html), официальный [чертёж размеров PDF](https://dl.espressif.com/dl/schematics/esp32_devkitc_v4_dimensions.pdf), [DXF](https://dl.espressif.com/dl/schematics/esp32_devkitc_v4_dimensions.dxf) | Плата и разъём — размерная LOD0-модель; в справочнике сохранены исходные PDF/DXF. Pinout проверен по таблице производителя |
-| Adafruit SHT45 #5665 без PTFE | [Страница изделия](https://www.adafruit.com/product/5665), [pinout](https://learn.adafruit.com/adafruit-sht40-temperature-humidity-sensor/pinouts) | STEP/BRD платы производителя сохранены в `cad/reference`; STEP-тело включено в сборку. I²C default 0x44 |
-| Sensirion SPS30 | [Даташит](https://sensirion.com/file/datasheet_sps30), [руководство по механике](https://sensirion.com/en/media/documents/7990F04A/616544B0/Sensirion_Particulate_Matter_AppNotes_SPS30_Mechanical_Design_and_As.pdf) | Заводской STEP включён в обменную сборку и сохранён отдельно; два входа и выход ориентированы к Y=0, разъём — к +Y |
+- **ESP32-DevKitC V4.** [Руководство Espressif](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32/esp32-devkitc/user_guide.html), официальный [чертёж размеров PDF](https://dl.espressif.com/dl/schematics/esp32_devkitc_v4_dimensions.pdf) и [DXF](https://dl.espressif.com/dl/schematics/esp32_devkitc_v4_dimensions.dxf). Плата и разъём представлены размерной LOD0-моделью; исходные PDF/DXF сохранены в `cad/reference`, pinout сверен с таблицей производителя.
+- **Adafruit SHT45 #5665 без PTFE.** [Страница изделия](https://www.adafruit.com/product/5665) и [pinout](https://learn.adafruit.com/adafruit-sht40-temperature-humidity-sensor/pinouts). STEP/BRD производителя сохранены в `cad/reference`; STEP-тело включено в сборку, адрес I²C по умолчанию — 0x44.
+- **Sensirion SPS30.** [Даташит](https://sensirion.com/file/datasheet_sps30) и [руководство по механике](https://sensirion.com/en/media/documents/7990F04A/616544B0/Sensirion_Particulate_Matter_AppNotes_SPS30_Mechanical_Design_and_As.pdf). Заводской STEP включён в обменную сборку и сохранён отдельно; два входа и выход ориентированы к Y=0, разъём — к +Y.

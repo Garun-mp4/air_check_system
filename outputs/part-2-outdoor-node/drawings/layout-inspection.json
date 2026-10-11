@@ -1,8 +1,8 @@
 {
   "sheets": 6,
   "format": "A3 landscape, 420 x 297 mm",
-  "entities": 1118,
-  "text_entities": 269,
+  "entities": 1365,
+  "text_entities": 279,
   "issues": [],
   "method": "GOST BU font metrics, rotated text boxes, 0.4 mm title-cell clearance, segment intersection"
 }

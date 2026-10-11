@@ -1,25 +1,25 @@
 {
   "verified": true,
   "operation": "OpenCADStudio save_verified",
-  "path": "drawings/AC-02-drawings-R01.dwg",
-  "sha256": "81e06c8908fa6c7e6f018cfe703b48cc1fbabe78962f2590c898e4745df60ec6",
-  "bytes": 56902,
-  "document_id": 7,
+  "path": "drawings/AC-02-drawings-R03.dwg",
+  "sha256": "6d2e3ed7b98f3fed2c9fd429e64fc74ce3e939fe910b4472aa49ffbaa79333af",
+  "bytes": 63084,
+  "document_id": 8,
   "revision": 17,
   "units": "mm",
-  "entities": 1118,
+  "entities": 1365,
   "by_type": {
-    "Line": 791,
-    "Circle": 58,
-    "Text": 269
+    "Line": 1016,
+    "Circle": 70,
+    "Text": 279
   },
   "by_layer": {
-    "D-CENTER": 68,
-    "D-DETAIL": 386,
+    "D-CENTER": 85,
+    "D-DETAIL": 574,
     "D-DIM": 133,
-    "D-OUTLINE": 214,
-    "D-REF": 48,
-    "D-TEXT": 269
+    "D-OUTLINE": 242,
+    "D-REF": 52,
+    "D-TEXT": 279
   },
   "audit": {
     "status": "passed",

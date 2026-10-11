@@ -1,8 +1,8 @@
-"""Deterministic AC-02 R01 drawing source in millimetres.
+"""Deterministic AC-02 R03 drawing source in millimetres.
 
 The same entity list feeds the A3 PDFs and the editable OpenCAD Studio DWG.
-Electronic devices are labeled LOD0 unless an exact manufacturer source is
-explicitly identified in the accompanying documentation.
+The assembly view follows the common Y datum in the CSG model; electronic
+reference fidelity is called out according to the actual source geometry.
 """
 import json
 import re
@@ -17,6 +17,7 @@ FONT_FACE = pdfmetrics.getFont("DrawingGOST").face
 
 E = []
 offset = 0
+RELEASE = "R03"
 
 
 def text_width(value, height):
@@ -85,12 +86,52 @@ def notes(x, y, rows, size=3.2, step=7.5):
         text(x, y - i * step, value, size)
 
 
+def hatch_box(x, y, width, height, spacing=3.0, slope=1):
+    """Draw clipped 45-degree section hatching inside one rectangular part."""
+    t = -height
+    while t <= width + height:
+        if slope > 0:
+            candidates = [(0, -t), (width, width - t),
+                          (t, 0), (height + t, height)]
+        else:
+            candidates = [(0, t), (width, t - width),
+                          (t, 0), (t - height, height)]
+        points = []
+        for px, py in candidates:
+            if -1e-8 <= px <= width + 1e-8 and -1e-8 <= py <= height + 1e-8:
+                point = (round(x + min(width, max(0, px)), 6),
+                         round(y + min(height, max(0, py)), 6))
+                if point not in points:
+                    points.append(point)
+        if len(points) >= 2:
+            a, b = max(((p1, p2) for i, p1 in enumerate(points)
+                        for p2 in points[i + 1:]),
+                       key=lambda pair: (pair[0][0] - pair[1][0]) ** 2
+                                        + (pair[0][1] - pair[1][1]) ** 2)
+            line(a[0], a[1], b[0], b[1], "D-DETAIL")
+        t += spacing
+
+
+def arrow_line(x1, y1, x2, y2, head=1.8, layer="D-DETAIL"):
+    """Draw a straight arrow using native line entities."""
+    dx, dy = x2 - x1, y2 - y1
+    length = (dx * dx + dy * dy) ** 0.5
+    if length <= 1e-9:
+        return
+    ux, uy = dx / length, dy / length
+    bx, by = x2 - head * ux, y2 - head * uy
+    px, py = -uy * head * 0.55, ux * head * 0.55
+    line(x1, y1, x2, y2, layer)
+    line(x2, y2, bx + px, by + py, layer)
+    line(x2, y2, bx - px, by - py, layer)
+
+
 def frame(number, title, designation, name, material="Материал не назначен", scale="1:1"):
     global offset
     offset = (number - 1) * 450
     rect(20, 5, 395, 287)
     text(26, 282, title, 4.6)
-    text(26, 274, "AirCheck | наружный измерительный узел | R01 | размеры в мм", 3.2)
+    text(26, 274, f"AirCheck | наружный измерительный узел | {RELEASE} | размеры в мм", 3.2)
 
     # Compact ESKD-style title block with deliberate text clearance from rules.
     rect(230, 5, 185, 55)
@@ -136,11 +177,14 @@ def base_top(x, y, electronics=True):
             cross(x + px, y + py, 4)
     for px in (14, 146):
         for py in (14, 166):
-            circle(x + px, y + py, 1.7)
+            # Screw pilot boss: Ø8.4 outside, Ø2.5 pilot through its top.
+            circle(x + px, y + py, 4.2, "D-DETAIL")
+            circle(x + px, y + py, 1.25)
+            cross(x + px, y + py, 4.8)
     # SHT45 breakout standoffs and camera screen perimeter.
     for px in (16.54, 36.86):
         for py in (30.54, 43.24):
-            circle(x + px, y + py, 1.25)
+            circle(x + px, y + py, 1.05)
             circle(x + px, y + py, 2.5, "D-DETAIL")
             cross(x + px, y + py, 3.3)
     rect(x + 4.3, y + 20, 40.7, 34, "D-DETAIL")
@@ -148,8 +192,9 @@ def base_top(x, y, electronics=True):
     for yy in (20, 48):
         rect(x + 40, y + yy, 16, 6, "D-DETAIL")
     for yy in (24, 50):
-        circle(x + 52, y + yy, 1.7)
-        cross(x + 52, y + yy, 3.0)
+        circle(x + 52, y + yy, 3.5, "D-DETAIL")
+        circle(x + 52, y + yy, 1.25)
+        cross(x + 52, y + yy, 4.5)
     # SPS30 envelope and its two air-port zones are shown as references.
     rect(x + 90, y + 4.5, 41.2, 41.2, "D-REF")
     rect(x + 92, y + 4, 18, 4, "D-DETAIL")
@@ -162,9 +207,13 @@ def base_top(x, y, electronics=True):
     # Inner support rails and perimeter tie slots.
     for px in (87.9, 131.2):
         rect(x + px, y + 8, 2.1, 36, "D-DETAIL")
-    for py in (15, 35):
-        for px in (9, 65):
-            rect(x + px, y + py, 18, 5, "D-DETAIL")
+    # Eight 3 x 5 mm floor slots, matching the CSG cut locations exactly.
+    for px in (9, 65):
+        for py in (79, 105):
+            rect(x + px, y + py, 3, 5, "D-DETAIL")
+    for px in (83, 136):
+        for py in (15, 35):
+            rect(x + px, y + py, 3, 5, "D-DETAIL")
     for py in (24, 34, 44):
         rect(x, y + py, 4, 6, "D-DETAIL")
 
@@ -174,14 +223,16 @@ def sheet_assembly():
           "AC-02-000 СБ", "Узел наружный измерительный")
     # Plan, with lid removed. Dashed rectangles are device envelopes / roof.
     rect(36, 78, 176, 190, "D-REF")
-    base_top(44, 83)
+    # Base and hood share the Y=0 datum in the assembly CSG model. The hood
+    # is 10 mm deeper than the base, so the overhang is at the rear only.
+    base_top(44, 78)
     for x in (52, 196):
-        for y in (113, 245):
+        for y in (108, 240):
             circle(x, y, 2.25, "D-REF")
-    # Keep the item label clear of the right-hand mounting cross.
-    text(178, 132, "3  SPS30", 3.1)
-    text(58, 141, "4  SHT45 #5665", 3.1)
-    text(110, 175, "5  ESP32", 3.1)
+    # Item numbers follow AC-02-000 СП; labels sit next to the matching model.
+    text(178, 127, "8  SPS30", 3.1)
+    text(58, 136, "7  SHT45 #5665", 3.1)
+    text(110, 170, "6  ESP32", 3.1)
     dimx(36, 212, 70, 78, "176")
     dimy(78, 268, 33, 36, "190")
 
@@ -195,7 +246,60 @@ def sheet_assembly():
     rect(x + 86, y, 2, 43, "D-DETAIL")
     rect(x + 4 + 46, y + 11, 9, 12, "D-DETAIL")
     rect(x + 4 + 56, y + 11, 9, 12, "D-DETAIL")
-    text(130, 45, "Вид спереди, 1:2", 2.8)
+    text(36, 62.5, "Вид спереди, 1:2", 2.8)
+
+    # Section A-A follows one SPS30 port axis (X=101 from the base datum).
+    # The arrows point toward -X; the section view therefore shows Y increasing
+    # to the right. The view is derived from the R01 housing dimensions.
+    cut_x = 44 + 101
+    line(cut_x, 78, cut_x, 268, "D-CENTER")
+    arrow_line(cut_x + 4.5, 268, cut_x, 268, head=2.0)
+    arrow_line(cut_x + 4.5, 78, cut_x, 78, head=2.0)
+    text(cut_x + 6, 269, "А", 2.5)
+    text(cut_x + 6, 73.5, "А", 2.5)
+
+    # Cross-section in the empty lower-right area, scale 1:2. It cuts the
+    # actual 18 x 24 mm base opening; the SPS30 is shown as a dashed envelope,
+    # not as a fictitious cut through its internal airflow channels.
+    vx, vy = 130, 12
+    sx = lambda yy: vx + yy * 0.5
+    sz = lambda zz: vy + (zz + 4) * 0.5
+
+    # Hood roof and rear wall: front and bottom stay open in the model.
+    roof = (vx, sz(82), 95, 2)
+    rear = (sx(185.8), sz(-4), 2.1, sz(82) - sz(-4))
+    rect(*roof, "D-OUTLINE")
+    hatch_box(*roof, spacing=3.0, slope=1)
+    rect(*rear, "D-OUTLINE")
+    hatch_box(*rear, spacing=3.0, slope=-1)
+
+    # Base section at X=101: the plane crosses the first port window, floor,
+    # rear wall and fitted lid. The 4 mm front wall is open from Z=18 to 42.
+    front_lower = (vx, sz(0), 2, sz(18) - sz(0))
+    front_upper = (vx, sz(42), 2, sz(60) - sz(42))
+    floor = (sx(4), sz(0), sx(176) - sx(4), 2)
+    base_rear = (sx(176), sz(0), 2, sz(60) - sz(0))
+    lid = (sx(0), sz(60), sx(180) - sx(0), 1.5)
+    for shape in (front_lower, front_upper, floor, base_rear):
+        rect(*shape, "D-OUTLINE")
+        hatch_box(*shape, spacing=2.7, slope=1)
+    rect(*lid, "D-OUTLINE")
+    hatch_box(*lid, spacing=2.7, slope=-1)
+
+    # Manufacturer model is represented by its section-plane envelope.
+    sps30_envelope = (sx(4.8), sz(22.3),
+                      sx(45.4) - sx(4.8), sz(34.5) - sz(22.3))
+    rect(*sps30_envelope, "D-REF")
+    text(sx(4.8) + 1, sz(34.5) + 1.2, "SPS30 REF", 2.2)
+    arrow_line(sx(-9), sz(28.0), sx(4.6), sz(28.0), head=1.4)
+    arrow_line(sx(4.6), sz(30.0), sx(-9), sz(30.0), head=1.4)
+    text(vx, 61, "Разрез А-А через порт SPS30, 1:2", 2.6)
+    notes(238, 128, [
+        "А-А: плоскость X=101 мм от начала основания.",
+        "Окно в стенке: 18 × 24 мм; показана связь",
+        "с портовой стороной SPS30. Контур датчика REF.",
+        "Внутренние каналы и расход воздуха не моделировались.",
+    ], 2.6, 4.8)
     notes(238, 278, [
         "Состав и ориентация", "1 — основание AC-02-001, 1 шт.",
         "2 — крышка AC-02-002, 1 шт.", "3 — козырёк AC-02-003, 1 шт.",
@@ -203,7 +307,7 @@ def sheet_assembly():
         "6 — ESP32-DevKitC-32E V4, 1 шт.",
         "7 — Adafruit SHT45 #5665, без PTFE, 1 шт.",
         "8 — Sensirion SPS30, 1 шт.",
-        "Позиции 6–8 — габаритные модели LOD0.",
+        "6 — ESP32 LOD0; 7–8 — модели STEP, не печатать.",
         "Условие: под навесом, без прямых осадков и солнца.",
         "SPS30: порты обращены к Y=0; не закрывать перед ними",
         "свободное пространство. ESP32: USB обращён к X=0.",
@@ -244,14 +348,16 @@ def sheet_base():
         "Габарит 160 × 180 × 60; стенки и дно 4 мм.",
         "Крышка: пилоты Ø2.5, X=14/146; Y=14/166.",
         "Крепёж корпуса Ø4.5, X=8/152; Y=30/162.",
-        "Опоры SHT45 Ø5: X=16.54/36.86; Y=30.54/43.24.",
-        "Пилоты SHT45 Ø2.1, глубина 10; камера X=4.3..45,",
-        "Y=20..54. Зазор сенсор–крышка камеры 5.2 мм.",
+        "Опоры SHT45 Ø5; пилоты Ø2.1, глубина 10; экран",
+        "X=4.3..45, Y=20..54; зазор сенсор–крышка 5.2 мм.",
+        "Крепёж экрана Ø2.5; X=52; Y=24/50.",
         "SPS30: полки X=90/131.2; верх направляющих Z=36.3.",
         "USB-окно 11 × 7; проверить штекер и изгиб кабеля.",
         "Окна SHT45: 3 × (6 × 12), Y=24/34/44, Z=16..28.",
-        "Допуск неуказанных размеров ±0.3; посадки проверить",
-        "образцом. Перед сверлением платы и кабели снять.",
+        "Прорези дна 3 × 5: X=9/65, Y=79/105; X=83/136,",
+        "Y=15/35 (все сочетания координат).",
+        "Неуказанные ±0.3; посадки проверить образцом; перед",
+        "сверлением снять платы и кабели.",
     ], 2.8, 6.4)
 
 
