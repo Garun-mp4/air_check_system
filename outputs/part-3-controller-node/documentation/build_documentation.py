@@ -1,6 +1,7 @@
-"""Build the readable AC-03 R01 A4 documentation PDF from its Markdown sources."""
+"""Build a readable AC-03 A4 documentation PDF from its Markdown sources."""
 from __future__ import annotations
 
+import argparse
 import html
 import re
 from pathlib import Path
@@ -62,12 +63,17 @@ def markdown_table(lines: list[str]) -> Table:
             continue
         rows.append([Paragraph(inline(cell), small) for cell in cells])
     n = len(rows[0])
+    header_text = " ".join(cell.getPlainText() for cell in rows[0]).casefold()
     ratios = {
         2: [0.30, 0.70],
         3: [0.17, 0.34, 0.49],
         4: [0.09, 0.22, 0.10, 0.59],
         5: [0.09, 0.20, 0.16, 0.16, 0.39],
     }.get(n, [1 / n] * n)
+    if n == 4 and "gpio" in header_text and "ограничение" in header_text:
+        # Give signal/function columns enough width so Russian pin descriptions
+        # do not break into one word per line in the printed specification.
+        ratios = [0.13, 0.14, 0.33, 0.40]
     table = Table(rows, colWidths=[174 * mm * part for part in ratios],
                   repeatRows=1, hAlign="LEFT", splitByRow=1)
     table.setStyle(TableStyle([
@@ -138,7 +144,18 @@ def footer(pdf, doc) -> None:
 
 
 def main() -> None:
+    global RELEASE
+    parser = argparse.ArgumentParser(description="Build the AC-03 documentation PDF")
+    parser.add_argument("--release", default="R01", help="release label, for example R02")
+    parser.add_argument("--overwrite", action="store_true",
+                        help="replace the PDF of the selected release")
+    args = parser.parse_args()
+    if not args.release.startswith("R") or not args.release[1:].isdigit():
+        parser.error("--release must look like R01")
+    RELEASE = args.release
     output = DOC / f"AC-03-documentation-{RELEASE}.pdf"
+    if output.exists() and not args.overwrite:
+        parser.error(f"output already exists; pass --overwrite to replace it: {output.name}")
     template = SimpleDocTemplate(
         str(output), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm,
         topMargin=17 * mm, bottomMargin=21 * mm,
@@ -152,8 +169,8 @@ def main() -> None:
         Paragraph("Плата, драйверы, нагрузки, принтер и материал не закуплены/не выбраны. До выбора реальных драйверов данный выпуск не является готовой электрической схемой и не разрешает подключать исполнительные устройства.", body),
     ]
     for filename in ("AC-03-000-SP.md", "AC-03-000-RE.md",
-                     "standards-and-sources.md", "validation-R01.md",
-                     "drawing-audit-R01.md"):
+                     "standards-and-sources.md", f"validation-{RELEASE}.md",
+                     f"drawing-audit-{RELEASE}.md"):
         source = DOC / filename
         if not source.exists():
             continue

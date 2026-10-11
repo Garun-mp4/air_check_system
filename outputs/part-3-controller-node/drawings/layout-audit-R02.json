@@ -1,0 +1,53 @@
+{
+  "release": "R02",
+  "page_size_mm": [
+    420.0,
+    297.0
+  ],
+  "sheets": 5,
+  "entity_count_by_sheet": {
+    "1": 191,
+    "2": 269,
+    "3": 191,
+    "4": 140,
+    "5": 151
+  },
+  "text_overlap_count": 0,
+  "table_cell_overflow_count": 0,
+  "geometry_checks": {
+    "base_detail_matches_design": true,
+    "lid_detail_matches_design": true,
+    "rear_view_opening_matches_design": true,
+    "front_usb_opening_matches_design": true,
+    "coordinate_datum_is_defined": true
+  },
+  "issues": [],
+  "pass": true,
+  "dxf_audit": {
+    "path": "AC-03-drawings-R02.dxf",
+    "format": "DXF R2013 / AC1027",
+    "version": "AC1027",
+    "units_code": "4",
+    "units": "mm",
+    "codepage_header": "ANSI_1251",
+    "encoding": "UTF-8",
+    "entity_count": 942,
+    "text_count": 298,
+    "layer_count": 11,
+    "layers": [
+      "0",
+      "CENTER",
+      "CUT",
+      "DIM",
+      "DIMTEXT",
+      "FRAME",
+      "OUT",
+      "REF",
+      "TEXT",
+      "THIN",
+      "TITLE"
+    ],
+    "pass": true,
+    "issues": []
+  }
+}
