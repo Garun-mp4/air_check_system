@@ -9,7 +9,25 @@
     "faces": 10304
   },
   {
+    "file": "AC-01-000-assembly-R02.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 429439.9030060024,
+    "solids": 12,
+    "faces": 12401
+  },
+  {
     "file": "AC-01-001-base-exchange.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 310502.2555576087,
+    "solids": 1,
+    "faces": 9092
+  },
+  {
+    "file": "AC-01-001-base-print-R02.step",
     "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
     "transferred_roots": 1,
     "valid": true,
@@ -23,6 +41,15 @@
     "transferred_roots": 1,
     "valid": true,
     "volume_mm3": 92044.02425060364,
+    "solids": 1,
+    "faces": 1148
+  },
+  {
+    "file": "AC-01-002-lid-print-R02.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 92044.02422470418,
     "solids": 1,
     "faces": 1148
   },
@@ -52,5 +79,14 @@
     "volume_mm3": 20878.51199999999,
     "solids": 1,
     "faces": 6
+  },
+  {
+    "file": "REF-SPS30-manufacturer-R02.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 19128.94633486912,
+    "solids": 1,
+    "faces": 2103
   }
 ]

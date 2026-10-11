@@ -15,9 +15,24 @@
     "sha256": "709bbc6a65b7eaa1f87a7187f6d54649b0413a3ade63663be6fcb57bb66ca69e"
   },
   {
+    "file": "AC-01-внутренний/cad/model/AC-01-000-assembly-R02.dwg",
+    "bytes": 167024,
+    "sha256": "8345f4c1575e19e0a09b3445785b049bd122d61276f6adb82fe4a1f11981f6ee"
+  },
+  {
+    "file": "AC-01-внутренний/cad/model/AC-01-000-assembly-R02.step",
+    "bytes": 36184321,
+    "sha256": "341aa55a90343ceae6aba77237e0489e9e11320723fe8dae45c83e7b3f22d754"
+  },
+  {
     "file": "AC-01-внутренний/cad/model/AC-01-001-base-exchange.step",
     "bytes": 20226418,
     "sha256": "993a5a74e44dec3b1692523b2d3ca5c45604dfaed687918d57bfebdcec46d43d"
+  },
+  {
+    "file": "AC-01-внутренний/cad/model/AC-01-001-base-print-R02.step",
+    "bytes": 20226418,
+    "sha256": "5b30b26b7cf01dd7d551ab44af63364ab7d59fb32b43b6e7c75e79967de2c810"
   },
   {
     "file": "AC-01-внутренний/cad/model/AC-01-001-base-R01.dwg",
@@ -25,9 +40,24 @@
     "sha256": "c96ec11c73e6176b64caf522c269b06f24f3a0fffb93299f29cccafab21c8a86"
   },
   {
+    "file": "AC-01-внутренний/cad/model/AC-01-001-base-R02.dwg",
+    "bytes": 148146,
+    "sha256": "86c621d59cc1bdcb607896507fdbad3a1bff5b943d7bac03752e24bc44eced66"
+  },
+  {
     "file": "AC-01-внутренний/cad/model/AC-01-002-lid-exchange.step",
     "bytes": 2445607,
     "sha256": "5e748105d69240989a058b1fb108f2188db15479bf4bb0c57b318d8e65204996"
+  },
+  {
+    "file": "AC-01-внутренний/cad/model/AC-01-002-lid-print-R02.step",
+    "bytes": 2441899,
+    "sha256": "527c38b8615afe5c1741326e7482dc13d812ab8d467107c4cecb538c2efbf9e1"
+  },
+  {
+    "file": "AC-01-внутренний/cad/model/AC-01-002-lid-R02.dwg",
+    "bytes": 35781,
+    "sha256": "2345a0d3db3db0953dd0c51acc80ae74559e6d93785d1ec7afac29fde6bf5963"
   },
   {
     "file": "AC-01-внутренний/cad/model/AC-01-002-lid.dwg",
@@ -48,6 +78,11 @@
     "file": "AC-01-внутренний/cad/model/REF-SPS30-envelope.step",
     "bytes": 15523,
     "sha256": "aefbffdcb3d9c51866d5821cb468a8a2c85f1a494363a1f8f6e98eb72fa14993"
+  },
+  {
+    "file": "AC-01-внутренний/cad/model/REF-SPS30-manufacturer-R02.step",
+    "bytes": 12946228,
+    "sha256": "e8a22e667de75582767fb968d390d265152555d55b5331528bde39cb85d7cce0"
   },
   {
     "file": "AC-01-внутренний/cad/reference/adafruit_scd41_5190.brd",
@@ -116,8 +151,13 @@
   },
   {
     "file": "AC-01-внутренний/documentation/AC-01-documentation-R02.pdf",
-    "bytes": 137685,
-    "sha256": "99f9788f50a66d9535f68c7f849b47040dfb8102cf2a7eeade08ca86300e8256"
+    "bytes": 139692,
+    "sha256": "a7bf24c92c1d3ad41636d8fa68346de84c323c17dc8250e058ce6cff167ace0f"
+  },
+  {
+    "file": "AC-01-внутренний/documentation/AC-01-documentation.pdf",
+    "bytes": 133339,
+    "sha256": "dfceeccb1e4b600817a41341279fdac97a79e035a3f47d6aea2abc211dffcea2"
   },
   {
     "file": "AC-01-внутренний/documentation/BOM.csv",
@@ -126,8 +166,8 @@
   },
   {
     "file": "AC-01-внутренний/documentation/build_pdf.py",
-    "bytes": 7659,
-    "sha256": "83883494427dd6416ea33ebe93a5b8978535ee7e012295fa0c7a1383778e92e4"
+    "bytes": 7631,
+    "sha256": "c19e3bc4bf577ade02f2eae231d611fd97de9131587a83156d85af9d2294878c"
   },
   {
     "file": "AC-01-внутренний/documentation/drawing-audit-R02.md",
@@ -140,9 +180,24 @@
     "sha256": "2fbe2464c793506e95df5c42665bdc1bb6fca324a2ebc5968ccd93912d9c1d07"
   },
   {
+    "file": "AC-01-внутренний/documentation/finalize_assets.py",
+    "bytes": 4365,
+    "sha256": "7877c96204302f8053f7a8fcb5ac891cef9dffef2e95e153ce41446a71ace6b8"
+  },
+  {
+    "file": "AC-01-внутренний/documentation/model-release-R02.md",
+    "bytes": 5470,
+    "sha256": "c4893eefb1bcb6679271173cc9daf6fbdef82a00a88f17103382276721625531"
+  },
+  {
+    "file": "AC-01-внутренний/documentation/native-3d-verification-R02.json",
+    "bytes": 1387,
+    "sha256": "cceb0ac5cedfa1396bc026d76264053e7d7f144b33e0c20309c4cf305281a5fe"
+  },
+  {
     "file": "AC-01-внутренний/documentation/pdf-inspection.json",
-    "bytes": 2422,
-    "sha256": "4bce3d79481a3e3e0063e0e92d3c9d5952d5aa927200c4def56e77306543350d"
+    "bytes": 2494,
+    "sha256": "df695c6d3fdc40adc40abbac019143abd382a5a04bfda9164465c9ee9700df19"
   },
   {
     "file": "AC-01-внутренний/documentation/standards-and-sources.md",
@@ -151,8 +206,18 @@
   },
   {
     "file": "AC-01-внутренний/documentation/validation-R02.md",
-    "bytes": 10387,
-    "sha256": "4b213fb1c13d9d16f23a62b26770026c5544a73f263b0f6e9d8106f3cea58c59"
+    "bytes": 12593,
+    "sha256": "f5e96cce02aa11f679d5edc847fb78a11f863898a2c3fb7dbf00218bc7468b45"
+  },
+  {
+    "file": "AC-01-внутренний/documentation/validation.md",
+    "bytes": 8387,
+    "sha256": "1c238bcc1c4604c2c8fb2ccee7162dc43857a38cf6148856d444f0e6f78e9bf2"
+  },
+  {
+    "file": "AC-01-внутренний/drawings/AC-01-000-drawings-R01.dwg",
+    "bytes": 62409,
+    "sha256": "4569170cf02dcdf10e70de469375f775a702a58affb6aaa62f946b73d6e5420a"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-000-drawings-R02.dwg",
@@ -165,9 +230,19 @@
     "sha256": "f899d7dfa1ea29cf8d29f428b655efdefb48a42695b23d9b814dde2131ebb43f"
   },
   {
+    "file": "AC-01-внутренний/drawings/AC-01-drawings.pdf",
+    "bytes": 101454,
+    "sha256": "16dc2c11de8832cf987388fb5471be70d6a718c26b3e0953faed192abb731cbc"
+  },
+  {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-1-R02.pdf",
     "bytes": 25602,
     "sha256": "8cdc2e4da9fe5358f568a21199f5ab3071bc90df8586d4b31fe364cf914a55e8"
+  },
+  {
+    "file": "AC-01-внутренний/drawings/AC-01-sheet-1.pdf",
+    "bytes": 25602,
+    "sha256": "57e34fa57fc826d21e6f6f9c26a39db87ffe33057f9bfd20a4b492fba459610c"
   },
   {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-2-R02.pdf",
@@ -175,14 +250,29 @@
     "sha256": "3442b11d64b26b2878c38b50e36dde9a2f531be524fd7f3cedefe270420fb8f5"
   },
   {
+    "file": "AC-01-внутренний/drawings/AC-01-sheet-2.pdf",
+    "bytes": 30609,
+    "sha256": "e979c803cef7b928fc36610d2f5f1859c3bcfc8531f170e2d6f280a7ea053a7a"
+  },
+  {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-3-R02.pdf",
     "bytes": 25114,
     "sha256": "afd16d24e06700bd2999b9086018cec10b461cea19186ea06995455a54c176d6"
   },
   {
+    "file": "AC-01-внутренний/drawings/AC-01-sheet-3.pdf",
+    "bytes": 25115,
+    "sha256": "94690d3bf4e6cbb6e397306ff310d638bd72653a3be6ca22f60f0d8826f08951"
+  },
+  {
     "file": "AC-01-внутренний/drawings/AC-01-sheet-4-R02.pdf",
     "bytes": 23392,
     "sha256": "2683eb387dbf026f8eff3aaea64d9d0548d7957756e6d3923d9597a486c9f9dd"
+  },
+  {
+    "file": "AC-01-внутренний/drawings/AC-01-sheet-4.pdf",
+    "bytes": 23393,
+    "sha256": "08f7f915d4558102a8650c28298398da77f8eb3fc47755ff9c3b66a9b0142c3c"
   },
   {
     "file": "AC-01-внутренний/drawings/build_drawing_source.py",
@@ -215,12 +305,12 @@
     "sha256": "54bda7ce88a7ea65e4c55ab73f5f792f3bf03996656f5158ae300b3a70ea2223"
   },
   {
-    "file": "AC-01-внутренний/manufacturing/AC-01-001-base-print-R01.stl",
+    "file": "AC-01-внутренний/manufacturing/AC-01-001-base-print-R02.stl",
     "bytes": 454684,
     "sha256": "a6c521f024f05fcf50c01821bfca57e2ae328b77b7b51fec7f2fdcf53c57cb51"
   },
   {
-    "file": "AC-01-внутренний/manufacturing/AC-01-002-lid-print.stl",
+    "file": "AC-01-внутренний/manufacturing/AC-01-002-lid-print-R02.stl",
     "bytes": 57484,
     "sha256": "16d2780d018368c84b74b0da9cf92b68b566f9ca8f7720a39ca7e1b0bc16736c"
   },
@@ -228,6 +318,11 @@
     "file": "AC-01-внутренний/manufacturing/build_exchange_step.py",
     "bytes": 3539,
     "sha256": "bce2dd67c1b6e571ab21dc594b78b610f6d05c90ceb2af6beedb968e81b2bed1"
+  },
+  {
+    "file": "AC-01-внутренний/manufacturing/build_model_release_R02.py",
+    "bytes": 13480,
+    "sha256": "849285ea09ec2509024d648093b48018cb81c19e7d21bca6e4f707b56d263c7d"
   },
   {
     "file": "AC-01-внутренний/manufacturing/clearance-inspection.json",
@@ -255,19 +350,24 @@
     "sha256": "873f227271fde292b64e63c292d33e71e4828de79e0fe4cf60684aafeed47225"
   },
   {
+    "file": "AC-01-внутренний/manufacturing/model-inspection-R02.json",
+    "bytes": 7739,
+    "sha256": "e5e13704278f53e9c1991507b904e2c2aadb367b3c2ffc5bcb13a51f8c931b21"
+  },
+  {
     "file": "AC-01-внутренний/manufacturing/step-inspection.json",
-    "bytes": 1447,
-    "sha256": "7bcfa23606dfa52af3eb70e3d1bea393c5d866fbdf53d0c9650b7926b779742c"
+    "bytes": 2420,
+    "sha256": "07e9c8bddcc49f0aa1afa1f8bb1c2f587f9770f9174b57a74b1ccca760452397"
   },
   {
     "file": "AC-01-внутренний/manufacturing/stl-inspection.json",
-    "bytes": 1781,
-    "sha256": "6256e8db88fda4c0ae04b490c9ef6d8c5501fa906715e31c34dec53ad3dcc4a5"
+    "bytes": 2666,
+    "sha256": "39b85e4dd276df26f86767ef738abc7bb589ddd39ba83c11eb31bd82306915df"
   },
   {
     "file": "AC-01-внутренний/README.md",
-    "bytes": 1288,
-    "sha256": "b12ce048526fdb5fb5bac9614544edf86289071a36e40cd31270d88874e082df"
+    "bytes": 3559,
+    "sha256": "b66155ad4397771b55729524bb422d431d7d174bdd56b663ebe2094914dd671b"
   },
   {
     "file": "AC-02-наружный/cad/design.json",
@@ -285,9 +385,24 @@
     "sha256": "6256daacefd33d2c4253c498696106157e661354e206d79d281f16d8654a7ab0"
   },
   {
+    "file": "AC-02-наружный/cad/model/AC-02-000-assembly-R04.dwg",
+    "bytes": 206633,
+    "sha256": "2d1e21467dcc547060ce3567a66e2bd68185ad27278327e6b4be390790954e38"
+  },
+  {
+    "file": "AC-02-наружный/cad/model/AC-02-000-assembly-R04.step",
+    "bytes": 16901610,
+    "sha256": "b87ed01e4891d2dc93ddf736de58cd7e98eb73c62af892c3f3bac7460ac9cd72"
+  },
+  {
     "file": "AC-02-наружный/cad/model/AC-02-001-base-assembly-R01.step",
     "bytes": 568485,
     "sha256": "763b9ca39a03f1613cad618f694de9110cc04a56ede3df8ec3df65e8abd7dd85"
+  },
+  {
+    "file": "AC-02-наружный/cad/model/AC-02-001-base-assembly-R04.step",
+    "bytes": 568485,
+    "sha256": "5a1d5b979f0919b8fe3502136aefe140e7b756a726ec8b6f042ae178f0340c98"
   },
   {
     "file": "AC-02-наружный/cad/model/AC-02-001-base-print-R01.step",
@@ -295,9 +410,19 @@
     "sha256": "1a1dd44cc6c2f4e54037460bc39192fcfe52d99affc0f9482bcd5199fc50ac21"
   },
   {
+    "file": "AC-02-наружный/cad/model/AC-02-001-base-print-R04.step",
+    "bytes": 545027,
+    "sha256": "6f8e35ff0393ba6efc7f328633d726f6856268ddaa00ef32960fef4b87b22c4a"
+  },
+  {
     "file": "AC-02-наружный/cad/model/AC-02-002-lid-assembly-R01.step",
     "bytes": 59436,
     "sha256": "9f5ab39d5bcf7d2edc4a8f6ae4a99bad925638b2b5d6fc2670a4e7d9d671780b"
+  },
+  {
+    "file": "AC-02-наружный/cad/model/AC-02-002-lid-assembly-R04.step",
+    "bytes": 59436,
+    "sha256": "09b2b97dac06a439eea9d84b9309976670031e6d9b2daffb549330e4ef10b610"
   },
   {
     "file": "AC-02-наружный/cad/model/AC-02-002-lid-print-R01.step",
@@ -305,9 +430,19 @@
     "sha256": "b1134aa178c05f6187aeae4937a3bf491b98021ea796ea4679fc622a853796d6"
   },
   {
+    "file": "AC-02-наружный/cad/model/AC-02-002-lid-print-R04.step",
+    "bytes": 58204,
+    "sha256": "37f13f8b95227ceaa5b5428237d9577bf362f28e63148d10f4cb22463e6215a7"
+  },
+  {
     "file": "AC-02-наружный/cad/model/AC-02-003-hood-assembly-R01.step",
     "bytes": 141668,
     "sha256": "8582af32f9b785a9e03249c63ae4018b19bff34add1496359e13e0abca5bcdf9"
+  },
+  {
+    "file": "AC-02-наружный/cad/model/AC-02-003-hood-assembly-R04.step",
+    "bytes": 141668,
+    "sha256": "f3c06f458ea3703268a559fe99033576c5a3b075eb2df8679201cc3f35333913"
   },
   {
     "file": "AC-02-наружный/cad/model/AC-02-003-hood-print-R01.step",
@@ -315,9 +450,19 @@
     "sha256": "784bb7d4384cec7b7477326b8a96c8c1e3aa3835a67ea72eaeb09d11791cb2ae"
   },
   {
+    "file": "AC-02-наружный/cad/model/AC-02-003-hood-print-R04.step",
+    "bytes": 143418,
+    "sha256": "7e0cc181a0584611a05795e24e9aa407fc05313d51b8ef08c08a7619a7e67682"
+  },
+  {
     "file": "AC-02-наружный/cad/model/AC-02-004-bracket-assembly-R01.step",
     "bytes": 152466,
     "sha256": "78d9e364fafa67df609a298ce943f15acb9ea62476dc8315b548dde03dd668f5"
+  },
+  {
+    "file": "AC-02-наружный/cad/model/AC-02-004-bracket-assembly-R04.step",
+    "bytes": 152466,
+    "sha256": "d90929f9d6eb42caa2abe78c4427d9265e054b556f17f12555183f70e3c4ac9d"
   },
   {
     "file": "AC-02-наружный/cad/model/AC-02-004-bracket-print-R01.step",
@@ -325,14 +470,34 @@
     "sha256": "1d5c0020f73ae138e015547c4628c1de5a03b6460ab9a62adb88d1fe8d8b2335"
   },
   {
+    "file": "AC-02-наружный/cad/model/AC-02-004-bracket-print-R04.step",
+    "bytes": 149275,
+    "sha256": "5cc26d3cdb50bfefd5a931d371a59e47ea3bdd371af6d2a4925a8663c2d9f329"
+  },
+  {
     "file": "AC-02-наружный/cad/model/AC-02-005-sht-screen-assembly-R01.step",
     "bytes": 137578,
     "sha256": "a244e9d35a6f4426f44af17c0d2df2f22070faaa0d0f5cc3a63b9c3a9c0868ab"
   },
   {
+    "file": "AC-02-наружный/cad/model/AC-02-005-sht-screen-assembly-R04.step",
+    "bytes": 137578,
+    "sha256": "38ee4a97d24a63045bcab2bce1e3f919119f92fa3f481899cf42f3b47a53da84"
+  },
+  {
     "file": "AC-02-наружный/cad/model/AC-02-005-sht-screen-print-R01.step",
     "bytes": 135568,
     "sha256": "62bcbd016f90becf4a6964d25accb42f4f0f3386458b294d8b2fd84234bb8a8d"
+  },
+  {
+    "file": "AC-02-наружный/cad/model/AC-02-005-sht-screen-print-R04.step",
+    "bytes": 135568,
+    "sha256": "3168f9e3c8dd349001821dd11bd88135f7af5350c5dea9f4e996e8fa313bf83e"
+  },
+  {
+    "file": "AC-02-наружный/cad/model/AC-02-shell-preview-R00.dwg",
+    "bytes": 165679,
+    "sha256": "2f1627aa89b2fb98d3150aa753fc0ac693becbd6bac20cf87eae829857551c5a"
   },
   {
     "file": "AC-02-наружный/cad/reference/adafruit_license.txt",
@@ -390,6 +555,11 @@
     "sha256": "71dd7cb566d5667403653d9baf472d8be4da43155e3d78775388a866a24678b1"
   },
   {
+    "file": "AC-02-наружный/documentation/AC-02-connections-check-R01.drawio.png",
+    "bytes": 247190,
+    "sha256": "047d6a172bc7a7f72ca376e4515d3ed47e90497ac6ea83c433492a4afab5a659"
+  },
+  {
     "file": "AC-02-наружный/documentation/AC-02-connections.drawio",
     "bytes": 4883,
     "sha256": "970262be7034e0cb8819f9789bcabb8865d1d549dc65061888b07116fc5a9a86"
@@ -405,9 +575,24 @@
     "sha256": "047d6a172bc7a7f72ca376e4515d3ed47e90497ac6ea83c433492a4afab5a659"
   },
   {
+    "file": "AC-02-наружный/documentation/AC-02-documentation-R01.pdf",
+    "bytes": 122033,
+    "sha256": "71cd13801b56204e087d617a49206ba4c4e7d8a030356140652b6fdb01518776"
+  },
+  {
+    "file": "AC-02-наружный/documentation/AC-02-documentation-R02.pdf",
+    "bytes": 132469,
+    "sha256": "2e3d9030d8977cca67c13fa8eca81874244ae0f01583ffe3310aadae60a2a977"
+  },
+  {
+    "file": "AC-02-наружный/documentation/AC-02-documentation-R03.pdf",
+    "bytes": 132938,
+    "sha256": "d87298d86e720ed41e55ace46cbf94e5268fcfde96d5d87dfa70a88a679d3acb"
+  },
+  {
     "file": "AC-02-наружный/documentation/AC-02-documentation-R04.pdf",
-    "bytes": 126648,
-    "sha256": "f3ab81d0f0c110bde09588addf5407a88f83fc644ac182fa0938bf8e54fd6e7c"
+    "bytes": 128910,
+    "sha256": "4035c58f1847eb6e39415825bf14ac2c2e14afd3617fda03fe3e597ee5e2374c"
   },
   {
     "file": "AC-02-наружный/documentation/BOM.csv",
@@ -416,8 +601,18 @@
   },
   {
     "file": "AC-02-наружный/documentation/build_pdf.py",
-    "bytes": 11709,
-    "sha256": "ba1fe2f0b2dbe29d1870fe2021fc491993d23d7fee9610f8a7414cc7ba0301d5"
+    "bytes": 11768,
+    "sha256": "4749cc718671f029804fba2bc8317067f97889c721fa9c4fb6d6708dd331fb1d"
+  },
+  {
+    "file": "AC-02-наружный/documentation/drawing-audit-R02.md",
+    "bytes": 9934,
+    "sha256": "d4c24f01d683415d16b37d7df753a5f3953140f23261a695770673aff706e554"
+  },
+  {
+    "file": "AC-02-наружный/documentation/drawing-audit-R03.md",
+    "bytes": 11111,
+    "sha256": "208d8bd14d6e321900d61a5ba9b3bbe7ac2aad8545062a1343c3fefa9d53ac83"
   },
   {
     "file": "AC-02-наружный/documentation/drawing-audit-R04.md",
@@ -425,14 +620,39 @@
     "sha256": "714db2075c3a3e5dfa1ee1c7813c8c69ac551ba9d9c82ce381215cbb184e9f12"
   },
   {
+    "file": "AC-02-наружный/documentation/dwg-verification-R01.json",
+    "bytes": 830,
+    "sha256": "4951ca65f4883fa9de2db1e6b12a1fa03a989849f6b09a14e8d023472f5fc528"
+  },
+  {
+    "file": "AC-02-наружный/documentation/dwg-verification-R02.json",
+    "bytes": 870,
+    "sha256": "6e6ac4c3a75dc2832405d30605ee17bba798159c5137425c2dd8de4374998cfe"
+  },
+  {
+    "file": "AC-02-наружный/documentation/dwg-verification-R03.json",
+    "bytes": 831,
+    "sha256": "86ad4e8f9beb05c4c0692679b4a233ac0abf7a82e168bf03e19cc6d8ec90b663"
+  },
+  {
     "file": "AC-02-наружный/documentation/dwg-verification.json",
     "bytes": 774,
     "sha256": "ffaf786c046257744446481fa5f483c650a58033d304b3cad0624d4af5061eb2"
   },
   {
+    "file": "AC-02-наружный/documentation/finalize_assets.py",
+    "bytes": 5935,
+    "sha256": "a34ff6dbf338da3d8fc51a963a5bb34c5149c274be70d777b39d9e7c4e58ec02"
+  },
+  {
+    "file": "AC-02-наружный/documentation/native-3d-verification-R04.json",
+    "bytes": 924,
+    "sha256": "a77cb90b7a7f96f0e9a5760403c124fe114fbc2d27bd2c611eb5bdaa47e1ae28"
+  },
+  {
     "file": "AC-02-наружный/documentation/pdf-inspection.json",
-    "bytes": 2862,
-    "sha256": "c34435dc894da3cae67fed50ef2ed32bbcad085d576c6bb93f44f6cbcd32eb70"
+    "bytes": 2935,
+    "sha256": "8fe4e351c6b9fdf3125b1ef36c68f909819bde936e79c306ed5862702c9df943"
   },
   {
     "file": "AC-02-наружный/documentation/standards-and-sources.md",
@@ -441,8 +661,43 @@
   },
   {
     "file": "AC-02-наружный/documentation/validation-R04.md",
-    "bytes": 9654,
-    "sha256": "a6c280599a8df83fa6871dd3dd01ded6c1f359d5794c924e1742554f405e312f"
+    "bytes": 11905,
+    "sha256": "0b977012b752c5124aaa668a4eb15409bde65130cf9bf8cc6aace8a73d2d4973"
+  },
+  {
+    "file": "AC-02-наружный/documentation/validation.md",
+    "bytes": 8902,
+    "sha256": "4608e0ba6ef7e6ee420e5676b91d92edf51d79e9f258341e19b326a51465c82c"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-drawings-R01.dwg",
+    "bytes": 56902,
+    "sha256": "81e06c8908fa6c7e6f018cfe703b48cc1fbabe78962f2590c898e4745df60ec6"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-drawings-R01.pdf",
+    "bytes": 139600,
+    "sha256": "6fb458e269c4b3a64d315cb05df3134f1621884214099a7ae65736a670f05cfb"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-drawings-R02.dwg",
+    "bytes": 58341,
+    "sha256": "d4e8cc9aadba77f8385d2c62e4aa8dbafa194bdf006892edee5d37e6967d3929"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-drawings-R02.pdf",
+    "bytes": 140984,
+    "sha256": "372675ec2648ca2f7f3fe1a816dd47696df2db11455556e596efdedd551e3f5d"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-drawings-R03.dwg",
+    "bytes": 63084,
+    "sha256": "6d2e3ed7b98f3fed2c9fd429e64fc74ce3e939fe910b4472aa49ffbaa79333af"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-drawings-R03.pdf",
+    "bytes": 143914,
+    "sha256": "db3bb6895ed121fc0c9df580274bde9351787f40b030060872c2021ddb036ecf"
   },
   {
     "file": "AC-02-наружный/drawings/AC-02-drawings-R04.dwg",
@@ -455,9 +710,39 @@
     "sha256": "026831c41400ef8e5f823316b8e50eda0081ee09718ecc4d53704f4a35a7f1b5"
   },
   {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-01-R01.pdf",
+    "bytes": 25505,
+    "sha256": "f6cb8fd3656cfbd3a8845fbe6a114d858f9c20a5ad8306d805019865b6178765"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-01-R02.pdf",
+    "bytes": 26234,
+    "sha256": "d8e0c04befa6ea1325c7ea6d1f905f7321c283e486e3c47b35dc6b4d365318fe"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-01-R03.pdf",
+    "bytes": 29173,
+    "sha256": "cded2429d93890622d8bcd44a40734f5597476f55e7f5410cedc7741f918a814"
+  },
+  {
     "file": "AC-02-наружный/drawings/AC-02-sheet-01-R04.pdf",
     "bytes": 29170,
     "sha256": "753dc47e4df4af962042453a9f5a2c979f2ec2c1ce782bdf4fa938c6e81bc5b8"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-02-R01.pdf",
+    "bytes": 25570,
+    "sha256": "625789da17e72775ef622d00c19fb9de6cf933c1a64ce245330943cd48571a23"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-02-R02.pdf",
+    "bytes": 26223,
+    "sha256": "266e15cce5924858225477af9e16c9cb8c1d4e1d7872bba0ff7a3073444704ee"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-02-R03.pdf",
+    "bytes": 26222,
+    "sha256": "333a7c93f92e47b2f4d4129cfdfb6e0cfe56dd3af2cb3dc2d052ecbcf9d28cc5"
   },
   {
     "file": "AC-02-наружный/drawings/AC-02-sheet-02-R04.pdf",
@@ -465,9 +750,39 @@
     "sha256": "a55ade0d6878800f181061ab6adc2d92c5339b53304b3456bf4a2d83c66b04fd"
   },
   {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-03-R01.pdf",
+    "bytes": 23222,
+    "sha256": "5ccd1303d639a1caf56ee2bd04fcd3aff02ffce0bfbe9a380e459663d5fe43b5"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-03-R02.pdf",
+    "bytes": 23222,
+    "sha256": "d46a4e0f4126815cbb2340fac1ff78249219dce69501468ca6b3af16bc4500b4"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-03-R03.pdf",
+    "bytes": 23219,
+    "sha256": "4d9c96bac78dbd96024db7937606b232944e7690f33f3188745a8321fd475547"
+  },
+  {
     "file": "AC-02-наружный/drawings/AC-02-sheet-03-R04.pdf",
     "bytes": 23218,
     "sha256": "3a9d875c3a3f3c2239d3aafd476c59278caf8221187aa36faf1807a42b6484a2"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-04-R01.pdf",
+    "bytes": 23495,
+    "sha256": "6140f38791344a41edb5cee3255c35cbdcf63c9f648925e6d53fcd742b5d0ecd"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-04-R02.pdf",
+    "bytes": 23495,
+    "sha256": "f381c786449f5c2525929e9702a842d657601d68e28807b4a0307f48e3b3f268"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-04-R03.pdf",
+    "bytes": 23493,
+    "sha256": "b93793c4027c102423e31a45f8cb5b7d36e29c909897fc782751e82e616a8d86"
   },
   {
     "file": "AC-02-наружный/drawings/AC-02-sheet-04-R04.pdf",
@@ -475,9 +790,39 @@
     "sha256": "0138c4e2b586964a947bf5eab854e6e348c33ac6fb9e971cc844f50da6c23a07"
   },
   {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-05-R01.pdf",
+    "bytes": 23459,
+    "sha256": "9ebcda44ae64ee64c421d9f4e23761c21de2ab7a0b35986e6fc538d25f6a487e"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-05-R02.pdf",
+    "bytes": 23461,
+    "sha256": "1c7a7908aa10993e3810cff998278b81214921c42365e4ca2ecad3dd2b5fc058"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-05-R03.pdf",
+    "bytes": 23459,
+    "sha256": "d7fdb4b947b004b3b4dfaf6625b9386f30bf34e5f8336cd4924271d1c06e4801"
+  },
+  {
     "file": "AC-02-наружный/drawings/AC-02-sheet-05-R04.pdf",
     "bytes": 23471,
     "sha256": "4ff17b1cf1db0833576b94deceeb20769fa0a87704daa709a71211fe59e1eeed"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-06-R01.pdf",
+    "bytes": 24263,
+    "sha256": "45320ad62612a146dc2528de084e2cdf3a685806f6041e37f28fd41916e55163"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-06-R02.pdf",
+    "bytes": 24263,
+    "sha256": "e4354d797228f145acb5d7c07d912ec7d78b64c6f1fa334bad62ff136b4423dd"
+  },
+  {
+    "file": "AC-02-наружный/drawings/AC-02-sheet-06-R03.pdf",
+    "bytes": 24262,
+    "sha256": "5645796983d6cff022c3b1d44833c6aa84f0ba0acacb8acee78ea3565be2948d"
   },
   {
     "file": "AC-02-наружный/drawings/AC-02-sheet-06-R04.pdf",
@@ -505,34 +850,39 @@
     "sha256": "5cd9e1bb6502734e4c0fbc853548ac7042ae4cfd739f570dc3fa22ac49ce0477"
   },
   {
-    "file": "AC-02-наружный/manufacturing/AC-02-001-base-print-R01.stl",
+    "file": "AC-02-наружный/manufacturing/AC-02-001-base-print-R04.stl",
     "bytes": 272284,
     "sha256": "5284dcdb2623b06dc1682bdbb1f2f3d512701a88edf02305dba36ffc3cb2e857"
   },
   {
-    "file": "AC-02-наружный/manufacturing/AC-02-002-lid-print-R01.stl",
+    "file": "AC-02-наружный/manufacturing/AC-02-002-lid-print-R04.stl",
     "bytes": 43884,
     "sha256": "6ab5ac71ad2652f9edce2bf06049beb43ea0df6f95f6737ed06750ca1b7294b7"
   },
   {
-    "file": "AC-02-наружный/manufacturing/AC-02-003-hood-print-R01.stl",
+    "file": "AC-02-наружный/manufacturing/AC-02-003-hood-print-R04.stl",
     "bytes": 47884,
     "sha256": "250df190eaa42c8039331cd2c099e5f52c0e1ba58c1aab6ee924ffab182fdb07"
   },
   {
-    "file": "AC-02-наружный/manufacturing/AC-02-004-bracket-print-R01.stl",
+    "file": "AC-02-наружный/manufacturing/AC-02-004-bracket-print-R04.stl",
     "bytes": 48084,
     "sha256": "ae5ca424222c678109bb3e38d31b5186f847ee879257de07fa6c40f0c020fce9"
   },
   {
-    "file": "AC-02-наружный/manufacturing/AC-02-005-sht-screen-print-R01.stl",
+    "file": "AC-02-наружный/manufacturing/AC-02-005-sht-screen-print-R04.stl",
     "bytes": 27084,
     "sha256": "f82965edbe64e224e028d40c2724354f058e22e50ef0366de2df517f4a751a9e"
   },
   {
     "file": "AC-02-наружный/manufacturing/build_models.py",
-    "bytes": 11609,
-    "sha256": "2a6488057f3f4b78bb61ee7c435144ceb2a22ed1f7bc68f1986d76b8404e9214"
+    "bytes": 12244,
+    "sha256": "77ceb4bffd7bae9827dd80e7f01ed75a86105e67b6bb017ba561e002bff9795c"
+  },
+  {
+    "file": "AC-02-наружный/manufacturing/model-inspection-R04.json",
+    "bytes": 9061,
+    "sha256": "441d4bbc00c50816f54d580c49d55ea436384eadc77567d65318c2b86ad4d79e"
   },
   {
     "file": "AC-02-наружный/manufacturing/model-inspection.json",
@@ -541,8 +891,8 @@
   },
   {
     "file": "AC-02-наружный/README.md",
-    "bytes": 1317,
-    "sha256": "a48d88747d30b66246349fc0c236bcbc8106159e6380e98190ea1633979725af"
+    "bytes": 3218,
+    "sha256": "8eadc8234748213751e4713a696ff3251b02869338a2dffe08096a39f2b315d3"
   },
   {
     "file": "AC-03-управление-и-связь/cad/design.json",
@@ -560,14 +910,34 @@
     "sha256": "281ceffc9e8911fa58220e9b0f1937cf91a416948d4f3f976a99191cf3b7f37d"
   },
   {
+    "file": "AC-03-управление-и-связь/cad/model/AC-03-000-assembly-R02.dwg",
+    "bytes": 57987,
+    "sha256": "94d5fda94782907c98a9a9e783477ff5f7fcd1d9b290e6a9a9715f1f97d15d58"
+  },
+  {
+    "file": "AC-03-управление-и-связь/cad/model/AC-03-000-assembly-R02.step",
+    "bytes": 261139,
+    "sha256": "7efe159bf4b29bf6557e0e1f8d1ce15cbb3eb2b04d1292d99fea339451b54301"
+  },
+  {
     "file": "AC-03-управление-и-связь/cad/model/AC-03-001-base-print-R01.step",
     "bytes": 131522,
     "sha256": "4c8b508eaa4d681837ca1718535446a1d536c2815adec35a6a17f4c594a4136b"
   },
   {
+    "file": "AC-03-управление-и-связь/cad/model/AC-03-001-base-print-R02.step",
+    "bytes": 131522,
+    "sha256": "3e40006b45f6e84f89ba343e37f6075b9e501584133f364016276302d5755b56"
+  },
+  {
     "file": "AC-03-управление-и-связь/cad/model/AC-03-002-lid-print-R01.step",
     "bytes": 43809,
     "sha256": "acc91da6c266ab02ee79cb9cd8b65c2bc4974b4965197dcc264c4b4368506e49"
+  },
+  {
+    "file": "AC-03-управление-и-связь/cad/model/AC-03-002-lid-print-R02.step",
+    "bytes": 43809,
+    "sha256": "d95321ae3fd681d09f1abe322e7ebbb9b1750c2c0dd3fa377b6904da81e5de91"
   },
   {
     "file": "AC-03-управление-и-связь/cad/reference/REF-ESP32-V4-envelope.step",
@@ -590,9 +960,14 @@
     "sha256": "4fb33d322f55b05c406bfe211ec9cac9585a70f08d2c849b24b6b343a63bcce5"
   },
   {
+    "file": "AC-03-управление-и-связь/documentation/AC-03-documentation-R01.pdf",
+    "bytes": 140192,
+    "sha256": "d33c3ef0604c3cad4f6672699bd1eaba756228e947c72419535344ef75a9cbc7"
+  },
+  {
     "file": "AC-03-управление-и-связь/documentation/AC-03-documentation-R02.pdf",
-    "bytes": 141822,
-    "sha256": "d33f669c0f1fa2df9801cf33fad9150a277b69fb70cfde6b2b325a8ddedd5bc2"
+    "bytes": 143169,
+    "sha256": "97b6359a05bcf6f9f740340fde21ecfc531983b5237f638df48c0b022913077c"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/BOM.csv",
@@ -602,7 +977,12 @@
   {
     "file": "AC-03-управление-и-связь/documentation/build_documentation.py",
     "bytes": 8288,
-    "sha256": "f40511bc9f7525b8302e4c9a40a4bbb13a7bd8bc9d407f0bc845ed54f1da9fca"
+    "sha256": "9c50207987ea7e8b9c763ac4e9390fa01ef0301ca5c54016962846388c41bc27"
+  },
+  {
+    "file": "AC-03-управление-и-связь/documentation/drawing-audit-R01.md",
+    "bytes": 6482,
+    "sha256": "4106e4fcde88d62170d0c40af68f682d013d448644c0a24e4e26118b14302898"
   },
   {
     "file": "AC-03-управление-и-связь/documentation/drawing-audit-R02.md",
@@ -615,14 +995,34 @@
     "sha256": "4b665e3c719e519f24e601654defbd39cb23c33e58105c3883202fde40ef77e6"
   },
   {
+    "file": "AC-03-управление-и-связь/documentation/native-3d-verification-R02.json",
+    "bytes": 809,
+    "sha256": "14b5541ccfbeec11e7b14163430979a5fda958464b610855bc10d1f8a135aabb"
+  },
+  {
     "file": "AC-03-управление-и-связь/documentation/standards-and-sources.md",
     "bytes": 12506,
     "sha256": "d891aa82d8bd5c5ea3d546d16d60b20d06c13644685692861821df94fe0fc337"
   },
   {
+    "file": "AC-03-управление-и-связь/documentation/validation-R01.md",
+    "bytes": 8272,
+    "sha256": "63c8164b86d6391d874daa597c763051ec98ae010b7a332499be952f0d570522"
+  },
+  {
     "file": "AC-03-управление-и-связь/documentation/validation-R02.md",
-    "bytes": 7242,
-    "sha256": "ea880bdce5f47462e8d5186a72a1cd5b17e057f31df1ee11a3941383962df8e2"
+    "bytes": 8901,
+    "sha256": "34560d36f92737595ba10969041d073d9a9f5291e2a9d0eb9ddbeca0dd6b14a9"
+  },
+  {
+    "file": "AC-03-управление-и-связь/drawings/AC-03-drawings-R01.dxf",
+    "bytes": 125339,
+    "sha256": "d104d5a5f2252dfff52ae8eb7f3b17ed840ee41560ac81f9992170b4dfa161f0"
+  },
+  {
+    "file": "AC-03-управление-и-связь/drawings/AC-03-drawings-R01.pdf",
+    "bytes": 43107,
+    "sha256": "501c5a58ff8553e7f01670cad266be2cadf9335d28a603172c69da1bf9deec11"
   },
   {
     "file": "AC-03-управление-и-связь/drawings/AC-03-drawings-R02.dxf",
@@ -640,9 +1040,19 @@
     "sha256": "c8bc0bbfe53ce3e3375c4bbd64c3247dde2f7e420202598a8fa9786b7faf5961"
   },
   {
+    "file": "AC-03-управление-и-связь/drawings/drawing-entities-R01.json",
+    "bytes": 155637,
+    "sha256": "eab3711c0518a38bdb707c71fbb035516bacb8ba9de15f6f158153b6854da29c"
+  },
+  {
     "file": "AC-03-управление-и-связь/drawings/drawing-entities-R02.json",
     "bytes": 180848,
     "sha256": "dde241a103b6724c30a791358752b439fbb62b9b102c7b575e200ffe0d5d7673"
+  },
+  {
+    "file": "AC-03-управление-и-связь/drawings/layout-audit-R01.json",
+    "bytes": 262,
+    "sha256": "4deaa18d78581ebd54461c47bfc8c12dd08bea1dc450399fe9e84c63d05d210f"
   },
   {
     "file": "AC-03-управление-и-связь/drawings/layout-audit-R02.json",
@@ -650,19 +1060,19 @@
     "sha256": "7b01ab24e5084d7340da68a040757af323246b98d2816a64fdfd4bcc2c264275"
   },
   {
-    "file": "AC-03-управление-и-связь/manufacturing/AC-03-001-base-print-R01.stl",
+    "file": "AC-03-управление-и-связь/manufacturing/AC-03-001-base-print-R02.stl",
     "bytes": 53084,
     "sha256": "4049ae09f411993f0a5e23541b327a5a55c567b3a581cf46544d914d352f9e47"
   },
   {
-    "file": "AC-03-управление-и-связь/manufacturing/AC-03-002-lid-print-R01.stl",
+    "file": "AC-03-управление-и-связь/manufacturing/AC-03-002-lid-print-R02.stl",
     "bytes": 48684,
     "sha256": "46bf40d68b2a60c434a52b7303c7acd6eb24fcca9bd31e7052bd766470fcf1b6"
   },
   {
     "file": "AC-03-управление-и-связь/manufacturing/build_models.py",
-    "bytes": 14402,
-    "sha256": "3dad32f771fc6f3b82e5d3ab7e1aff770a2ec6645587700d766d4863aa01f431"
+    "bytes": 14946,
+    "sha256": "0d069723f456a922bcf2cc9e019e26f6714ce8064618c3d75e8c078bca4b2a95"
   },
   {
     "file": "AC-03-управление-и-связь/manufacturing/model-inspection-R01.json",
@@ -670,14 +1080,19 @@
     "sha256": "bf9fb98549fd6d0d98d3e644e2f1af4bf9253d11a6545184c2f6899d94161f02"
   },
   {
+    "file": "AC-03-управление-и-связь/manufacturing/model-inspection-R02.json",
+    "bytes": 8944,
+    "sha256": "2651811f3e17a33b04626b54feb9763991acf6b00d7ba10a4376697732b606ea"
+  },
+  {
     "file": "AC-03-управление-и-связь/README.md",
-    "bytes": 1024,
-    "sha256": "15fec0af0ed627ff9d8b653e637bd75c8facb9f5f3b3c2e194c6510ed3f2210b"
+    "bytes": 2819,
+    "sha256": "32b4a83f5fba219ca4b3de046d2ec561c29858e02366e0c75fb1dd9a0d8934f7"
   },
   {
     "file": "README.md",
-    "bytes": 3215,
-    "sha256": "c9f5fae096bdd06a86b0ef3b800258149c0204c4214781676757f12c7b08c808"
+    "bytes": 5152,
+    "sha256": "56fb8740e6ad84bd4d9a0575b7ec5c7ee348392353db8acf2df4e8abe3ba0136"
   },
   {
     "file": "Общие-документы/api.md",
@@ -688,6 +1103,11 @@
     "file": "Общие-документы/long-term-history.md",
     "bytes": 5903,
     "sha256": "8e16de9fe4fad8c2bff34737efabeb27e09a4bf20488e6da744f7e87843f06ac"
+  },
+  {
+    "file": "Общие-документы/model-release-map.md",
+    "bytes": 6288,
+    "sha256": "30ce7f0d4bbfa24dc19f21ff6604b9a07e65cd4cb5a86cb01f21f87a55f8c22f"
   },
   {
     "file": "Общие-документы/notifications.md",
@@ -701,8 +1121,8 @@
   },
   {
     "file": "Общие-документы/аудит-физической-части-aircheck-2026-10-11.md",
-    "bytes": 15820,
-    "sha256": "ed1ed9648ba2fd9c8b928fc9934a6d745b82c72fd7204bd4bffe9cd4aeb37c04"
+    "bytes": 15664,
+    "sha256": "3bd2dbb77a34de0111f1e5f20996d068798ff291f4a00aeb52e1d3bb6cac767a"
   },
   {
     "file": "Общие-документы/исходные-данные/devices.toml",
@@ -716,8 +1136,8 @@
   },
   {
     "file": "Общие-документы/план-физической-части-aircheck.md",
-    "bytes": 29579,
-    "sha256": "8370899f9c1f5807821cbcffbb87b74fbafa4b2b632149765cb899691e0f5102"
+    "bytes": 30035,
+    "sha256": "001bfde4b39d8cdb45300f327656eca6a6970362e623085555c9860839cb38e4"
   },
   {
     "file": "Общие-документы/подготовка-физической-части-aircheck.md",

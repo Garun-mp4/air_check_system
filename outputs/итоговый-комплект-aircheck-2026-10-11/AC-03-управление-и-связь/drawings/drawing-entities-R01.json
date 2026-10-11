@@ -1,0 +1,10667 @@
+[
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      20,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      415,
+      292
+    ],
+    "end": [
+      20,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      20,
+      292
+    ],
+    "end": [
+      20,
+      5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TITLE",
+    "x": 26,
+    "y": 281,
+    "height": 4.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Узел управления и связи. Общий вид"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 274,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "AirCheck | узел управления и связи | R01 | размеры в мм"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      415,
+      60
+    ],
+    "end": [
+      230,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      60
+    ],
+    "end": [
+      230,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      250,
+      5
+    ],
+    "end": [
+      250,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      267,
+      5
+    ],
+    "end": [
+      267,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      282,
+      5
+    ],
+    "end": [
+      282,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      295,
+      5
+    ],
+    "end": [
+      295,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      380,
+      5
+    ],
+    "end": [
+      380,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      395,
+      5
+    ],
+    "end": [
+      395,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      10
+    ],
+    "end": [
+      295,
+      10
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      15
+    ],
+    "end": [
+      295,
+      15
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      20
+    ],
+    "end": [
+      295,
+      20
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      25
+    ],
+    "end": [
+      295,
+      25
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      30
+    ],
+    "end": [
+      295,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      35
+    ],
+    "end": [
+      295,
+      35
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      40
+    ],
+    "end": [
+      295,
+      40
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      45
+    ],
+    "end": [
+      295,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      50
+    ],
+    "end": [
+      295,
+      50
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      230,
+      55
+    ],
+    "end": [
+      295,
+      55
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      295,
+      45
+    ],
+    "end": [
+      415,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      295,
+      30
+    ],
+    "end": [
+      415,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      380,
+      30
+    ],
+    "end": [
+      380,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      395,
+      30
+    ],
+    "end": [
+      395,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "FRAME",
+    "start": [
+      390,
+      20
+    ],
+    "end": [
+      390,
+      30
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 240.0,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Изм."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 258.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 274.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Подп."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 288.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Дата"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TITLE",
+    "x": 298,
+    "y": 50.5,
+    "height": 3.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "AC-03-000 СБ"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 35.5,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "Узел управления и связи"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лит."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 387.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масса"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масш."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "П"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "1:1"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 11.5,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "Цифровой прототип; материал не назначен"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 377.5,
+    "y": 12.0,
+    "height": 2.25,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист 1 / 5"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 27.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Разраб."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 22.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Проверил"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 17.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Т. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 12.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Н. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 7.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Утв."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "А3 420 x 297; печать PDF 100%; проверить линейный размер 100 мм"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 135,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "Подписи и нормоконтроль не выполнены"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 42,
+    "y": 255,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Вид сверху, крышка снята; установочные размеры 1:1"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      42,
+      128
+    ],
+    "end": [
+      182,
+      128
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      182,
+      128
+    ],
+    "end": [
+      182,
+      238
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      182,
+      238
+    ],
+    "end": [
+      42,
+      238
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      42,
+      238
+    ],
+    "end": [
+      42,
+      128
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      39,
+      125
+    ],
+    "end": [
+      185,
+      125
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      185,
+      125
+    ],
+    "end": [
+      185,
+      241
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      185,
+      241
+    ],
+    "end": [
+      39,
+      241
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      39,
+      241
+    ],
+    "end": [
+      39,
+      125
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      44.5,
+      130.5
+    ],
+    "end": [
+      179.5,
+      130.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      179.5,
+      130.5
+    ],
+    "end": [
+      179.5,
+      235.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      179.5,
+      235.5
+    ],
+    "end": [
+      44.5,
+      235.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      44.5,
+      235.5
+    ],
+    "end": [
+      44.5,
+      130.5
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 1,
+    "layer": "OUT",
+    "center": [
+      50,
+      136
+    ],
+    "radius": 1.7
+  },
+  {
+    "type": "Circle",
+    "sheet": 1,
+    "layer": "OUT",
+    "center": [
+      50,
+      230
+    ],
+    "radius": 1.7
+  },
+  {
+    "type": "Circle",
+    "sheet": 1,
+    "layer": "OUT",
+    "center": [
+      174,
+      136
+    ],
+    "radius": 1.7
+  },
+  {
+    "type": "Circle",
+    "sheet": 1,
+    "layer": "OUT",
+    "center": [
+      174,
+      230
+    ],
+    "radius": 1.7
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      98.03,
+      131.5
+    ],
+    "end": [
+      125.97,
+      131.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      125.97,
+      131.5
+    ],
+    "end": [
+      125.97,
+      179.76
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      125.97,
+      179.76
+    ],
+    "end": [
+      98.03,
+      179.76
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      98.03,
+      179.76
+    ],
+    "end": [
+      98.03,
+      131.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      103.0,
+      148.22
+    ],
+    "end": [
+      121.0,
+      148.22
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      121.0,
+      148.22
+    ],
+    "end": [
+      121.0,
+      173.72
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      121.0,
+      173.72
+    ],
+    "end": [
+      103.0,
+      173.72
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      103.0,
+      173.72
+    ],
+    "end": [
+      103.0,
+      148.22
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 101,
+    "y": 183,
+    "height": 2.5,
+    "align": "left",
+    "rotation": 0,
+    "value": "Плата ESP32 LOD0"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 104,
+    "y": 145,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "WROOM-32E"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      103,
+      128
+    ],
+    "end": [
+      121,
+      128
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      121,
+      128
+    ],
+    "end": [
+      121,
+      130.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      121,
+      130.5
+    ],
+    "end": [
+      103,
+      130.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      103,
+      130.5
+    ],
+    "end": [
+      103,
+      128
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      134,
+      235.5
+    ],
+    "end": [
+      166,
+      235.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      166,
+      235.5
+    ],
+    "end": [
+      166,
+      238.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      166,
+      238.0
+    ],
+    "end": [
+      134,
+      238.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      134,
+      238.0
+    ],
+    "end": [
+      134,
+      235.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 124,
+    "y": 123,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "USB: 18 x 2,5 в плане"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 126,
+    "y": 244,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "Задний ввод: 32 x 2,5 в плане"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      39,
+      241
+    ],
+    "end": [
+      39,
+      249.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      185,
+      241
+    ],
+    "end": [
+      185,
+      249.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      39,
+      250
+    ],
+    "end": [
+      185,
+      250
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      39,
+      250
+    ],
+    "end": [
+      41.5,
+      250.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      39,
+      250
+    ],
+    "end": [
+      41.5,
+      249.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      185,
+      250
+    ],
+    "end": [
+      182.5,
+      250.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      185,
+      250
+    ],
+    "end": [
+      182.5,
+      249.1
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "DIMTEXT",
+    "x": 112.0,
+    "y": 251.4,
+    "height": 3.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "146"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      39,
+      125
+    ],
+    "end": [
+      32.0,
+      125
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      39,
+      241
+    ],
+    "end": [
+      32.0,
+      241
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      31,
+      125
+    ],
+    "end": [
+      31,
+      241
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      31,
+      125
+    ],
+    "end": [
+      30.1,
+      127.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      31,
+      125
+    ],
+    "end": [
+      31.9,
+      127.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      31,
+      241
+    ],
+    "end": [
+      30.1,
+      238.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      31,
+      241
+    ],
+    "end": [
+      31.9,
+      238.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "DIMTEXT",
+    "x": 24.06,
+    "y": 181.88,
+    "height": 3.2,
+    "align": "left",
+    "rotation": 0,
+    "value": "116"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 43,
+    "y": 112,
+    "height": 2.7,
+    "align": "left",
+    "rotation": 0,
+    "value": "Контур основания 140 x 110; контур крышки выступает на 3 мм/сторону"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      220,
+      153
+    ],
+    "end": [
+      360,
+      153
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      360,
+      153
+    ],
+    "end": [
+      360,
+      208
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      360,
+      208
+    ],
+    "end": [
+      220,
+      208
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      220,
+      208
+    ],
+    "end": [
+      220,
+      153
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      217,
+      203
+    ],
+    "end": [
+      363,
+      203
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      363,
+      203
+    ],
+    "end": [
+      363,
+      211
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      363,
+      211
+    ],
+    "end": [
+      217,
+      211
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      217,
+      211
+    ],
+    "end": [
+      217,
+      203
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      281,
+      158.6
+    ],
+    "end": [
+      299,
+      158.6
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      299,
+      158.6
+    ],
+    "end": [
+      299,
+      169.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      299,
+      169.0
+    ],
+    "end": [
+      281,
+      169.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      281,
+      169.0
+    ],
+    "end": [
+      281,
+      158.6
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "CENTER",
+    "start": [
+      290,
+      154
+    ],
+    "end": [
+      290,
+      171
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 220,
+    "y": 219,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Вид спереди (USB), 1:1"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      211
+    ],
+    "end": [
+      217,
+      214.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      363,
+      211
+    ],
+    "end": [
+      363,
+      214.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      215
+    ],
+    "end": [
+      363,
+      215
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      215
+    ],
+    "end": [
+      219.5,
+      215.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      215
+    ],
+    "end": [
+      219.5,
+      214.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      363,
+      215
+    ],
+    "end": [
+      360.5,
+      215.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      363,
+      215
+    ],
+    "end": [
+      360.5,
+      214.1
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "DIMTEXT",
+    "x": 290.0,
+    "y": 216.4,
+    "height": 3.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "146"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      153
+    ],
+    "end": [
+      212.0,
+      153
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      211
+    ],
+    "end": [
+      212.0,
+      211
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      211,
+      153
+    ],
+    "end": [
+      211,
+      211
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      211,
+      153
+    ],
+    "end": [
+      210.1,
+      155.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      211,
+      153
+    ],
+    "end": [
+      211.9,
+      155.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      211,
+      211
+    ],
+    "end": [
+      210.1,
+      208.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      211,
+      211
+    ],
+    "end": [
+      211.9,
+      208.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "DIMTEXT",
+    "x": 204.7,
+    "y": 180.88,
+    "height": 3.2,
+    "align": "left",
+    "rotation": 0,
+    "value": "58"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 220,
+    "y": 263.0,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "Состав цифровой сборки:"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 220,
+    "y": 257.0,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "1 — основание AC-03-001; 2 — крышка AC-03-002;"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 220,
+    "y": 251.0,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "3 — габаритная модель ESP32-DevKitC V4 (LOD0);"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 220,
+    "y": 245.0,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "4 — условные съёмные опоры платы."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 220,
+    "y": 239.0,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "Плата должна быть без нижних припаянных гребёнок."
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 220,
+    "y": 233.0,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "Электронные элементы показаны как REF, не для печати."
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      220,
+      77
+    ],
+    "end": [
+      330,
+      77
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      330,
+      77
+    ],
+    "end": [
+      330,
+      132
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      330,
+      132
+    ],
+    "end": [
+      220,
+      132
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      220,
+      132
+    ],
+    "end": [
+      220,
+      77
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      217,
+      127
+    ],
+    "end": [
+      333,
+      127
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      333,
+      127
+    ],
+    "end": [
+      333,
+      135
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      333,
+      135
+    ],
+    "end": [
+      217,
+      135
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      217,
+      135
+    ],
+    "end": [
+      217,
+      127
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 220,
+    "y": 139,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Вид сбоку, 1:1"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      77
+    ],
+    "end": [
+      217,
+      71.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      333,
+      77
+    ],
+    "end": [
+      333,
+      71.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      72
+    ],
+    "end": [
+      333,
+      72
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      72
+    ],
+    "end": [
+      219.5,
+      72.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      72
+    ],
+    "end": [
+      219.5,
+      71.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      333,
+      72
+    ],
+    "end": [
+      330.5,
+      72.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      333,
+      72
+    ],
+    "end": [
+      330.5,
+      71.1
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "DIMTEXT",
+    "x": 275.0,
+    "y": 73.4,
+    "height": 3.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "116"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      77
+    ],
+    "end": [
+      209.0,
+      77
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      217,
+      135
+    ],
+    "end": [
+      209.0,
+      135
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      208,
+      77
+    ],
+    "end": [
+      208,
+      135
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      208,
+      77
+    ],
+    "end": [
+      207.1,
+      79.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      208,
+      77
+    ],
+    "end": [
+      208.9,
+      79.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      208,
+      135
+    ],
+    "end": [
+      207.1,
+      132.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "DIM",
+    "start": [
+      208,
+      135
+    ],
+    "end": [
+      208.9,
+      132.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "DIMTEXT",
+    "x": 201.7,
+    "y": 104.88,
+    "height": 3.2,
+    "align": "left",
+    "rotation": 0,
+    "value": "58"
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 42,
+    "y": 91,
+    "height": 2.7,
+    "align": "left",
+    "rotation": 0,
+    "value": "Условная схема разборки (не вид и не сборочный масштаб)"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      42,
+      53
+    ],
+    "end": [
+      188,
+      53
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      188,
+      53
+    ],
+    "end": [
+      188,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      188,
+      60
+    ],
+    "end": [
+      42,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      42,
+      60
+    ],
+    "end": [
+      42,
+      53
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 195,
+    "y": 55,
+    "height": 2.7,
+    "align": "left",
+    "rotation": 0,
+    "value": "Крышка"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      48,
+      66
+    ],
+    "end": [
+      182,
+      66
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      182,
+      66
+    ],
+    "end": [
+      182,
+      68
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      182,
+      68
+    ],
+    "end": [
+      48,
+      68
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "REF",
+    "start": [
+      48,
+      68
+    ],
+    "end": [
+      48,
+      66
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 195,
+    "y": 64.5,
+    "height": 2.7,
+    "align": "left",
+    "rotation": 0,
+    "value": "Плата + съёмные опоры"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      45,
+      74
+    ],
+    "end": [
+      185,
+      74
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      185,
+      74
+    ],
+    "end": [
+      185,
+      88
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      185,
+      88
+    ],
+    "end": [
+      45,
+      88
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "OUT",
+    "start": [
+      45,
+      88
+    ],
+    "end": [
+      45,
+      74
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 195,
+    "y": 79,
+    "height": 2.7,
+    "align": "left",
+    "rotation": 0,
+    "value": "Основание"
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      115,
+      61
+    ],
+    "end": [
+      115,
+      65
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      115,
+      65
+    ],
+    "end": [
+      114.175,
+      63.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      115,
+      65
+    ],
+    "end": [
+      115.825,
+      63.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      115,
+      69
+    ],
+    "end": [
+      115,
+      73
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      115,
+      73
+    ],
+    "end": [
+      114.175,
+      71.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 1,
+    "layer": "THIN",
+    "start": [
+      115,
+      73
+    ],
+    "end": [
+      115.825,
+      71.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 1,
+    "layer": "TEXT",
+    "x": 42,
+    "y": 43,
+    "height": 2.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Крепёж крышки: 4 винта М3; длина подбирается после физической примерки."
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      20,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      415,
+      292
+    ],
+    "end": [
+      20,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      20,
+      292
+    ],
+    "end": [
+      20,
+      5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TITLE",
+    "x": 26,
+    "y": 281,
+    "height": 4.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Основание корпуса. Чертёж детали"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 274,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "AirCheck | узел управления и связи | R01 | размеры в мм"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      415,
+      60
+    ],
+    "end": [
+      230,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      60
+    ],
+    "end": [
+      230,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      250,
+      5
+    ],
+    "end": [
+      250,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      267,
+      5
+    ],
+    "end": [
+      267,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      282,
+      5
+    ],
+    "end": [
+      282,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      295,
+      5
+    ],
+    "end": [
+      295,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      380,
+      5
+    ],
+    "end": [
+      380,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      395,
+      5
+    ],
+    "end": [
+      395,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      10
+    ],
+    "end": [
+      295,
+      10
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      15
+    ],
+    "end": [
+      295,
+      15
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      20
+    ],
+    "end": [
+      295,
+      20
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      25
+    ],
+    "end": [
+      295,
+      25
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      30
+    ],
+    "end": [
+      295,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      35
+    ],
+    "end": [
+      295,
+      35
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      40
+    ],
+    "end": [
+      295,
+      40
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      45
+    ],
+    "end": [
+      295,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      50
+    ],
+    "end": [
+      295,
+      50
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      230,
+      55
+    ],
+    "end": [
+      295,
+      55
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      295,
+      45
+    ],
+    "end": [
+      415,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      295,
+      30
+    ],
+    "end": [
+      415,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      380,
+      30
+    ],
+    "end": [
+      380,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      395,
+      30
+    ],
+    "end": [
+      395,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "FRAME",
+    "start": [
+      390,
+      20
+    ],
+    "end": [
+      390,
+      30
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 240.0,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Изм."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 258.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 274.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Подп."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 288.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Дата"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TITLE",
+    "x": 298,
+    "y": 50.5,
+    "height": 3.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "AC-03-001"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 35.5,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "Основание корпуса"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лит."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 387.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масса"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масш."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "П"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "1:1"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 11.5,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "Цифровой прототип; материал не назначен"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 377.5,
+    "y": 12.0,
+    "height": 2.25,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист 2 / 5"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 27.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Разраб."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 22.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Проверил"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 17.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Т. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 12.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Н. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 7.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Утв."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "А3 420 x 297; печать PDF 100%; проверить линейный размер 100 мм"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 135,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "Подписи и нормоконтроль не выполнены"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 42,
+    "y": 260,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Вид сверху изнутри"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      42,
+      132
+    ],
+    "end": [
+      182,
+      132
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      182,
+      132
+    ],
+    "end": [
+      182,
+      242
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      182,
+      242
+    ],
+    "end": [
+      42,
+      242
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      42,
+      242
+    ],
+    "end": [
+      42,
+      132
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      44.5,
+      134.5
+    ],
+    "end": [
+      179.5,
+      134.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      179.5,
+      134.5
+    ],
+    "end": [
+      179.5,
+      239.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      179.5,
+      239.5
+    ],
+    "end": [
+      44.5,
+      239.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      44.5,
+      239.5
+    ],
+    "end": [
+      44.5,
+      134.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      43,
+      133
+    ],
+    "end": [
+      57,
+      133
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      57,
+      133
+    ],
+    "end": [
+      57,
+      147
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      57,
+      147
+    ],
+    "end": [
+      43,
+      147
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      43,
+      147
+    ],
+    "end": [
+      43,
+      133
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 2,
+    "layer": "OUT",
+    "center": [
+      50,
+      140
+    ],
+    "radius": 1.25
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      46.8,
+      140
+    ],
+    "end": [
+      53.2,
+      140
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      50,
+      136.8
+    ],
+    "end": [
+      50,
+      143.2
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      43,
+      227
+    ],
+    "end": [
+      57,
+      227
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      57,
+      227
+    ],
+    "end": [
+      57,
+      241
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      57,
+      241
+    ],
+    "end": [
+      43,
+      241
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      43,
+      241
+    ],
+    "end": [
+      43,
+      227
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 2,
+    "layer": "OUT",
+    "center": [
+      50,
+      234
+    ],
+    "radius": 1.25
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      46.8,
+      234
+    ],
+    "end": [
+      53.2,
+      234
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      50,
+      230.8
+    ],
+    "end": [
+      50,
+      237.2
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      167,
+      133
+    ],
+    "end": [
+      181,
+      133
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      181,
+      133
+    ],
+    "end": [
+      181,
+      147
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      181,
+      147
+    ],
+    "end": [
+      167,
+      147
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      167,
+      147
+    ],
+    "end": [
+      167,
+      133
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 2,
+    "layer": "OUT",
+    "center": [
+      174,
+      140
+    ],
+    "radius": 1.25
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      170.8,
+      140
+    ],
+    "end": [
+      177.2,
+      140
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      174,
+      136.8
+    ],
+    "end": [
+      174,
+      143.2
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      167,
+      227
+    ],
+    "end": [
+      181,
+      227
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      181,
+      227
+    ],
+    "end": [
+      181,
+      241
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      181,
+      241
+    ],
+    "end": [
+      167,
+      241
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      167,
+      241
+    ],
+    "end": [
+      167,
+      227
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 2,
+    "layer": "OUT",
+    "center": [
+      174,
+      234
+    ],
+    "radius": 1.25
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      170.8,
+      234
+    ],
+    "end": [
+      177.2,
+      234
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      174,
+      230.8
+    ],
+    "end": [
+      174,
+      237.2
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      103,
+      132
+    ],
+    "end": [
+      121,
+      132
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      121,
+      132
+    ],
+    "end": [
+      121,
+      134.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      121,
+      134.5
+    ],
+    "end": [
+      103,
+      134.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      103,
+      134.5
+    ],
+    "end": [
+      103,
+      132
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      134,
+      239.5
+    ],
+    "end": [
+      166,
+      239.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      166,
+      239.5
+    ],
+    "end": [
+      166,
+      242.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      166,
+      242.0
+    ],
+    "end": [
+      134,
+      242.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      134,
+      242.0
+    ],
+    "end": [
+      134,
+      239.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      242
+    ],
+    "end": [
+      42,
+      249.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      182,
+      242
+    ],
+    "end": [
+      182,
+      249.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      250
+    ],
+    "end": [
+      182,
+      250
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      250
+    ],
+    "end": [
+      44.5,
+      250.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      250
+    ],
+    "end": [
+      44.5,
+      249.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      182,
+      250
+    ],
+    "end": [
+      179.5,
+      250.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      182,
+      250
+    ],
+    "end": [
+      179.5,
+      249.1
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "DIMTEXT",
+    "x": 112.0,
+    "y": 251.4,
+    "height": 3.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "140"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      132
+    ],
+    "end": [
+      33.0,
+      132
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      242
+    ],
+    "end": [
+      33.0,
+      242
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      32,
+      132
+    ],
+    "end": [
+      32,
+      242
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      32,
+      132
+    ],
+    "end": [
+      31.1,
+      134.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      32,
+      132
+    ],
+    "end": [
+      32.9,
+      134.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      32,
+      242
+    ],
+    "end": [
+      31.1,
+      239.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      32,
+      242
+    ],
+    "end": [
+      32.9,
+      239.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "DIMTEXT",
+    "x": 25.06,
+    "y": 185.88,
+    "height": 3.2,
+    "align": "left",
+    "rotation": 0,
+    "value": "110"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 102,
+    "y": 125,
+    "height": 2.35,
+    "align": "left",
+    "rotation": 0,
+    "value": "Фасад USB 18 x 10,4; план 18 x 2,5; X=61…79; Z=5,6…16"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      222,
+      170
+    ],
+    "end": [
+      362,
+      170
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      362,
+      170
+    ],
+    "end": [
+      362,
+      225
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      362,
+      225
+    ],
+    "end": [
+      222,
+      225
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      222,
+      225
+    ],
+    "end": [
+      222,
+      170
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      283,
+      175.6
+    ],
+    "end": [
+      301,
+      175.6
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      301,
+      175.6
+    ],
+    "end": [
+      301,
+      186.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      301,
+      186.0
+    ],
+    "end": [
+      283,
+      186.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      283,
+      186.0
+    ],
+    "end": [
+      283,
+      175.6
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "CENTER",
+    "start": [
+      292,
+      172
+    ],
+    "end": [
+      292,
+      190
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 222,
+    "y": 232,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Вид спереди"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      170
+    ],
+    "end": [
+      222,
+      158.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      362,
+      170
+    ],
+    "end": [
+      362,
+      158.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      159
+    ],
+    "end": [
+      362,
+      159
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      159
+    ],
+    "end": [
+      224.5,
+      159.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      159
+    ],
+    "end": [
+      224.5,
+      158.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      362,
+      159
+    ],
+    "end": [
+      359.5,
+      159.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      362,
+      159
+    ],
+    "end": [
+      359.5,
+      158.1
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "DIMTEXT",
+    "x": 292.0,
+    "y": 160.4,
+    "height": 3.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "140"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      170
+    ],
+    "end": [
+      215.0,
+      170
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      225
+    ],
+    "end": [
+      215.0,
+      225
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      170
+    ],
+    "end": [
+      214,
+      225
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      170
+    ],
+    "end": [
+      213.1,
+      172.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      170
+    ],
+    "end": [
+      214.9,
+      172.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      225
+    ],
+    "end": [
+      213.1,
+      222.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      225
+    ],
+    "end": [
+      214.9,
+      222.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "DIMTEXT",
+    "x": 208.02,
+    "y": 196.38,
+    "height": 3.2,
+    "align": "left",
+    "rotation": 0,
+    "value": "55"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 222,
+    "y": 260.0,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "USB окно 18 x 10,4 мм; X=61…79."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 222,
+    "y": 254.0,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "По высоте Z=5,6…16 мм; сверить штекер."
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      222,
+      82
+    ],
+    "end": [
+      332,
+      82
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      332,
+      82
+    ],
+    "end": [
+      332,
+      137
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      332,
+      137
+    ],
+    "end": [
+      222,
+      137
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      222,
+      137
+    ],
+    "end": [
+      222,
+      82
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 222,
+    "y": 144,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Вид справа"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      82
+    ],
+    "end": [
+      222,
+      70.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      332,
+      82
+    ],
+    "end": [
+      332,
+      70.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      71
+    ],
+    "end": [
+      332,
+      71
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      71
+    ],
+    "end": [
+      224.5,
+      71.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      71
+    ],
+    "end": [
+      224.5,
+      70.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      332,
+      71
+    ],
+    "end": [
+      329.5,
+      71.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      332,
+      71
+    ],
+    "end": [
+      329.5,
+      70.1
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "DIMTEXT",
+    "x": 277.0,
+    "y": 72.4,
+    "height": 3.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "110"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      82
+    ],
+    "end": [
+      215.0,
+      82
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      222,
+      137
+    ],
+    "end": [
+      215.0,
+      137
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      82
+    ],
+    "end": [
+      214,
+      137
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      82
+    ],
+    "end": [
+      213.1,
+      84.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      82
+    ],
+    "end": [
+      214.9,
+      84.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      137
+    ],
+    "end": [
+      213.1,
+      134.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      214,
+      137
+    ],
+    "end": [
+      214.9,
+      134.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "DIMTEXT",
+    "x": 208.02,
+    "y": 108.38,
+    "height": 3.2,
+    "align": "left",
+    "rotation": 0,
+    "value": "55"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      42,
+      55
+    ],
+    "end": [
+      112,
+      55
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      112,
+      55
+    ],
+    "end": [
+      112,
+      82.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      112,
+      82.5
+    ],
+    "end": [
+      42,
+      82.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      42,
+      82.5
+    ],
+    "end": [
+      42,
+      55
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      88,
+      58.5
+    ],
+    "end": [
+      104,
+      58.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      104,
+      58.5
+    ],
+    "end": [
+      104,
+      64.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      104,
+      64.5
+    ],
+    "end": [
+      88,
+      64.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      88,
+      64.5
+    ],
+    "end": [
+      88,
+      58.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 42,
+    "y": 89,
+    "height": 2.5,
+    "align": "left",
+    "rotation": 0,
+    "value": "Вид сзади, 1:2; окно 32 x 12"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      55
+    ],
+    "end": [
+      42,
+      47.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      112,
+      55
+    ],
+    "end": [
+      112,
+      47.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      48
+    ],
+    "end": [
+      112,
+      48
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      48
+    ],
+    "end": [
+      44.5,
+      48.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      48
+    ],
+    "end": [
+      44.5,
+      47.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      112,
+      48
+    ],
+    "end": [
+      109.5,
+      48.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      112,
+      48
+    ],
+    "end": [
+      109.5,
+      47.1
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "DIMTEXT",
+    "x": 77.0,
+    "y": 49.4,
+    "height": 3.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "140"
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      55
+    ],
+    "end": [
+      34.0,
+      55
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      42,
+      82.5
+    ],
+    "end": [
+      34.0,
+      82.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      33,
+      55
+    ],
+    "end": [
+      33,
+      82.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      33,
+      55
+    ],
+    "end": [
+      32.1,
+      57.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      33,
+      55
+    ],
+    "end": [
+      33.9,
+      57.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      33,
+      82.5
+    ],
+    "end": [
+      32.1,
+      80.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "DIM",
+    "start": [
+      33,
+      82.5
+    ],
+    "end": [
+      33.9,
+      80.0
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "DIMTEXT",
+    "x": 27.02,
+    "y": 67.63,
+    "height": 3.2,
+    "align": "left",
+    "rotation": 0,
+    "value": "55"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 112.0,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "Четыре квадратные опоры"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 106.7,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "14 x 14 мм; пилотное"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 101.4,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "отверстие Ø2,5 мм."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 96.1,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "Центры отверстий:"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 90.8,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "(8;8), (132;8),"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 85.5,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "(8;102), (132;102)."
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 80.2,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "Отверстие — пилот под"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 74.9,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "подбор винта/резьбы,"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 122,
+    "y": 69.6,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "не готовая резьба."
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      365,
+      125
+    ],
+    "end": [
+      410,
+      125
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      410,
+      125
+    ],
+    "end": [
+      410,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      410,
+      131
+    ],
+    "end": [
+      370,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      370,
+      131
+    ],
+    "end": [
+      370,
+      159
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      370,
+      159
+    ],
+    "end": [
+      365,
+      159
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "OUT",
+    "start": [
+      365,
+      159
+    ],
+    "end": [
+      365,
+      125
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      370,
+      127
+    ],
+    "end": [
+      374,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      372,
+      125
+    ],
+    "end": [
+      378,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      376,
+      125
+    ],
+    "end": [
+      382,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      380,
+      125
+    ],
+    "end": [
+      386,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      384,
+      125
+    ],
+    "end": [
+      390,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      388,
+      125
+    ],
+    "end": [
+      394,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      392,
+      125
+    ],
+    "end": [
+      398,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      396,
+      125
+    ],
+    "end": [
+      402,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      400,
+      125
+    ],
+    "end": [
+      406,
+      131
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      410,
+      131
+    ],
+    "end": [
+      404,
+      125
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      410,
+      127
+    ],
+    "end": [
+      408,
+      125
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      365,
+      155
+    ],
+    "end": [
+      369,
+      159
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      365,
+      151
+    ],
+    "end": [
+      370,
+      156
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      365,
+      147
+    ],
+    "end": [
+      370,
+      152
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      365,
+      143
+    ],
+    "end": [
+      370,
+      148
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      365,
+      139
+    ],
+    "end": [
+      370,
+      144
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      365,
+      135
+    ],
+    "end": [
+      370,
+      140
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      365,
+      131
+    ],
+    "end": [
+      370,
+      136
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 2,
+    "layer": "THIN",
+    "start": [
+      370,
+      132
+    ],
+    "end": [
+      369,
+      131
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 365,
+    "y": 164,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "Сечение A-A, 2:1"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 365,
+    "y": 118,
+    "height": 2.35,
+    "align": "left",
+    "rotation": 0,
+    "value": "Дно 3"
+  },
+  {
+    "type": "Text",
+    "sheet": 2,
+    "layer": "TEXT",
+    "x": 345,
+    "y": 138,
+    "height": 2.3,
+    "align": "left",
+    "rotation": 0,
+    "value": "Ст. 2,5"
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      20,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      415,
+      292
+    ],
+    "end": [
+      20,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      20,
+      292
+    ],
+    "end": [
+      20,
+      5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TITLE",
+    "x": 26,
+    "y": 281,
+    "height": 4.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Крышка корпуса. Чертёж детали"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 274,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "AirCheck | узел управления и связи | R01 | размеры в мм"
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      415,
+      60
+    ],
+    "end": [
+      230,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      60
+    ],
+    "end": [
+      230,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      250,
+      5
+    ],
+    "end": [
+      250,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      267,
+      5
+    ],
+    "end": [
+      267,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      282,
+      5
+    ],
+    "end": [
+      282,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      295,
+      5
+    ],
+    "end": [
+      295,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      380,
+      5
+    ],
+    "end": [
+      380,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      395,
+      5
+    ],
+    "end": [
+      395,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      10
+    ],
+    "end": [
+      295,
+      10
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      15
+    ],
+    "end": [
+      295,
+      15
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      20
+    ],
+    "end": [
+      295,
+      20
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      25
+    ],
+    "end": [
+      295,
+      25
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      30
+    ],
+    "end": [
+      295,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      35
+    ],
+    "end": [
+      295,
+      35
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      40
+    ],
+    "end": [
+      295,
+      40
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      45
+    ],
+    "end": [
+      295,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      50
+    ],
+    "end": [
+      295,
+      50
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      230,
+      55
+    ],
+    "end": [
+      295,
+      55
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      295,
+      45
+    ],
+    "end": [
+      415,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      295,
+      30
+    ],
+    "end": [
+      415,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      380,
+      30
+    ],
+    "end": [
+      380,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      395,
+      30
+    ],
+    "end": [
+      395,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "FRAME",
+    "start": [
+      390,
+      20
+    ],
+    "end": [
+      390,
+      30
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 240.0,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Изм."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 258.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 274.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Подп."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 288.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Дата"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TITLE",
+    "x": 298,
+    "y": 50.5,
+    "height": 3.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "AC-03-002"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 35.5,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "Крышка корпуса"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лит."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 387.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масса"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масш."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "П"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "1:1"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 11.5,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "Цифровой прототип; материал не назначен"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 377.5,
+    "y": 12.0,
+    "height": 2.25,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист 3 / 5"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 27.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Разраб."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 22.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Проверил"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 17.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Т. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 12.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Н. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 7.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Утв."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "А3 420 x 297; печать PDF 100%; проверить линейный размер 100 мм"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 135,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "Подписи и нормоконтроль не выполнены"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 42,
+    "y": 260,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Вид снизу (посадочная полость)"
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "OUT",
+    "start": [
+      42,
+      135
+    ],
+    "end": [
+      188,
+      135
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "OUT",
+    "start": [
+      188,
+      135
+    ],
+    "end": [
+      188,
+      251
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "OUT",
+    "start": [
+      188,
+      251
+    ],
+    "end": [
+      42,
+      251
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "OUT",
+    "start": [
+      42,
+      251
+    ],
+    "end": [
+      42,
+      135
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      44.6,
+      137.6
+    ],
+    "end": [
+      185.4,
+      137.6
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      185.4,
+      137.6
+    ],
+    "end": [
+      185.4,
+      248.4
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      185.4,
+      248.4
+    ],
+    "end": [
+      44.6,
+      248.4
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      44.6,
+      248.4
+    ],
+    "end": [
+      44.6,
+      137.6
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 3,
+    "layer": "OUT",
+    "center": [
+      50,
+      143
+    ],
+    "radius": 1.7
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "CENTER",
+    "start": [
+      47.0,
+      143
+    ],
+    "end": [
+      53.0,
+      143
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "CENTER",
+    "start": [
+      50,
+      140.0
+    ],
+    "end": [
+      50,
+      146.0
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 3,
+    "layer": "OUT",
+    "center": [
+      50,
+      237
+    ],
+    "radius": 1.7
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "CENTER",
+    "start": [
+      47.0,
+      237
+    ],
+    "end": [
+      53.0,
+      237
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "CENTER",
+    "start": [
+      50,
+      234.0
+    ],
+    "end": [
+      50,
+      240.0
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 3,
+    "layer": "OUT",
+    "center": [
+      174,
+      143
+    ],
+    "radius": 1.7
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "CENTER",
+    "start": [
+      171.0,
+      143
+    ],
+    "end": [
+      177.0,
+      143
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "CENTER",
+    "start": [
+      174,
+      140.0
+    ],
+    "end": [
+      174,
+      146.0
+    ]
+  },
+  {
+    "type": "Circle",
+    "sheet": 3,
+    "layer": "OUT",
+    "center": [
+      174,
+      237
+    ],
+    "radius": 1.7
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "CENTER",
+    "start": [
+      171.0,
+      237
+    ],
+    "end": [
+      177.0,
+      237
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "CENTER",
+    "start": [
+      174,
+      234.0
+    ],
+    "end": [
+      174,
+      240.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      42,
+      251
+    ],
+    "end": [
+      42,
+      258.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      188,
+      251
+    ],
+    "end": [
+      188,
+      258.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      42,
+      259
+    ],
+    "end": [
+      188,
+      259
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      42,
+      259
+    ],
+    "end": [
+      44.5,
+      259.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      42,
+      259
+    ],
+    "end": [
+      44.5,
+      258.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      188,
+      259
+    ],
+    "end": [
+      185.5,
+      259.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      188,
+      259
+    ],
+    "end": [
+      185.5,
+      258.1
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "DIMTEXT",
+    "x": 115.0,
+    "y": 260.4,
+    "height": 3.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "146"
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      42,
+      135
+    ],
+    "end": [
+      33.0,
+      135
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      42,
+      251
+    ],
+    "end": [
+      33.0,
+      251
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      32,
+      135
+    ],
+    "end": [
+      32,
+      251
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      32,
+      135
+    ],
+    "end": [
+      31.1,
+      137.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      32,
+      135
+    ],
+    "end": [
+      32.9,
+      137.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      32,
+      251
+    ],
+    "end": [
+      31.1,
+      248.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      32,
+      251
+    ],
+    "end": [
+      32.9,
+      248.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "DIMTEXT",
+    "x": 25.06,
+    "y": 191.88,
+    "height": 3.2,
+    "align": "left",
+    "rotation": 0,
+    "value": "116"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 45,
+    "y": 189,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Полость 140,8 x 110,8"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 45,
+    "y": 183,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "Зазор к основанию 0,4 мм/сторону"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 45,
+    "y": 177,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "Глубина полости 5,4 мм"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 45,
+    "y": 169,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "4 x Ø3,4; шаг центров 124 x 94"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 45,
+    "y": 163,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "Центры относительно основания: (8;8)…(132;102)"
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "OUT",
+    "start": [
+      245,
+      192
+    ],
+    "end": [
+      318,
+      192
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "OUT",
+    "start": [
+      318,
+      192
+    ],
+    "end": [
+      318,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "OUT",
+    "start": [
+      318,
+      208.0
+    ],
+    "end": [
+      245,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "OUT",
+    "start": [
+      245,
+      208.0
+    ],
+    "end": [
+      245,
+      192
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      246.5,
+      192
+    ],
+    "end": [
+      316.5,
+      192
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      316.5,
+      192
+    ],
+    "end": [
+      316.5,
+      202.8
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      316.5,
+      202.8
+    ],
+    "end": [
+      246.5,
+      202.8
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      246.5,
+      202.8
+    ],
+    "end": [
+      246.5,
+      192
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      245,
+      202.8
+    ],
+    "end": [
+      318,
+      202.8
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      246.5,
+      204.0
+    ],
+    "end": [
+      250.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      249.3,
+      202.8
+    ],
+    "end": [
+      254.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      253.3,
+      202.8
+    ],
+    "end": [
+      258.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      257.3,
+      202.8
+    ],
+    "end": [
+      262.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      261.3,
+      202.8
+    ],
+    "end": [
+      266.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      265.3,
+      202.8
+    ],
+    "end": [
+      270.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      269.3,
+      202.8
+    ],
+    "end": [
+      274.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      273.3,
+      202.8
+    ],
+    "end": [
+      278.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      277.3,
+      202.8
+    ],
+    "end": [
+      282.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      281.3,
+      202.8
+    ],
+    "end": [
+      286.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      285.3,
+      202.8
+    ],
+    "end": [
+      290.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      289.3,
+      202.8
+    ],
+    "end": [
+      294.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      293.3,
+      202.8
+    ],
+    "end": [
+      298.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      297.3,
+      202.8
+    ],
+    "end": [
+      302.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      301.3,
+      202.8
+    ],
+    "end": [
+      306.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      305.3,
+      202.8
+    ],
+    "end": [
+      310.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      309.3,
+      202.8
+    ],
+    "end": [
+      314.5,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      316.5,
+      206.0
+    ],
+    "end": [
+      313.3,
+      202.8
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      245,
+      199.8
+    ],
+    "end": [
+      246.5,
+      201.3
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      245,
+      196.8
+    ],
+    "end": [
+      246.5,
+      198.3
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      245,
+      193.8
+    ],
+    "end": [
+      246.5,
+      195.3
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      246.5,
+      192.3
+    ],
+    "end": [
+      246.2,
+      192
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      316.5,
+      199.8
+    ],
+    "end": [
+      318.0,
+      201.3
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      316.5,
+      196.8
+    ],
+    "end": [
+      318.0,
+      198.3
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      316.5,
+      193.8
+    ],
+    "end": [
+      318.0,
+      195.3
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "THIN",
+    "start": [
+      318.0,
+      192.3
+    ],
+    "end": [
+      317.7,
+      192
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 215,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "Участок борта и полости, вид в разрезе, 2:1"
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      318,
+      192
+    ],
+    "end": [
+      328.0,
+      192
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      318,
+      208.0
+    ],
+    "end": [
+      328.0,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      327,
+      192
+    ],
+    "end": [
+      327,
+      208.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      327,
+      192
+    ],
+    "end": [
+      326.1,
+      194.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      327,
+      192
+    ],
+    "end": [
+      327.9,
+      194.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      327,
+      208.0
+    ],
+    "end": [
+      326.1,
+      205.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      327,
+      208.0
+    ],
+    "end": [
+      327.9,
+      205.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "DIMTEXT",
+    "x": 323.26,
+    "y": 199.02,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "8"
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      245,
+      192
+    ],
+    "end": [
+      237.0,
+      192
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      245,
+      202.8
+    ],
+    "end": [
+      237.0,
+      202.8
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      236,
+      192
+    ],
+    "end": [
+      236,
+      202.8
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      236,
+      192
+    ],
+    "end": [
+      235.1,
+      194.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      236,
+      192
+    ],
+    "end": [
+      236.9,
+      194.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      236,
+      202.8
+    ],
+    "end": [
+      235.1,
+      200.3
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 3,
+    "layer": "DIM",
+    "start": [
+      236,
+      202.8
+    ],
+    "end": [
+      236.9,
+      200.3
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "DIMTEXT",
+    "x": 214.52,
+    "y": 196.455,
+    "height": 2.7,
+    "align": "left",
+    "rotation": 0,
+    "value": "полость 5,4"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 151.0,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "Заход стенок крышки на основание — 5,0 мм."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 145.4,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "Глубина полости крышки — 5,4 мм; запас"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 139.8,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "над торцом основания — 0,4 мм."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 134.2,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "Боковой зазор — 0,4 мм на сторону."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 128.6,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "Измерить по пробной печати. При короблении"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 123.0,
+    "height": 2.55,
+    "align": "left",
+    "rotation": 0,
+    "value": "или усадке не запрессовывать крышку винтами."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 108.0,
+    "height": 2.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Печатать наружной плоскостью к столу —"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 101.8,
+    "height": 2.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "только предварительный вариант. Ориентацию"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 95.6,
+    "height": 2.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "и поддержки подтвердить в выбранном слайсере."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 245,
+    "y": 89.4,
+    "height": 2.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Материал и допуски печати не назначены."
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 42,
+    "y": 100,
+    "height": 2.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Крепёж крышки — 4 винта М3 (внешние, в спецификации длина не назначена)"
+  },
+  {
+    "type": "Text",
+    "sheet": 3,
+    "layer": "TEXT",
+    "x": 42,
+    "y": 93,
+    "height": 2.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Отверстия сквозные Ø3,4 мм; шайбы и длину винта подобрать после физической сборки."
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      20,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      415,
+      292
+    ],
+    "end": [
+      20,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      20,
+      292
+    ],
+    "end": [
+      20,
+      5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TITLE",
+    "x": 26,
+    "y": 281,
+    "height": 4.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Функциональная схема: узлы AC-01, AC-02 и AC-03"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 274,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "AirCheck | узел управления и связи | R01 | размеры в мм"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      415,
+      60
+    ],
+    "end": [
+      230,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      60
+    ],
+    "end": [
+      230,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      250,
+      5
+    ],
+    "end": [
+      250,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      267,
+      5
+    ],
+    "end": [
+      267,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      282,
+      5
+    ],
+    "end": [
+      282,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      295,
+      5
+    ],
+    "end": [
+      295,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      380,
+      5
+    ],
+    "end": [
+      380,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      395,
+      5
+    ],
+    "end": [
+      395,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      10
+    ],
+    "end": [
+      295,
+      10
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      15
+    ],
+    "end": [
+      295,
+      15
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      20
+    ],
+    "end": [
+      295,
+      20
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      25
+    ],
+    "end": [
+      295,
+      25
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      30
+    ],
+    "end": [
+      295,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      35
+    ],
+    "end": [
+      295,
+      35
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      40
+    ],
+    "end": [
+      295,
+      40
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      45
+    ],
+    "end": [
+      295,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      50
+    ],
+    "end": [
+      295,
+      50
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      230,
+      55
+    ],
+    "end": [
+      295,
+      55
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      295,
+      45
+    ],
+    "end": [
+      415,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      295,
+      30
+    ],
+    "end": [
+      415,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      380,
+      30
+    ],
+    "end": [
+      380,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      395,
+      30
+    ],
+    "end": [
+      395,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "FRAME",
+    "start": [
+      390,
+      20
+    ],
+    "end": [
+      390,
+      30
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 240.0,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Изм."
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 258.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 274.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Подп."
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 288.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Дата"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TITLE",
+    "x": 298,
+    "y": 50.5,
+    "height": 3.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "AC-03-004"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 35.5,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "Функциональная схема"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лит."
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 387.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масса"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масш."
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "П"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "Б/М"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 11.5,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "Цифровой прототип; материал не назначен"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 377.5,
+    "y": 12.0,
+    "height": 2.25,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист 4 / 5"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 27.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Разраб."
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 22.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Проверил"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 17.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Т. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 12.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Н. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 7.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Утв."
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "А3 420 x 297; печать PDF 100%; проверить линейный размер 100 мм"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 135,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "Подписи и нормоконтроль не выполнены"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 31,
+    "y": 260,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "Каналы данных и интерфейсы AC-03. Не является принципиальной электрической схемой Э3."
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      34,
+      190
+    ],
+    "end": [
+      120,
+      190
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      120,
+      190
+    ],
+    "end": [
+      120,
+      236
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      120,
+      236
+    ],
+    "end": [
+      34,
+      236
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      34,
+      236
+    ],
+    "end": [
+      34,
+      190
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 77.0,
+    "y": 216.317,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "AC-01"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 77.0,
+    "y": 211.822,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "ESP32 + SCD41"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 77.0,
+    "y": 207.327,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "+ SPS30"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      34,
+      112
+    ],
+    "end": [
+      120,
+      112
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      120,
+      112
+    ],
+    "end": [
+      120,
+      158
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      120,
+      158
+    ],
+    "end": [
+      34,
+      158
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      34,
+      158
+    ],
+    "end": [
+      34,
+      112
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 77.0,
+    "y": 138.317,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "AC-02"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 77.0,
+    "y": 133.822,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "ESP32 + SHT45"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 77.0,
+    "y": 129.327,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "+ SPS30"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      156,
+      168
+    ],
+    "end": [
+      276,
+      168
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      276,
+      168
+    ],
+    "end": [
+      276,
+      236
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      276,
+      236
+    ],
+    "end": [
+      156,
+      236
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      156,
+      236
+    ],
+    "end": [
+      156,
+      168
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 216.0,
+    "y": 207.6542,
+    "height": 3.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "AC-03 / ESP32 DevKitC V4"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 216.0,
+    "y": 203.0867,
+    "height": 3.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Сбор A/B; control state;"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 216.0,
+    "y": 198.5192,
+    "height": 3.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Wi-Fi gateway"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 216.0,
+    "y": 193.9518,
+    "height": 3.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "(device_id = room-01)"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      313,
+      180
+    ],
+    "end": [
+      395,
+      180
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      395,
+      180
+    ],
+    "end": [
+      395,
+      224
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      395,
+      224
+    ],
+    "end": [
+      313,
+      224
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      313,
+      224
+    ],
+    "end": [
+      313,
+      180
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 354.0,
+    "y": 205.317,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "AirCheck API"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 354.0,
+    "y": 200.822,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "/measurements"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 354.0,
+    "y": 196.327,
+    "height": 3.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "/controls/*"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      120,
+      213
+    ],
+    "end": [
+      156,
+      213
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      156,
+      213
+    ],
+    "end": [
+      153.6,
+      214.32
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      156,
+      213
+    ],
+    "end": [
+      153.6,
+      211.68
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 121,
+    "y": 220,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "ESP-NOW"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      120,
+      135
+    ],
+    "end": [
+      156,
+      183
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      156,
+      183
+    ],
+    "end": [
+      153.504,
+      181.872
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      156,
+      183
+    ],
+    "end": [
+      155.616,
+      180.288
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 121,
+    "y": 165,
+    "height": 2.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "ESP-NOW"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      276,
+      208
+    ],
+    "end": [
+      313,
+      208
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      313,
+      208
+    ],
+    "end": [
+      310.6,
+      209.32
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      313,
+      208
+    ],
+    "end": [
+      310.6,
+      206.68
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      313,
+      192
+    ],
+    "end": [
+      276,
+      192
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      276,
+      192
+    ],
+    "end": [
+      278.4,
+      190.68
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      276,
+      192
+    ],
+    "end": [
+      278.4,
+      193.32
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 285,
+    "y": 242,
+    "height": 2.75,
+    "align": "left",
+    "rotation": 0,
+    "value": "Wi-Fi / HTTPS"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 278,
+    "y": 174,
+    "height": 2.35,
+    "align": "left",
+    "rotation": 0,
+    "value": "poll commands / POST state"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      156,
+      120
+    ],
+    "end": [
+      276,
+      120
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      276,
+      120
+    ],
+    "end": [
+      276,
+      153
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      276,
+      153
+    ],
+    "end": [
+      156,
+      153
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      156,
+      153
+    ],
+    "end": [
+      156,
+      120
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 216.0,
+    "y": 139.2285,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "ESP32 DevKitC V4 / J2 / J3"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 216.0,
+    "y": 135.531,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "Выходы GPIO25/26/27/32 -> драйверы"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 216.0,
+    "y": 131.8335,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "Входы GPIO33/18 <- NC концевики окна"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      216,
+      168
+    ],
+    "end": [
+      216,
+      153
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      216,
+      153
+    ],
+    "end": [
+      217.1,
+      155.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      216,
+      153
+    ],
+    "end": [
+      214.9,
+      155.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      207,
+      70
+    ],
+    "end": [
+      295,
+      70
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      295,
+      70
+    ],
+    "end": [
+      295,
+      101
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      295,
+      101
+    ],
+    "end": [
+      207,
+      101
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      207,
+      101
+    ],
+    "end": [
+      207,
+      70
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 251.0,
+    "y": 86.4488,
+    "height": 2.75,
+    "align": "center",
+    "rotation": 0,
+    "value": "Внешние драйверы"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 251.0,
+    "y": 82.4613,
+    "height": 2.75,
+    "align": "center",
+    "rotation": 0,
+    "value": "TBD / не входят в AC-03"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      327,
+      70
+    ],
+    "end": [
+      397,
+      70
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      397,
+      70
+    ],
+    "end": [
+      397,
+      101
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      397,
+      101
+    ],
+    "end": [
+      327,
+      101
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      327,
+      101
+    ],
+    "end": [
+      327,
+      70
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 362.0,
+    "y": 88.3355,
+    "height": 2.65,
+    "align": "center",
+    "rotation": 0,
+    "value": "Вентиляторы /"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 362.0,
+    "y": 84.493,
+    "height": 2.65,
+    "align": "center",
+    "rotation": 0,
+    "value": "привод окна"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 362.0,
+    "y": 80.6505,
+    "height": 2.65,
+    "align": "center",
+    "rotation": 0,
+    "value": "не выбраны"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      250,
+      120
+    ],
+    "end": [
+      250,
+      101
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      250,
+      101
+    ],
+    "end": [
+      251.1,
+      103.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      250,
+      101
+    ],
+    "end": [
+      248.9,
+      103.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      295,
+      85
+    ],
+    "end": [
+      327,
+      85
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      327,
+      85
+    ],
+    "end": [
+      325.0,
+      86.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      327,
+      85
+    ],
+    "end": [
+      325.0,
+      83.9
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      31,
+      23
+    ],
+    "end": [
+      149,
+      23
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      149,
+      23
+    ],
+    "end": [
+      149,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      149,
+      45
+    ],
+    "end": [
+      31,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "OUT",
+    "start": [
+      31,
+      45
+    ],
+    "end": [
+      31,
+      23
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 90.0,
+    "y": 34.8797,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "Внешние NC концевики"
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 90.0,
+    "y": 31.1822,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "Открыто / закрыто"
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      149,
+      34
+    ],
+    "end": [
+      150,
+      34
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      150,
+      34
+    ],
+    "end": [
+      150,
+      136
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      150,
+      136
+    ],
+    "end": [
+      156,
+      136
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      156,
+      136
+    ],
+    "end": [
+      154.0,
+      137.1
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 4,
+    "layer": "THIN",
+    "start": [
+      156,
+      136
+    ],
+    "end": [
+      154.0,
+      134.9
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 4,
+    "layer": "TEXT",
+    "x": 31,
+    "y": 13,
+    "height": 2.35,
+    "align": "left",
+    "rotation": 0,
+    "value": "Нагрузки подключать через отдельные драйверы; прямо к GPIO не подключать."
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      20,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      415,
+      292
+    ],
+    "end": [
+      20,
+      292
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      20,
+      292
+    ],
+    "end": [
+      20,
+      5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TITLE",
+    "x": 26,
+    "y": 281,
+    "height": 4.6,
+    "align": "left",
+    "rotation": 0,
+    "value": "Таблица соединений и состав интерфейсов"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 274,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "AirCheck | узел управления и связи | R01 | размеры в мм"
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      5
+    ],
+    "end": [
+      415,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      415,
+      5
+    ],
+    "end": [
+      415,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      415,
+      60
+    ],
+    "end": [
+      230,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      60
+    ],
+    "end": [
+      230,
+      5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      250,
+      5
+    ],
+    "end": [
+      250,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      267,
+      5
+    ],
+    "end": [
+      267,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      282,
+      5
+    ],
+    "end": [
+      282,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      295,
+      5
+    ],
+    "end": [
+      295,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      380,
+      5
+    ],
+    "end": [
+      380,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      395,
+      5
+    ],
+    "end": [
+      395,
+      60
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      10
+    ],
+    "end": [
+      295,
+      10
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      15
+    ],
+    "end": [
+      295,
+      15
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      20
+    ],
+    "end": [
+      295,
+      20
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      25
+    ],
+    "end": [
+      295,
+      25
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      30
+    ],
+    "end": [
+      295,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      35
+    ],
+    "end": [
+      295,
+      35
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      40
+    ],
+    "end": [
+      295,
+      40
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      45
+    ],
+    "end": [
+      295,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      50
+    ],
+    "end": [
+      295,
+      50
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      55
+    ],
+    "end": [
+      295,
+      55
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      295,
+      45
+    ],
+    "end": [
+      415,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      295,
+      30
+    ],
+    "end": [
+      415,
+      30
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      365,
+      5
+    ],
+    "end": [
+      365,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      380,
+      30
+    ],
+    "end": [
+      380,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      395,
+      30
+    ],
+    "end": [
+      395,
+      45
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      390,
+      20
+    ],
+    "end": [
+      390,
+      30
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 240.0,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Изм."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 258.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 274.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Подп."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 288.5,
+    "y": 51.25,
+    "height": 2.2,
+    "align": "center",
+    "rotation": 0,
+    "value": "Дата"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TITLE",
+    "x": 298,
+    "y": 50.5,
+    "height": 3.8,
+    "align": "left",
+    "rotation": 0,
+    "value": "AC-03-005"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 35.5,
+    "height": 3.0,
+    "align": "left",
+    "rotation": 0,
+    "value": "Таблица сигналов и BOM"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лит."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 387.5,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масса"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 39.4,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Масш."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 372.5,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "П"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 405,
+    "y": 32.0,
+    "height": 2.4,
+    "align": "center",
+    "rotation": 0,
+    "value": "Б/М"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 298,
+    "y": 11.5,
+    "height": 2.4,
+    "align": "left",
+    "rotation": 0,
+    "value": "Цифровой прототип; материал не назначен"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 377.5,
+    "y": 12.0,
+    "height": 2.25,
+    "align": "center",
+    "rotation": 0,
+    "value": "Лист 5 / 5"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 27.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Разраб."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 22.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Проверил"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 17.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Т. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 12.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Н. контр."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 240,
+    "y": 7.5,
+    "height": 2.1,
+    "align": "center",
+    "rotation": 0,
+    "value": "Утв."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 26,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "А3 420 x 297; печать PDF 100%; проверить линейный размер 100 мм"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 135,
+    "y": 7,
+    "height": 2.25,
+    "align": "left",
+    "rotation": 0,
+    "value": "Подписи и нормоконтроль не выполнены"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 30,
+    "y": 260,
+    "height": 2.9,
+    "align": "left",
+    "rotation": 0,
+    "value": "Контакты референсной Espressif DevKitC V4. Перед монтажом сверить исполнение платы и шелкографию."
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      238.0
+    ],
+    "end": [
+      400,
+      238.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      227.5
+    ],
+    "end": [
+      400,
+      227.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      217.0
+    ],
+    "end": [
+      400,
+      217.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      206.5
+    ],
+    "end": [
+      400,
+      206.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      196.0
+    ],
+    "end": [
+      400,
+      196.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      185.5
+    ],
+    "end": [
+      400,
+      185.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      175.0
+    ],
+    "end": [
+      400,
+      175.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      164.5
+    ],
+    "end": [
+      400,
+      164.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      249
+    ],
+    "end": [
+      400,
+      249
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      249
+    ],
+    "end": [
+      30,
+      164.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      83,
+      249
+    ],
+    "end": [
+      83,
+      164.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      154,
+      249
+    ],
+    "end": [
+      154,
+      164.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      240,
+      249
+    ],
+    "end": [
+      240,
+      164.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      292,
+      249
+    ],
+    "end": [
+      292,
+      164.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      400,
+      249
+    ],
+    "end": [
+      400,
+      164.5
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 56.5,
+    "y": 242.7,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "Разъём"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 118.5,
+    "y": 242.7,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "GPIO"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 197.0,
+    "y": 242.7,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "Функция"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 266.0,
+    "y": 242.7,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "Тип / состояние"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 346.0,
+    "y": 242.7,
+    "height": 2.55,
+    "align": "center",
+    "rotation": 0,
+    "value": "Ограничение"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 56.5,
+    "y": 232.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "J2-9"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 118.5,
+    "y": 232.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "GPIO25"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 197.0,
+    "y": 232.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Enable вытяжного вентилятора"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 266.0,
+    "y": 232.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "выход, HIGH = запрос"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 346.0,
+    "y": 232.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Внешний драйвер; нагрузку не питать"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 56.5,
+    "y": 221.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "J2-10"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 118.5,
+    "y": 221.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "GPIO26"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 197.0,
+    "y": 221.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Enable приточного вентилятора"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 266.0,
+    "y": 221.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "выход, HIGH = запрос"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 346.0,
+    "y": 221.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Внешний драйвер; подтяжка вниз"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 56.5,
+    "y": 211.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "J2-11"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 118.5,
+    "y": 211.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "GPIO27"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 197.0,
+    "y": 211.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Открыть окно"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 266.0,
+    "y": 211.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "выход, HIGH = запрос"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 346.0,
+    "y": 211.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Блокировка с GPIO32"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 56.5,
+    "y": 200.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "J2-7"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 118.5,
+    "y": 200.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "GPIO32"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 197.0,
+    "y": 200.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Закрыть окно"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 266.0,
+    "y": 200.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "выход, HIGH = запрос"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 346.0,
+    "y": 200.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Блокировка с GPIO27"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 56.5,
+    "y": 190.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "J2-8"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 118.5,
+    "y": 190.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "GPIO33"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 197.0,
+    "y": 190.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Концевик «открыто»"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 266.0,
+    "y": 190.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "вход, NC к GND"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 346.0,
+    "y": 190.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Обрыв провода диагностировать"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 56.5,
+    "y": 179.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "J3-9"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 118.5,
+    "y": 179.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "GPIO18"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 197.0,
+    "y": 179.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Концевик «закрыто»"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 266.0,
+    "y": 179.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "вход, NC к GND"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 346.0,
+    "y": 179.7,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Обрыв провода диагностировать"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 56.5,
+    "y": 169.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "J2-14 / J3-1"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 118.5,
+    "y": 169.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "GND"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 197.0,
+    "y": 169.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Общая логическая опора"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 266.0,
+    "y": 169.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "сигнальная цепь"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 346.0,
+    "y": 169.2,
+    "height": 2.3,
+    "align": "center",
+    "rotation": 0,
+    "value": "Только по схеме драйвера"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TITLE",
+    "x": 30,
+    "y": 141,
+    "height": 3.3,
+    "align": "left",
+    "rotation": 0,
+    "value": "Референсная ведомость состава"
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      123.0
+    ],
+    "end": [
+      400,
+      123.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      114.5
+    ],
+    "end": [
+      400,
+      114.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      106.0
+    ],
+    "end": [
+      400,
+      106.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      97.5
+    ],
+    "end": [
+      400,
+      97.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      89.0
+    ],
+    "end": [
+      400,
+      89.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      80.5
+    ],
+    "end": [
+      400,
+      80.5
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      72.0
+    ],
+    "end": [
+      400,
+      72.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      30,
+      132
+    ],
+    "end": [
+      30,
+      72.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      52,
+      132
+    ],
+    "end": [
+      52,
+      72.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      203,
+      132
+    ],
+    "end": [
+      203,
+      72.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      230,
+      132
+    ],
+    "end": [
+      230,
+      72.0
+    ]
+  },
+  {
+    "type": "Line",
+    "sheet": 5,
+    "layer": "FRAME",
+    "start": [
+      400,
+      132
+    ],
+    "end": [
+      400,
+      72.0
+    ]
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 41.0,
+    "y": 126.8,
+    "height": 2.35,
+    "align": "center",
+    "rotation": 0,
+    "value": "Поз."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 127.5,
+    "y": 126.8,
+    "height": 2.35,
+    "align": "center",
+    "rotation": 0,
+    "value": "Наименование"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 216.5,
+    "y": 126.8,
+    "height": 2.35,
+    "align": "center",
+    "rotation": 0,
+    "value": "Кол."
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 315.0,
+    "y": 126.8,
+    "height": 2.35,
+    "align": "center",
+    "rotation": 0,
+    "value": "Статус / примечание"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 41.0,
+    "y": 118.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "1"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 127.5,
+    "y": 118.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "AC-03-001 основание"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 216.5,
+    "y": 118.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "1"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 315.0,
+    "y": 118.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "FDM-кандидат; материал не подтверждён"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 41.0,
+    "y": 109.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "2"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 127.5,
+    "y": 109.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "AC-03-002 крышка"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 216.5,
+    "y": 109.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "1"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 315.0,
+    "y": 109.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Печатать как отдельную деталь"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 41.0,
+    "y": 101.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "3"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 127.5,
+    "y": 101.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "ESP32-DevKitC-32E V4"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 216.5,
+    "y": 101.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "1"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 315.0,
+    "y": 101.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Кандидат; без нижних гребёнок; не куплена"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 41.0,
+    "y": 92.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "4"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 127.5,
+    "y": 92.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Кабель Micro-USB / источник 5 В"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 216.5,
+    "y": 92.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "1"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 315.0,
+    "y": 92.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Модель и параметры не выбраны"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 41.0,
+    "y": 84.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "5"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 127.5,
+    "y": 84.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Винт М3 / съёмные опоры"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 216.5,
+    "y": 84.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "4 / 2"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 315.0,
+    "y": 84.3,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Длину/клей определить после примерки"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 41.0,
+    "y": 75.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "6"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 127.5,
+    "y": 75.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "Драйверы, нагрузки, концевики"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 216.5,
+    "y": 75.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "—"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 315.0,
+    "y": 75.8,
+    "height": 2.15,
+    "align": "center",
+    "rotation": 0,
+    "value": "TBD, в электрический выпуск не входят"
+  },
+  {
+    "type": "Text",
+    "sheet": 5,
+    "layer": "TEXT",
+    "x": 30,
+    "y": 65,
+    "height": 2.45,
+    "align": "left",
+    "rotation": 0,
+    "value": "GPIO — только логика 3,3 В; токи, провода и защиты назначить после выбора драйверов и нагрузок."
+  }
+]

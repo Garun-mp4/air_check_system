@@ -138,7 +138,7 @@ def footer(pdf, doc) -> None:
     pdf.setFillColor(INK)
     pdf.setFont("Body", 7.2)
     pdf.drawString(18 * mm, 13 * mm,
-                   f"AirCheck | AC-03 | {RELEASE} | 11.10.2026 | цифровой прототип")
+                   f"AirCheck | AC-03 | {RELEASE} | 12.10.2026 | цифровой прототип")
     pdf.drawRightString(192 * mm, 13 * mm, f"Лист {doc.page}")
     pdf.restoreState()
 
@@ -163,7 +163,7 @@ def main() -> None:
         author="AirCheck project")
     story = [
         Paragraph("AirCheck. Узел управления и связи", head1),
-        Paragraph(f"AC-03 • цифровой прототип • выпуск {RELEASE} • 11.10.2026", body),
+        Paragraph(f"AC-03 • цифровой прототип • выпуск {RELEASE} • 12.10.2026", body),
         Spacer(1, 6),
         Paragraph("Состав: спецификация, руководство по сборке и проверке, нормативная матрица и цифровые протоколы. Подробные размеры и геометрия находятся в пятилистовом комплекте A3.", body),
         Paragraph("Плата, драйверы, нагрузки, принтер и материал не закуплены/не выбраны. До выбора реальных драйверов данный выпуск не является готовой электрической схемой и не разрешает подключать исполнительные устройства.", body),

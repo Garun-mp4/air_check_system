@@ -1,0 +1,336 @@
+{
+  "status": "PASS_WITH_TOLERANCE_NOTE",
+  "revision": "R02",
+  "drawing_reference": "AC-01 drawing R02",
+  "geometry_baseline": "R01 nominal housing geometry; R02 drawing changes are drafting/documentation only",
+  "units": "mm",
+  "native_dwg": "cad/model/AC-01-000-assembly-R02.dwg",
+  "print_parts": [
+    {
+      "designation": "AC-01-001-base",
+      "drawing_size_mm": [
+        150,
+        190,
+        65
+      ]
+    },
+    {
+      "designation": "AC-01-002-lid",
+      "drawing_size_mm": [
+        150,
+        190,
+        6.5
+      ]
+    }
+  ],
+  "references": {
+    "REF-SPS30": {
+      "fidelity": "Sensirion manufacturer STEP, exact unscaled geometry",
+      "source": "cad/reference/sensirion_sps30_step/PS_CAD_SPS30_D1.STEP",
+      "source_bounds": {
+        "min_mm": [
+          -32.51597,
+          -6.51183,
+          -26.04789
+        ],
+        "max_mm": [
+          8.69097,
+          6.05409,
+          15.15904
+        ],
+        "extents_mm": [
+          41.20693,
+          12.56593,
+          41.20693
+        ]
+      },
+      "assembly_bounds": {
+        "min_mm": [
+          54.4,
+          4.5,
+          22.0
+        ],
+        "max_mm": [
+          95.60693,
+          45.70694,
+          34.56592
+        ],
+        "extents_mm": [
+          41.20693,
+          41.20693,
+          12.56593
+        ]
+      }
+    },
+    "REF-SCD41": {
+      "fidelity": "LOD0 board outline and sensor envelope; Adafruit BRD source retained in cad/reference"
+    },
+    "REF-ESP32": {
+      "fidelity": "LOD0 dimensional envelope from Espressif dimension drawing"
+    }
+  },
+  "stl": [
+    {
+      "file": "AC-01-001-base-print-R02.stl",
+      "triangles": 9092,
+      "bounds_min_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_max_mm": [
+        150.0,
+        190.0,
+        65.0
+      ],
+      "extents_mm": [
+        150.0,
+        190.0,
+        65.0
+      ],
+      "signed_volume_mm3": 310502.2544,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm by project convention; STL does not embed units"
+    },
+    {
+      "file": "AC-01-002-lid-print-R02.stl",
+      "triangles": 1148,
+      "bounds_min_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_max_mm": [
+        150.0,
+        190.0,
+        6.5
+      ],
+      "extents_mm": [
+        150.0,
+        190.0,
+        6.5
+      ],
+      "signed_volume_mm3": 92044.0243,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm by project convention; STL does not embed units"
+    }
+  ],
+  "step": [
+    {
+      "file": "AC-01-001-base-print-R02.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 310502.25556,
+      "bounds": {
+        "min_mm": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "max_mm": [
+          150.0,
+          190.0,
+          65.0
+        ],
+        "extents_mm": [
+          150.0,
+          190.0,
+          65.0
+        ]
+      },
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-01-002-lid-print-R02.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 92044.02422,
+      "bounds": {
+        "min_mm": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "max_mm": [
+          150.0,
+          190.0,
+          6.5
+        ],
+        "extents_mm": [
+          150.0,
+          190.0,
+          6.5
+        ]
+      },
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "REF-SPS30-manufacturer-R02.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 19128.94633,
+      "bounds": {
+        "min_mm": [
+          54.4,
+          4.5,
+          22.0
+        ],
+        "max_mm": [
+          95.60693,
+          45.70694,
+          34.56592
+        ],
+        "extents_mm": [
+          41.20693,
+          41.20693,
+          12.56593
+        ]
+      },
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-01-000-assembly-R02.step",
+      "valid": true,
+      "solids": 12,
+      "volume_mm3": 429439.90301,
+      "bounds": {
+        "min_mm": [
+          -0.00345,
+          -0.00345,
+          -0.00345
+        ],
+        "max_mm": [
+          150.00345,
+          190.00345,
+          68.00345
+        ],
+        "extents_mm": [
+          150.00691,
+          190.00691,
+          68.00691
+        ]
+      },
+      "format": "STEP AP214, mm"
+    }
+  ],
+  "printed_part_intersections": [
+    {
+      "a": "AC-01-001-base",
+      "b": "AC-01-002-lid",
+      "intersection_mm3": 0.0
+    }
+  ],
+  "housing_to_electronics_intersections": [
+    {
+      "part": "AC-01-001-base",
+      "reference": "REF-SPS30",
+      "intersection_mm3": 5.9152,
+      "intersection_bounds": {
+        "min_mm": [
+          54.96119,
+          9.57719,
+          23.71143
+        ],
+        "max_mm": [
+          95.60347,
+          45.70348,
+          34.51183
+        ],
+        "extents_mm": [
+          40.64228,
+          36.12628,
+          10.8004
+        ]
+      }
+    },
+    {
+      "part": "AC-01-001-base",
+      "reference": "REF-SCD41-PCB",
+      "intersection_mm3": 1.6,
+      "intersection_bounds": {
+        "min_mm": [
+          32.0,
+          146.0,
+          29.5
+        ],
+        "max_mm": [
+          40.0,
+          168.86,
+          29.6
+        ],
+        "extents_mm": [
+          8.0,
+          22.86,
+          0.1
+        ]
+      }
+    },
+    {
+      "part": "AC-01-001-base",
+      "reference": "REF-SCD41-SENSOR-LOD0",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-01-001-base",
+      "reference": "REF-ESP32-LOD0",
+      "intersection_mm3": 2.80798,
+      "intersection_bounds": {
+        "min_mm": [
+          112.0,
+          115.0,
+          17.45
+        ],
+        "max_mm": [
+          120.0,
+          142.94,
+          17.6
+        ],
+        "extents_mm": [
+          8.0,
+          27.94,
+          0.15
+        ]
+      }
+    },
+    {
+      "part": "AC-01-002-lid",
+      "reference": "REF-SPS30",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-01-002-lid",
+      "reference": "REF-SCD41-PCB",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-01-002-lid",
+      "reference": "REF-SCD41-SENSOR-LOD0",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-01-002-lid",
+      "reference": "REF-ESP32-LOD0",
+      "intersection_mm3": 0.0
+    }
+  ],
+  "review_notes": [
+    {
+      "severity": "fit_check_required",
+      "reference": "REF-SPS30",
+      "intersection_mm3": 5.9152,
+      "nominal_fit": "The drawing sets 41.2 mm between SPS30 guide faces; the unscaled manufacturer STEP measures 41.20693 mm across that direction.",
+      "disposition": "No scaling or hidden housing correction was applied. Preserve the drawing geometry and verify the actual part with a printed fit sample before assembly."
+    }
+  ],
+  "limits": [
+    "STL files have no embedded unit declaration; millimetres are the project convention.",
+    "Printer, nozzle, material, slicer profile and shrink compensation are not selected.",
+    "Electronic reference bodies are not printable and real purchased parts have not been checked.",
+    "The native OpenCAD Studio DWG retains LOD0 electronic references; exact manufacturer SPS30 geometry is included in the STEP exchange assembly.",
+    "Physical fit and sensor performance are not confirmed without prototype printing and tests."
+  ]
+}

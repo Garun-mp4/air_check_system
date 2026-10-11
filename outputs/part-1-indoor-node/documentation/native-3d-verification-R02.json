@@ -1,0 +1,48 @@
+{
+  "project": "AirCheck",
+  "node": "AC-01",
+  "drawing_revision": "R02",
+  "model_revision": "R02",
+  "units": "mm",
+  "open_cad_studio": {
+    "version": "2026.40.1",
+    "build_rev": "7d5ee91665b1",
+    "target_format": "dwg",
+    "target_version": "AC1032",
+    "insertion_units": 4,
+    "save_method": "save_verified",
+    "semantic_roundtrip_verified": true,
+    "audit_errors": 0,
+    "audit_warnings": 0,
+    "viewport_capture": "ocs_capture returned Unexpected response type; no visual capture is claimed"
+  },
+  "files": [
+    {
+      "file": "cad/model/AC-01-001-base-R02.dwg",
+      "verified": true,
+      "entities": {"3D Solid": 1},
+      "bytes": 148146,
+      "sha256": "86c621d59cc1bdcb607896507fdbad3a1bff5b943d7bac03752e24bc44eced66"
+    },
+    {
+      "file": "cad/model/AC-01-002-lid-R02.dwg",
+      "verified": true,
+      "entities": {"3D Solid": 1},
+      "bytes": 35781,
+      "sha256": "2345a0d3db3db0953dd0c51acc80ae74559e6d93785d1ec7afac29fde6bf5963"
+    },
+    {
+      "file": "cad/model/AC-01-000-assembly-R02.dwg",
+      "verified": true,
+      "entities": {"3D Solid": 12},
+      "bytes": 167024,
+      "sha256": "8345f4c1575e19e0a09b3445785b049bd122d61276f6adb82fe4a1f11981f6ee"
+    }
+  ],
+  "assembly_audit": {
+    "issues": [],
+    "unknown_entities": 0,
+    "lossless": true,
+    "nominal_bounds_mm": {"min": [0, 0, 0], "max": [150, 190, 68]}
+  }
+}

@@ -25,3 +25,7 @@ pgdata/
 
 # Browser diagnostics may contain authenticated test sessions.
 tests/browser/artifacts/
+
+# OpenCAD Studio writes transient locks and recovery snapshots beside DWG files.
+*.ocs.lock
+*.ocs-autosave.sv$

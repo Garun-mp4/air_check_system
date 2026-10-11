@@ -95,13 +95,13 @@ def markdown(path):
 def footer(c,doc):
     c.saveState();c.setStrokeColor(colors.black);c.setLineWidth(.5)
     c.rect(20*mm,10*mm,185*mm,282*mm,stroke=1,fill=0)
-    c.setFont('Body',8);c.drawString(23*mm,13*mm,f'AirCheck | AC-01 | {RELEASE} | 11.10.2026 | цифровой прототип')
+    c.setFont('Body',8);c.drawString(23*mm,13*mm,f'AirCheck | AC-01 | {RELEASE} | 12.10.2026 | цифровой прототип')
     c.drawRightString(202*mm,13*mm,f'Лист {doc.page}');c.restoreState()
 
 def manual():
     path=ROOT/f'documentation/AC-01-documentation-{RELEASE}.pdf'
     d=SimpleDocTemplate(str(path),pagesize=(210*mm,297*mm),leftMargin=23*mm,rightMargin=7*mm,topMargin=10*mm,bottomMargin=21*mm,title=f'AirCheck AC-01: документация {RELEASE}',author='AirCheck project')
-    story=[para('AirCheck. Внутренний измерительный узел',head),para('Комплект документации AC-01. Выпуск R02 от 11.10.2026; корректировка оформления чертежей к цифровому прототипу R01.'),para('Состав: спецификация, изготовление и сборка, таблица соединений, установка и обслуживание, нормативная матрица, протокол цифровой проверки.'),para('Электроника не куплена; физическая приёмка не выполнена. Подписи, утверждение и полный нормоконтроль отсутствуют. См. границы готовности в конце комплекта.'),PageBreak()]
+    story=[para('AirCheck. Внутренний измерительный узел',head),para('Документация AC-01 R02. Чертежи оформлены 11.10.2026; выпуск CAD/3D-моделей и проверок дополнен 12.10.2026.'),para('Состав: спецификация, изготовление и сборка, таблица соединений, установка и обслуживание, нормативная матрица, протокол цифровой проверки.'),para('Электроника не куплена; физическая приёмка не выполнена. Подписи, утверждение и полный нормоконтроль отсутствуют. См. границы готовности в конце комплекта.'),PageBreak()]
     for j,name in enumerate(['AC-01-000-SP.md','AC-01-000-RE.md','standards-and-sources.md','validation-R02.md','drawing-audit-R02.md']):
         if j:story.append(PageBreak())
         story.extend(markdown(ROOT/'documentation'/name))

@@ -90,6 +90,7 @@ def inline(text: str) -> str:
     text = html.escape(text, quote=False)
     text = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)",
                   r'<link href="\2" color="#204b68">\1</link>', text)
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1", text)
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"`([^`]+)`", r'<font name="BodyBold">\1</font>', text)
     return text
@@ -193,7 +194,7 @@ def footer(page: canvas.Canvas, doc) -> None:
     page.rect(14 * mm, 10 * mm, 182 * mm, 277 * mm, stroke=1, fill=0)
     page.setFont("Body", 7.4)
     page.setFillColor(colors.HexColor("#273b44"))
-    page.drawString(18 * mm, 13 * mm, f"AirCheck | AC-02 | {RELEASE} | 11.10.2026 | цифровой прототип")
+    page.drawString(18 * mm, 13 * mm, f"AirCheck | AC-02 | {RELEASE} | 12.10.2026 | цифровой прототип")
     page.drawRightString(193 * mm, 13 * mm, f"Лист {doc.page}")
     page.restoreState()
 
@@ -207,7 +208,7 @@ def documentation_pdf() -> Path:
                             author="AirCheck project")
     story = [
         Paragraph("AirCheck. Наружный измерительный узел", head1),
-        Paragraph(f"AC-02 • комплект документации {RELEASE} • 11.10.2026", body),
+        Paragraph(f"AC-02 • комплект документации {RELEASE} • 12.10.2026", body),
         Spacer(1, 8),
         Paragraph("В комплект входят рабочая спецификация, руководство по сборке/эксплуатации, нормативная матрица и протокол цифровой проверки.", body),
         Paragraph("Платы не куплены, принтер и пластик не выбраны. Чертежи и модели предназначены для прототипирования; фактическая посадка, наружная защита и точность измерений не испытаны.", body),

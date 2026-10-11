@@ -15,9 +15,24 @@
     "sha256": "709bbc6a65b7eaa1f87a7187f6d54649b0413a3ade63663be6fcb57bb66ca69e"
   },
   {
+    "file": "cad/model/AC-01-000-assembly-R02.dwg",
+    "bytes": 167024,
+    "sha256": "8345f4c1575e19e0a09b3445785b049bd122d61276f6adb82fe4a1f11981f6ee"
+  },
+  {
+    "file": "cad/model/AC-01-000-assembly-R02.step",
+    "bytes": 36184321,
+    "sha256": "341aa55a90343ceae6aba77237e0489e9e11320723fe8dae45c83e7b3f22d754"
+  },
+  {
     "file": "cad/model/AC-01-001-base-exchange.step",
     "bytes": 20226418,
     "sha256": "993a5a74e44dec3b1692523b2d3ca5c45604dfaed687918d57bfebdcec46d43d"
+  },
+  {
+    "file": "cad/model/AC-01-001-base-print-R02.step",
+    "bytes": 20226418,
+    "sha256": "5b30b26b7cf01dd7d551ab44af63364ab7d59fb32b43b6e7c75e79967de2c810"
   },
   {
     "file": "cad/model/AC-01-001-base-R01.dwg",
@@ -25,9 +40,24 @@
     "sha256": "c96ec11c73e6176b64caf522c269b06f24f3a0fffb93299f29cccafab21c8a86"
   },
   {
+    "file": "cad/model/AC-01-001-base-R02.dwg",
+    "bytes": 148146,
+    "sha256": "86c621d59cc1bdcb607896507fdbad3a1bff5b943d7bac03752e24bc44eced66"
+  },
+  {
     "file": "cad/model/AC-01-002-lid-exchange.step",
     "bytes": 2445607,
     "sha256": "5e748105d69240989a058b1fb108f2188db15479bf4bb0c57b318d8e65204996"
+  },
+  {
+    "file": "cad/model/AC-01-002-lid-print-R02.step",
+    "bytes": 2441899,
+    "sha256": "527c38b8615afe5c1741326e7482dc13d812ab8d467107c4cecb538c2efbf9e1"
+  },
+  {
+    "file": "cad/model/AC-01-002-lid-R02.dwg",
+    "bytes": 35781,
+    "sha256": "2345a0d3db3db0953dd0c51acc80ae74559e6d93785d1ec7afac29fde6bf5963"
   },
   {
     "file": "cad/model/AC-01-002-lid.dwg",
@@ -48,6 +78,11 @@
     "file": "cad/model/REF-SPS30-envelope.step",
     "bytes": 15523,
     "sha256": "aefbffdcb3d9c51866d5821cb468a8a2c85f1a494363a1f8f6e98eb72fa14993"
+  },
+  {
+    "file": "cad/model/REF-SPS30-manufacturer-R02.step",
+    "bytes": 12946228,
+    "sha256": "e8a22e667de75582767fb968d390d265152555d55b5331528bde39cb85d7cce0"
   },
   {
     "file": "cad/reference/adafruit_scd41_5190.brd",
@@ -116,8 +151,8 @@
   },
   {
     "file": "documentation/AC-01-documentation-R02.pdf",
-    "bytes": 137685,
-    "sha256": "99f9788f50a66d9535f68c7f849b47040dfb8102cf2a7eeade08ca86300e8256"
+    "bytes": 139692,
+    "sha256": "a7bf24c92c1d3ad41636d8fa68346de84c323c17dc8250e058ce6cff167ace0f"
   },
   {
     "file": "documentation/AC-01-documentation.pdf",
@@ -131,8 +166,8 @@
   },
   {
     "file": "documentation/build_pdf.py",
-    "bytes": 7659,
-    "sha256": "83883494427dd6416ea33ebe93a5b8978535ee7e012295fa0c7a1383778e92e4"
+    "bytes": 7631,
+    "sha256": "c19e3bc4bf577ade02f2eae231d611fd97de9131587a83156d85af9d2294878c"
   },
   {
     "file": "documentation/drawing-audit-R02.md",
@@ -146,13 +181,23 @@
   },
   {
     "file": "documentation/finalize_assets.py",
-    "bytes": 4284,
-    "sha256": "127e3b61d1b5da7216744a51e497ad9efa85abc26758fb28394fd3e5fcbcab09"
+    "bytes": 4365,
+    "sha256": "7877c96204302f8053f7a8fcb5ac891cef9dffef2e95e153ce41446a71ace6b8"
+  },
+  {
+    "file": "documentation/model-release-R02.md",
+    "bytes": 5470,
+    "sha256": "c4893eefb1bcb6679271173cc9daf6fbdef82a00a88f17103382276721625531"
+  },
+  {
+    "file": "documentation/native-3d-verification-R02.json",
+    "bytes": 1387,
+    "sha256": "cceb0ac5cedfa1396bc026d76264053e7d7f144b33e0c20309c4cf305281a5fe"
   },
   {
     "file": "documentation/pdf-inspection.json",
-    "bytes": 2422,
-    "sha256": "4bce3d79481a3e3e0063e0e92d3c9d5952d5aa927200c4def56e77306543350d"
+    "bytes": 2494,
+    "sha256": "df695c6d3fdc40adc40abbac019143abd382a5a04bfda9164465c9ee9700df19"
   },
   {
     "file": "documentation/standards-and-sources.md",
@@ -161,8 +206,8 @@
   },
   {
     "file": "documentation/validation-R02.md",
-    "bytes": 10387,
-    "sha256": "4b213fb1c13d9d16f23a62b26770026c5544a73f263b0f6e9d8106f3cea58c59"
+    "bytes": 12593,
+    "sha256": "f5e96cce02aa11f679d5edc847fb78a11f863898a2c3fb7dbf00218bc7468b45"
   },
   {
     "file": "documentation/validation.md",
@@ -265,6 +310,11 @@
     "sha256": "a6c521f024f05fcf50c01821bfca57e2ae328b77b7b51fec7f2fdcf53c57cb51"
   },
   {
+    "file": "manufacturing/AC-01-001-base-print-R02.stl",
+    "bytes": 454684,
+    "sha256": "a6c521f024f05fcf50c01821bfca57e2ae328b77b7b51fec7f2fdcf53c57cb51"
+  },
+  {
     "file": "manufacturing/AC-01-001-base-raw-R01.stl",
     "bytes": 482284,
     "sha256": "c297eb39a6980eb86f317bbf4ff9fba70243c6c48def4b9708d0dc7055a10a2e"
@@ -275,6 +325,11 @@
     "sha256": "932e981f6a0a5f46499172741638445656ec9b43052e8b707458102dde7b17d9"
   },
   {
+    "file": "manufacturing/AC-01-002-lid-print-R02.stl",
+    "bytes": 57484,
+    "sha256": "16d2780d018368c84b74b0da9cf92b68b566f9ca8f7720a39ca7e1b0bc16736c"
+  },
+  {
     "file": "manufacturing/AC-01-002-lid-print.stl",
     "bytes": 57484,
     "sha256": "16d2780d018368c84b74b0da9cf92b68b566f9ca8f7720a39ca7e1b0bc16736c"
@@ -283,6 +338,11 @@
     "file": "manufacturing/build_exchange_step.py",
     "bytes": 3539,
     "sha256": "bce2dd67c1b6e571ab21dc594b78b610f6d05c90ceb2af6beedb968e81b2bed1"
+  },
+  {
+    "file": "manufacturing/build_model_release_R02.py",
+    "bytes": 13480,
+    "sha256": "849285ea09ec2509024d648093b48018cb81c19e7d21bca6e4f707b56d263c7d"
   },
   {
     "file": "manufacturing/clearance-inspection.json",
@@ -310,18 +370,23 @@
     "sha256": "873f227271fde292b64e63c292d33e71e4828de79e0fe4cf60684aafeed47225"
   },
   {
+    "file": "manufacturing/model-inspection-R02.json",
+    "bytes": 7739,
+    "sha256": "e5e13704278f53e9c1991507b904e2c2aadb367b3c2ffc5bcb13a51f8c931b21"
+  },
+  {
     "file": "manufacturing/step-inspection.json",
-    "bytes": 1447,
-    "sha256": "7bcfa23606dfa52af3eb70e3d1bea393c5d866fbdf53d0c9650b7926b779742c"
+    "bytes": 2420,
+    "sha256": "07e9c8bddcc49f0aa1afa1f8bb1c2f587f9770f9174b57a74b1ccca760452397"
   },
   {
     "file": "manufacturing/stl-inspection.json",
-    "bytes": 1781,
-    "sha256": "6256e8db88fda4c0ae04b490c9ef6d8c5501fa906715e31c34dec53ad3dcc4a5"
+    "bytes": 2666,
+    "sha256": "39b85e4dd276df26f86767ef738abc7bb589ddd39ba83c11eb31bd82306915df"
   },
   {
     "file": "README.md",
-    "bytes": 6603,
-    "sha256": "21fd9431c9a2ac2be6dfeaacef809177a4c24091235a68bd12d8d3b250dc0e32"
+    "bytes": 7027,
+    "sha256": "60f8ee9dd08c18e4d8424558d6a28adc20f6367750054b4e875671999d36616e"
   }
 ]

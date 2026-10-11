@@ -19,6 +19,25 @@
     "method": "binary STL; vertices welded to 0.00001 mm; each undirected edge must occur twice"
   },
   {
+    "file": "AC-01-001-base-print-R02.stl",
+    "triangles": 9092,
+    "bounds_min": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bounds_max": [
+      150.0,
+      190.0,
+      65.0
+    ],
+    "signed_volume_mm3": 310502.25442552794,
+    "boundary_edges": 0,
+    "nonmanifold_edges": 0,
+    "degenerate_triangles": 0,
+    "method": "binary STL; vertices welded to 0.00001 mm; each undirected edge must occur twice"
+  },
+  {
     "file": "AC-01-001-base-raw-R01.stl",
     "triangles": 9644,
     "bounds_min": [
@@ -51,6 +70,25 @@
       68.0
     ],
     "signed_volume_mm3": 92044.02436368377,
+    "boundary_edges": 0,
+    "nonmanifold_edges": 0,
+    "degenerate_triangles": 0,
+    "method": "binary STL; vertices welded to 0.00001 mm; each undirected edge must occur twice"
+  },
+  {
+    "file": "AC-01-002-lid-print-R02.stl",
+    "triangles": 1148,
+    "bounds_min": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bounds_max": [
+      150.0,
+      190.0,
+      6.5
+    ],
+    "signed_volume_mm3": 92044.02430212786,
     "boundary_edges": 0,
     "nonmanifold_edges": 0,
     "degenerate_triangles": 0,

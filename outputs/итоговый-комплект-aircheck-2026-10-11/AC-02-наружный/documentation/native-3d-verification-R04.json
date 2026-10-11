@@ -1,0 +1,31 @@
+{
+  "project": "AirCheck",
+  "node": "AC-02",
+  "drawing_revision": "R04",
+  "model_revision": "R04",
+  "units": "mm",
+  "open_cad_studio": {
+    "version": "2026.40.1",
+    "build_rev": "7d5ee91665b1",
+    "target_format": "dwg",
+    "target_version": "AC1032",
+    "insertion_units": 4,
+    "save_method": "save_verified",
+    "semantic_roundtrip_verified": true,
+    "audit_errors": 0,
+    "audit_warnings": 0,
+    "issues": [],
+    "unknown_entities": 0,
+    "viewport_capture": "ocs_capture returned Unexpected response type; no visual capture is claimed"
+  },
+  "file": {
+    "file": "cad/model/AC-02-000-assembly-R04.dwg",
+    "verified": true,
+    "entities": {"3D Solid": 14},
+    "printed_parts": 5,
+    "lod0_electronic_reference_solids": 9,
+    "bounds_mm": {"min": [-8, 0, -12], "max": [168, 190, 86]},
+    "bytes": 206633,
+    "sha256": "2d1e21467dcc547060ce3567a66e2bd68185ad27278327e6b4be390790954e38"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "release": "R01",
+  "page_size_mm": [
+    420.0,
+    297.0
+  ],
+  "sheets": 5,
+  "entity_count_by_sheet": {
+    "1": 191,
+    "2": 226,
+    "3": 159,
+    "4": 140,
+    "5": 151
+  },
+  "text_overlap_count": 0,
+  "issues": [],
+  "pass": true
+}

@@ -5,7 +5,7 @@ script reproduces its explicit BOX/CYLINDER CSG recipe with OpenCascade and
 checks each export by reopening it.
 """
 from __future__ import annotations
-import json, math, struct
+import json, math, os, re, struct
 from collections import Counter
 from pathlib import Path
 
@@ -32,6 +32,9 @@ MODEL=ROOT/'cad/model'
 PRINT=ROOT/'manufacturing'
 MODEL.mkdir(parents=True,exist_ok=True)
 design=json.loads(SOURCE.read_text(encoding='utf-8'))
+REVISION=os.environ.get('AIRCHECK_MODEL_REVISION','R01')
+if not re.fullmatch(r'R\d{2}',REVISION):
+    raise ValueError(f'Invalid AIRCHECK_MODEL_REVISION: {REVISION!r}')
 
 def box(p):
     x,y,z=p['p']; dx,dy,dz=p['size']
@@ -162,9 +165,9 @@ for designation,definition in design['parts'].items():
     shape=build(definition,designation); body[designation]=shape; parts.append(shape)
     oriented=transform(shape,definition['print_transform'])
     slug=designation.lower()
-    stl_results.append(export_stl(oriented,PRINT/f'{designation}-print-R01.stl'))
-    step_results.append(export_step(MODEL/f'{designation}-print-R01.step',[oriented]))
-    step_results.append(export_step(MODEL/f'{designation}-assembly-R01.step',[shape]))
+    stl_results.append(export_stl(oriented,PRINT/f'{designation}-print-{REVISION}.stl'))
+    step_results.append(export_step(MODEL/f'{designation}-print-{REVISION}.step',[oriented]))
+    step_results.append(export_step(MODEL/f'{designation}-assembly-{REVISION}.step',[shape]))
     print(json.dumps(dict(part=designation,solid_count=len(solids(shape)),volume_mm3=round(volume(shape),3),print_extents=stl_results[-1]['extents_mm']),ensure_ascii=False),flush=True)
 
 # Manufacturer STEP references are placed from measured source bounds. The SPS30
@@ -193,7 +196,7 @@ for key,definition in design['refs'].items():
         shape=build(definition,key); refs.append(shape); reference_bounds[key]=bounds(shape)
 refs.extend(primitive(v) for v in design['ref_extra'])
 assembly=parts+refs
-assembly_path=MODEL/'AC-02-000-assembly-R01.step'
+assembly_path=MODEL/f'AC-02-000-assembly-{REVISION}.step'
 step_results.append(export_step(assembly_path,assembly))
 
 checks=[]
@@ -210,9 +213,13 @@ for i,part in enumerate(parts):
         electronics.append(dict(part=list(design['parts'])[i],reference=key,intersection_mm3=round(inter,5)))
         if math.isnan(inter) or inter>0.05: raise RuntimeError(f'body intersects electronics reference: {electronics[-1]}')
 
-result=dict(revision='R01',units='mm',source='cad/design.json',part_count=len(body),parts={k:round(volume(v),4) for k,v in body.items()},
+result=dict(status='PASS',revision=REVISION,drawing_reference=f'AC-02 drawing {REVISION}',
+    geometry_baseline='R01 dimensions in cad/design.json; current drawing release carries the same nominal part geometry',
+    units='mm',source='cad/design.json',part_count=len(body),parts={k:round(volume(v),4) for k,v in body.items()},
+    native_dwg=f'cad/model/AC-02-000-assembly-{REVISION}.dwg',
     stl=stl_results,step=step_results,printed_part_intersections=checks,electronics_intersections=electronics,
     electronic_references=reference_bounds,
-    reference_note='The SPS30 and Adafruit SHT45 #5665 are exact manufacturer STEP bodies in the exchange assembly. ESP32-DevKitC V4 uses an LOD0 dimensional envelope; manufacturer dimension sources are retained in cad/reference. Electronic reference geometry is not printable.')
-(ROOT/'manufacturing/model-inspection.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+    reference_note='The STEP exchange assembly contains the exact manufacturer SPS30 and Adafruit SHT45 #5665 bodies. The OpenCAD Studio DWG assembly uses LOD0 envelopes for all electronic references because the exposed MCP cannot import STEP. ESP32-DevKitC V4 uses an LOD0 dimensional envelope in both models. Electronic reference geometry is not printable.')
+inspection_name='model-inspection.json' if REVISION=='R01' else f'model-inspection-{REVISION}.json'
+(ROOT/'manufacturing'/inspection_name).write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
 print(json.dumps(dict(status='PASS',printed_parts=len(body),step_files=len(step_results),assembly_solids=len(solids(compound(assembly))),stl_meshes=len(stl_results),printed_interferences=sum(v['intersection_mm3']>0.05 for v in checks),housing_to_electronics_interferences=sum(v['intersection_mm3']>0.05 for v in electronics)),ensure_ascii=False),flush=True)

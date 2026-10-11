@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import math
+import os
+import re
 import struct
 from collections import Counter
 from pathlib import Path
@@ -36,6 +38,9 @@ MODEL = ROOT / "cad" / "model"
 PRINT = ROOT / "manufacturing"
 MODEL.mkdir(parents=True, exist_ok=True)
 design = json.loads(DESIGN.read_text(encoding="utf-8"))
+REVISION = os.environ.get("AIRCHECK_MODEL_REVISION", "R01")
+if not re.fullmatch(r"R\d{2}", REVISION):
+    raise ValueError(f"Invalid AIRCHECK_MODEL_REVISION: {REVISION!r}")
 TOL = 0.02
 
 
@@ -317,22 +322,24 @@ stl_results = []
 ordered = list(parts.items())
 for key, shape in ordered:
     slug = key.lower()
-    step_results.append(export_step(MODEL / f"{key}-print-R01.step", [shape], 1))
+    step_results.append(export_step(MODEL / f"{key}-print-{REVISION}.step", [shape], 1))
     oriented = print_transform(shape, design["parts"][key]["print_transform"])
-    stl_results.append(export_stl(oriented, PRINT / f"{key}-print-R01.stl"))
+    stl_results.append(export_stl(oriented, PRINT / f"{key}-print-{REVISION}.stl"))
 
 assembly_shapes = list(parts.values()) + list(references.values())
 step_results.insert(
     0,
-    export_step(MODEL / "AC-03-000-assembly-R01.step", assembly_shapes, design["assembly"]["expected_solids"]),
+    export_step(MODEL / f"AC-03-000-assembly-{REVISION}.step", assembly_shapes, design["assembly"]["expected_solids"]),
 )
 
 result = {
-    "revision": "R01",
+    "revision": REVISION,
+    "drawing_reference": f"AC-03 drawing {REVISION}",
+    "geometry_baseline": "R01 dimensions in cad/design.json; current drawing release carries the same nominal part geometry",
     "source": "cad/design.json",
     "units": "mm",
     "status": "PASS",
-    "native_cad": "OpenCAD Studio DWG, separately audited and save-verified",
+    "native_cad": f"cad/model/AC-03-000-assembly-{REVISION}.dwg; separately audited and save-verified in documentation/native-3d-verification-{REVISION}.json",
     "print_parts": {
         key: {"bounds": bounds(shape), "volume_mm3": round(volume(shape), 4), "solids": len(solids(shape))}
         for key, shape in parts.items()
@@ -348,7 +355,7 @@ result = {
     "stl": stl_results,
     "limits": design["print_process"]["limits"],
 }
-out = PRINT / "model-inspection-R01.json"
+out = PRINT / ("model-inspection-R01.json" if REVISION == "R01" else f"model-inspection-{REVISION}.json")
 out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 print(json.dumps({
     "status": "PASS",

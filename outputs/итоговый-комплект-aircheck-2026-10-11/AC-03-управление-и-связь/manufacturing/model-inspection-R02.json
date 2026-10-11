@@ -1,0 +1,422 @@
+{
+  "revision": "R02",
+  "drawing_reference": "AC-03 drawing R02",
+  "geometry_baseline": "R01 dimensions in cad/design.json; current drawing release carries the same nominal part geometry",
+  "source": "cad/design.json",
+  "units": "mm",
+  "status": "PASS",
+  "native_cad": "cad/model/AC-03-000-assembly-R02.dwg; separately audited and save-verified in documentation/native-3d-verification-R02.json",
+  "print_parts": {
+    "AC-03-001-base": {
+      "bounds": {
+        "min": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "max": [
+          140.0,
+          110.0,
+          55.0
+        ],
+        "extents": [
+          140.0,
+          110.0,
+          55.0
+        ]
+      },
+      "volume_mm3": 140516.4691,
+      "solids": 1
+    },
+    "AC-03-002-lid": {
+      "bounds": {
+        "min": [
+          -3.0,
+          -3.0,
+          50.0
+        ],
+        "max": [
+          143.0,
+          113.0,
+          58.0
+        ],
+        "extents": [
+          146.0,
+          116.0,
+          8.0
+        ]
+      },
+      "volume_mm3": 51150.1203,
+      "solids": 1
+    }
+  },
+  "references": {
+    "REF-ESP32-PCB": {
+      "bounds": {
+        "min": [
+          56.03,
+          3.5,
+          4.5
+        ],
+        "max": [
+          83.97,
+          51.76,
+          6.1
+        ],
+        "extents": [
+          27.94,
+          48.26,
+          1.6
+        ]
+      },
+      "volume_mm3": 2157.415,
+      "fidelity": "LOD0 rectangular board outline from Espressif dimension drawing"
+    },
+    "REF-WROOM-32E": {
+      "bounds": {
+        "min": [
+          61.0,
+          20.22,
+          6.1
+        ],
+        "max": [
+          79.0,
+          45.72,
+          9.2
+        ],
+        "extents": [
+          18.0,
+          25.5,
+          3.1
+        ]
+      },
+      "volume_mm3": 1422.9,
+      "fidelity": "LOD0 module envelope; location within the PCB is provisional"
+    },
+    "REF-MICRO-USB": {
+      "bounds": {
+        "min": [
+          64.0,
+          2.21,
+          6.1
+        ],
+        "max": [
+          76.0,
+          7.21,
+          10.3
+        ],
+        "extents": [
+          12.0,
+          5.0,
+          4.2
+        ]
+      },
+      "volume_mm3": 252.0,
+      "fidelity": "LOD0 clearance reference; not a connector CAD model"
+    },
+    "REF-ADHESIVE-PAD-L": {
+      "bounds": {
+        "min": [
+          58.0,
+          10.0,
+          3.0
+        ],
+        "max": [
+          61.0,
+          30.0,
+          4.5
+        ],
+        "extents": [
+          3.0,
+          20.0,
+          1.5
+        ]
+      },
+      "volume_mm3": 90.0,
+      "fidelity": "reference only; material and location must be checked on the purchased PCB"
+    },
+    "REF-ADHESIVE-PAD-R": {
+      "bounds": {
+        "min": [
+          79.0,
+          10.0,
+          3.0
+        ],
+        "max": [
+          82.0,
+          30.0,
+          4.5
+        ],
+        "extents": [
+          3.0,
+          20.0,
+          1.5
+        ]
+      },
+      "volume_mm3": 90.0,
+      "fidelity": "reference only; material and location must be checked on the purchased PCB"
+    }
+  },
+  "nominal_lid_fit": {
+    "per_side_clearance_mm": 0.4,
+    "side_wall_engagement_mm": 5,
+    "axial_clearance_over_base_wall_mm": 0.4,
+    "base_outer_mm": [
+      140,
+      110
+    ],
+    "lid_inside_mm": [
+      140.8,
+      110.8
+    ],
+    "physical_fit_confirmed": false
+  },
+  "native_cad_volume_checks": {
+    "AC-03-001-base": {
+      "cad_volume_mm3": 140517.200469,
+      "rebuilt_volume_mm3": 140516.469065,
+      "absolute_difference_mm3": 0.731404
+    },
+    "AC-03-002-lid": {
+      "cad_volume_mm3": 51150.271899,
+      "rebuilt_volume_mm3": 51150.120291,
+      "absolute_difference_mm3": 0.151607
+    }
+  },
+  "pairwise_interference_checks": [
+    {
+      "a": "AC-03-001-base",
+      "b": "AC-03-002-lid",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-001-base",
+      "b": "REF-ESP32-PCB",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-001-base",
+      "b": "REF-WROOM-32E",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-001-base",
+      "b": "REF-MICRO-USB",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-001-base",
+      "b": "REF-ADHESIVE-PAD-L",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-001-base",
+      "b": "REF-ADHESIVE-PAD-R",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-002-lid",
+      "b": "REF-ESP32-PCB",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-002-lid",
+      "b": "REF-WROOM-32E",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-002-lid",
+      "b": "REF-MICRO-USB",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-002-lid",
+      "b": "REF-ADHESIVE-PAD-L",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-03-002-lid",
+      "b": "REF-ADHESIVE-PAD-R",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-ESP32-PCB",
+      "b": "REF-WROOM-32E",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-ESP32-PCB",
+      "b": "REF-MICRO-USB",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-ESP32-PCB",
+      "b": "REF-ADHESIVE-PAD-L",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-ESP32-PCB",
+      "b": "REF-ADHESIVE-PAD-R",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-WROOM-32E",
+      "b": "REF-MICRO-USB",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-WROOM-32E",
+      "b": "REF-ADHESIVE-PAD-L",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-WROOM-32E",
+      "b": "REF-ADHESIVE-PAD-R",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-MICRO-USB",
+      "b": "REF-ADHESIVE-PAD-L",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-MICRO-USB",
+      "b": "REF-ADHESIVE-PAD-R",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "REF-ADHESIVE-PAD-L",
+      "b": "REF-ADHESIVE-PAD-R",
+      "intersection_mm3": 0.0
+    }
+  ],
+  "step": [
+    {
+      "file": "AC-03-000-assembly-R02.step",
+      "valid": true,
+      "solids": 7,
+      "volume_mm3": 195678.9044,
+      "bounds": {
+        "min": [
+          -3.0,
+          -3.0,
+          -0.0
+        ],
+        "max": [
+          143.0,
+          113.0,
+          58.0
+        ],
+        "extents": [
+          146.0,
+          116.0,
+          58.0
+        ]
+      },
+      "format": "STEP, millimetres"
+    },
+    {
+      "file": "AC-03-001-base-print-R02.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 140516.4691,
+      "bounds": {
+        "min": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "max": [
+          140.0,
+          110.0,
+          55.0
+        ],
+        "extents": [
+          140.0,
+          110.0,
+          55.0
+        ]
+      },
+      "format": "STEP, millimetres"
+    },
+    {
+      "file": "AC-03-002-lid-print-R02.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 51150.1203,
+      "bounds": {
+        "min": [
+          -3.0,
+          -3.0,
+          50.0
+        ],
+        "max": [
+          143.0,
+          113.0,
+          58.0
+        ],
+        "extents": [
+          146.0,
+          116.0,
+          8.0
+        ]
+      },
+      "format": "STEP, millimetres"
+    }
+  ],
+  "stl": [
+    {
+      "file": "AC-03-001-base-print-R02.stl",
+      "triangles": 1060,
+      "bounds_min_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_max_mm": [
+        140.0,
+        110.0,
+        55.0
+      ],
+      "extents_mm": [
+        140.0,
+        110.0,
+        55.0
+      ],
+      "signed_volume_mm3": 140517.3583,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm by project convention; STL does not embed units"
+    },
+    {
+      "file": "AC-03-002-lid-print-R02.stl",
+      "triangles": 972,
+      "bounds_min_mm": [
+        -3.0,
+        -3.0,
+        0.0
+      ],
+      "bounds_max_mm": [
+        143.0,
+        113.0,
+        8.0
+      ],
+      "extents_mm": [
+        146.0,
+        116.0,
+        8.0
+      ],
+      "signed_volume_mm3": 51150.3109,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm by project convention; STL does not embed units"
+    }
+  ],
+  "limits": [
+    "Printer, nozzle, material, orientation profile and shrink compensation are not selected.",
+    "Nominal clearances require a printed fit coupon and physical acceptance.",
+    "Do not claim an IP rating, outdoor suitability or environmental qualification."
+  ]
+}

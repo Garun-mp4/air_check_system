@@ -15,9 +15,24 @@
     "sha256": "6256daacefd33d2c4253c498696106157e661354e206d79d281f16d8654a7ab0"
   },
   {
+    "file": "cad/model/AC-02-000-assembly-R04.dwg",
+    "bytes": 206633,
+    "sha256": "2d1e21467dcc547060ce3567a66e2bd68185ad27278327e6b4be390790954e38"
+  },
+  {
+    "file": "cad/model/AC-02-000-assembly-R04.step",
+    "bytes": 16901610,
+    "sha256": "b87ed01e4891d2dc93ddf736de58cd7e98eb73c62af892c3f3bac7460ac9cd72"
+  },
+  {
     "file": "cad/model/AC-02-001-base-assembly-R01.step",
     "bytes": 568485,
     "sha256": "763b9ca39a03f1613cad618f694de9110cc04a56ede3df8ec3df65e8abd7dd85"
+  },
+  {
+    "file": "cad/model/AC-02-001-base-assembly-R04.step",
+    "bytes": 568485,
+    "sha256": "5a1d5b979f0919b8fe3502136aefe140e7b756a726ec8b6f042ae178f0340c98"
   },
   {
     "file": "cad/model/AC-02-001-base-print-R01.step",
@@ -25,9 +40,19 @@
     "sha256": "1a1dd44cc6c2f4e54037460bc39192fcfe52d99affc0f9482bcd5199fc50ac21"
   },
   {
+    "file": "cad/model/AC-02-001-base-print-R04.step",
+    "bytes": 545027,
+    "sha256": "6f8e35ff0393ba6efc7f328633d726f6856268ddaa00ef32960fef4b87b22c4a"
+  },
+  {
     "file": "cad/model/AC-02-002-lid-assembly-R01.step",
     "bytes": 59436,
     "sha256": "9f5ab39d5bcf7d2edc4a8f6ae4a99bad925638b2b5d6fc2670a4e7d9d671780b"
+  },
+  {
+    "file": "cad/model/AC-02-002-lid-assembly-R04.step",
+    "bytes": 59436,
+    "sha256": "09b2b97dac06a439eea9d84b9309976670031e6d9b2daffb549330e4ef10b610"
   },
   {
     "file": "cad/model/AC-02-002-lid-print-R01.step",
@@ -35,9 +60,19 @@
     "sha256": "b1134aa178c05f6187aeae4937a3bf491b98021ea796ea4679fc622a853796d6"
   },
   {
+    "file": "cad/model/AC-02-002-lid-print-R04.step",
+    "bytes": 58204,
+    "sha256": "37f13f8b95227ceaa5b5428237d9577bf362f28e63148d10f4cb22463e6215a7"
+  },
+  {
     "file": "cad/model/AC-02-003-hood-assembly-R01.step",
     "bytes": 141668,
     "sha256": "8582af32f9b785a9e03249c63ae4018b19bff34add1496359e13e0abca5bcdf9"
+  },
+  {
+    "file": "cad/model/AC-02-003-hood-assembly-R04.step",
+    "bytes": 141668,
+    "sha256": "f3c06f458ea3703268a559fe99033576c5a3b075eb2df8679201cc3f35333913"
   },
   {
     "file": "cad/model/AC-02-003-hood-print-R01.step",
@@ -45,9 +80,19 @@
     "sha256": "784bb7d4384cec7b7477326b8a96c8c1e3aa3835a67ea72eaeb09d11791cb2ae"
   },
   {
+    "file": "cad/model/AC-02-003-hood-print-R04.step",
+    "bytes": 143418,
+    "sha256": "7e0cc181a0584611a05795e24e9aa407fc05313d51b8ef08c08a7619a7e67682"
+  },
+  {
     "file": "cad/model/AC-02-004-bracket-assembly-R01.step",
     "bytes": 152466,
     "sha256": "78d9e364fafa67df609a298ce943f15acb9ea62476dc8315b548dde03dd668f5"
+  },
+  {
+    "file": "cad/model/AC-02-004-bracket-assembly-R04.step",
+    "bytes": 152466,
+    "sha256": "d90929f9d6eb42caa2abe78c4427d9265e054b556f17f12555183f70e3c4ac9d"
   },
   {
     "file": "cad/model/AC-02-004-bracket-print-R01.step",
@@ -55,14 +100,29 @@
     "sha256": "1d5c0020f73ae138e015547c4628c1de5a03b6460ab9a62adb88d1fe8d8b2335"
   },
   {
+    "file": "cad/model/AC-02-004-bracket-print-R04.step",
+    "bytes": 149275,
+    "sha256": "5cc26d3cdb50bfefd5a931d371a59e47ea3bdd371af6d2a4925a8663c2d9f329"
+  },
+  {
     "file": "cad/model/AC-02-005-sht-screen-assembly-R01.step",
     "bytes": 137578,
     "sha256": "a244e9d35a6f4426f44af17c0d2df2f22070faaa0d0f5cc3a63b9c3a9c0868ab"
   },
   {
+    "file": "cad/model/AC-02-005-sht-screen-assembly-R04.step",
+    "bytes": 137578,
+    "sha256": "38ee4a97d24a63045bcab2bce1e3f919119f92fa3f481899cf42f3b47a53da84"
+  },
+  {
     "file": "cad/model/AC-02-005-sht-screen-print-R01.step",
     "bytes": 135568,
     "sha256": "62bcbd016f90becf4a6964d25accb42f4f0f3386458b294d8b2fd84234bb8a8d"
+  },
+  {
+    "file": "cad/model/AC-02-005-sht-screen-print-R04.step",
+    "bytes": 135568,
+    "sha256": "3168f9e3c8dd349001821dd11bd88135f7af5350c5dea9f4e996e8fa313bf83e"
   },
   {
     "file": "cad/model/AC-02-shell-preview-R00.dwg",
@@ -161,8 +221,8 @@
   },
   {
     "file": "documentation/AC-02-documentation-R04.pdf",
-    "bytes": 126648,
-    "sha256": "f3ab81d0f0c110bde09588addf5407a88f83fc644ac182fa0938bf8e54fd6e7c"
+    "bytes": 128910,
+    "sha256": "4035c58f1847eb6e39415825bf14ac2c2e14afd3617fda03fe3e597ee5e2374c"
   },
   {
     "file": "documentation/BOM.csv",
@@ -171,8 +231,8 @@
   },
   {
     "file": "documentation/build_pdf.py",
-    "bytes": 11709,
-    "sha256": "ba1fe2f0b2dbe29d1870fe2021fc491993d23d7fee9610f8a7414cc7ba0301d5"
+    "bytes": 11768,
+    "sha256": "4749cc718671f029804fba2bc8317067f97889c721fa9c4fb6d6708dd331fb1d"
   },
   {
     "file": "documentation/drawing-audit-R02.md",
@@ -215,9 +275,14 @@
     "sha256": "a34ff6dbf338da3d8fc51a963a5bb34c5149c274be70d777b39d9e7c4e58ec02"
   },
   {
+    "file": "documentation/native-3d-verification-R04.json",
+    "bytes": 924,
+    "sha256": "a77cb90b7a7f96f0e9a5760403c124fe114fbc2d27bd2c611eb5bdaa47e1ae28"
+  },
+  {
     "file": "documentation/pdf-inspection.json",
-    "bytes": 2862,
-    "sha256": "c34435dc894da3cae67fed50ef2ed32bbcad085d576c6bb93f44f6cbcd32eb70"
+    "bytes": 2935,
+    "sha256": "8fe4e351c6b9fdf3125b1ef36c68f909819bde936e79c306ed5862702c9df943"
   },
   {
     "file": "documentation/standards-and-sources.md",
@@ -226,8 +291,8 @@
   },
   {
     "file": "documentation/validation-R04.md",
-    "bytes": 9654,
-    "sha256": "a6c280599a8df83fa6871dd3dd01ded6c1f359d5794c924e1742554f405e312f"
+    "bytes": 11905,
+    "sha256": "0b977012b752c5124aaa668a4eb15409bde65130cf9bf8cc6aace8a73d2d4973"
   },
   {
     "file": "documentation/validation.md",
@@ -420,7 +485,17 @@
     "sha256": "5284dcdb2623b06dc1682bdbb1f2f3d512701a88edf02305dba36ffc3cb2e857"
   },
   {
+    "file": "manufacturing/AC-02-001-base-print-R04.stl",
+    "bytes": 272284,
+    "sha256": "5284dcdb2623b06dc1682bdbb1f2f3d512701a88edf02305dba36ffc3cb2e857"
+  },
+  {
     "file": "manufacturing/AC-02-002-lid-print-R01.stl",
+    "bytes": 43884,
+    "sha256": "6ab5ac71ad2652f9edce2bf06049beb43ea0df6f95f6737ed06750ca1b7294b7"
+  },
+  {
+    "file": "manufacturing/AC-02-002-lid-print-R04.stl",
     "bytes": 43884,
     "sha256": "6ab5ac71ad2652f9edce2bf06049beb43ea0df6f95f6737ed06750ca1b7294b7"
   },
@@ -430,7 +505,17 @@
     "sha256": "250df190eaa42c8039331cd2c099e5f52c0e1ba58c1aab6ee924ffab182fdb07"
   },
   {
+    "file": "manufacturing/AC-02-003-hood-print-R04.stl",
+    "bytes": 47884,
+    "sha256": "250df190eaa42c8039331cd2c099e5f52c0e1ba58c1aab6ee924ffab182fdb07"
+  },
+  {
     "file": "manufacturing/AC-02-004-bracket-print-R01.stl",
+    "bytes": 48084,
+    "sha256": "ae5ca424222c678109bb3e38d31b5186f847ee879257de07fa6c40f0c020fce9"
+  },
+  {
+    "file": "manufacturing/AC-02-004-bracket-print-R04.stl",
     "bytes": 48084,
     "sha256": "ae5ca424222c678109bb3e38d31b5186f847ee879257de07fa6c40f0c020fce9"
   },
@@ -440,9 +525,19 @@
     "sha256": "f82965edbe64e224e028d40c2724354f058e22e50ef0366de2df517f4a751a9e"
   },
   {
+    "file": "manufacturing/AC-02-005-sht-screen-print-R04.stl",
+    "bytes": 27084,
+    "sha256": "f82965edbe64e224e028d40c2724354f058e22e50ef0366de2df517f4a751a9e"
+  },
+  {
     "file": "manufacturing/build_models.py",
-    "bytes": 11609,
-    "sha256": "2a6488057f3f4b78bb61ee7c435144ceb2a22ed1f7bc68f1986d76b8404e9214"
+    "bytes": 12244,
+    "sha256": "77ceb4bffd7bae9827dd80e7f01ed75a86105e67b6bb017ba561e002bff9795c"
+  },
+  {
+    "file": "manufacturing/model-inspection-R04.json",
+    "bytes": 9061,
+    "sha256": "441d4bbc00c50816f54d580c49d55ea436384eadc77567d65318c2b86ad4d79e"
   },
   {
     "file": "manufacturing/model-inspection.json",
@@ -451,7 +546,7 @@
   },
   {
     "file": "README.md",
-    "bytes": 6147,
-    "sha256": "311329a376f343da0860a9124c250a98f6270b09e76fae90db7b8b673f55edaa"
+    "bytes": 6749,
+    "sha256": "67a539ce7d1fca4d9aa1fbb298fb1290ff617afd32e46ae8779580a1f920cc24"
   }
 ]

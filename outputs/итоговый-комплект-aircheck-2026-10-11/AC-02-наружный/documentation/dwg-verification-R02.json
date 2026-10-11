@@ -1,0 +1,40 @@
+{
+  "verified": true,
+  "operation": "OpenCADStudio save_verified",
+  "path": "drawings/AC-02-drawings-R02.dwg",
+  "sha256": "d4e8cc9aadba77f8385d2c62e4aa8dbafa194bdf006892edee5d37e6967d3929",
+  "bytes": 58341,
+  "document_id": 7,
+  "revision": 41,
+  "units": "mm",
+  "entities": 1180,
+  "by_type": {
+    "Line": 839,
+    "Circle": 70,
+    "Text": 271
+  },
+  "by_layer": {
+    "D-CENTER": 84,
+    "D-DETAIL": 430,
+    "D-DIM": 133,
+    "D-OUTLINE": 214,
+    "D-REF": 48,
+    "D-TEXT": 271
+  },
+  "audit": {
+    "status": "passed",
+    "format": "dwg",
+    "requested_version": "2018",
+    "actual_version": "AC1032",
+    "lossless": true,
+    "dropped_on_save": 0,
+    "errors": 0,
+    "warnings": 0,
+    "issues": []
+  },
+  "tool": {
+    "name": "OpenCADStudio",
+    "version": "2026.40.1",
+    "build_rev": "7d5ee91665b1"
+  }
+}

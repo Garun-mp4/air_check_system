@@ -41,7 +41,9 @@ def bom():
 def manifest():
     rows=[]
     for p in sorted(root.rglob('*')):
-        if p.is_file() and p.name!='manifest-sha256.json' and '__pycache__' not in p.parts:
+        if (p.is_file() and p.name!='manifest-sha256.json'
+                and not p.name.endswith(('.ocs.lock', '.sv$'))
+                and '__pycache__' not in p.parts):
             rows.append(dict(file=p.relative_to(root).as_posix(),bytes=p.stat().st_size,sha256=hashlib.sha256(p.read_bytes()).hexdigest()))
     (root/'manifest-sha256.json').write_text(json.dumps(rows,indent=2,ensure_ascii=False),encoding='utf-8')
 
