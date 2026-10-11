@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" version="26" modified="2026-10-11T00:00:00Z">
+  <diagram id="aircheck-01" name="Соединения AC-01">
+    <mxGraphModel dx="1200" dy="850" grid="1" gridSize="10" page="1" pageWidth="1200" pageHeight="850">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="AirCheck AC-01 • внутренний узел • R01&#10;Функциональная схема соединений; не Э3 по ЕСКД" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=16;fillColor=#e7edf0;strokeColor=#283840;fontColor=#172b34;spacing=12;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="20" width="1140" height="70" />
+        </mxCell>
+        <mxCell id="usb" value="Внешний USB-адаптер&#10;5 В / 2 А&#10;Единственный источник" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=16;fillColor=#ffffff;strokeColor=#283840;fontColor=#172b34;spacing=12;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="170" width="250" height="130" />
+        </mxCell>
+        <mxCell id="esp" value="ESP32-DevKitC-32E V4&#10;Micro-B: питание&#10;J2.19: отвод 5V&#10;J3.1/7: GND&#10;J3.6: GPIO21 SDA&#10;J3.3: GPIO22 SCL&#10;J3.12: GPIO16 RX&#10;J3.11: GPIO17 TX" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=16;fillColor=#edf6f5;strokeColor=#283840;fontColor=#172b34;spacing=12;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="400" y="170" width="330" height="290" />
+        </mxCell>
+        <mxCell id="scd" value="Adafruit SCD-41 #5190&#10;VIN ← 5V; GND общий&#10;SDA ↔ GPIO21&#10;SCL ← GPIO22&#10;I2C подтяжки: только 3.3 В" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=16;fillColor=#ffffff;strokeColor=#283840;fontColor=#172b34;spacing=12;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="870" y="160" width="300" height="170" />
+        </mxCell>
+        <mxCell id="sps" value="Sensirion SPS30&#10;1 VDD ← 5V; 5 GND общий&#10;3 TX → GPIO16 RX&#10;2 RX ← GPIO17 TX&#10;4 SEL: не подключать&#10;UART 115200 / 8N1" style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=16;fillColor=#ffffff;strokeColor=#283840;fontColor=#172b34;spacing=12;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="870" y="410" width="300" height="200" />
+        </mxCell>
+        <mxCell id="p" value="USB" source="usb" target="esp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;fontFamily=Arial;fontSize=14;strokeWidth=2;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.2;" edge="1" parent="1">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="i" value="I2C + питание" source="esp" target="scd" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;fontFamily=Arial;fontSize=14;strokeWidth=2;labelBackgroundColor=#ffffff;exitX=1;exitY=0.25;entryX=0;entryY=0.5;" edge="1" parent="1">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="u" value="5V / GND / RX / TX" source="esp" target="sps" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;fontFamily=Arial;fontSize=14;strokeWidth=2;labelBackgroundColor=#ffffff;exitX=1;exitY=0.85;entryX=0;entryY=0.5;" edge="1" parent="1">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="notes" value="Перед включением: сверить маркировку контактов, ревизию PCB и перемычки SCD41 (Rev A errata).&#10;USB и отдельный источник на 5V/3V3 одновременно не подключать. Цвет провода не определяет номер контакта.&#10;Точная монтажная таблица и порядок сборки: AC-01-000 РЭ. Прошивка в комплект CAD не входит." style="rounded=0;whiteSpace=wrap;html=0;fontFamily=Arial;fontSize=16;fillColor=#fff9eb;strokeColor=#283840;fontColor=#172b34;spacing=12;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="30" y="670" width="1140" height="130" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

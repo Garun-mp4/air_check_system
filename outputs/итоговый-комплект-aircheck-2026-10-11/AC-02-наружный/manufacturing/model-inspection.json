@@ -1,0 +1,397 @@
+{
+  "revision": "R01",
+  "units": "mm",
+  "source": "cad/design.json",
+  "part_count": 5,
+  "parts": {
+    "AC-02-001-base": 282091.7947,
+    "AC-02-002-lid": 92943.8496,
+    "AC-02-003-hood": 331051.131,
+    "AC-02-004-bracket": 35779.062,
+    "AC-02-005-sht-screen": 6349.2048
+  },
+  "stl": [
+    {
+      "file": "AC-02-001-base-print-R01.stl",
+      "triangles": 5444,
+      "bounds_min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_max": [
+        160.0,
+        180.0,
+        60.0
+      ],
+      "extents_mm": [
+        160.0,
+        180.0,
+        60.0
+      ],
+      "signed_volume_mm3": 282055.4544,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm (STL has no embedded units)"
+    },
+    {
+      "file": "AC-02-002-lid-print-R01.stl",
+      "triangles": 876,
+      "bounds_min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_max": [
+        160.0,
+        180.0,
+        6.5
+      ],
+      "extents_mm": [
+        160.0,
+        180.0,
+        6.5
+      ],
+      "signed_volume_mm3": 92944.125,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm (STL has no embedded units)"
+    },
+    {
+      "file": "AC-02-003-hood-print-R01.stl",
+      "triangles": 956,
+      "bounds_min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_max": [
+        176.0,
+        190.0,
+        90.0
+      ],
+      "extents_mm": [
+        176.0,
+        190.0,
+        90.0
+      ],
+      "signed_volume_mm3": 331051.7742,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm (STL has no embedded units)"
+    },
+    {
+      "file": "AC-02-004-bracket-print-R01.stl",
+      "triangles": 960,
+      "bounds_min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_max": [
+        160.0,
+        156.0,
+        8.0
+      ],
+      "extents_mm": [
+        160.0,
+        156.0,
+        8.0
+      ],
+      "signed_volume_mm3": 35780.3485,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm (STL has no embedded units)"
+    },
+    {
+      "file": "AC-02-005-sht-screen-print-R01.stl",
+      "triangles": 540,
+      "bounds_min": [
+        0.0,
+        20.0,
+        0.0
+      ],
+      "bounds_max": [
+        51.7,
+        54.0,
+        9.2
+      ],
+      "extents_mm": [
+        51.7,
+        34.0,
+        9.2
+      ],
+      "signed_volume_mm3": 6349.3425,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "units": "mm (STL has no embedded units)"
+    }
+  ],
+  "step": [
+    {
+      "file": "AC-02-001-base-print-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 282091.79466,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-001-base-assembly-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 282091.79466,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-002-lid-print-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 92943.84957,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-002-lid-assembly-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 92943.84957,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-003-hood-print-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 331051.131,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-003-hood-assembly-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 331051.131,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-004-bracket-print-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 35779.06199,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-004-bracket-assembly-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 35779.06199,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-005-sht-screen-print-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 6349.20478,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-005-sht-screen-assembly-R01.step",
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 6349.20478,
+      "format": "STEP AP214, mm"
+    },
+    {
+      "file": "AC-02-000-assembly-R01.step",
+      "valid": true,
+      "solids": 36,
+      "volume_mm3": 774211.41703,
+      "format": "STEP AP214, mm"
+    }
+  ],
+  "printed_part_intersections": [
+    {
+      "a": "AC-02-001-base",
+      "b": "AC-02-002-lid",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-001-base",
+      "b": "AC-02-003-hood",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-001-base",
+      "b": "AC-02-004-bracket",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-001-base",
+      "b": "AC-02-005-sht-screen",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-002-lid",
+      "b": "AC-02-003-hood",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-002-lid",
+      "b": "AC-02-004-bracket",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-002-lid",
+      "b": "AC-02-005-sht-screen",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-003-hood",
+      "b": "AC-02-004-bracket",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-003-hood",
+      "b": "AC-02-005-sht-screen",
+      "intersection_mm3": 0.0
+    },
+    {
+      "a": "AC-02-004-bracket",
+      "b": "AC-02-005-sht-screen",
+      "intersection_mm3": 0.0
+    }
+  ],
+  "electronics_intersections": [
+    {
+      "part": "AC-02-001-base",
+      "reference": "REF-SPS30",
+      "intersection_mm3": 0.00212
+    },
+    {
+      "part": "AC-02-001-base",
+      "reference": "REF-SHT45",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-001-base",
+      "reference": "REF-ESP32",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-002-lid",
+      "reference": "REF-SPS30",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-002-lid",
+      "reference": "REF-SHT45",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-002-lid",
+      "reference": "REF-ESP32",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-003-hood",
+      "reference": "REF-SPS30",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-003-hood",
+      "reference": "REF-SHT45",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-003-hood",
+      "reference": "REF-ESP32",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-004-bracket",
+      "reference": "REF-SPS30",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-004-bracket",
+      "reference": "REF-SHT45",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-004-bracket",
+      "reference": "REF-ESP32",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-005-sht-screen",
+      "reference": "REF-SPS30",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-005-sht-screen",
+      "reference": "REF-SHT45",
+      "intersection_mm3": 0.0
+    },
+    {
+      "part": "AC-02-005-sht-screen",
+      "reference": "REF-ESP32",
+      "intersection_mm3": 0.0
+    }
+  ],
+  "electronic_references": {
+    "REF-SPS30": {
+      "min": [
+        90.0,
+        4.5,
+        22.0
+      ],
+      "max": [
+        131.20693,
+        45.70694,
+        34.56592
+      ],
+      "extents": [
+        41.20693,
+        41.20693,
+        12.56593
+      ]
+    },
+    "REF-SHT45": {
+      "min": [
+        14.0,
+        28.0,
+        18.0
+      ],
+      "max": [
+        39.4058,
+        45.7858,
+        22.5358
+      ],
+      "extents": [
+        25.4058,
+        17.7858,
+        4.5358
+      ]
+    },
+    "REF-ESP32": {
+      "min": [
+        14.0,
+        80.0,
+        16.0
+      ],
+      "max": [
+        62.26,
+        107.94,
+        17.6
+      ],
+      "extents": [
+        48.26,
+        27.94,
+        1.6
+      ]
+    }
+  },
+  "reference_note": "The SPS30 and Adafruit SHT45 #5665 are exact manufacturer STEP bodies in the exchange assembly. ESP32-DevKitC V4 uses an LOD0 dimensional envelope; manufacturer dimension sources are retained in cad/reference. Electronic reference geometry is not printable."
+}

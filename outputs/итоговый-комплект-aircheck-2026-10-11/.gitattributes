@@ -1,0 +1,8 @@
+# Keep release hashes identical across Git checkouts on every platform.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Generated CAD exchange and published binary documents are reviewed in readers.
+*.step -diff
+*.STEP -diff
+*.dxf -diff
+*.pdf binary
+cad/reference/** -diff

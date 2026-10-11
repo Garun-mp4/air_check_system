@@ -1,0 +1,288 @@
+[
+  {
+    "audit": {
+      "bounds": {
+        "max": [
+          1765,
+          292,
+          0
+        ],
+        "min": [
+          20,
+          5,
+          0
+        ]
+      },
+      "document_id": 3,
+      "issues": [],
+      "manifest": {
+        "by_layer": {
+          "D-CENTER": 51,
+          "D-DETAIL": 347,
+          "D-DIM": 120,
+          "D-OUTLINE": 650,
+          "D-REF": 16,
+          "D-TEXT": 193
+        },
+        "by_type": {
+          "Circle": 48,
+          "Line": 1136,
+          "Text": 193
+        },
+        "total": 1377
+      },
+      "ok": true,
+      "source": {
+        "dxf_structure": null,
+        "format": "dxf",
+        "path": null,
+        "sha256": null,
+        "version": "AC1032"
+      },
+      "status": "passed",
+      "summary": {
+        "errors": 0,
+        "warnings": 0
+      },
+      "target": {
+        "dropped_on_save": 0,
+        "format": "dwg",
+        "lossless": true,
+        "version": "AC1032"
+      },
+      "unknown_entities": 0
+    },
+    "bytes": 62409,
+    "dropped_on_save": 0,
+    "dxf_structure": null,
+    "manifest": {
+      "by_layer": {
+        "D-CENTER": 51,
+        "D-DETAIL": 347,
+        "D-DIM": 120,
+        "D-OUTLINE": 650,
+        "D-REF": 16,
+        "D-TEXT": 193
+      },
+      "by_type": {
+        "Circle": 48,
+        "Line": 1136,
+        "Text": 193
+      },
+      "total": 1377
+    },
+    "ok": true,
+    "saved": "C:/Users/admin/Desktop/AGTU Structured/4 курс/ВКР/Проект/outputs/part-1-indoor-node/drawings/AC-01-000-drawings-R01.dwg",
+    "sha256": "4569170cf02dcdf10e70de469375f775a702a58affb6aaa62f946b73d6e5420a",
+    "status": "completed",
+    "target_format": "dwg",
+    "target_version": "AC1032",
+    "verified": true
+  },
+  {
+    "audit": {
+      "bounds": {
+        "max": [
+          150,
+          190,
+          65
+        ],
+        "min": [
+          0,
+          0,
+          0
+        ]
+      },
+      "document_id": 4,
+      "issues": [],
+      "manifest": {
+        "by_layer": {
+          "HSG_BODY": 1
+        },
+        "by_type": {
+          "3D Solid": 1
+        },
+        "total": 1
+      },
+      "ok": true,
+      "source": {
+        "dxf_structure": null,
+        "format": "dxf",
+        "path": null,
+        "sha256": null,
+        "version": "AC1032"
+      },
+      "status": "passed",
+      "summary": {
+        "errors": 0,
+        "warnings": 0
+      },
+      "target": {
+        "dropped_on_save": 0,
+        "format": "dwg",
+        "lossless": true,
+        "version": "AC1032"
+      },
+      "unknown_entities": 0
+    },
+    "bytes": 148146,
+    "dropped_on_save": 0,
+    "dxf_structure": null,
+    "manifest": {
+      "by_layer": {
+        "HSG_BODY": 1
+      },
+      "by_type": {
+        "3D Solid": 1
+      },
+      "total": 1
+    },
+    "ok": true,
+    "saved": "C:/Users/admin/Desktop/AGTU Structured/4 курс/ВКР/Проект/outputs/part-1-indoor-node/cad/model/AC-01-001-base-R01.dwg",
+    "sha256": "c96ec11c73e6176b64caf522c269b06f24f3a0fffb93299f29cccafab21c8a86",
+    "status": "completed",
+    "target_format": "dwg",
+    "target_version": "AC1032",
+    "verified": true
+  },
+  {
+    "audit": {
+      "bounds": {
+        "max": [
+          150,
+          190,
+          68
+        ],
+        "min": [
+          0,
+          0,
+          0
+        ]
+      },
+      "document_id": 2,
+      "issues": [],
+      "manifest": {
+        "by_layer": {
+          "HSG_BODY": 1,
+          "HSG_LID": 1,
+          "REF_ESP32": 7,
+          "REF_SCD41": 2,
+          "REF_SPS30": 1
+        },
+        "by_type": {
+          "3D Solid": 12
+        },
+        "total": 12
+      },
+      "ok": true,
+      "source": {
+        "dxf_structure": null,
+        "format": "dxf",
+        "path": null,
+        "sha256": null,
+        "version": "AC1032"
+      },
+      "status": "passed",
+      "summary": {
+        "errors": 0,
+        "warnings": 0
+      },
+      "target": {
+        "dropped_on_save": 0,
+        "format": "dwg",
+        "lossless": true,
+        "version": "AC1032"
+      },
+      "unknown_entities": 0
+    },
+    "bytes": 167024,
+    "dropped_on_save": 0,
+    "dxf_structure": null,
+    "manifest": {
+      "by_layer": {
+        "HSG_BODY": 1,
+        "HSG_LID": 1,
+        "REF_ESP32": 7,
+        "REF_SCD41": 2,
+        "REF_SPS30": 1
+      },
+      "by_type": {
+        "3D Solid": 12
+      },
+      "total": 12
+    },
+    "ok": true,
+    "saved": "C:/Users/admin/Desktop/AGTU Structured/4 курс/ВКР/Проект/outputs/part-1-indoor-node/cad/model/AC-01-000-assembly-R01.dwg",
+    "sha256": "709bbc6a65b7eaa1f87a7187f6d54649b0413a3ade63663be6fcb57bb66ca69e",
+    "status": "completed",
+    "target_format": "dwg",
+    "target_version": "AC1032",
+    "verified": true
+  },
+  {
+    "audit": {
+      "bounds": {
+        "max": [
+          150,
+          190,
+          68
+        ],
+        "min": [
+          0,
+          0,
+          61.5
+        ]
+      },
+      "document_id": 5,
+      "issues": [],
+      "manifest": {
+        "by_layer": {
+          "HSG_LID": 1
+        },
+        "by_type": {
+          "3D Solid": 1
+        },
+        "total": 1
+      },
+      "ok": true,
+      "source": {
+        "dxf_structure": null,
+        "format": "dxf",
+        "path": null,
+        "sha256": null,
+        "version": "AC1032"
+      },
+      "status": "passed",
+      "summary": {
+        "errors": 0,
+        "warnings": 0
+      },
+      "target": {
+        "dropped_on_save": 0,
+        "format": "dwg",
+        "lossless": true,
+        "version": "AC1032"
+      },
+      "unknown_entities": 0
+    },
+    "bytes": 35781,
+    "dropped_on_save": 0,
+    "dxf_structure": null,
+    "manifest": {
+      "by_layer": {
+        "HSG_LID": 1
+      },
+      "by_type": {
+        "3D Solid": 1
+      },
+      "total": 1
+    },
+    "ok": true,
+    "saved": "C:\\Users\\admin\\Desktop\\AGTU Structured\\4 курс\\ВКР\\Проект\\outputs\\part-1-indoor-node\\cad\\model\\AC-01-002-lid.dwg",
+    "sha256": "7eb1b14b1788cc69a441e5d9d5745484f02f62f73d7c0cb05f6a6e9f9f6aeb73",
+    "status": "completed",
+    "target_format": "dwg",
+    "target_version": "AC1032",
+    "verified": true
+  }
+]
