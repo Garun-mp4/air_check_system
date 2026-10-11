@@ -116,13 +116,13 @@
   },
   {
     "file": "documentation/AC-02-000-RE.md",
-    "bytes": 9878,
-    "sha256": "024810e3c71a291dac506e39d5e72bfc676a253ae4781257a8abcb34de134287"
+    "bytes": 9921,
+    "sha256": "e0b33098a109038eae6dabf36b1ef9f24f0a40007310c11db05dd424ea7dd3dc"
   },
   {
     "file": "documentation/AC-02-000-SP.md",
     "bytes": 4890,
-    "sha256": "0897b1dcec36678c2eeddd5a4eb5f945e06af28fe9dbb0f89e5603e4f1c2a6be"
+    "sha256": "71dd7cb566d5667403653d9baf472d8be4da43155e3d78775388a866a24678b1"
   },
   {
     "file": "documentation/AC-02-connections-check-R01.drawio.png",
@@ -161,8 +161,8 @@
   },
   {
     "file": "documentation/AC-02-documentation-R04.pdf",
-    "bytes": 128096,
-    "sha256": "a94dce0213c2ee1b97d20186d960b80271f6e39efbb1664b63d88a3875a970f2"
+    "bytes": 126648,
+    "sha256": "f3ab81d0f0c110bde09588addf5407a88f83fc644ac182fa0938bf8e54fd6e7c"
   },
   {
     "file": "documentation/BOM.csv",
@@ -216,18 +216,18 @@
   },
   {
     "file": "documentation/pdf-inspection.json",
-    "bytes": 2934,
-    "sha256": "ad3b346fbc03fb8585c29ba74ea1761a6ace97f6d6a8873cdad11c88febf148b"
+    "bytes": 2862,
+    "sha256": "c34435dc894da3cae67fed50ef2ed32bbcad085d576c6bb93f44f6cbcd32eb70"
   },
   {
     "file": "documentation/standards-and-sources.md",
-    "bytes": 6777,
-    "sha256": "43631d7a489e27f74326c4ee34f495c4f9054fd4780080e53e598ccb2de2496f"
+    "bytes": 6862,
+    "sha256": "c4a46f5126de8d306a0b226aeced4f0001fd25d46531ab7f38f3c75a4e37b99b"
   },
   {
     "file": "documentation/validation-R04.md",
-    "bytes": 11030,
-    "sha256": "cb8c162d581c152b255c344f07edcf8cf85e1aa4265f2747eb55e41becf103ec"
+    "bytes": 9654,
+    "sha256": "a6c280599a8df83fa6871dd3dd01ded6c1f359d5794c924e1742554f405e312f"
   },
   {
     "file": "documentation/validation.md",
