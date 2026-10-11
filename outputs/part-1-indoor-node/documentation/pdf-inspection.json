@@ -1,0 +1,148 @@
+{
+  "files": [
+    {
+      "file": "drawings\\AC-01-sheet-1.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1273
+      ]
+    },
+    {
+      "file": "drawings\\AC-01-sheet-2.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1181
+      ]
+    },
+    {
+      "file": "drawings\\AC-01-sheet-3.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        892
+      ]
+    },
+    {
+      "file": "drawings\\AC-01-sheet-4.pdf",
+      "pages": 1,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1127
+      ]
+    },
+    {
+      "file": "drawings\\AC-01-drawings.pdf",
+      "pages": 4,
+      "page_sizes_mm": [
+        [
+          420.0,
+          297.0
+        ],
+        [
+          420.0,
+          297.0
+        ],
+        [
+          420.0,
+          297.0
+        ],
+        [
+          420.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        1273,
+        1181,
+        892,
+        1127
+      ]
+    },
+    {
+      "file": "documentation\\AC-01-documentation.pdf",
+      "pages": 11,
+      "page_sizes_mm": [
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ],
+        [
+          210.0,
+          297.0
+        ]
+      ],
+      "characters": [
+        454,
+        2169,
+        900,
+        3172,
+        3355,
+        3076,
+        1522,
+        2253,
+        2518,
+        3437,
+        1771
+      ]
+    }
+  ],
+  "text_bounds_warnings": []
+}

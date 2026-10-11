@@ -1,0 +1,56 @@
+[
+  {
+    "file": "AC-01-000-assembly-exchange.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 431189.4197139793,
+    "solids": 12,
+    "faces": 10304
+  },
+  {
+    "file": "AC-01-001-base-exchange.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 310502.2555576087,
+    "solids": 1,
+    "faces": 9092
+  },
+  {
+    "file": "AC-01-002-lid-exchange.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 92044.02425060364,
+    "solids": 1,
+    "faces": 1148
+  },
+  {
+    "file": "REF-ESP32-V4-envelope.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 6140.836440000006,
+    "solids": 7,
+    "faces": 42
+  },
+  {
+    "file": "REF-SCD41-5190-envelope.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 1623.7914657883066,
+    "solids": 2,
+    "faces": 16
+  },
+  {
+    "file": "REF-SPS30-envelope.step",
+    "read_status": "IFSelect_ReturnStatus.IFSelect_RetDone",
+    "transferred_roots": 1,
+    "valid": true,
+    "volume_mm3": 20878.51199999999,
+    "solids": 1,
+    "faces": 6
+  }
+]

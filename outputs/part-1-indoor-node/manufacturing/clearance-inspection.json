@@ -1,0 +1,26 @@
+[
+  {
+    "component": "SPS30",
+    "interference_mm3": 0.0
+  },
+  {
+    "component": "SCD41 PCB",
+    "interference_mm3": 1.5999995117198547
+  },
+  {
+    "component": "SCD41 body",
+    "interference_mm3": 0.0
+  },
+  {
+    "component": "ESP32 PCB",
+    "interference_mm3": 2.8079783936071294
+  },
+  {
+    "component": "USB keepout",
+    "interference_mm3": 0.0
+  },
+  {
+    "component": "Lid against base including SCD41 partition",
+    "interference_mm3": 0.0
+  }
+]
