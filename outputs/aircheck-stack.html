@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <meta name="description" content="Технический обзор AirCheck: языки, фреймворки, библиотеки и объём кода по фронтенду, бэкенду, ML и симуляции.">
+  <title>AirCheck — стек и объём проекта</title>
+  <style>
+    :root {
+      --color-primary: #111111; --color-primary-active: #242424;
+      --color-ink: #111111; --color-body: #374151; --color-muted: #6b7280;
+      --color-hairline: #e5e7eb; --color-hairline-soft: #f3f4f6;
+      --color-canvas: #ffffff; --color-surface-soft: #f8f9fa; --color-surface-card: #f5f5f5;
+      --color-on-primary: #ffffff; --color-brand-accent: #3b82f6;
+      --font-display: "Cal Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-code: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+      --rounded-sm: 6px; --rounded-md: 8px; --spacing-section: 96px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-padding-top: 32px; scrollbar-color: var(--color-muted) var(--color-surface-soft); }
+    body { margin: 0; background: var(--color-canvas); color: var(--color-body); font: 16px/1.6 var(--font-body); }
+    ::selection { background: var(--color-ink); color: var(--color-on-primary); }
+    a { color: inherit; text-underline-offset: .22em; }
+    button, summary, a { -webkit-tap-highlight-color: transparent; }
+    a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 5px; }
+    button { font: inherit; cursor: pointer; }
+    .container { width: min(100% - 64px, 1120px); margin-inline: auto; }
+    .skip-link { position: absolute; top: -80px; left: 20px; z-index: 20; padding: 12px 20px; background: var(--color-ink); color: white; }
+    .skip-link:focus { top: 12px; }
+    .topbar { border-bottom: 1px solid var(--color-hairline); }
+    .topbar-inner { min-height: 80px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { text-decoration: none; color: var(--color-ink); font-size: 22px; font-weight: 650; letter-spacing: -.03em; }
+    .brand span { margin-left: 14px; padding-left: 18px; border-left: 1px solid var(--color-hairline); color: var(--color-muted); font-size: 14px; font-weight: 400; letter-spacing: 0; }
+    .topnav { display: flex; gap: 28px; font-size: 14px; }
+    .topnav a { text-decoration: none; padding-block: 12px; min-height: 44px; }
+    .hero { padding-block: 80px 64px; display: grid; grid-template-columns: 1.65fr 1fr; gap: 72px; align-items: end; }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2, h3 { color: var(--color-ink); }
+    h1 { font: 600 clamp(38px, 5.1vw, 64px)/1.08 var(--font-display); letter-spacing: -.035em; text-wrap: balance; }
+    h1 span { display: block; }
+    .intro { margin-top: 24px; max-width: 60ch; font-size: 18px; line-height: 1.65; }
+    .meta { margin-bottom: 24px; font-size: 13px; color: var(--color-muted); }
+    .hero-side { padding-bottom: 6px; }
+    .hero-side dl { margin: 0; }
+    .hero-side dl > div { padding-block: 12px; border-bottom: 1px solid var(--color-hairline); display: flex; gap: 16px; justify-content: space-between; font-size: 14px; }
+    .hero-side dt { color: var(--color-muted); }
+    .hero-side dd { margin: 0; text-align: right; color: var(--color-ink); }
+    .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+    .button { min-height: 44px; border: 1px solid var(--color-hairline); border-radius: var(--rounded-md); background: var(--color-canvas); color: var(--color-ink); padding: 10px 16px; font-size: 13px; font-weight: 600; transition: transform 160ms ease-out, background-color 160ms ease-out; }
+    .button-primary { color: var(--color-on-primary); background: var(--color-primary); border-color: var(--color-primary); }
+    .button:active { transform: scale(.97); }
+    .action-status { display: block; min-height: 22px; margin-top: 8px; color: var(--color-muted); font-size: 12px; }
+    section { padding-block: var(--spacing-section); border-top: 1px solid var(--color-hairline); }
+    .section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 32px; margin-bottom: 32px; }
+    h2 { font: 600 32px/1.2 var(--font-display); letter-spacing: -.025em; text-wrap: balance; }
+    .section-heading p { max-width: 50ch; color: var(--color-muted); font-size: 14px; }
+    .size-section { padding-top: 48px; }
+    .size-overview { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-bottom: 40px; }
+    .size-overview p { max-width: 62ch; }
+    .size-overview strong { display: block; color: var(--color-ink); font-size: 24px; font-weight: 600; line-height: 1.35; letter-spacing: -.02em; margin-bottom: 12px; }
+    .size-overview .sub { color: var(--color-muted); font-size: 14px; }
+    .count-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .count-table th { color: var(--color-muted); text-align: left; font-size: 12px; font-weight: 500; padding: 0 12px 12px; border-bottom: 1px solid var(--color-hairline); }
+    .count-table th:first-child, .count-table td:first-child { padding-left: 0; }
+    .count-table th:last-child, .count-table td:last-child { padding-right: 0; }
+    .count-table td { padding: 17px 12px; border-bottom: 1px solid var(--color-hairline); vertical-align: middle; }
+    .count-table .part { width: 21%; font-weight: 600; color: var(--color-ink); }
+    .count-table .scope { width: 42%; color: var(--color-muted); }
+    .count-table .number { width: 16%; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 18px; color: var(--color-ink); font-weight: 500; }
+    .count-table th.number { font-size: 12px; color: var(--color-muted); }
+    .count-table .share { width: 21%; padding-left: 32px; }
+    .share-inner { display: flex; align-items: center; gap: 12px; }
+    .track { height: 5px; flex: 1; background: var(--color-hairline-soft); }
+    .track span { display: block; height: 100%; width: var(--share); background: var(--color-ink); }
+    .share-label { width: 39px; text-align: right; font-size: 12px; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+    .count-table .subtotal td { padding-block: 12px 24px; font-size: 13px; border-bottom: 1px solid var(--color-ink); }
+    .count-table .subtotal .number { font-size: 16px; }
+    .count-table .total td { border-bottom: 0; padding-top: 24px; font-weight: 650; color: var(--color-ink); }
+    .count-table .total .number { font-size: 24px; }
+    .count-note { padding: 20px 24px; background: var(--color-surface-soft); border-radius: var(--rounded-md); font-size: 13px; margin-top: 20px; }
+    .count-note p + p { margin-top: 8px; }
+    .count-note strong { color: var(--color-ink); }
+    .language-row { display: grid; grid-template-columns: 260px 1fr; gap: 40px; padding-block: 25px; border-bottom: 1px solid var(--color-hairline); }
+    .language-row:first-of-type { border-top: 1px solid var(--color-hairline); }
+    .language-row h3 { font-size: 18px; font-weight: 600; }
+    .language-row p { max-width: 74ch; font-size: 14px; }
+    .language-row small { display: block; margin-top: 6px; color: var(--color-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .language-row code { font: 12px var(--font-code); }
+    .stack-lead { max-width: 70ch; margin-bottom: 40px; font-size: 17px; }
+    .stack-layer { display: grid; grid-template-columns: 260px 1fr; gap: 40px; border-top: 1px solid var(--color-ink); padding-top: 24px; margin-top: 48px; }
+    .stack-layer:first-of-type { margin-top: 0; }
+    .layer-label h3 { font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+    .layer-label p { margin-top: 12px; font-size: 13px; color: var(--color-muted); max-width: 28ch; }
+    .libraries { margin: 0; }
+    .library { padding-block: 14px; border-bottom: 1px solid var(--color-hairline); }
+    .library:first-child { padding-top: 0; }
+    .library dt { color: var(--color-ink); font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
+    .version { font-size: 12px; color: var(--color-muted); font-weight: 400; font-variant-numeric: tabular-nums; text-align: right; flex-shrink: 0; }
+    .library dd { margin: 5px 0 0; font-size: 13px; max-width: 78ch; }
+    .library code { font: 12px var(--font-code); }
+    .ml-section { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+    .ml-section h2 { margin-bottom: 24px; }
+    .ml-section p { font-size: 15px; max-width: 64ch; }
+    .ml-section p + p { margin-top: 18px; }
+    .ml-section ol { margin: 0; padding-left: 22px; }
+    .ml-section li { padding: 0 0 16px 8px; font-size: 14px; }
+    .ml-section li::marker { color: var(--color-muted); font-variant-numeric: tabular-nums; }
+    .ml-section li strong { display: block; color: var(--color-ink); font-weight: 600; }
+    .features { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--color-hairline); font-size: 13px; }
+    .features code { font: 12px/1.8 var(--font-code); overflow-wrap: anywhere; }
+    .method-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+    .method-layout h3 { font-size: 18px; margin-bottom: 16px; }
+    .method-layout p, .method-layout li { font-size: 14px; }
+    .method-layout p + p { margin-top: 14px; }
+    .method-layout ul { margin: 0; padding-left: 18px; }
+    .method-layout li { padding-bottom: 12px; }
+    .method-layout code, .source-list code { font: 12px var(--font-code); overflow-wrap: anywhere; }
+    details { margin-top: 32px; padding-block: 20px; border-top: 1px solid var(--color-hairline); border-bottom: 1px solid var(--color-hairline); }
+    summary { cursor: pointer; color: var(--color-ink); font-size: 14px; font-weight: 600; padding-block: 4px; min-height: 32px; }
+    details[open] summary { margin-bottom: 20px; }
+    .source-list { padding: 0; margin: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 32px; }
+    .source-list li { font-size: 13px; }
+    .source-list small { display: block; margin-top: 3px; color: var(--color-muted); }
+    .inventory-wrap { overflow: auto; max-height: 420px; scrollbar-color: var(--color-muted) var(--color-surface-soft); }
+    .inventory { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .inventory th { position: sticky; top: 0; background: var(--color-surface-soft); text-align: left; color: var(--color-ink); }
+    .inventory td, .inventory th { padding: 9px 12px; border-bottom: 1px solid var(--color-hairline); }
+    .inventory td:first-child { font-family: var(--font-code); overflow-wrap: anywhere; }
+    .inventory td:last-child { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .fine { font-size: 12px; color: var(--color-muted); margin-top: 16px; max-width: 90ch; }
+    footer { background: var(--color-surface-soft); border-top: 1px solid var(--color-hairline); padding-block: 32px; font-size: 12px; color: var(--color-muted); }
+    .footer-inner { display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap; }
+    footer code { font-family: var(--font-code); }
+    @media (hover: hover) and (pointer: fine) {
+      .topnav a:hover, .source-list a:hover { color: var(--color-ink); text-decoration: underline; }
+      .button:hover { background: var(--color-surface-soft); }
+      .button-primary:hover { background: var(--color-primary-active); }
+    }
+    @media (min-width: 1400px) { .hero { padding-top: 96px; } }
+    @media (max-width: 1024px) {
+      .hero { gap: 40px; grid-template-columns: 1.4fr 1fr; }
+      .language-row, .stack-layer { grid-template-columns: 220px 1fr; gap: 32px; }
+      .count-table .scope { width: 38%; }
+      .ml-section, .method-layout { gap: 40px; }
+    }
+    @media (max-width: 780px) {
+      :root { --spacing-section: 64px; }
+      .container { width: min(100% - 40px, 1120px); }
+      .topbar-inner { align-items: flex-start; flex-direction: column; gap: 6px; padding-block: 18px 8px; }
+      .topnav { width: 100%; justify-content: space-between; gap: 16px; }
+      .hero { grid-template-columns: 1fr; padding-block: 48px 40px; gap: 32px; }
+      .hero-side { max-width: 540px; }
+      .hero-side dl > div { padding-block: 8px; }
+      .section-heading { display: block; margin-bottom: 24px; }
+      .section-heading p { margin-top: 12px; }
+      .size-overview { gap: 24px; }
+      .count-table .scope { display: none; }
+      .count-table .part { width: 40%; }
+      .count-table .number { width: 25%; }
+      .count-table .share { width: 35%; padding-left: 24px; }
+      .language-row, .stack-layer { grid-template-columns: 180px 1fr; gap: 24px; }
+      .ml-section, .method-layout { grid-template-columns: 1fr; gap: 32px; }
+    }
+    @media (max-width: 540px) {
+      .container { width: calc(100% - 32px); }
+      .brand span { margin-left: 10px; padding-left: 12px; font-size: 12px; }
+      .topnav { gap: 10px; font-size: 12px; }
+      h1 { font-size: 42px; }
+      h2 { font-size: 28px; }
+      .intro { font-size: 16px; }
+      .meta { margin-bottom: 18px; }
+      .size-overview { grid-template-columns: 1fr; gap: 20px; margin-bottom: 28px; }
+      .size-overview strong { font-size: 22px; margin-bottom: 8px; }
+      .count-table .share { padding-left: 10px; }
+      .count-table .number { font-size: 16px; }
+      .count-table .part { font-size: 13px; }
+      .share-inner { gap: 8px; }
+      .count-table th { padding-inline: 8px; font-size: 11px; }
+      .count-table td { padding: 15px 8px; }
+      .count-table .total .number { font-size: 21px; }
+      .count-note { padding: 18px; }
+      .language-row, .stack-layer { grid-template-columns: 1fr; gap: 12px; }
+      .language-row { padding-block: 20px; }
+      .layer-label p { max-width: 62ch; margin-top: 8px; margin-bottom: 16px; }
+      .library dt { flex-wrap: wrap; gap: 2px 16px; }
+      .source-list { grid-template-columns: 1fr; }
+      .inventory th:nth-child(2), .inventory td:nth-child(2) { display: none; }
+      .inventory td, .inventory th { padding-inline: 6px; }
+      .footer-inner { display: block; }
+      .footer-inner p + p { margin-top: 8px; }
+    }
+    @media (max-width: 350px) {
+      h1 { font-size: 36px; }
+      .track { display: none; }
+      .count-table .share { width: 22%; }
+      .share-inner { justify-content: flex-end; }
+      .count-table .part { width: 48%; }
+      .topnav { gap: 8px; font-size: 11px; }
+      .button { padding-inline: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .button { transition: none; } .button:active { transform: none; } }
+    @media print {
+      @page { size: A4; margin: 16mm; }
+      body { font-size: 10pt; }
+      .container { width: 100%; }
+      .topnav, .actions, .action-status, .skip-link, .inventory-details { display: none !important; }
+      .topbar-inner { min-height: 40px; padding: 0; }
+      .hero { padding-block: 28px; gap: 32px; grid-template-columns: 1.4fr 1fr; }
+      h1 { font-size: 32pt; } h2 { font-size: 22pt; }
+      .intro { font-size: 11pt; }
+      section { padding-block: 28px; }
+      .section-heading { margin-bottom: 20px; }
+      .stack-layer, .language-row { grid-template-columns: 150px 1fr; gap: 24px; }
+      .stack-layer { margin-top: 26px; }
+      .library, .language-row, .count-table tr, .ml-section li { break-inside: avoid; }
+      .count-table .scope { display: table-cell; }
+      .count-table th, .count-table td { padding-block: 8px; }
+      .count-table .number { font-size: 12pt; }
+      .count-table .share { display: none; }
+      .count-table .total .number { font-size: 16pt; }
+      .ml-section, .method-layout { grid-template-columns: 1fr; gap: 24px; }
+      h2, h3 { break-after: avoid; }
+      a { text-decoration: none; }
+      footer { padding-block: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">К содержимому</a>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="#main">AirCheck<span>Технический обзор</span></a>
+      <nav class="topnav" aria-label="Разделы отчёта">
+        <a href="#size">Объём кода</a><a href="#languages">Языки</a><a href="#stack">Стек</a><a href="#method">Методика</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="container">
+    <div class="hero">
+      <div>
+        <h1>Стек и объём<span>проекта AirCheck.</span></h1>
+        <p class="intro">Система контроля качества воздуха: веб-панель, цифровой двойник комнаты и прогноз CO₂ на 15 минут. Обзор технологий по фактическим исходникам проекта.</p>
+      </div>
+      <div class="hero-side">
+        <p class="meta">Срез репозитория · <time datetime="2026-10-15">15 октября 2026</time></p>
+        <dl>
+          <div><dt>Веб-приложение</dt><dd>Next.js + React</dd></div>
+          <div><dt>Прогноз и симуляция</dt><dd>Python</dd></div>
+          <div><dt>Хранение данных</dt><dd>PostgreSQL</dd></div>
+          <div><dt>Запуск</dt><dd>Docker Compose</dd></div>
+        </dl>
+        <div class="actions">
+          <button class="button button-primary" id="copy-summary" type="button" hidden>Скопировать сводку</button>
+          <button class="button" id="print-report" type="button" hidden>Печать / PDF</button>
+        </div>
+        <span class="action-status" id="action-status" role="status" aria-live="polite"></span>
+      </div>
+    </div>
+
+    <section class="size-section" id="size" aria-labelledby="size-title">
+      <div class="section-heading">
+        <h2 id="size-title">Масштаб в строках</h2>
+        <p>Исходники приложения, тесты и служебные скрипты. Сторонние зависимости и результаты сборки исключены.</p>
+      </div>
+      <div class="size-overview">
+        <p><strong>Более 41 000 строк кода</strong>Расчётная оценка — <b>41 406</b> непустых строк без комментариев. Вместе с конфигурацией — <b>42 076</b> строк в 277 файлах.</p>
+        <p><strong>Из них 28 136 — продуктовый код</strong><span class="sub">Это фронтенд, бэкенд, ML и симуляторы. Тесты вынесены отдельно, чтобы было видно размер самой системы.</span></p>
+      </div>
+      <table class="count-table">
+        <caption hidden>Распределение строк кода по частям проекта. Доли рассчитаны от 41 406 строк.</caption>
+        <thead><tr><th scope="col">Часть проекта</th><th class="scope" scope="col">Что входит</th><th scope="col" class="number">Строки</th><th scope="col" class="share">Доля кода</th></tr></thead>
+        <tbody>
+          <tr><td class="part">Фронтенд</td><td class="scope">React-компоненты, страницы, 3D-сцена, CSS</td><td class="number">17 754</td><td class="share"><div class="share-inner"><span class="track" aria-hidden="true"><span style="--share:42.9%"></span></span><span class="share-label">42,9%</span></div></td></tr>
+          <tr><td class="part">Бэкенд</td><td class="scope">API Next.js, серверная логика, SQL-миграции</td><td class="number">5 963</td><td class="share"><div class="share-inner"><span class="track" aria-hidden="true"><span style="--share:14.4%"></span></span><span class="share-label">14,4%</span></div></td></tr>
+          <tr><td class="part">ML-часть</td><td class="scope">Признаки, обучение, оценка, прогноз, HTTP-сервис</td><td class="number">672</td><td class="share"><div class="share-inner"><span class="track" aria-hidden="true"><span style="--share:1.6%"></span></span><span class="share-label">1,6%</span></div></td></tr>
+          <tr><td class="part">Симуляторы</td><td class="scope">Физика комнаты, устройства, телеметрия, FastAPI</td><td class="number">3 747</td><td class="share"><div class="share-inner"><span class="track" aria-hidden="true"><span style="--share:9.0%"></span></span><span class="share-label">9,0%</span></div></td></tr>
+          <tr class="subtotal"><td class="part">Продуктовый код</td><td class="scope">151 файл</td><td class="number">28 136</td><td class="share"></td></tr>
+          <tr><td class="part">Тесты</td><td class="scope">Unit, UI, API, БД, интеграционные и браузерные</td><td class="number">13 001</td><td class="share"><div class="share-inner"><span class="track" aria-hidden="true"><span style="--share:31.4%"></span></span><span class="share-label">31,4%</span></div></td></tr>
+          <tr><td class="part">Утилиты</td><td class="scope">Управление владельцем, запуск и настройки проверок</td><td class="number">269</td><td class="share"><div class="share-inner"><span class="track" aria-hidden="true"><span style="--share:0.6%"></span></span><span class="share-label">0,6%</span></div></td></tr>
+        </tbody>
+        <tfoot><tr class="total"><td class="part">Весь код</td><td class="scope">253 файла</td><td class="number">41 406</td><td class="share">100%</td></tr></tfoot>
+      </table>
+      <div class="count-note">
+        <p><strong>Дополнительно: 670 строк конфигурации в 24 файлах.</strong> Dockerfile, Compose, Caddyfile, TOML, JSON-манифесты, requirements, CI и pytest.ini. Полный учитываемый объём: <strong>42 076 строк</strong>; с пустыми строками и комментариями — 47 224 физические строки.</p>
+        <p>Во фронтенде: 9 690 строк TS/TSX и 8 064 строки CSS. Веб-3D входит во фронтенд: 2 733 строки. В Python-симуляторах: 3 342 строки общего ядра и 405 строк генератора датчиков. ML-сервис выделен в собственную категорию и повторно в бэкенде не учитывается.</p>
+      </div>
+    </section>
+
+    <section id="languages" aria-labelledby="languages-title">
+      <div class="section-heading"><h2 id="languages-title">Языки и форматы</h2><p>TSX — синтаксис TypeScript с JSX. HTML и CSS отвечают за разметку и представление.</p></div>
+      <div class="language-row"><div><h3>TypeScript</h3><small>22 881 строка · включая TSX</small></div><p>Основной язык веб-приложения: React-интерфейс, App Router, API, серверные сервисы, типы данных и тесты. Включён строгий режим TypeScript. Цель компиляции — <code>ES2022</code>.</p></div>
+      <div class="language-row"><div><h3>Python</h3><small>9 309 строк · включая тесты</small></div><p>Обучение и применение ML-моделей, физическая модель комнаты, виртуальные датчики и исполнительные устройства, сетевой сервис симулятора, интеграционные проверки.</p></div>
+      <div class="language-row"><div><h3>JavaScript</h3><small>784 строки · файлы .mjs</small></div><p>Скрипты запуска и управления владельцем, конфигурация Next.js и проверочный модуль доступа к базе данных.</p></div>
+      <div class="language-row"><div><h3>SQL</h3><small>320 строк · 11 миграций</small></div><p>Схема PostgreSQL, таблицы измерений, прогнозов, команд, авторизации, истории и уведомлений; индексы и изменения структуры данных. SQL внутри TypeScript относится к строкам TypeScript.</p></div>
+      <div class="language-row"><div><h3>PowerShell</h3><small>48 строк · служебный скрипт</small></div><p>Windows-обёртка для управления учётной записью владельца: <code>frontend/scripts/manage-owner.ps1</code>.</p></div>
+      <div class="language-row"><div><h3>HTML / JSX и CSS</h3><small>CSS: 8 064 строки</small></div><p>HTML-разметка интерфейса задаётся JSX в React-компонентах и уже учтена в TSX. Стили написаны обычным CSS с custom properties, медиазапросами и общими компонентными правилами.</p></div>
+      <div class="language-row"><div><h3>Конфигурационные форматы</h3><small>Отдельно от программного кода</small></div><p>JSON — пакеты и настройки TypeScript; YAML — Docker Compose и GitHub Actions; TOML — параметры симуляции; INI — pytest. Также используются Dockerfile, Caddyfile, requirements.txt и команды Shell внутри Docker/CI.</p></div>
+    </section>
+
+    <section id="stack" aria-labelledby="stack-title">
+      <div class="section-heading"><h2 id="stack-title">Технологии по слоям</h2><p>JS-версии взяты из package-lock.json. Для Python указаны диапазоны из requirements, а для контейнеров — теги образов.</p></div>
+      <p class="stack-lead">Веб-интерфейс и основной API работают в одном Next.js-приложении. Python-сервисы отвечают за прогноз и симуляцию, PostgreSQL хранит состояние и историю.</p>
+
+      <article class="stack-layer">
+        <div class="layer-label"><h3>Веб-интерфейс</h3><p>Панель воздуха, история, настройки, аккаунт и интерактивная 3D-комната.</p></div>
+        <dl class="libraries">
+          <div class="library"><dt>React и React DOM <span class="version">19.2.8</span></dt><dd>Компоненты, состояние, хуки и отрисовка интерфейса.</dd></div>
+          <div class="library"><dt>Next.js · App Router <span class="version">15.5.25</span></dt><dd>Страницы и маршрутизация, серверный рендеринг, сборка и оптимизация ресурсов. Развёртывание в режиме <code>standalone</code>.</dd></div>
+          <div class="library"><dt>TypeScript <span class="version">5.9.3</span></dt><dd>Типизация клиентской и серверной логики, компилятор <code>tsc</code>.</dd></div>
+          <div class="library"><dt>Apache ECharts <span class="version">6.1.0</span></dt><dd>Графики CO₂ и температуры, tooltip, временная ось, панорамирование и масштабирование; CanvasRenderer.</dd></div>
+          <div class="library"><dt>Three.js <span class="version">0.186.1</span></dt><dd>WebGL-геометрия комнаты, оборудования, воздушных потоков и проводки.</dd></div>
+          <div class="library"><dt>React Three Fiber <span class="version">9.8.1</span></dt><dd><code>@react-three/fiber</code> связывает React-компоненты со сценой Three.js.</dd></div>
+          <div class="library"><dt>React Three Drei <span class="version">10.7.9</span></dt><dd><code>@react-three/drei</code> предоставляет OrbitControls, текст и вспомогательные 3D-компоненты. В коде также импортируется тип OrbitControls из транзитивной <code>three-stdlib 2.36.1</code>.</dd></div>
+          <div class="library"><dt>CSS custom properties <span class="version">Нативный CSS</span></dt><dd>Единые токены цвета, типографики, отступов и состояний из <code>DESIGN-cal.md</code> и <code>frontend/css/styles.css</code>. PostCSS 8.5.28 зафиксирован через npm override для цепочки сборки.</dd></div>
+        </dl>
+      </article>
+
+      <article class="stack-layer">
+        <div class="layer-label"><h3>Сервер и данные</h3><p>Показания, прогнозы, рекомендации, управление климатом, роли и уведомления.</p></div>
+        <dl class="libraries">
+          <div class="library"><dt>Node.js + Next.js Route Handlers <span class="version">Node 22 · Next 15.5.25</span></dt><dd>Node 22 в production Dockerfile; Node 24 в CI. REST API реализован в <code>frontend/src/app/api</code>, бизнес-логика — в <code>frontend/src/server</code>. Эти файлы отнесены к бэкенду.</dd></div>
+          <div class="library"><dt>Better Auth <span class="version">1.7.6</span></dt><dd>Вход по email/паролю и сессии в PostgreSQL. Проверка ролей гостя, пользователя, оператора и владельца реализована в серверных модулях AirCheck.</dd></div>
+          <div class="library"><dt>PostgreSQL + node-postgres <span class="version">PostgreSQL 16 · pg 8.23.0</span></dt><dd>Постоянное хранение, пул соединений <code>pg</code>, прямые SQL-запросы и миграции. Измерения, прогнозы, состояния устройств, команды, аккаунты, история и журнал уведомлений.</dd></div>
+          <div class="library"><dt>HTTP / JSON и Server-Sent Events <span class="version">REST · SSE</span></dt><dd>Обмен показаниями и командами через API; обновления состояния симулятора через SSE и браузерный EventSource. В коде используются встроенные Fetch API и Node.js crypto.</dd></div>
+          <div class="library"><dt>Telegram Bot API <span class="version">HTTP-интеграция</span></dt><dd>Отправка настроенных уведомлений через серверный fetch. Токен бота шифруется средствами Node.js: AES-256-GCM.</dd></div>
+        </dl>
+      </article>
+
+      <article class="stack-layer">
+        <div class="layer-label"><h3>ML и симуляция</h3><p>Два самостоятельных Python-направления: прогноз CO₂ и физическая модель помещения.</p></div>
+        <dl class="libraries">
+          <div class="library"><dt>Python <span class="version">3.12 · Docker</span></dt><dd>Общий runtime для ML-сервиса, headless-симулятора и генератора датчиков.</dd></div>
+          <div class="library"><dt>scikit-learn <span class="version">≥ 1.4, &lt; 2</span></dt><dd>LinearRegression и RandomForestRegressor; сравнение моделей по RMSE и MAE.</dd></div>
+          <div class="library"><dt>NumPy <span class="version">≥ 1.26.4, &lt; 2.3</span></dt><dd>Числовые массивы признаков и целей, подготовка данных для обучения и вычисление RMSE.</dd></div>
+          <div class="library"><dt>Joblib <span class="version">≥ 1.4, &lt; 2</span></dt><dd>Сохранение и загрузка обученной модели в <code>model.joblib</code>.</dd></div>
+          <div class="library"><dt>Python http.server <span class="version">Стандартная библиотека</span></dt><dd>HTTP-сервис прогнозирования и управления обучением в <code>ml-service/app.py</code>; ThreadingHTTPServer и BaseHTTPRequestHandler.</dd></div>
+          <div class="library"><dt>FastAPI + Uvicorn <span class="version">≥ 0.115, &lt; 1 · ≥ 0.34, &lt; 1</span></dt><dd>Внутренний API Python-симулятора: состояние, действия и SSE-поток. Запуск через <code>uvicorn[standard]</code>.</dd></div>
+          <div class="library"><dt>Simulation Core / Device Layer <span class="version">Собственные модули</span></dt><dd>Физика комнаты, шаг времени, виртуальные датчики, окно, вентиляторы, сценарии и обмен командами. Используются dataclasses, threading, asyncio, tomllib, logging и urllib из стандартной библиотеки.</dd></div>
+        </dl>
+      </article>
+
+      <article class="stack-layer">
+        <div class="layer-label"><h3>Среда и проверки</h3><p>Контейнеризация, локальный HTTPS, воспроизводимая установка и тестовые инструменты.</p></div>
+        <dl class="libraries">
+          <div class="library"><dt>Docker + Docker Compose <span class="version">Контейнерное окружение</span></dt><dd>PostgreSQL, Next.js, ML, web-simulator и HTTPS-прокси. Дополнительные Compose-профили: генератор данных <code>demo</code> и CLI владельца <code>maintenance</code>; данные и модели сохраняются в volumes.</dd></div>
+          <div class="library"><dt>Caddy <span class="version">2-alpine</span></dt><dd>Reverse proxy и HTTPS с внутренним центром сертификации для локального домена.</dd></div>
+          <div class="library"><dt>npm, pip, Git и GitHub Actions <span class="version">Инструменты проекта</span></dt><dd>JS-зависимости фиксируются package-lock.json и устанавливаются через <code>npm ci</code>; Python-зависимости заданы requirements. CI запускает typecheck, unit-тесты, сборку и браузерный сценарий.</dd></div>
+          <div class="library"><dt>Vitest <span class="version">3.2.7</span></dt><dd>Unit- и компонентные проверки TypeScript. Скрипты <code>lint</code> и <code>typecheck</code> в текущем package.json выполняют <code>tsc --noEmit</code>.</dd></div>
+          <div class="library"><dt>Testing Library + jsdom <span class="version">React 16.3.3 · jsdom 30.1.1</span></dt><dd><code>@testing-library/react 16.3.3</code>, <code>@testing-library/dom 10.4.2</code> и <code>@testing-library/user-event 14.6.7</code>: DOM-окружение и пользовательские взаимодействия в UI-тестах.</dd></div>
+          <div class="library"><dt>Playwright <span class="version">@playwright/test 1.58.2</span></dt><dd>Проверки реального браузера и сквозных пользовательских сценариев, запуск через Python-оркестратор <code>tests/browser/run.py</code>.</dd></div>
+          <div class="library"><dt>pytest + HTTPX <span class="version">≥ 8, &lt; 9 · ≥ 0.28, &lt; 1</span></dt><dd>Тесты Python-модулей, ML-контрактов, физики и сетевого сервиса; HTTPX используется для проверки ASGI/FastAPI.</dd></div>
+          <div class="library"><dt>Пакеты типов TypeScript <span class="version">Dev-зависимости</span></dt><dd><code>@types/node 22.20.1</code>, <code>@types/pg 8.23.1</code>, <code>@types/react 19.2.18</code>, <code>@types/react-dom 19.2.7</code>.</dd></div>
+        </dl>
+      </article>
+      <p class="fine">Перечень охватывает прямые зависимости приложения и основных тестовых окружений. Транзитивные пакеты npm/pip целиком не перечисляются. Версии из lockfile описывают зафиксированный стек репозитория; фактические версии Python-пакетов в запущенных контейнерах в этом обзоре не проверялись.</p>
+    </section>
+
+    <section id="ml" class="ml-section" aria-labelledby="ml-title">
+      <div>
+        <h2 id="ml-title">Что именно делает ML</h2>
+        <p>Модель предсказывает концентрацию CO₂ через <strong>15 минут</strong> по текущим показаниям и недавнему изменению CO₂. В ML-категорию включён весь сервис: подготовка признаков, обучение, оценка, хранение модели и выдача прогноза.</p>
+        <p>Обучение сравнивает линейную регрессию и случайный лес из 200 деревьев с глубиной до 12. Выбирается модель с минимальным RMSE; MAE используется как второй критерий.</p>
+        <div class="features"><p><strong>11 признаков</strong></p><code>current_co2, indoor_temperature, indoor_humidity, indoor_pm25, outdoor_temperature, outdoor_humidity, outdoor_pm25, window_open, co2_change_5min, co2_change_10min, hour</code></div>
+      </div>
+      <div>
+        <ol>
+          <li><strong>История измерений</strong>Получение JSON из API или файла, выбор источника real / simulator / unknown.</li>
+          <li><strong>Датасет и временное разделение</strong>Признаки и целевой CO₂ через 15 минут. Разделение примерно 80/20 по времени; обучающие строки, чьи цели заходят в тестовый период, исключаются.</li>
+          <li><strong>Обучение и оценка</strong>LinearRegression и RandomForestRegressor, расчёт MAE/RMSE, сохранение выбранного артефакта и метаданных.</li>
+          <li><strong>Применение и управление моделью</strong>HTTP-прогноз, фоновое обучение, замена проверенной модели и возможность отката к предыдущему артефакту.</li>
+        </ol>
+        <p class="fine">Физическая симуляция помещения и правила управления вентиляцией выделены отдельно от ML. Наличие обучающего кода подтверждено; состояние текущей модели, качество на реальных данных и успешность последнего обучения здесь не оценивались.</p>
+      </div>
+    </section>
+
+    <section id="method" aria-labelledby="method-title">
+      <div class="section-heading"><h2 id="method-title">Как получены цифры</h2><p>Снимок исходников <code>e958d11</code>. Оценка размера кода, а не производительности или качества системы.</p></div>
+      <div class="method-layout">
+        <div>
+          <h3>Правило подсчёта</h3>
+          <p>Взяты отслеживаемые Git файлы программных языков, CSS, SQL и конфигурации. Подсчитаны физические строки, содержащие код после удаления комментариев лексерами Pygments. Пустые строки и Python-docstring исключены; строка с кодом и комментарием считается один раз.</p>
+          <p>Это приблизительная SLOC-оценка: переносы строк, форматирование CSS, JSX и многострочные литералы влияют на результат. В числах нет оценки трудозатрат или числа функций.</p>
+          <p>Отчёт автономный: стили, поведение и результаты подсчёта находятся в одном HTML-файле. Сам этот отчёт в снимок кода не включён.</p>
+        </div>
+        <div>
+          <h3>Границы категорий</h3>
+          <ul>
+            <li><strong>Фронтенд:</strong> страницы, компоненты, клиентские и общие UI-модули, CSS. HTML/JSX учитывается внутри TSX.</li>
+            <li><strong>Бэкенд:</strong> <code>src/server</code>, <code>src/app/api</code>, healthz, instrumentation и SQL-миграции. Next.js server components, формирующие UI, оставлены во фронтенде.</li>
+            <li><strong>ML и симуляция:</strong> исходники соответствующих Python-каталогов; тесты из них перенесены в общую категорию тестов.</li>
+            <li><strong>Исключено:</strong> node_modules, .venv, .tools, .next, build/dist, lockfile, generated next-env.d.ts, данные и модели, документация, docs, outputs, .codex-pptx-build, CAD и медиаресурсы.</li>
+          </ul>
+        </div>
+      </div>
+      <details>
+        <summary>Исходные файлы, подтверждающие стек</summary>
+        <ul class="source-list">
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/frontend/package.json"><code>frontend/package.json</code></a><small>Прямые JS-зависимости и команды разработки.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/frontend/package-lock.json"><code>frontend/package-lock.json</code></a><small>Зафиксированные версии JS-пакетов.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/ml-service/requirements.txt"><code>ml-service/requirements.txt</code></a><small>NumPy, scikit-learn, Joblib и pytest.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/ml-service/modeling.py"><code>ml-service/modeling.py</code></a><small>Алгоритмы, временное разделение и метрики.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/ml-service/app.py"><code>ml-service/app.py</code></a><small>HTTP-сервер ML на стандартной библиотеке Python.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/aircheck_simulator_3d/requirements-headless.txt"><code>aircheck_simulator_3d/requirements-headless.txt</code></a><small>FastAPI и Uvicorn для Python-симулятора.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/docker-compose.yml"><code>docker-compose.yml</code></a><small>Сервисы, PostgreSQL, Caddy и volumes.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/frontend/src/server/auth.ts"><code>frontend/src/server/auth.ts</code></a><small>Better Auth и PostgreSQL-сессии.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/frontend/src/server/telegram.ts"><code>frontend/src/server/telegram.ts</code></a><small>Telegram-интеграция и шифрование токена.</small></li>
+          <li><a href="https://github.com/Garun-mp4/air_check_system/blob/e958d11f6ba82deb8eebe3a118a65c7be5184afc/.github/workflows/browser.yml"><code>.github/workflows/browser.yml</code></a><small>Окружение и последовательность проверок CI.</small></li>
+        </ul>
+        <p class="fine">Ссылки ведут к исходному коммиту на GitHub; для закрытого репозитория потребуется доступ к нему. Все выводы сделаны по локальным файлам этого среза.</p>
+      </details>
+      <details class="inventory-details">
+        <summary>Ведомость подсчёта · 277 файлов</summary>
+        <p class="fine" style="margin-top:0;margin-bottom:16px">Для проверки состава и суммы. «Строки» — оценка без пустых строк, комментариев и Python-docstring.</p>
+        <div class="inventory-wrap" tabindex="0" role="region" aria-label="Прокручиваемая ведомость файлов">
+          <table class="inventory"><thead><tr><th scope="col">Файл</th><th scope="col">Категория</th><th scope="col">Строки</th></tr></thead><tbody id="inventory-body"><tr><td>.github/workflows/browser.yml</td><td>Конфигурация</td><td>30</td></tr>
+<tr><td>aircheck_simulator_3d/Dockerfile.headless</td><td>Конфигурация</td><td>9</td></tr>
+<tr><td>aircheck_simulator_3d/__init__.py</td><td>Симуляция</td><td>1</td></tr>
+<tr><td>aircheck_simulator_3d/app/__init__.py</td><td>Симуляция</td><td>0</td></tr>
+<tr><td>aircheck_simulator_3d/app/automatic_demo.py</td><td>Симуляция</td><td>112</td></tr>
+<tr><td>aircheck_simulator_3d/app/config.py</td><td>Симуляция</td><td>781</td></tr>
+<tr><td>aircheck_simulator_3d/app/coordinator.py</td><td>Симуляция</td><td>399</td></tr>
+<tr><td>aircheck_simulator_3d/app/developer_controls.py</td><td>Симуляция</td><td>81</td></tr>
+<tr><td>aircheck_simulator_3d/app/logging_setup.py</td><td>Симуляция</td><td>40</td></tr>
+<tr><td>aircheck_simulator_3d/app/scenarios.py</td><td>Симуляция</td><td>69</td></tr>
+<tr><td>aircheck_simulator_3d/app/stand_layout.py</td><td>Симуляция</td><td>67</td></tr>
+<tr><td>aircheck_simulator_3d/config/backend.toml</td><td>Конфигурация</td><td>10</td></tr>
+<tr><td>aircheck_simulator_3d/config/camera.toml</td><td>Конфигурация</td><td>15</td></tr>
+<tr><td>aircheck_simulator_3d/config/demo.toml</td><td>Конфигурация</td><td>181</td></tr>
+<tr><td>aircheck_simulator_3d/config/devices.toml</td><td>Конфигурация</td><td>37</td></tr>
+<tr><td>aircheck_simulator_3d/config/logging.toml</td><td>Конфигурация</td><td>5</td></tr>
+<tr><td>aircheck_simulator_3d/config/physics.toml</td><td>Конфигурация</td><td>36</td></tr>
+<tr><td>aircheck_simulator_3d/config/room.toml</td><td>Конфигурация</td><td>21</td></tr>
+<tr><td>aircheck_simulator_3d/config/scene.toml</td><td>Конфигурация</td><td>11</td></tr>
+<tr><td>aircheck_simulator_3d/devices/__init__.py</td><td>Симуляция</td><td>0</td></tr>
+<tr><td>aircheck_simulator_3d/devices/command_executor.py</td><td>Симуляция</td><td>94</td></tr>
+<tr><td>aircheck_simulator_3d/devices/device_layer.py</td><td>Симуляция</td><td>95</td></tr>
+<tr><td>aircheck_simulator_3d/devices/models.py</td><td>Симуляция</td><td>65</td></tr>
+<tr><td>aircheck_simulator_3d/devices/presentation_state.py</td><td>Симуляция</td><td>40</td></tr>
+<tr><td>aircheck_simulator_3d/devices/window_actuator.py</td><td>Симуляция</td><td>74</td></tr>
+<tr><td>aircheck_simulator_3d/networking/__init__.py</td><td>Симуляция</td><td>20</td></tr>
+<tr><td>aircheck_simulator_3d/networking/contracts.py</td><td>Симуляция</td><td>164</td></tr>
+<tr><td>aircheck_simulator_3d/networking/http_backend.py</td><td>Симуляция</td><td>92</td></tr>
+<tr><td>aircheck_simulator_3d/networking/process_lease.py</td><td>Симуляция</td><td>59</td></tr>
+<tr><td>aircheck_simulator_3d/networking/web_service.py</td><td>Симуляция</td><td>101</td></tr>
+<tr><td>aircheck_simulator_3d/networking/workers.py</td><td>Симуляция</td><td>370</td></tr>
+<tr><td>aircheck_simulator_3d/requirements-dev.txt</td><td>Конфигурация</td><td>1</td></tr>
+<tr><td>aircheck_simulator_3d/requirements-headless.txt</td><td>Конфигурация</td><td>2</td></tr>
+<tr><td>aircheck_simulator_3d/requirements-test.txt</td><td>Конфигурация</td><td>3</td></tr>
+<tr><td>aircheck_simulator_3d/simulation/__init__.py</td><td>Симуляция</td><td>0</td></tr>
+<tr><td>aircheck_simulator_3d/simulation/clock.py</td><td>Симуляция</td><td>36</td></tr>
+<tr><td>aircheck_simulator_3d/simulation/engine.py</td><td>Симуляция</td><td>47</td></tr>
+<tr><td>aircheck_simulator_3d/simulation/factory.py</td><td>Симуляция</td><td>89</td></tr>
+<tr><td>aircheck_simulator_3d/simulation/room_model.py</td><td>Симуляция</td><td>283</td></tr>
+<tr><td>aircheck_simulator_3d/simulation/state.py</td><td>Симуляция</td><td>113</td></tr>
+<tr><td>aircheck_simulator_3d/simulation/virtual_sensors.py</td><td>Симуляция</td><td>50</td></tr>
+<tr><td>aircheck_simulator_3d/tests/__init__.py</td><td>Тесты</td><td>0</td></tr>
+<tr><td>aircheck_simulator_3d/tests/support.py</td><td>Тесты</td><td>19</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_clock.py</td><td>Тесты</td><td>50</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_command_executor.py</td><td>Тесты</td><td>71</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_config.py</td><td>Тесты</td><td>70</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_contracts.py</td><td>Тесты</td><td>78</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_device_layer.py</td><td>Тесты</td><td>72</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_devices_block09.py</td><td>Тесты</td><td>285</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_logging_setup.py</td><td>Тесты</td><td>21</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_long_simulation.py</td><td>Тесты</td><td>59</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_milestone6.py</td><td>Тесты</td><td>146</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_networking.py</td><td>Тесты</td><td>367</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_physics_scenarios.py</td><td>Тесты</td><td>117</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_process_lease.py</td><td>Тесты</td><td>21</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_room_model.py</td><td>Тесты</td><td>210</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_simulation_time_invariance.py</td><td>Тесты</td><td>91</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_stand_layout.py</td><td>Тесты</td><td>26</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_state.py</td><td>Тесты</td><td>31</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_web_coordinator.py</td><td>Тесты</td><td>63</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_web_network_boundaries.py</td><td>Тесты</td><td>363</td></tr>
+<tr><td>aircheck_simulator_3d/tests/test_web_service.py</td><td>Тесты</td><td>94</td></tr>
+<tr><td>database/migrations/001_init.sql</td><td>Бэкенд</td><td>35</td></tr>
+<tr><td>database/migrations/002_controls.sql</td><td>Бэкенд</td><td>32</td></tr>
+<tr><td>database/migrations/003_retention_indexes.sql</td><td>Бэкенд</td><td>5</td></tr>
+<tr><td>database/migrations/004_node_settings.sql</td><td>Бэкенд</td><td>23</td></tr>
+<tr><td>database/migrations/005_auth.sql</td><td>Бэкенд</td><td>69</td></tr>
+<tr><td>database/migrations/006_command_lifecycle.sql</td><td>Бэкенд</td><td>12</td></tr>
+<tr><td>database/migrations/007_outdoor_policy.sql</td><td>Бэкенд</td><td>3</td></tr>
+<tr><td>database/migrations/008_prediction_provenance.sql</td><td>Бэкенд</td><td>8</td></tr>
+<tr><td>database/migrations/009_measurement_sources.sql</td><td>Бэкенд</td><td>5</td></tr>
+<tr><td>database/migrations/010_long_term_history.sql</td><td>Бэкенд</td><td>96</td></tr>
+<tr><td>database/migrations/011_notifications.sql</td><td>Бэкенд</td><td>32</td></tr>
+<tr><td>deploy/Caddyfile</td><td>Конфигурация</td><td>5</td></tr>
+<tr><td>docker-compose.yml</td><td>Конфигурация</td><td>154</td></tr>
+<tr><td>frontend/Dockerfile</td><td>Конфигурация</td><td>30</td></tr>
+<tr><td>frontend/css/styles.css</td><td>Фронтенд</td><td>8 064</td></tr>
+<tr><td>frontend/e2e/system.spec.ts</td><td>Тесты</td><td>825</td></tr>
+<tr><td>frontend/next.config.mjs</td><td>Утилиты</td><td>7</td></tr>
+<tr><td>frontend/owner-tools/package.json</td><td>Конфигурация</td><td>9</td></tr>
+<tr><td>frontend/package.json</td><td>Конфигурация</td><td>42</td></tr>
+<tr><td>frontend/password-policy.json</td><td>Конфигурация</td><td>4</td></tr>
+<tr><td>frontend/playwright.config.ts</td><td>Утилиты</td><td>27</td></tr>
+<tr><td>frontend/scripts/manage-owner.mjs</td><td>Утилиты</td><td>139</td></tr>
+<tr><td>frontend/scripts/manage-owner.ps1</td><td>Утилиты</td><td>48</td></tr>
+<tr><td>frontend/scripts/start-standalone.mjs</td><td>Утилиты</td><td>41</td></tr>
+<tr><td>frontend/src/app/account/page.tsx</td><td>Фронтенд</td><td>5</td></tr>
+<tr><td>frontend/src/app/admin/page.tsx</td><td>Фронтенд</td><td>9</td></tr>
+<tr><td>frontend/src/app/api/admin/users/[userId]/route.ts</td><td>Бэкенд</td><td>111</td></tr>
+<tr><td>frontend/src/app/api/admin/users/route.ts</td><td>Бэкенд</td><td>66</td></tr>
+<tr><td>frontend/src/app/api/auth-authorization.test.ts</td><td>Тесты</td><td>294</td></tr>
+<tr><td>frontend/src/app/api/auth/[...all]/route.ts</td><td>Бэкенд</td><td>8</td></tr>
+<tr><td>frontend/src/app/api/auth/access/route.ts</td><td>Бэкенд</td><td>13</td></tr>
+<tr><td>frontend/src/app/api/profile/avatar/[avatarId]/route.ts</td><td>Бэкенд</td><td>38</td></tr>
+<tr><td>frontend/src/app/api/profile/avatar/route.test.ts</td><td>Тесты</td><td>173</td></tr>
+<tr><td>frontend/src/app/api/profile/avatar/route.ts</td><td>Бэкенд</td><td>120</td></tr>
+<tr><td>frontend/src/app/api/simulator/actions/route.ts</td><td>Бэкенд</td><td>35</td></tr>
+<tr><td>frontend/src/app/api/simulator/events/route.ts</td><td>Бэкенд</td><td>25</td></tr>
+<tr><td>frontend/src/app/api/simulator/simulator-authorization.test.ts</td><td>Тесты</td><td>71</td></tr>
+<tr><td>frontend/src/app/api/simulator/simulator-routes.test.ts</td><td>Тесты</td><td>118</td></tr>
+<tr><td>frontend/src/app/api/simulator/state/route.ts</td><td>Бэкенд</td><td>17</td></tr>
+<tr><td>frontend/src/app/api/v1/controls/commands/actions/route.ts</td><td>Бэкенд</td><td>66</td></tr>
+<tr><td>frontend/src/app/api/v1/controls/commands/route.ts</td><td>Бэкенд</td><td>77</td></tr>
+<tr><td>frontend/src/app/api/v1/controls/route.ts</td><td>Бэкенд</td><td>19</td></tr>
+<tr><td>frontend/src/app/api/v1/controls/state/route.ts</td><td>Бэкенд</td><td>39</td></tr>
+<tr><td>frontend/src/app/api/v1/controls/ventilation/route.ts</td><td>Бэкенд</td><td>47</td></tr>
+<tr><td>frontend/src/app/api/v1/events/route.ts</td><td>Бэкенд</td><td>37</td></tr>
+<tr><td>frontend/src/app/api/v1/history/route.ts</td><td>Бэкенд</td><td>30</td></tr>
+<tr><td>frontend/src/app/api/v1/measurements/history/route.ts</td><td>Бэкенд</td><td>26</td></tr>
+<tr><td>frontend/src/app/api/v1/measurements/latest/route.ts</td><td>Бэкенд</td><td>12</td></tr>
+<tr><td>frontend/src/app/api/v1/measurements/route.test.ts</td><td>Тесты</td><td>112</td></tr>
+<tr><td>frontend/src/app/api/v1/measurements/route.ts</td><td>Бэкенд</td><td>33</td></tr>
+<tr><td>frontend/src/app/api/v1/model/route.ts</td><td>Бэкенд</td><td>70</td></tr>
+<tr><td>frontend/src/app/api/v1/notifications/route.ts</td><td>Бэкенд</td><td>49</td></tr>
+<tr><td>frontend/src/app/api/v1/prediction/latest/route.ts</td><td>Бэкенд</td><td>12</td></tr>
+<tr><td>frontend/src/app/api/v1/read-routes.test.ts</td><td>Тесты</td><td>261</td></tr>
+<tr><td>frontend/src/app/api/v1/recommendation/route.ts</td><td>Бэкенд</td><td>12</td></tr>
+<tr><td>frontend/src/app/api/v1/settings/route.ts</td><td>Бэкенд</td><td>54</td></tr>
+<tr><td>frontend/src/app/healthz/route.ts</td><td>Бэкенд</td><td>16</td></tr>
+<tr><td>frontend/src/app/layout.tsx</td><td>Фронтенд</td><td>51</td></tr>
+<tr><td>frontend/src/app/login/page.tsx</td><td>Фронтенд</td><td>5</td></tr>
+<tr><td>frontend/src/app/page.tsx</td><td>Фронтенд</td><td>4</td></tr>
+<tr><td>frontend/src/app/simulator/page.tsx</td><td>Фронтенд</td><td>5</td></tr>
+<tr><td>frontend/src/components/AirDashboard.test.ts</td><td>Тесты</td><td>258</td></tr>
+<tr><td>frontend/src/components/AirDashboard.tsx</td><td>Фронтенд</td><td>2 650</td></tr>
+<tr><td>frontend/src/components/AirDashboard.ui.test.ts</td><td>Тесты</td><td>265</td></tr>
+<tr><td>frontend/src/components/AuthPanel.tsx</td><td>Фронтенд</td><td>108</td></tr>
+<tr><td>frontend/src/components/BrandLogo.tsx</td><td>Фронтенд</td><td>21</td></tr>
+<tr><td>frontend/src/components/Charts.test.ts</td><td>Тесты</td><td>91</td></tr>
+<tr><td>frontend/src/components/Charts.tsx</td><td>Фронтенд</td><td>1 142</td></tr>
+<tr><td>frontend/src/components/CommandHistory.tsx</td><td>Фронтенд</td><td>120</td></tr>
+<tr><td>frontend/src/components/CommandHistory.ui.test.ts</td><td>Тесты</td><td>89</td></tr>
+<tr><td>frontend/src/components/DataStatus.tsx</td><td>Фронтенд</td><td>55</td></tr>
+<tr><td>frontend/src/components/DataStatus.ui.test.ts</td><td>Тесты</td><td>42</td></tr>
+<tr><td>frontend/src/components/EventJournal.tsx</td><td>Фронтенд</td><td>119</td></tr>
+<tr><td>frontend/src/components/LongHistoryPanel.tsx</td><td>Фронтенд</td><td>225</td></tr>
+<tr><td>frontend/src/components/ModelPanel.tsx</td><td>Фронтенд</td><td>193</td></tr>
+<tr><td>frontend/src/components/NotificationPanel.tsx</td><td>Фронтенд</td><td>194</td></tr>
+<tr><td>frontend/src/components/OutdoorPolicyPanel.tsx</td><td>Фронтенд</td><td>107</td></tr>
+<tr><td>frontend/src/components/OutdoorPolicyPanel.ui.test.ts</td><td>Тесты</td><td>58</td></tr>
+<tr><td>frontend/src/components/OwnerUsers.tsx</td><td>Фронтенд</td><td>198</td></tr>
+<tr><td>frontend/src/components/OwnerUsers.ui.test.ts</td><td>Тесты</td><td>80</td></tr>
+<tr><td>frontend/src/components/SettingsPanel.ui.test.ts</td><td>Тесты</td><td>66</td></tr>
+<tr><td>frontend/src/components/auth/AccessSessionProvider.tsx</td><td>Фронтенд</td><td>94</td></tr>
+<tr><td>frontend/src/components/auth/AccountMenu.tsx</td><td>Фронтенд</td><td>89</td></tr>
+<tr><td>frontend/src/components/auth/AccountMenu.ui.test.ts</td><td>Тесты</td><td>197</td></tr>
+<tr><td>frontend/src/components/auth/AccountPage.tsx</td><td>Фронтенд</td><td>348</td></tr>
+<tr><td>frontend/src/components/auth/AccountSignOutDialog.tsx</td><td>Фронтенд</td><td>61</td></tr>
+<tr><td>frontend/src/components/auth/AvatarCropDialog.tsx</td><td>Фронтенд</td><td>248</td></tr>
+<tr><td>frontend/src/components/auth/AvatarCropDialog.ui.test.ts</td><td>Тесты</td><td>54</td></tr>
+<tr><td>frontend/src/components/auth/PasswordInput.tsx</td><td>Фронтенд</td><td>52</td></tr>
+<tr><td>frontend/src/components/auth/ProfileAvatarEditor.tsx</td><td>Фронтенд</td><td>147</td></tr>
+<tr><td>frontend/src/components/auth/ProfileAvatarEditor.ui.test.ts</td><td>Тесты</td><td>83</td></tr>
+<tr><td>frontend/src/components/auth/UserAvatar.tsx</td><td>Фронтенд</td><td>32</td></tr>
+<tr><td>frontend/src/components/auth/UtilityHeader.tsx</td><td>Фронтенд</td><td>27</td></tr>
+<tr><td>frontend/src/components/auth/auth-ui.test.ts</td><td>Тесты</td><td>312</td></tr>
+<tr><td>frontend/src/components/simulator/SceneLoader.tsx</td><td>Фронтенд</td><td>4</td></tr>
+<tr><td>frontend/src/components/simulator/SimulatorApp.tsx</td><td>Фронтенд</td><td>373</td></tr>
+<tr><td>frontend/src/components/simulator/scene/Airflow.tsx</td><td>Фронтенд</td><td>66</td></tr>
+<tr><td>frontend/src/components/simulator/scene/CameraRig.tsx</td><td>Фронтенд</td><td>113</td></tr>
+<tr><td>frontend/src/components/simulator/scene/FanAssembly.tsx</td><td>Фронтенд</td><td>196</td></tr>
+<tr><td>frontend/src/components/simulator/scene/Pickable.tsx</td><td>Фронтенд</td><td>64</td></tr>
+<tr><td>frontend/src/components/simulator/scene/RoomShell.tsx</td><td>Фронтенд</td><td>135</td></tr>
+<tr><td>frontend/src/components/simulator/scene/SceneCanvas.tsx</td><td>Фронтенд</td><td>72</td></tr>
+<tr><td>frontend/src/components/simulator/scene/SensorsAndNodes.tsx</td><td>Фронтенд</td><td>24</td></tr>
+<tr><td>frontend/src/components/simulator/scene/WindowAssembly.tsx</td><td>Фронтенд</td><td>204</td></tr>
+<tr><td>frontend/src/components/simulator/scene/Wiring.tsx</td><td>Фронтенд</td><td>109</td></tr>
+<tr><td>frontend/src/components/simulator/scene/cameraInput.test.ts</td><td>Тесты</td><td>63</td></tr>
+<tr><td>frontend/src/components/simulator/scene/cameraInput.ts</td><td>Фронтенд</td><td>41</td></tr>
+<tr><td>frontend/src/components/simulator/scene/cameraTransition.test.ts</td><td>Тесты</td><td>43</td></tr>
+<tr><td>frontend/src/components/simulator/scene/cameraTransition.ts</td><td>Фронтенд</td><td>37</td></tr>
+<tr><td>frontend/src/components/simulator/scene/models/ControlCabinet.tsx</td><td>Фронтенд</td><td>236</td></tr>
+<tr><td>frontend/src/components/simulator/scene/models/WallSensorNodes.tsx</td><td>Фронтенд</td><td>203</td></tr>
+<tr><td>frontend/src/components/simulator/scene/models/geometry.test.ts</td><td>Тесты</td><td>62</td></tr>
+<tr><td>frontend/src/components/simulator/scene/models/geometry.ts</td><td>Фронтенд</td><td>216</td></tr>
+<tr><td>frontend/src/components/simulator/scene/models/parts.tsx</td><td>Фронтенд</td><td>130</td></tr>
+<tr><td>frontend/src/components/simulator/scene/sceneInteraction.test.ts</td><td>Тесты</td><td>155</td></tr>
+<tr><td>frontend/src/components/simulator/scene/snapshotScene.test.ts</td><td>Тесты</td><td>300</td></tr>
+<tr><td>frontend/src/components/simulator/scene/wireCurves.test.ts</td><td>Тесты</td><td>27</td></tr>
+<tr><td>frontend/src/components/simulator/scene/wireCurves.ts</td><td>Фронтенд</td><td>40</td></tr>
+<tr><td>frontend/src/components/simulator/scene/wiringRoutes.test.ts</td><td>Тесты</td><td>231</td></tr>
+<tr><td>frontend/src/components/simulator/scene/wiringRoutes.ts</td><td>Фронтенд</td><td>270</td></tr>
+<tr><td>frontend/src/components/simulator/types.ts</td><td>Фронтенд</td><td>141</td></tr>
+<tr><td>frontend/src/components/simulator/useSimulatorState.ts</td><td>Фронтенд</td><td>54</td></tr>
+<tr><td>frontend/src/instrumentation.ts</td><td>Бэкенд</td><td>10</td></tr>
+<tr><td>frontend/src/lib/access-types.test.ts</td><td>Тесты</td><td>22</td></tr>
+<tr><td>frontend/src/lib/access-types.ts</td><td>Фронтенд</td><td>34</td></tr>
+<tr><td>frontend/src/lib/air-quality.test.ts</td><td>Тесты</td><td>21</td></tr>
+<tr><td>frontend/src/lib/air-quality.ts</td><td>Фронтенд</td><td>72</td></tr>
+<tr><td>frontend/src/lib/auth-errors.test.ts</td><td>Тесты</td><td>17</td></tr>
+<tr><td>frontend/src/lib/auth-errors.ts</td><td>Фронтенд</td><td>18</td></tr>
+<tr><td>frontend/src/lib/auth-navigation-security.test.ts</td><td>Тесты</td><td>52</td></tr>
+<tr><td>frontend/src/lib/auth-navigation.test.ts</td><td>Тесты</td><td>15</td></tr>
+<tr><td>frontend/src/lib/auth-navigation.ts</td><td>Фронтенд</td><td>24</td></tr>
+<tr><td>frontend/src/lib/avatar-image.test.ts</td><td>Тесты</td><td>79</td></tr>
+<tr><td>frontend/src/lib/avatar-image.ts</td><td>Фронтенд</td><td>155</td></tr>
+<tr><td>frontend/src/lib/client-api.ts</td><td>Фронтенд</td><td>350</td></tr>
+<tr><td>frontend/src/server/access-session.test.ts</td><td>Тесты</td><td>151</td></tr>
+<tr><td>frontend/src/server/access.test.ts</td><td>Тесты</td><td>73</td></tr>
+<tr><td>frontend/src/server/access.ts</td><td>Бэкенд</td><td>122</td></tr>
+<tr><td>frontend/src/server/api-contracts.test.ts</td><td>Тесты</td><td>166</td></tr>
+<tr><td>frontend/src/server/api.ts</td><td>Бэкенд</td><td>108</td></tr>
+<tr><td>frontend/src/server/auth-policy.test.ts</td><td>Тесты</td><td>106</td></tr>
+<tr><td>frontend/src/server/auth.ts</td><td>Бэкенд</td><td>80</td></tr>
+<tr><td>frontend/src/server/avatar-storage.test.ts</td><td>Тесты</td><td>54</td></tr>
+<tr><td>frontend/src/server/avatar-storage.ts</td><td>Бэкенд</td><td>60</td></tr>
+<tr><td>frontend/src/server/command-lifecycle.test.ts</td><td>Тесты</td><td>131</td></tr>
+<tr><td>frontend/src/server/config.ts</td><td>Бэкенд</td><td>83</td></tr>
+<tr><td>frontend/src/server/control-service.test.ts</td><td>Тесты</td><td>200</td></tr>
+<tr><td>frontend/src/server/control-service.ts</td><td>Бэкенд</td><td>408</td></tr>
+<tr><td>frontend/src/server/data-source.test.ts</td><td>Тесты</td><td>24</td></tr>
+<tr><td>frontend/src/server/features.ml-contract.test.ts</td><td>Тесты</td><td>133</td></tr>
+<tr><td>frontend/src/server/features.ts</td><td>Бэкенд</td><td>113</td></tr>
+<tr><td>frontend/src/server/long-history.test.ts</td><td>Тесты</td><td>59</td></tr>
+<tr><td>frontend/src/server/long-history.ts</td><td>Бэкенд</td><td>202</td></tr>
+<tr><td>frontend/src/server/ml-client.contract.test.ts</td><td>Тесты</td><td>107</td></tr>
+<tr><td>frontend/src/server/ml-client.ts</td><td>Бэкенд</td><td>101</td></tr>
+<tr><td>frontend/src/server/model-management.ts</td><td>Бэкенд</td><td>56</td></tr>
+<tr><td>frontend/src/server/notification-journal.test.ts</td><td>Тесты</td><td>19</td></tr>
+<tr><td>frontend/src/server/notification-policy.test.ts</td><td>Тесты</td><td>49</td></tr>
+<tr><td>frontend/src/server/notification-policy.ts</td><td>Бэкенд</td><td>50</td></tr>
+<tr><td>frontend/src/server/notification-settings.test.ts</td><td>Тесты</td><td>34</td></tr>
+<tr><td>frontend/src/server/notifications.ts</td><td>Бэкенд</td><td>459</td></tr>
+<tr><td>frontend/src/server/outdoor-policy.test.ts</td><td>Тесты</td><td>172</td></tr>
+<tr><td>frontend/src/server/outdoor-policy.ts</td><td>Бэкенд</td><td>106</td></tr>
+<tr><td>frontend/src/server/owner-recovery.test.ts</td><td>Тесты</td><td>96</td></tr>
+<tr><td>frontend/src/server/prediction-provenance.test.ts</td><td>Тесты</td><td>93</td></tr>
+<tr><td>frontend/src/server/recommendation-business-logic.test.ts</td><td>Тесты</td><td>259</td></tr>
+<tr><td>frontend/src/server/recommendation.ts</td><td>Бэкенд</td><td>137</td></tr>
+<tr><td>frontend/src/server/repository.ts</td><td>Бэкенд</td><td>1 240</td></tr>
+<tr><td>frontend/src/server/serializers.ts</td><td>Бэкенд</td><td>153</td></tr>
+<tr><td>frontend/src/server/server.test.ts</td><td>Тесты</td><td>817</td></tr>
+<tr><td>frontend/src/server/service.ml-contract.test.ts</td><td>Тесты</td><td>132</td></tr>
+<tr><td>frontend/src/server/service.ts</td><td>Бэкенд</td><td>270</td></tr>
+<tr><td>frontend/src/server/settings.ts</td><td>Бэкенд</td><td>18</td></tr>
+<tr><td>frontend/src/server/simulator.test.ts</td><td>Тесты</td><td>52</td></tr>
+<tr><td>frontend/src/server/simulator.ts</td><td>Бэкенд</td><td>25</td></tr>
+<tr><td>frontend/src/server/telegram.test.ts</td><td>Тесты</td><td>37</td></tr>
+<tr><td>frontend/src/server/telegram.ts</td><td>Бэкенд</td><td>63</td></tr>
+<tr><td>frontend/src/server/trusted-origins.test.ts</td><td>Тесты</td><td>14</td></tr>
+<tr><td>frontend/src/server/trusted-origins.ts</td><td>Бэкенд</td><td>4</td></tr>
+<tr><td>frontend/src/server/types.ts</td><td>Бэкенд</td><td>175</td></tr>
+<tr><td>frontend/src/server/validation.ts</td><td>Бэкенд</td><td>568</td></tr>
+<tr><td>frontend/tsconfig.json</td><td>Конфигурация</td><td>38</td></tr>
+<tr><td>frontend/vitest.config.ts</td><td>Утилиты</td><td>7</td></tr>
+<tr><td>ml-service/Dockerfile</td><td>Конфигурация</td><td>8</td></tr>
+<tr><td>ml-service/app.py</td><td>ML</td><td>145</td></tr>
+<tr><td>ml-service/feature_schema.py</td><td>ML</td><td>180</td></tr>
+<tr><td>ml-service/jobs.py</td><td>ML</td><td>94</td></tr>
+<tr><td>ml-service/modeling.py</td><td>ML</td><td>91</td></tr>
+<tr><td>ml-service/predict.py</td><td>ML</td><td>60</td></tr>
+<tr><td>ml-service/requirements.txt</td><td>Конфигурация</td><td>4</td></tr>
+<tr><td>ml-service/tests/test_app.py</td><td>Тесты</td><td>7</td></tr>
+<tr><td>ml-service/tests/test_feature_schema.py</td><td>Тесты</td><td>89</td></tr>
+<tr><td>ml-service/tests/test_jobs.py</td><td>Тесты</td><td>69</td></tr>
+<tr><td>ml-service/tests/test_ml_contracts.py</td><td>Тесты</td><td>303</td></tr>
+<tr><td>ml-service/tests/test_modeling.py</td><td>Тесты</td><td>74</td></tr>
+<tr><td>ml-service/train.py</td><td>ML</td><td>102</td></tr>
+<tr><td>pytest.ini</td><td>Конфигурация</td><td>9</td></tr>
+<tr><td>sensor-simulator/Dockerfile</td><td>Конфигурация</td><td>6</td></tr>
+<tr><td>sensor-simulator/simulator.py</td><td>Симуляция</td><td>346</td></tr>
+<tr><td>sensor-simulator/simulator_lease.py</td><td>Симуляция</td><td>59</td></tr>
+<tr><td>sensor-simulator/test_simulator.py</td><td>Тесты</td><td>87</td></tr>
+<tr><td>sensor-simulator/test_simulator_lease.py</td><td>Тесты</td><td>21</td></tr>
+<tr><td>sensor-simulator/tests/test_legacy_controls.py</td><td>Тесты</td><td>110</td></tr>
+<tr><td>sensor-simulator/tests/test_legacy_payloads.py</td><td>Тесты</td><td>51</td></tr>
+<tr><td>sensor-simulator/tests/test_legacy_retry_backfill.py</td><td>Тесты</td><td>90</td></tr>
+<tr><td>sensor-simulator/tests/test_legacy_shared_lease.py</td><td>Тесты</td><td>65</td></tr>
+<tr><td>tests/browser/run.py</td><td>Тесты</td><td>101</td></tr>
+<tr><td>tests/database/conftest.py</td><td>Тесты</td><td>235</td></tr>
+<tr><td>tests/database/repository_probe.mjs</td><td>Тесты</td><td>597</td></tr>
+<tr><td>tests/database/test_long_history.py</td><td>Тесты</td><td>66</td></tr>
+<tr><td>tests/database/test_migrations.py</td><td>Тесты</td><td>341</td></tr>
+<tr><td>tests/database/test_notifications.py</td><td>Тесты</td><td>23</td></tr>
+<tr><td>tests/database/test_repository.py</td><td>Тесты</td><td>83</td></tr>
+<tr><td>tests/infrastructure/test_compose_contract.py</td><td>Тесты</td><td>385</td></tr>
+<tr><td>tests/integration/test_compose_e2e.py</td><td>Тесты</td><td>436</td></tr></tbody></table>
+        </div>
+      </details>
+    </section>
+  </main>
+  <footer><div class="container footer-inner"><p>AirCheck · Технический обзор проекта · 15.10.2026</p><p>Срез <code>e958d11</code> · Более 41 тыс. строк кода</p></div></footer>
+  <script type="application/json" id="audit-data">{"commit":"e958d11f6ba82deb8eebe3a118a65c7be5184afc","date":"2026-10-15","categories":{"infrastructure":{"files":24,"code":670,"physical":733,"nonblank":676},"simulation":{"files":30,"code":3747,"physical":4273,"nonblank":3781},"tests":{"files":96,"code":13001,"physical":14966,"nonblank":13046},"backend":{"files":60,"code":5963,"physical":6387,"nonblank":5980},"frontend":{"files":55,"code":17754,"physical":19791,"nonblank":17818},"tooling":{"files":6,"code":269,"physical":302,"nonblank":270},"ml":{"files":6,"code":672,"physical":772,"nonblank":678}},"languages":{"YAML":{"files":2,"code":184,"physical":192,"nonblank":184},"Dockerfile":{"files":4,"code":53,"physical":66,"nonblank":53},"Python":{"files":76,"code":9309,"physical":11005,"nonblank":9373},"TOML":{"files":8,"code":316,"physical":358,"nonblank":322},"Requirements":{"files":4,"code":10,"physical":10,"nonblank":10},"SQL":{"files":11,"code":320,"physical":350,"nonblank":330},"Caddyfile":{"files":1,"code":5,"physical":5,"nonblank":5},"CSS":{"files":1,"code":8064,"physical":9400,"nonblank":8111},"TypeScript":{"files":119,"code":14643,"physical":16056,"nonblank":14681},"JavaScript":{"files":4,"code":784,"physical":859,"nonblank":789},"JSON":{"files":4,"code":93,"physical":93,"nonblank":93},"PowerShell":{"files":1,"code":48,"physical":56,"nonblank":48},"TypeScript / TSX":{"files":41,"code":8238,"physical":8765,"nonblank":8241},"INI":{"files":1,"code":9,"physical":9,"nonblank":9}},"versions":{"@react-three/drei":"10.7.9","@react-three/fiber":"9.8.1","better-auth":"1.7.6","echarts":"6.1.0","next":"15.5.25","pg":"8.23.0","react":"19.2.8","react-dom":"19.2.8","three":"0.186.1","@playwright/test":"1.58.2","@testing-library/dom":"10.4.2","@testing-library/react":"16.3.3","@testing-library/user-event":"14.6.7","@types/node":"22.20.1","@types/pg":"8.23.1","@types/react":"19.2.18","@types/react-dom":"19.2.7","jsdom":"30.1.1","typescript":"5.9.3","vitest":"3.2.7","three-stdlib":"2.36.1","postcss":"8.5.28"},"excluded":{".codex-pptx-build":120,"docs":55,"outputs":468},"files":[{"path":".github/workflows/browser.yml","category":"infrastructure","language":"YAML","code":30,"physical":30,"nonblank":30},{"path":"aircheck_simulator_3d/Dockerfile.headless","category":"infrastructure","language":"Dockerfile","code":9,"physical":10,"nonblank":9},{"path":"aircheck_simulator_3d/__init__.py","category":"simulation","language":"Python","code":1,"physical":3,"nonblank":2},{"path":"aircheck_simulator_3d/app/__init__.py","category":"simulation","language":"Python","code":0,"physical":1,"nonblank":1},{"path":"aircheck_simulator_3d/app/automatic_demo.py","category":"simulation","language":"Python","code":112,"physical":131,"nonblank":113},{"path":"aircheck_simulator_3d/app/config.py","category":"simulation","language":"Python","code":781,"physical":849,"nonblank":782},{"path":"aircheck_simulator_3d/app/coordinator.py","category":"simulation","language":"Python","code":399,"physical":422,"nonblank":401},{"path":"aircheck_simulator_3d/app/developer_controls.py","category":"simulation","language":"Python","code":81,"physical":91,"nonblank":82},{"path":"aircheck_simulator_3d/app/logging_setup.py","category":"simulation","language":"Python","code":40,"physical":49,"nonblank":40},{"path":"aircheck_simulator_3d/app/scenarios.py","category":"simulation","language":"Python","code":69,"physical":79,"nonblank":70},{"path":"aircheck_simulator_3d/app/stand_layout.py","category":"simulation","language":"Python","code":67,"physical":77,"nonblank":68},{"path":"aircheck_simulator_3d/config/backend.toml","category":"infrastructure","language":"TOML","code":10,"physical":10,"nonblank":10},{"path":"aircheck_simulator_3d/config/camera.toml","category":"infrastructure","language":"TOML","code":15,"physical":15,"nonblank":15},{"path":"aircheck_simulator_3d/config/demo.toml","category":"infrastructure","language":"TOML","code":181,"physical":203,"nonblank":182},{"path":"aircheck_simulator_3d/config/devices.toml","category":"infrastructure","language":"TOML","code":37,"physical":45,"nonblank":39},{"path":"aircheck_simulator_3d/config/logging.toml","category":"infrastructure","language":"TOML","code":5,"physical":5,"nonblank":5},{"path":"aircheck_simulator_3d/config/physics.toml","category":"infrastructure","language":"TOML","code":36,"physical":44,"nonblank":38},{"path":"aircheck_simulator_3d/config/room.toml","category":"infrastructure","language":"TOML","code":21,"physical":25,"nonblank":22},{"path":"aircheck_simulator_3d/config/scene.toml","category":"infrastructure","language":"TOML","code":11,"physical":11,"nonblank":11},{"path":"aircheck_simulator_3d/devices/__init__.py","category":"simulation","language":"Python","code":0,"physical":1,"nonblank":1},{"path":"aircheck_simulator_3d/devices/command_executor.py","category":"simulation","language":"Python","code":94,"physical":110,"nonblank":95},{"path":"aircheck_simulator_3d/devices/device_layer.py","category":"simulation","language":"Python","code":95,"physical":121,"nonblank":96},{"path":"aircheck_simulator_3d/devices/models.py","category":"simulation","language":"Python","code":65,"physical":82,"nonblank":65},{"path":"aircheck_simulator_3d/devices/presentation_state.py","category":"simulation","language":"Python","code":40,"physical":51,"nonblank":40},{"path":"aircheck_simulator_3d/devices/window_actuator.py","category":"simulation","language":"Python","code":74,"physical":87,"nonblank":75},{"path":"aircheck_simulator_3d/networking/__init__.py","category":"simulation","language":"Python","code":20,"physical":22,"nonblank":21},{"path":"aircheck_simulator_3d/networking/contracts.py","category":"simulation","language":"Python","code":164,"physical":201,"nonblank":166},{"path":"aircheck_simulator_3d/networking/http_backend.py","category":"simulation","language":"Python","code":92,"physical":115,"nonblank":95},{"path":"aircheck_simulator_3d/networking/process_lease.py","category":"simulation","language":"Python","code":59,"physical":75,"nonblank":61},{"path":"aircheck_simulator_3d/networking/web_service.py","category":"simulation","language":"Python","code":101,"physical":116,"nonblank":101},{"path":"aircheck_simulator_3d/networking/workers.py","category":"simulation","language":"Python","code":370,"physical":428,"nonblank":372},{"path":"aircheck_simulator_3d/requirements-dev.txt","category":"infrastructure","language":"Requirements","code":1,"physical":1,"nonblank":1},{"path":"aircheck_simulator_3d/requirements-headless.txt","category":"infrastructure","language":"Requirements","code":2,"physical":2,"nonblank":2},{"path":"aircheck_simulator_3d/requirements-test.txt","category":"infrastructure","language":"Requirements","code":3,"physical":3,"nonblank":3},{"path":"aircheck_simulator_3d/simulation/__init__.py","category":"simulation","language":"Python","code":0,"physical":1,"nonblank":1},{"path":"aircheck_simulator_3d/simulation/clock.py","category":"simulation","language":"Python","code":36,"physical":43,"nonblank":37},{"path":"aircheck_simulator_3d/simulation/engine.py","category":"simulation","language":"Python","code":47,"physical":57,"nonblank":48},{"path":"aircheck_simulator_3d/simulation/factory.py","category":"simulation","language":"Python","code":89,"physical":94,"nonblank":90},{"path":"aircheck_simulator_3d/simulation/room_model.py","category":"simulation","language":"Python","code":283,"physical":313,"nonblank":285},{"path":"aircheck_simulator_3d/simulation/state.py","category":"simulation","language":"Python","code":113,"physical":134,"nonblank":115},{"path":"aircheck_simulator_3d/simulation/virtual_sensors.py","category":"simulation","language":"Python","code":50,"physical":61,"nonblank":51},{"path":"aircheck_simulator_3d/tests/__init__.py","category":"tests","language":"Python","code":0,"physical":0,"nonblank":0},{"path":"aircheck_simulator_3d/tests/support.py","category":"tests","language":"Python","code":19,"physical":27,"nonblank":20},{"path":"aircheck_simulator_3d/tests/test_clock.py","category":"tests","language":"Python","code":50,"physical":71,"nonblank":50},{"path":"aircheck_simulator_3d/tests/test_command_executor.py","category":"tests","language":"Python","code":71,"physical":90,"nonblank":71},{"path":"aircheck_simulator_3d/tests/test_config.py","category":"tests","language":"Python","code":70,"physical":92,"nonblank":70},{"path":"aircheck_simulator_3d/tests/test_contracts.py","category":"tests","language":"Python","code":78,"physical":101,"nonblank":78},{"path":"aircheck_simulator_3d/tests/test_device_layer.py","category":"tests","language":"Python","code":72,"physical":96,"nonblank":72},{"path":"aircheck_simulator_3d/tests/test_devices_block09.py","category":"tests","language":"Python","code":285,"physical":354,"nonblank":285},{"path":"aircheck_simulator_3d/tests/test_logging_setup.py","category":"tests","language":"Python","code":21,"physical":25,"nonblank":21},{"path":"aircheck_simulator_3d/tests/test_long_simulation.py","category":"tests","language":"Python","code":59,"physical":71,"nonblank":60},{"path":"aircheck_simulator_3d/tests/test_milestone6.py","category":"tests","language":"Python","code":146,"physical":177,"nonblank":146},{"path":"aircheck_simulator_3d/tests/test_networking.py","category":"tests","language":"Python","code":367,"physical":440,"nonblank":367},{"path":"aircheck_simulator_3d/tests/test_physics_scenarios.py","category":"tests","language":"Python","code":117,"physical":151,"nonblank":118},{"path":"aircheck_simulator_3d/tests/test_process_lease.py","category":"tests","language":"Python","code":21,"physical":27,"nonblank":21},{"path":"aircheck_simulator_3d/tests/test_room_model.py","category":"tests","language":"Python","code":210,"physical":270,"nonblank":210},{"path":"aircheck_simulator_3d/tests/test_simulation_time_invariance.py","category":"tests","language":"Python","code":91,"physical":110,"nonblank":91},{"path":"aircheck_simulator_3d/tests/test_stand_layout.py","category":"tests","language":"Python","code":26,"physical":35,"nonblank":26},{"path":"aircheck_simulator_3d/tests/test_state.py","category":"tests","language":"Python","code":31,"physical":41,"nonblank":31},{"path":"aircheck_simulator_3d/tests/test_web_coordinator.py","category":"tests","language":"Python","code":63,"physical":85,"nonblank":63},{"path":"aircheck_simulator_3d/tests/test_web_network_boundaries.py","category":"tests","language":"Python","code":363,"physical":447,"nonblank":363},{"path":"aircheck_simulator_3d/tests/test_web_service.py","category":"tests","language":"Python","code":94,"physical":128,"nonblank":94},{"path":"database/migrations/001_init.sql","category":"backend","language":"SQL","code":35,"physical":41,"nonblank":35},{"path":"database/migrations/002_controls.sql","category":"backend","language":"SQL","code":32,"physical":36,"nonblank":33},{"path":"database/migrations/003_retention_indexes.sql","category":"backend","language":"SQL","code":5,"physical":8,"nonblank":7},{"path":"database/migrations/004_node_settings.sql","category":"backend","language":"SQL","code":23,"physical":25,"nonblank":25},{"path":"database/migrations/005_auth.sql","category":"backend","language":"SQL","code":69,"physical":75,"nonblank":70},{"path":"database/migrations/006_command_lifecycle.sql","category":"backend","language":"SQL","code":12,"physical":13,"nonblank":13},{"path":"database/migrations/007_outdoor_policy.sql","category":"backend","language":"SQL","code":3,"physical":3,"nonblank":3},{"path":"database/migrations/008_prediction_provenance.sql","category":"backend","language":"SQL","code":8,"physical":9,"nonblank":9},{"path":"database/migrations/009_measurement_sources.sql","category":"backend","language":"SQL","code":5,"physical":5,"nonblank":5},{"path":"database/migrations/010_long_term_history.sql","category":"backend","language":"SQL","code":96,"physical":103,"nonblank":98},{"path":"database/migrations/011_notifications.sql","category":"backend","language":"SQL","code":32,"physical":32,"nonblank":32},{"path":"deploy/Caddyfile","category":"infrastructure","language":"Caddyfile","code":5,"physical":5,"nonblank":5},{"path":"docker-compose.yml","category":"infrastructure","language":"YAML","code":154,"physical":162,"nonblank":154},{"path":"frontend/Dockerfile","category":"infrastructure","language":"Dockerfile","code":30,"physical":38,"nonblank":30},{"path":"frontend/css/styles.css","category":"frontend","language":"CSS","code":8064,"physical":9400,"nonblank":8111},{"path":"frontend/e2e/system.spec.ts","category":"tests","language":"TypeScript","code":825,"physical":828,"nonblank":826},{"path":"frontend/next.config.mjs","category":"tooling","language":"JavaScript","code":7,"physical":9,"nonblank":8},{"path":"frontend/owner-tools/package.json","category":"infrastructure","language":"JSON","code":9,"physical":9,"nonblank":9},{"path":"frontend/package.json","category":"infrastructure","language":"JSON","code":42,"physical":42,"nonblank":42},{"path":"frontend/password-policy.json","category":"infrastructure","language":"JSON","code":4,"physical":4,"nonblank":4},{"path":"frontend/playwright.config.ts","category":"tooling","language":"TypeScript","code":27,"physical":27,"nonblank":27},{"path":"frontend/scripts/manage-owner.mjs","category":"tooling","language":"JavaScript","code":139,"physical":154,"nonblank":139},{"path":"frontend/scripts/manage-owner.ps1","category":"tooling","language":"PowerShell","code":48,"physical":56,"nonblank":48},{"path":"frontend/scripts/start-standalone.mjs","category":"tooling","language":"JavaScript","code":41,"physical":47,"nonblank":41},{"path":"frontend/src/app/account/page.tsx","category":"frontend","language":"TypeScript / TSX","code":5,"physical":7,"nonblank":5},{"path":"frontend/src/app/admin/page.tsx","category":"frontend","language":"TypeScript / TSX","code":9,"physical":11,"nonblank":9},{"path":"frontend/src/app/api/admin/users/[userId]/route.ts","category":"backend","language":"TypeScript","code":111,"physical":117,"nonblank":111},{"path":"frontend/src/app/api/admin/users/route.ts","category":"backend","language":"TypeScript","code":66,"physical":70,"nonblank":66},{"path":"frontend/src/app/api/auth-authorization.test.ts","category":"tests","language":"TypeScript","code":294,"physical":330,"nonblank":294},{"path":"frontend/src/app/api/auth/[...all]/route.ts","category":"backend","language":"TypeScript","code":8,"physical":11,"nonblank":8},{"path":"frontend/src/app/api/auth/access/route.ts","category":"backend","language":"TypeScript","code":13,"physical":16,"nonblank":13},{"path":"frontend/src/app/api/profile/avatar/[avatarId]/route.ts","category":"backend","language":"TypeScript","code":38,"physical":44,"nonblank":38},{"path":"frontend/src/app/api/profile/avatar/route.test.ts","category":"tests","language":"TypeScript","code":173,"physical":198,"nonblank":173},{"path":"frontend/src/app/api/profile/avatar/route.ts","category":"backend","language":"TypeScript","code":120,"physical":141,"nonblank":120},{"path":"frontend/src/app/api/simulator/actions/route.ts","category":"backend","language":"TypeScript","code":35,"physical":39,"nonblank":35},{"path":"frontend/src/app/api/simulator/events/route.ts","category":"backend","language":"TypeScript","code":25,"physical":28,"nonblank":25},{"path":"frontend/src/app/api/simulator/simulator-authorization.test.ts","category":"tests","language":"TypeScript","code":71,"physical":90,"nonblank":71},{"path":"frontend/src/app/api/simulator/simulator-routes.test.ts","category":"tests","language":"TypeScript","code":118,"physical":143,"nonblank":118},{"path":"frontend/src/app/api/simulator/state/route.ts","category":"backend","language":"TypeScript","code":17,"physical":20,"nonblank":17},{"path":"frontend/src/app/api/v1/controls/commands/actions/route.ts","category":"backend","language":"TypeScript","code":66,"physical":67,"nonblank":66},{"path":"frontend/src/app/api/v1/controls/commands/route.ts","category":"backend","language":"TypeScript","code":77,"physical":82,"nonblank":77},{"path":"frontend/src/app/api/v1/controls/route.ts","category":"backend","language":"TypeScript","code":19,"physical":22,"nonblank":19},{"path":"frontend/src/app/api/v1/controls/state/route.ts","category":"backend","language":"TypeScript","code":39,"physical":43,"nonblank":39},{"path":"frontend/src/app/api/v1/controls/ventilation/route.ts","category":"backend","language":"TypeScript","code":47,"physical":51,"nonblank":47},{"path":"frontend/src/app/api/v1/events/route.ts","category":"backend","language":"TypeScript","code":37,"physical":37,"nonblank":37},{"path":"frontend/src/app/api/v1/history/route.ts","category":"backend","language":"TypeScript","code":30,"physical":30,"nonblank":30},{"path":"frontend/src/app/api/v1/measurements/history/route.ts","category":"backend","language":"TypeScript","code":26,"physical":29,"nonblank":26},{"path":"frontend/src/app/api/v1/measurements/latest/route.ts","category":"backend","language":"TypeScript","code":12,"physical":15,"nonblank":12},{"path":"frontend/src/app/api/v1/measurements/route.test.ts","category":"tests","language":"TypeScript","code":112,"physical":129,"nonblank":112},{"path":"frontend/src/app/api/v1/measurements/route.ts","category":"backend","language":"TypeScript","code":33,"physical":37,"nonblank":33},{"path":"frontend/src/app/api/v1/model/route.ts","category":"backend","language":"TypeScript","code":70,"physical":70,"nonblank":70},{"path":"frontend/src/app/api/v1/notifications/route.ts","category":"backend","language":"TypeScript","code":49,"physical":49,"nonblank":49},{"path":"frontend/src/app/api/v1/prediction/latest/route.ts","category":"backend","language":"TypeScript","code":12,"physical":15,"nonblank":12},{"path":"frontend/src/app/api/v1/read-routes.test.ts","category":"tests","language":"TypeScript","code":261,"physical":303,"nonblank":261},{"path":"frontend/src/app/api/v1/recommendation/route.ts","category":"backend","language":"TypeScript","code":12,"physical":15,"nonblank":12},{"path":"frontend/src/app/api/v1/settings/route.ts","category":"backend","language":"TypeScript","code":54,"physical":59,"nonblank":54},{"path":"frontend/src/app/healthz/route.ts","category":"backend","language":"TypeScript","code":16,"physical":19,"nonblank":16},{"path":"frontend/src/app/layout.tsx","category":"frontend","language":"TypeScript / TSX","code":51,"physical":54,"nonblank":51},{"path":"frontend/src/app/login/page.tsx","category":"frontend","language":"TypeScript / TSX","code":5,"physical":7,"nonblank":5},{"path":"frontend/src/app/page.tsx","category":"frontend","language":"TypeScript / TSX","code":4,"physical":5,"nonblank":4},{"path":"frontend/src/app/simulator/page.tsx","category":"frontend","language":"TypeScript / TSX","code":5,"physical":7,"nonblank":5},{"path":"frontend/src/components/AirDashboard.test.ts","category":"tests","language":"TypeScript","code":258,"physical":284,"nonblank":258},{"path":"frontend/src/components/AirDashboard.tsx","category":"frontend","language":"TypeScript / TSX","code":2650,"physical":2791,"nonblank":2650},{"path":"frontend/src/components/AirDashboard.ui.test.ts","category":"tests","language":"TypeScript","code":265,"physical":306,"nonblank":266},{"path":"frontend/src/components/AuthPanel.tsx","category":"frontend","language":"TypeScript / TSX","code":108,"physical":114,"nonblank":108},{"path":"frontend/src/components/BrandLogo.tsx","category":"frontend","language":"TypeScript / TSX","code":21,"physical":23,"nonblank":21},{"path":"frontend/src/components/Charts.test.ts","category":"tests","language":"TypeScript","code":91,"physical":103,"nonblank":91},{"path":"frontend/src/components/Charts.tsx","category":"frontend","language":"TypeScript / TSX","code":1142,"physical":1237,"nonblank":1145},{"path":"frontend/src/components/CommandHistory.tsx","category":"frontend","language":"TypeScript / TSX","code":120,"physical":121,"nonblank":120},{"path":"frontend/src/components/CommandHistory.ui.test.ts","category":"tests","language":"TypeScript","code":89,"physical":90,"nonblank":90},{"path":"frontend/src/components/DataStatus.tsx","category":"frontend","language":"TypeScript / TSX","code":55,"physical":55,"nonblank":55},{"path":"frontend/src/components/DataStatus.ui.test.ts","category":"tests","language":"TypeScript","code":42,"physical":43,"nonblank":43},{"path":"frontend/src/components/EventJournal.tsx","category":"frontend","language":"TypeScript / TSX","code":119,"physical":119,"nonblank":119},{"path":"frontend/src/components/LongHistoryPanel.tsx","category":"frontend","language":"TypeScript / TSX","code":225,"physical":225,"nonblank":225},{"path":"frontend/src/components/ModelPanel.tsx","category":"frontend","language":"TypeScript / TSX","code":193,"physical":193,"nonblank":193},{"path":"frontend/src/components/NotificationPanel.tsx","category":"frontend","language":"TypeScript / TSX","code":194,"physical":194,"nonblank":194},{"path":"frontend/src/components/OutdoorPolicyPanel.tsx","category":"frontend","language":"TypeScript / TSX","code":107,"physical":107,"nonblank":107},{"path":"frontend/src/components/OutdoorPolicyPanel.ui.test.ts","category":"tests","language":"TypeScript","code":58,"physical":59,"nonblank":59},{"path":"frontend/src/components/OwnerUsers.tsx","category":"frontend","language":"TypeScript / TSX","code":198,"physical":211,"nonblank":198},{"path":"frontend/src/components/OwnerUsers.ui.test.ts","category":"tests","language":"TypeScript","code":80,"physical":101,"nonblank":81},{"path":"frontend/src/components/SettingsPanel.ui.test.ts","category":"tests","language":"TypeScript","code":66,"physical":80,"nonblank":67},{"path":"frontend/src/components/auth/AccessSessionProvider.tsx","category":"frontend","language":"TypeScript / TSX","code":94,"physical":111,"nonblank":94},{"path":"frontend/src/components/auth/AccountMenu.tsx","category":"frontend","language":"TypeScript / TSX","code":89,"physical":100,"nonblank":89},{"path":"frontend/src/components/auth/AccountMenu.ui.test.ts","category":"tests","language":"TypeScript","code":197,"physical":226,"nonblank":198},{"path":"frontend/src/components/auth/AccountPage.tsx","category":"frontend","language":"TypeScript / TSX","code":348,"physical":381,"nonblank":348},{"path":"frontend/src/components/auth/AccountSignOutDialog.tsx","category":"frontend","language":"TypeScript / TSX","code":61,"physical":68,"nonblank":61},{"path":"frontend/src/components/auth/AvatarCropDialog.tsx","category":"frontend","language":"TypeScript / TSX","code":248,"physical":268,"nonblank":248},{"path":"frontend/src/components/auth/AvatarCropDialog.ui.test.ts","category":"tests","language":"TypeScript","code":54,"physical":66,"nonblank":55},{"path":"frontend/src/components/auth/PasswordInput.tsx","category":"frontend","language":"TypeScript / TSX","code":52,"physical":57,"nonblank":52},{"path":"frontend/src/components/auth/ProfileAvatarEditor.tsx","category":"frontend","language":"TypeScript / TSX","code":147,"physical":163,"nonblank":147},{"path":"frontend/src/components/auth/ProfileAvatarEditor.ui.test.ts","category":"tests","language":"TypeScript","code":83,"physical":100,"nonblank":84},{"path":"frontend/src/components/auth/UserAvatar.tsx","category":"frontend","language":"TypeScript / TSX","code":32,"physical":35,"nonblank":32},{"path":"frontend/src/components/auth/UtilityHeader.tsx","category":"frontend","language":"TypeScript / TSX","code":27,"physical":32,"nonblank":27},{"path":"frontend/src/components/auth/auth-ui.test.ts","category":"tests","language":"TypeScript","code":312,"physical":363,"nonblank":313},{"path":"frontend/src/components/simulator/SceneLoader.tsx","category":"frontend","language":"TypeScript / TSX","code":4,"physical":7,"nonblank":4},{"path":"frontend/src/components/simulator/SimulatorApp.tsx","category":"frontend","language":"TypeScript / TSX","code":373,"physical":403,"nonblank":373},{"path":"frontend/src/components/simulator/scene/Airflow.tsx","category":"frontend","language":"TypeScript / TSX","code":66,"physical":71,"nonblank":66},{"path":"frontend/src/components/simulator/scene/CameraRig.tsx","category":"frontend","language":"TypeScript / TSX","code":113,"physical":124,"nonblank":113},{"path":"frontend/src/components/simulator/scene/FanAssembly.tsx","category":"frontend","language":"TypeScript / TSX","code":196,"physical":205,"nonblank":196},{"path":"frontend/src/components/simulator/scene/Pickable.tsx","category":"frontend","language":"TypeScript / TSX","code":64,"physical":68,"nonblank":64},{"path":"frontend/src/components/simulator/scene/RoomShell.tsx","category":"frontend","language":"TypeScript / TSX","code":135,"physical":147,"nonblank":135},{"path":"frontend/src/components/simulator/scene/SceneCanvas.tsx","category":"frontend","language":"TypeScript / TSX","code":72,"physical":77,"nonblank":72},{"path":"frontend/src/components/simulator/scene/SensorsAndNodes.tsx","category":"frontend","language":"TypeScript / TSX","code":24,"physical":27,"nonblank":24},{"path":"frontend/src/components/simulator/scene/WindowAssembly.tsx","category":"frontend","language":"TypeScript / TSX","code":204,"physical":218,"nonblank":204},{"path":"frontend/src/components/simulator/scene/Wiring.tsx","category":"frontend","language":"TypeScript / TSX","code":109,"physical":116,"nonblank":109},{"path":"frontend/src/components/simulator/scene/cameraInput.test.ts","category":"tests","language":"TypeScript","code":63,"physical":76,"nonblank":63},{"path":"frontend/src/components/simulator/scene/cameraInput.ts","category":"frontend","language":"TypeScript","code":41,"physical":52,"nonblank":41},{"path":"frontend/src/components/simulator/scene/cameraTransition.test.ts","category":"tests","language":"TypeScript","code":43,"physical":55,"nonblank":43},{"path":"frontend/src/components/simulator/scene/cameraTransition.ts","category":"frontend","language":"TypeScript","code":37,"physical":44,"nonblank":37},{"path":"frontend/src/components/simulator/scene/models/ControlCabinet.tsx","category":"frontend","language":"TypeScript / TSX","code":236,"physical":250,"nonblank":236},{"path":"frontend/src/components/simulator/scene/models/WallSensorNodes.tsx","category":"frontend","language":"TypeScript / TSX","code":203,"physical":217,"nonblank":203},{"path":"frontend/src/components/simulator/scene/models/geometry.test.ts","category":"tests","language":"TypeScript","code":62,"physical":68,"nonblank":62},{"path":"frontend/src/components/simulator/scene/models/geometry.ts","category":"frontend","language":"TypeScript","code":216,"physical":240,"nonblank":218},{"path":"frontend/src/components/simulator/scene/models/parts.tsx","category":"frontend","language":"TypeScript / TSX","code":130,"physical":139,"nonblank":130},{"path":"frontend/src/components/simulator/scene/sceneInteraction.test.ts","category":"tests","language":"TypeScript","code":155,"physical":175,"nonblank":155},{"path":"frontend/src/components/simulator/scene/snapshotScene.test.ts","category":"tests","language":"TypeScript","code":300,"physical":338,"nonblank":300},{"path":"frontend/src/components/simulator/scene/wireCurves.test.ts","category":"tests","language":"TypeScript","code":27,"physical":32,"nonblank":27},{"path":"frontend/src/components/simulator/scene/wireCurves.ts","category":"frontend","language":"TypeScript","code":40,"physical":56,"nonblank":46},{"path":"frontend/src/components/simulator/scene/wiringRoutes.test.ts","category":"tests","language":"TypeScript","code":231,"physical":256,"nonblank":231},{"path":"frontend/src/components/simulator/scene/wiringRoutes.ts","category":"frontend","language":"TypeScript","code":270,"physical":307,"nonblank":276},{"path":"frontend/src/components/simulator/types.ts","category":"frontend","language":"TypeScript","code":141,"physical":147,"nonblank":141},{"path":"frontend/src/components/simulator/useSimulatorState.ts","category":"frontend","language":"TypeScript","code":54,"physical":59,"nonblank":54},{"path":"frontend/src/instrumentation.ts","category":"backend","language":"TypeScript","code":10,"physical":11,"nonblank":11},{"path":"frontend/src/lib/access-types.test.ts","category":"tests","language":"TypeScript","code":22,"physical":25,"nonblank":22},{"path":"frontend/src/lib/access-types.ts","category":"frontend","language":"TypeScript","code":34,"physical":39,"nonblank":34},{"path":"frontend/src/lib/air-quality.test.ts","category":"tests","language":"TypeScript","code":21,"physical":24,"nonblank":21},{"path":"frontend/src/lib/air-quality.ts","category":"frontend","language":"TypeScript","code":72,"physical":80,"nonblank":72},{"path":"frontend/src/lib/auth-errors.test.ts","category":"tests","language":"TypeScript","code":17,"physical":22,"nonblank":17},{"path":"frontend/src/lib/auth-errors.ts","category":"frontend","language":"TypeScript","code":18,"physical":22,"nonblank":18},{"path":"frontend/src/lib/auth-navigation-security.test.ts","category":"tests","language":"TypeScript","code":52,"physical":58,"nonblank":52},{"path":"frontend/src/lib/auth-navigation.test.ts","category":"tests","language":"TypeScript","code":15,"physical":18,"nonblank":15},{"path":"frontend/src/lib/auth-navigation.ts","category":"frontend","language":"TypeScript","code":24,"physical":27,"nonblank":24},{"path":"frontend/src/lib/avatar-image.test.ts","category":"tests","language":"TypeScript","code":79,"physical":87,"nonblank":79},{"path":"frontend/src/lib/avatar-image.ts","category":"frontend","language":"TypeScript","code":155,"physical":177,"nonblank":155},{"path":"frontend/src/lib/client-api.ts","category":"frontend","language":"TypeScript","code":350,"physical":376,"nonblank":350},{"path":"frontend/src/server/access-session.test.ts","category":"tests","language":"TypeScript","code":151,"physical":177,"nonblank":151},{"path":"frontend/src/server/access.test.ts","category":"tests","language":"TypeScript","code":73,"physical":81,"nonblank":73},{"path":"frontend/src/server/access.ts","category":"backend","language":"TypeScript","code":122,"physical":137,"nonblank":122},{"path":"frontend/src/server/api-contracts.test.ts","category":"tests","language":"TypeScript","code":166,"physical":185,"nonblank":166},{"path":"frontend/src/server/api.ts","category":"backend","language":"TypeScript","code":108,"physical":118,"nonblank":109},{"path":"frontend/src/server/auth-policy.test.ts","category":"tests","language":"TypeScript","code":106,"physical":119,"nonblank":106},{"path":"frontend/src/server/auth.ts","category":"backend","language":"TypeScript","code":80,"physical":87,"nonblank":80},{"path":"frontend/src/server/avatar-storage.test.ts","category":"tests","language":"TypeScript","code":54,"physical":67,"nonblank":54},{"path":"frontend/src/server/avatar-storage.ts","category":"backend","language":"TypeScript","code":60,"physical":72,"nonblank":60},{"path":"frontend/src/server/command-lifecycle.test.ts","category":"tests","language":"TypeScript","code":131,"physical":132,"nonblank":131},{"path":"frontend/src/server/config.ts","category":"backend","language":"TypeScript","code":83,"physical":87,"nonblank":83},{"path":"frontend/src/server/control-service.test.ts","category":"tests","language":"TypeScript","code":200,"physical":231,"nonblank":201},{"path":"frontend/src/server/control-service.ts","category":"backend","language":"TypeScript","code":408,"physical":435,"nonblank":408},{"path":"frontend/src/server/data-source.test.ts","category":"tests","language":"TypeScript","code":24,"physical":24,"nonblank":24},{"path":"frontend/src/server/features.ml-contract.test.ts","category":"tests","language":"TypeScript","code":133,"physical":143,"nonblank":133},{"path":"frontend/src/server/features.ts","category":"backend","language":"TypeScript","code":113,"physical":126,"nonblank":113},{"path":"frontend/src/server/long-history.test.ts","category":"tests","language":"TypeScript","code":59,"physical":59,"nonblank":59},{"path":"frontend/src/server/long-history.ts","category":"backend","language":"TypeScript","code":202,"physical":202,"nonblank":202},{"path":"frontend/src/server/ml-client.contract.test.ts","category":"tests","language":"TypeScript","code":107,"physical":121,"nonblank":108},{"path":"frontend/src/server/ml-client.ts","category":"backend","language":"TypeScript","code":101,"physical":112,"nonblank":101},{"path":"frontend/src/server/model-management.ts","category":"backend","language":"TypeScript","code":56,"physical":58,"nonblank":58},{"path":"frontend/src/server/notification-journal.test.ts","category":"tests","language":"TypeScript","code":19,"physical":19,"nonblank":19},{"path":"frontend/src/server/notification-policy.test.ts","category":"tests","language":"TypeScript","code":49,"physical":49,"nonblank":49},{"path":"frontend/src/server/notification-policy.ts","category":"backend","language":"TypeScript","code":50,"physical":50,"nonblank":50},{"path":"frontend/src/server/notification-settings.test.ts","category":"tests","language":"TypeScript","code":34,"physical":34,"nonblank":34},{"path":"frontend/src/server/notifications.ts","category":"backend","language":"TypeScript","code":459,"physical":460,"nonblank":460},{"path":"frontend/src/server/outdoor-policy.test.ts","category":"tests","language":"TypeScript","code":172,"physical":172,"nonblank":172},{"path":"frontend/src/server/outdoor-policy.ts","category":"backend","language":"TypeScript","code":106,"physical":107,"nonblank":106},{"path":"frontend/src/server/owner-recovery.test.ts","category":"tests","language":"TypeScript","code":96,"physical":110,"nonblank":98},{"path":"frontend/src/server/prediction-provenance.test.ts","category":"tests","language":"TypeScript","code":93,"physical":93,"nonblank":93},{"path":"frontend/src/server/recommendation-business-logic.test.ts","category":"tests","language":"TypeScript","code":259,"physical":296,"nonblank":261},{"path":"frontend/src/server/recommendation.ts","category":"backend","language":"TypeScript","code":137,"physical":148,"nonblank":137},{"path":"frontend/src/server/repository.ts","category":"backend","language":"TypeScript","code":1240,"physical":1328,"nonblank":1242},{"path":"frontend/src/server/serializers.ts","category":"backend","language":"TypeScript","code":153,"physical":162,"nonblank":153},{"path":"frontend/src/server/server.test.ts","category":"tests","language":"TypeScript","code":817,"physical":911,"nonblank":817},{"path":"frontend/src/server/service.ml-contract.test.ts","category":"tests","language":"TypeScript","code":132,"physical":143,"nonblank":132},{"path":"frontend/src/server/service.ts","category":"backend","language":"TypeScript","code":270,"physical":288,"nonblank":270},{"path":"frontend/src/server/settings.ts","category":"backend","language":"TypeScript","code":18,"physical":19,"nonblank":18},{"path":"frontend/src/server/simulator.test.ts","category":"tests","language":"TypeScript","code":52,"physical":61,"nonblank":52},{"path":"frontend/src/server/simulator.ts","category":"backend","language":"TypeScript","code":25,"physical":27,"nonblank":25},{"path":"frontend/src/server/telegram.test.ts","category":"tests","language":"TypeScript","code":37,"physical":37,"nonblank":37},{"path":"frontend/src/server/telegram.ts","category":"backend","language":"TypeScript","code":63,"physical":63,"nonblank":63},{"path":"frontend/src/server/trusted-origins.test.ts","category":"tests","language":"TypeScript","code":14,"physical":17,"nonblank":14},{"path":"frontend/src/server/trusted-origins.ts","category":"backend","language":"TypeScript","code":4,"physical":4,"nonblank":4},{"path":"frontend/src/server/types.ts","category":"backend","language":"TypeScript","code":175,"physical":206,"nonblank":175},{"path":"frontend/src/server/validation.ts","category":"backend","language":"TypeScript","code":568,"physical":604,"nonblank":568},{"path":"frontend/tsconfig.json","category":"infrastructure","language":"JSON","code":38,"physical":38,"nonblank":38},{"path":"frontend/vitest.config.ts","category":"tooling","language":"TypeScript","code":7,"physical":9,"nonblank":7},{"path":"ml-service/Dockerfile","category":"infrastructure","language":"Dockerfile","code":8,"physical":10,"nonblank":8},{"path":"ml-service/app.py","category":"ml","language":"Python","code":145,"physical":165,"nonblank":145},{"path":"ml-service/feature_schema.py","category":"ml","language":"Python","code":180,"physical":211,"nonblank":180},{"path":"ml-service/jobs.py","category":"ml","language":"Python","code":94,"physical":108,"nonblank":99},{"path":"ml-service/modeling.py","category":"ml","language":"Python","code":91,"physical":100,"nonblank":92},{"path":"ml-service/predict.py","category":"ml","language":"Python","code":60,"physical":71,"nonblank":60},{"path":"ml-service/requirements.txt","category":"infrastructure","language":"Requirements","code":4,"physical":4,"nonblank":4},{"path":"ml-service/tests/test_app.py","category":"tests","language":"Python","code":7,"physical":12,"nonblank":7},{"path":"ml-service/tests/test_feature_schema.py","category":"tests","language":"Python","code":89,"physical":109,"nonblank":89},{"path":"ml-service/tests/test_jobs.py","category":"tests","language":"Python","code":69,"physical":75,"nonblank":69},{"path":"ml-service/tests/test_ml_contracts.py","category":"tests","language":"Python","code":303,"physical":368,"nonblank":303},{"path":"ml-service/tests/test_modeling.py","category":"tests","language":"Python","code":74,"physical":88,"nonblank":74},{"path":"ml-service/train.py","category":"ml","language":"Python","code":102,"physical":117,"nonblank":102},{"path":"pytest.ini","category":"infrastructure","language":"INI","code":9,"physical":9,"nonblank":9},{"path":"sensor-simulator/Dockerfile","category":"infrastructure","language":"Dockerfile","code":6,"physical":8,"nonblank":6},{"path":"sensor-simulator/simulator.py","category":"simulation","language":"Python","code":346,"physical":384,"nonblank":346},{"path":"sensor-simulator/simulator_lease.py","category":"simulation","language":"Python","code":59,"physical":75,"nonblank":61},{"path":"sensor-simulator/test_simulator.py","category":"tests","language":"Python","code":87,"physical":123,"nonblank":87},{"path":"sensor-simulator/test_simulator_lease.py","category":"tests","language":"Python","code":21,"physical":29,"nonblank":21},{"path":"sensor-simulator/tests/test_legacy_controls.py","category":"tests","language":"Python","code":110,"physical":135,"nonblank":110},{"path":"sensor-simulator/tests/test_legacy_payloads.py","category":"tests","language":"Python","code":51,"physical":64,"nonblank":51},{"path":"sensor-simulator/tests/test_legacy_retry_backfill.py","category":"tests","language":"Python","code":90,"physical":118,"nonblank":90},{"path":"sensor-simulator/tests/test_legacy_shared_lease.py","category":"tests","language":"Python","code":65,"physical":73,"nonblank":65},{"path":"tests/browser/run.py","category":"tests","language":"Python","code":101,"physical":107,"nonblank":103},{"path":"tests/database/conftest.py","category":"tests","language":"Python","code":235,"physical":261,"nonblank":236},{"path":"tests/database/repository_probe.mjs","category":"tests","language":"JavaScript","code":597,"physical":649,"nonblank":601},{"path":"tests/database/test_long_history.py","category":"tests","language":"Python","code":66,"physical":72,"nonblank":66},{"path":"tests/database/test_migrations.py","category":"tests","language":"Python","code":341,"physical":382,"nonblank":341},{"path":"tests/database/test_notifications.py","category":"tests","language":"Python","code":23,"physical":26,"nonblank":23},{"path":"tests/database/test_repository.py","category":"tests","language":"Python","code":83,"physical":117,"nonblank":84},{"path":"tests/infrastructure/test_compose_contract.py","category":"tests","language":"Python","code":385,"physical":469,"nonblank":394},{"path":"tests/integration/test_compose_e2e.py","category":"tests","language":"Python","code":436,"physical":494,"nonblank":444}]}</script>
+  <script>
+    (() => {
+      const status = document.getElementById('action-status');
+      const copyButton = document.getElementById('copy-summary');
+      const printButton = document.getElementById('print-report');
+      const summary = 'AirCheck — стек проекта (15.10.2026, срез e958d11).\n'
+        + 'Языки: TypeScript/TSX, Python, JavaScript, SQL, PowerShell; HTML/JSX и CSS.\n'
+        + 'Веб и API: Next.js 15.5.25, React/React DOM 19.2.8, TypeScript 5.9.3, Node.js 22, Better Auth 1.7.6, pg 8.23.0, PostgreSQL 16.\n'
+        + 'Визуализация: Apache ECharts 6.1.0, Three.js 0.186.1, React Three Fiber 9.8.1, Drei 10.7.9.\n'
+        + 'ML: Python 3.12, scikit-learn, NumPy, Joblib; LinearRegression и RandomForestRegressor, прогноз CO₂ на 15 минут.\n'
+        + 'Симуляция: Python Simulation Core, FastAPI, Uvicorn; REST/JSON и SSE.\n'
+        + 'Инфраструктура и проверки: Docker Compose, Caddy 2, GitHub Actions, npm/pip, Vitest, Testing Library, jsdom, Playwright, pytest, HTTPX.\n'
+        + 'Строки кода: фронтенд 17 754; бэкенд 5 963; ML 672; симуляторы 3 747. Продуктовый код — 28 136.\n'
+        + 'Тесты — 13 001; утилиты — 269. Всего — 41 406 строк кода; с 670 строками конфигурации — 42 076.\n'
+        + 'Оценка без пустых строк, комментариев, зависимостей, сборок и документов.';
+      copyButton.hidden = false;
+      printButton.hidden = false;
+      printButton.addEventListener('click', () => window.print());
+      copyButton.addEventListener('click', async () => {
+        let copied = false;
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(summary);
+            copied = true;
+          }
+        } catch { /* Older browsers and local files can deny Clipboard API access. */ }
+        if (!copied) {
+          const selection = document.createElement('textarea');
+          selection.value = summary;
+          selection.setAttribute('readonly', '');
+          selection.setAttribute('aria-label', 'Сводка проекта для копирования');
+          Object.assign(selection.style, { position: 'fixed', top: '0', left: '-9999px' });
+          document.body.appendChild(selection);
+          selection.select();
+          try { copied = document.execCommand('copy'); } catch { copied = false; }
+          selection.remove();
+          copyButton.focus();
+        }
+        status.textContent = copied ? 'Сводка скопирована.' : 'Браузер запретил копирование. Выделите текст отчёта и нажмите Ctrl+C.';
+      });
+    })();
+  </script>
+</body>
+</html>
