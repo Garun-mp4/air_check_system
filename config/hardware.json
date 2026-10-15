@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "device_id": "room-01",
+  "controllers": 1,
+  "board": "ESP32-DevKitC V4 / ESP32-WROOM-32E, 4 MB",
+  "firmware": "firmware/esp32",
+  "sensor_bus": { "sda": 21, "scl": 22, "frequency_hz": 100000 },
+  "sensors": [
+    { "id": "indoor_climate", "model": "SCD41", "zone": "indoor", "interface": "i2c", "address": 98, "period_ms": 5000, "stale_ms": 15000 },
+    { "id": "outdoor_climate", "model": "SHT45", "zone": "outdoor", "interface": "i2c", "address": 68, "period_ms": 5000, "stale_ms": 15000 },
+    { "id": "indoor_particles", "model": "SPS30", "zone": "indoor", "interface": "uart1", "rx": 16, "tx": 17, "baud": 115200, "period_ms": 5000, "stale_ms": 15000 },
+    { "id": "outdoor_particles", "model": "SPS30", "zone": "outdoor", "interface": "uart2", "rx": 32, "tx": 33, "baud": 115200, "period_ms": 5000, "stale_ms": 15000 }
+  ],
+  "outputs": { "exhaust": 25, "intake": 26, "window_open": 27, "window_close": 14 },
+  "inputs": { "open_limit": 34, "close_limit": 35, "exhaust_tach": 36, "intake_tach": 39 },
+  "sd": { "optional": true, "sck": 18, "miso": 19, "mosi": 23, "cs": 13, "max_journal_bytes": 8388608 },
+  "limits": { "window_travel_ms": 30000, "fan_start_ms": 5000, "offline_after_ms": 90000, "telemetry_period_ms": 5000, "max_future_skew_ms": 5000 }
+}
