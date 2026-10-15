@@ -52,6 +52,17 @@ afterEach(() => {
 })
 
 describe('ML service persistence and API serialization boundary', () => {
+  it('stores an explicit 20 minute target and never labels its value as a 15 minute forecast', async () => {
+    const repository = new MemoryRepository()
+    const now = await seedSufficientHistory(repository)
+    const service = new AirQualityService(repository, { predict: vi.fn(async () => ({ predictedCo2_15min: 950, model: 'linear', modelVersion: '20-min-test', horizonMinutes: 20 as const })) }, { ...config, automationEnabled: false })
+    const result = await service.ingest(inputAt(now, 800))
+    expect(result.prediction?.targetTime.getTime()).toBe(now.getTime() + 20 * 60000)
+    const serialized = serializeIngest(result).prediction
+    expect(serialized?.predicted_co2).toBe(950)
+    expect(serialized?.predicted_co2_15min).toBeNull()
+    expect(serialized?.horizon_minutes).toBe(20)
+  })
   it('persists and serializes only the validated forecast returned by the client', async () => {
     const fetchMock = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>

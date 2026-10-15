@@ -2,6 +2,7 @@ import type { DashboardDiagnostics } from '../server/types'
 import type { StoredTelemetry } from './telemetry'
 import type { OutdoorPolicy, OutdoorSafety } from '../server/outdoor-policy'
 export interface ClientMeasurement {
+  observation_key?: string
   id: number
   created_at: string
   timestamp: string

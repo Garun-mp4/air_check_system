@@ -138,7 +138,7 @@ class NetworkIntegration:
             return
         self._stop.clear()
         self._thread = threading.Thread(
-            target=self._run,
+            target=self._guarded_run,
             name="aircheck-network-worker",
             daemon=True,
         )
@@ -153,6 +153,12 @@ class NetworkIntegration:
             self._thread.join(timeout=self.config.request_timeout_seconds + 1.0)
             if self._thread.is_alive():
                 LOGGER.error("network worker did not stop within the configured request timeout")
+
+    def _guarded_run(self) -> None:
+        try:
+            self._run()
+        finally:
+            self._set_status(False, message='Сетевой цикл остановлен')
 
     def publish_telemetry(self, payload: MeasurementPayload | DeviceTelemetryPayload) -> None:
         with self._latest_lock:
@@ -307,9 +313,9 @@ class NetworkIntegration:
                         self._clear_telemetry_if_current(revision)
                         self._set_status(True, forecast=forecast)
                         LOGGER.info(
-                            "Telemetry accepted by backend: indoor_co2=%.1f ppm indoor_pm25=%.2f ug/m3 forecast=%s",
-                            payload.indoor["co2"], payload.indoor["pm25"],
-                            f"{forecast.predicted_co2_15min:.1f} ppm" if forecast else "unavailable",
+                            "Telemetry accepted by backend: forecast=%s horizon_minutes=%s",
+                            (forecast.predicted_co2 if forecast.predicted_co2 is not None else forecast.predicted_co2_15min) if forecast else "unavailable",
+                            forecast.horizon_minutes if forecast else "unavailable",
                         )
                         self._events.put(
                             TelemetryAccepted(

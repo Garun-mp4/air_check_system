@@ -9,7 +9,7 @@ from concurrent.futures import TimeoutError as FutureTimeout
 from typing import Any, AsyncIterator
 
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 
 from aircheck_simulator_3d.app.config import load_config
 from aircheck_simulator_3d.app.coordinator import SimulationCoordinator
@@ -50,9 +50,10 @@ def create_web_service(coordinator: SimulationCoordinator | None = None) -> Fast
             raise HTTPException(status_code=401, detail="Invalid simulator service token")
 
     @app.get("/healthz")
-    async def health() -> dict[str, Any]:
+    async def health():
         revision, snapshot = simulation.snapshot()
-        return {"status": "ok", "running": simulation.running, "revision": revision, "device_id": snapshot["device_id"]}
+        ready = simulation.running and simulation.network.running
+        return JSONResponse({"status": "ok" if ready else "degraded", "running": simulation.running, "network_running": simulation.network.running, "revision": revision, "device_id": snapshot["device_id"]}, status_code=200 if ready else 503)
 
     @app.get("/v1/state")
     async def state(authorization: str | None = Header(default=None)) -> dict[str, Any]:

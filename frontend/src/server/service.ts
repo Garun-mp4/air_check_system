@@ -88,6 +88,11 @@ export class AirQualityService {
       co2Limit:settings.co2CriticalThreshold,pm25Limit:settings.pm25ElevatedLimit,
       ventilationOn:reportFresh ? controls.reported.intakeOn||controls.reported.exhaustOn : null,
     })
+    if (measurement.historicalOnly) {
+      const reason = 'Архивное измерение сохранено для истории и обучения; текущий прогноз не рассчитывается'
+      await this.repository.setPredictionOutcome(measurement.id, 'unavailable', reason, 'historical')
+      return { measurement, prediction: null, recommendation: null, predictionStatus: 'unavailable', predictionError: reason }
+    }
     let prediction: Prediction | null = await this.repository.getPredictionForMeasurement(measurement.id)
     const existingRecommendation = await this.repository.getRecommendationForMeasurement(measurement.id)
     if (existingRecommendation && measurement.predictionStatus && measurement.predictionStatus !== 'pending') {

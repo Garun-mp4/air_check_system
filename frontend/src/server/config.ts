@@ -64,7 +64,7 @@ export function getConfig(): AppConfig {
 
   return {
     mlForecastHorizonMinutes: horizon,
-    ...(process.env.AIRCHECK_MODE !== undefined ? { dataSource: activeDataSource() } : {}),
+    dataSource: activeDataSource(),
     databaseUrl:
       process.env.DATABASE_URL ??
       'postgres://air_quality:air_quality_dev@localhost:5432/air_quality',

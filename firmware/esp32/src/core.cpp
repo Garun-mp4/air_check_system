@@ -68,7 +68,7 @@ Outcome Controller::command(const Command& c, uint64_t now, int64_t epoch_ms) {
     active_[t] = c; started_[t] = now;
     if (c.manual) manual_until_ = now + policy_.manual_override_ms;
     if (t == 2) auto_window_active_ = false;
-    if (t < 2) auto_fans_ = false;
+    if (t < 2) automatic_fans_[t] = !c.manual && c.desired;
     state_.results[t] = {c.id, Outcome::accepted};
     if (t == 0) state_.outputs.exhaust = c.desired;
     if (t == 1) state_.outputs.intake = c.desired;
@@ -91,6 +91,7 @@ void Controller::reconcile_pending(const uint64_t* ids, size_t count) {
     }
 }
 void Controller::tick(uint64_t now, int64_t epoch_ms, const Feedback& f) {
+    if(f.open_limit && !state_.feedback.open_limit) auto_opened_at_=now;
     state_.feedback = f;
     state_.position_percent = f.open_limit && !f.close_limit ? 100 : f.close_limit && !f.open_limit ? 0 : -1;
     if (f.open_limit && f.close_limit) { state_.window_fault = true; stop_window(); finish(2, Outcome::fault); }
@@ -133,18 +134,23 @@ bool valid_policy(const Policy& p) {
         std::isfinite(p.outdoor_pm25_recovery) && p.outdoor_pm25_recovery >= 0 && p.outdoor_pm25_recovery < p.outdoor_pm25_max &&
         std::isfinite(p.outdoor_min_c) && p.outdoor_min_c >= -40 && p.outdoor_min_c <= 40 &&
         std::isfinite(p.outdoor_recovery_c) && p.outdoor_recovery_c > p.outdoor_min_c && p.outdoor_recovery_c <= 45 &&
-        p.manual_override_ms >= 60000 && p.manual_override_ms <= 86400000 && p.minimum_ventilation_ms >= 60000 && p.minimum_ventilation_ms <= 3600000;
+        p.manual_override_ms >= 60000 && p.manual_override_ms <= 86400000 && p.minimum_ventilation_ms >= 60000 && p.minimum_ventilation_ms <= 7200000 && p.max_sensor_age_ms>=5000 && p.max_sensor_age_ms<=15000;
+}
+void Controller::stop_automatic_fans() {
+    if(automatic_fans_[0]) state_.outputs.exhaust=false;
+    if(automatic_fans_[1]) state_.outputs.intake=false;
+    automatic_fans_.fill(false);
 }
 void Controller::configure(const Policy& p) {
     if(!valid_policy(p)) return;
     policy_=p;
     if(!p.enabled) {
-        if(auto_fans_) { state_.outputs.exhaust=false; state_.outputs.intake=false; auto_fans_=false; }
+        stop_automatic_fans();
         if(auto_window_active_) { stop_window(); auto_window_active_=false; }
     }
 }
 void Controller::safety(uint64_t now, const Sample& indoor, const Sample& outdoor, const Sample& pm, const Policy& p) {
-    auto fresh = [now](const Sample& s) { return s.quality == Quality::ok && s.count && now >= s.last_good_ms && now - s.last_good_ms <= board::sensor_stale_ms; };
+    auto fresh = [now,&p](const Sample& s) { return s.quality == Quality::ok && s.count && now >= s.last_good_ms && now - s.last_good_ms <= std::min<uint32_t>(p.max_sensor_age_ms,board::sensor_stale_ms); };
     const bool known = fresh(indoor) && fresh(outdoor) && fresh(pm);
     if (known) {
         pollution_blocked_ = pm.values[0] >= (pollution_blocked_ ? p.outdoor_pm25_recovery : p.outdoor_pm25_max);
@@ -156,22 +162,25 @@ void Controller::safety(uint64_t now, const Sample& indoor, const Sample& outdoo
         const bool unsafe = t == 2 ? !safe_window_ : !safe_fans_;
         if (unsafe && active_[t].id && active_[t].desired) { if(t==2) stop_window(); finish(t, Outcome::unsafe_air); }
     }
-    if (!safe_fans_) { state_.outputs.exhaust = false; state_.outputs.intake = false; auto_fans_ = false; }
+    if (!safe_fans_) { state_.outputs.exhaust = false; state_.outputs.intake = false; automatic_fans_.fill(false); }
     if (!safe_window_ && (state_.outputs.open || (auto_window_active_ && auto_window_desired_))) { stop_window(); auto_window_active_ = false; }
 }
 void Controller::autonomous(uint64_t now, const Sample& indoor, const Sample& outdoor, const Sample& pm, const Policy& p) {
     safety(now,indoor,outdoor,pm,p);
     if (!commissioned_ || !p.enabled) {
-        if(auto_fans_) { state_.outputs.exhaust=false; state_.outputs.intake=false; auto_fans_=false; }
+        stop_automatic_fans();
         if(auto_window_active_) { stop_window(); auto_window_active_=false; }
         return;
     }
     if (now < manual_until_ || active_[0].id || active_[1].id || active_[2].id) return;
     if (safe_fans_ && indoor.values[0] >= p.co2_on) {
-        auto_fans_ = true;
+        automatic_fans_.fill(true);
         if (!state_.fan_fault[0] && !state_.outputs.exhaust) { started_[0] = now; state_.outputs.exhaust = true; }
         if (!state_.fan_fault[1] && !state_.outputs.intake) { started_[1] = now; state_.outputs.intake = true; }
-    } else if (indoor.values[0] <= p.co2_off) { state_.outputs.exhaust = false; state_.outputs.intake = false; }
+    } else if (indoor.values[0] <= p.co2_off) {
+        if(now - started_[0] >= p.minimum_ventilation_ms) { state_.outputs.exhaust=false; automatic_fans_[0]=false; }
+        if(now - started_[1] >= p.minimum_ventilation_ms) { state_.outputs.intake=false; automatic_fans_[1]=false; }
+    }
     if (p.auto_window && !state_.window_fault && !auto_window_active_) {
         const bool open = safe_window_ && indoor.values[0] >= p.co2_on;
         const bool close = !safe_window_ || (indoor.values[0] <= p.co2_off && now - auto_opened_at_ >= p.minimum_ventilation_ms);

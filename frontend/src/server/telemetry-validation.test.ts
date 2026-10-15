@@ -11,6 +11,9 @@ describe('device telemetry v2', () => {
     const frame = frameFixture(); frame.sampled_at = '2026-02-30T12:00:00Z'
     expect(() => parseTelemetry(frame, now)).toThrow()
     const valid = frameFixture(); valid.edge_forecast = { model_sha256: 'a'.repeat(64), horizon_minutes: 20, predicted_co2: 1200, inference_us: 15 }
+    valid.controller.stack_watermarks = { sampler: 256, network: null }
+    expect(parseTelemetry(valid, now).controller.stack_watermarks?.network).toBeNull()
+    expect(controllerWarnings(valid).join(' ')).toContain('стека задачи sampler')
     expect(parseTelemetry(valid, now).edge_forecast?.horizon_minutes).toBe(20)
     valid.edge_forecast.model_sha256 = 'wrong'; expect(() => parseTelemetry(valid, now)).toThrow()
   })

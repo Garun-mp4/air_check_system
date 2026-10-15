@@ -22,6 +22,15 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs() })
 
 describe('HTTP device telemetry', () => {
+  it('passes delivery scope separately from immutable frame data and rejects an unknown scope', async () => {
+    const archived=request(JSON.stringify(frameFixture())); archived.headers.set('x-aircheck-delivery','archive')
+    mocks.ingest.mockResolvedValue({ record: { id: 7, received_at: new Date(now).toISOString() }, duplicate: false, current: false, measurementId: null })
+    expect((await POST(archived)).status).toBe(201)
+    expect(mocks.ingest).toHaveBeenCalledWith(frameFixture(),'archive')
+    mocks.ingest.mockClear()
+    const invalid=request(JSON.stringify(frameFixture())); invalid.headers.set('x-aircheck-delivery','other')
+    expect((await POST(invalid)).status).toBe(400); expect(mocks.ingest).not.toHaveBeenCalled()
+  })
   it('rejects unauthenticated packets before parsing or storing them', async () => {
     expect((await POST(request('invalid', 'Bearer invalid'))).status).toBe(401)
     expect(mocks.ingest).not.toHaveBeenCalled()

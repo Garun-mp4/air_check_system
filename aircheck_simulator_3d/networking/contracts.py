@@ -184,6 +184,9 @@ class BackendForecast:
         value = float(co2)
         if not math.isfinite(value) or value < 0:
             raise ValueError("predicted CO2 must be finite and non-negative")
+        horizon = raw.get('horizon_minutes', 15)
+        if type(horizon) is not int or horizon not in (15,20):
+            raise ValueError('prediction horizon must be 15 or 20 minutes')
         return cls(
             predicted_co2_15min=value if raw.get('horizon_minutes', 15) == 15 else None,
             predicted_co2=value,

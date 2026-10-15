@@ -61,6 +61,7 @@ def test_migration_files_are_ordered_and_complete() -> None:
         "012_device_telemetry.sql",
         "013_runtime_mode.sql",
         "014_telemetry_history_index.sql",
+        "015_archived_telemetry.sql",
     ]
 
 

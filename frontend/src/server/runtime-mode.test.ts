@@ -14,6 +14,12 @@ function service(repository: MemoryRepository, dataSource: 'real' | 'simulator',
 function measurement(dataSource: 'real' | 'simulator', co2 = 650, timestamp = new Date()) { return { dataSource, timestamp, indoor: { co2, temperature: 23, humidity: 45, pm25: 5 }, outdoor: { temperature: 18, humidity: 50, pm25: 8 }, windowOpen: false } }
 
 describe('physical/virtual runtime isolation', () => {
+  it('defaults to simulation without admitting physical credentials or a real source', () => {
+    vi.stubEnv('AIRCHECK_MODE', undefined); vi.stubEnv('DEVICE_API_TOKEN', physicalToken); vi.stubEnv('SIMULATOR_DEVICE_TOKEN', virtualToken)
+    expect(getConfig().dataSource).toBe('simulator')
+    expect(() => requireDeviceToken(request('real', physicalToken))).toThrow()
+    expect(() => requireDeviceToken(request('simulator', virtualToken))).not.toThrow()
+  })
   it('requires real scope and the physical credential in real mode', () => {
     vi.stubEnv('AIRCHECK_MODE', 'real'); vi.stubEnv('DEVICE_API_TOKEN', physicalToken); vi.stubEnv('SIMULATOR_DEVICE_TOKEN', virtualToken)
     expect(() => requireDeviceToken(request('real', physicalToken))).not.toThrow()
@@ -46,6 +52,8 @@ describe('physical/virtual runtime isolation', () => {
     expect(await physical.pendingControlCommands()).toHaveLength(0)
     expect((await repository.getControlBatch('room-01', commands[0].id))[0].status).toBe('cancelled')
     expect((await physical.controlsStatus()).knownTargets).toEqual([])
+    expect((await physical.controlsStatus()).recentCommands).toEqual([])
+    expect(await repository.getLatestControlCommand('room-01', 'window')).toBeNull()
     expect(await repository.listMeasurements({ dataSource: 'simulator', limit: 20 })).toHaveLength(1)
     await expect(physical.ingest(measurement('simulator'))).rejects.toThrow()
     await expect(physical.pendingControlCommands('other-room')).rejects.toThrow()

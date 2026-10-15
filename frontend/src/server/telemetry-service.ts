@@ -41,9 +41,9 @@ export class TelemetryService {
     private readonly now = () => Date.now(),
   ) {}
 
-  async ingest(frame: TelemetryFrame) {
+  async ingest(frame: TelemetryFrame, delivery: 'live' | 'archive' = 'live') {
     if (frame.device_id !== this.deviceId) throw new ValidationError([{ field: 'device_id', message: 'не соответствует устройству установки' }])
-    const saved = await this.store.save(frame)
+    const saved = await this.store.save(frame, delivery)
     const now = this.now()
     const age = now - Date.parse(frame.sampled_at ?? saved.record.received_at)
     if (saved.current && age >= -5000 && age <= 90000) {
@@ -71,7 +71,7 @@ export class TelemetryService {
       })
     }
     const measurement = completeMeasurement(frame)
-    const projected = measurement ? await this.air.ingest(measurement) : null
+    const projected = measurement ? await this.air.ingest({ ...measurement, historicalOnly: delivery === 'archive' || !saved.current }) : null
     return { ...saved, measurementId: projected?.measurement.id ?? null, prediction: projected?.prediction ?? null }
   }
 

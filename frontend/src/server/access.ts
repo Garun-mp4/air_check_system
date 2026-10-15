@@ -114,10 +114,9 @@ export function assertSameOrigin(request: Request): void {
 }
 
 export function requireDeviceToken(request: Request): void {
-  const scoped = process.env.AIRCHECK_MODE !== undefined
-  const source = scoped ? activeDataSource() : null
+  const source = activeDataSource()
   const declared = request.headers.get('x-aircheck-source')
-  if (scoped && (declared && declared !== source || source === 'real' && declared !== 'real')) throw new AccessDeniedError(403, 'Источник устройства не соответствует режиму установки')
+  if (declared && declared !== source || source === 'real' && declared !== 'real') throw new AccessDeniedError(403, 'Источник устройства не соответствует режиму установки')
   const expected = (source === 'simulator' ? process.env.SIMULATOR_DEVICE_TOKEN?.trim() || process.env.DEVICE_API_TOKEN?.trim() : process.env.DEVICE_API_TOKEN?.trim()) ?? ''
   if (expected.length < 32) {
     throw new AccessDeniedError(403, 'Device API token is not configured')

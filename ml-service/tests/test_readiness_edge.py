@@ -64,3 +64,15 @@ def test_export_uses_same_float32_inference_in_portable_firmware(tmp_path):
         subprocess.run([str(tmp_path/'test')],check=True,timeout=10)
     else:
         subprocess.run(['docker','run','--rm','--mount',f'type=bind,source={tmp_path},target=/test,readonly','--mount',f'type=bind,source={firmware},target=/src,readonly','gcc:14','sh','-c','g++ -std=c++17 -Wall -Wextra -Werror -I/src -I/test /test/test.cpp -o /tmp/check && /tmp/check'],check=True,capture_output=True,timeout=120)
+
+def test_edge_admission_rechecks_float32_quality_instead_of_reusing_float64_metrics(tmp_path):
+    import numpy as np
+    from types import SimpleNamespace
+    from edge_export import export_linear
+    features=np.zeros((2,11)); features[:,0]=900
+    bias=-9e10+800
+    model=SimpleNamespace(coef_=np.asarray([1e8]+[0.]*10),intercept_=bias,predict=lambda matrix:np.asarray(matrix)[:,0]*1e8+bias)
+    result=export_linear(model,features,tmp_path,'real',15,'numeric-test',{'mae':0.,'rmse':0.},{'mae':100.,'rmse':100.},[800.,800.])
+    assert result['reference_metrics']['rmse']==0
+    assert result['metrics']['rmse']>10 and result['quantization_max_error_ppm']>10
+    assert not result['qualified'] and 'enabled = false' in (tmp_path/'edge_model.hpp').read_text()

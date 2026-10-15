@@ -79,10 +79,21 @@ try {
   await repository.activateMode(deviceId, 'real')
   assert.equal((await repository.getControlBatch(deviceId, virtualCommand.id))[0].status, 'cancelled')
   assert.deepEqual((await repository.getControlState(deviceId)).knownTargets, [])
+  assert.deepEqual((await repository.getControlState(deviceId)).recentCommands, [])
+  assert.equal(await repository.getLatestControlCommand(deviceId, 'intake'), null)
   assert.equal((await pool.query("SELECT delivery_status FROM notification_events WHERE event_key='db-telemetry-mode-event'")).rows[0].delivery_status, 'disabled')
   assert.equal((await repository.listMeasurements({ dataSource: 'real', limit: 100 })).some(row => row.id === measurements[0].id), true)
   const [physicalCommand] = await repository.queueControlCommands([{ deviceId, target: 'window', desiredState: false, source: 'manual', reason: 'test', batchId: 'db-telemetry-real' }])
   await Promise.all(Array.from({ length: 5 }, () => repository.activateMode(deviceId, 'real')))
   assert.equal((await repository.getControlBatch(deviceId, physicalCommand.id))[0].status, 'pending')
+  const unsynced = frameFixture(); unsynced.boot_id='boot-00000003'; unsynced.sampled_at=null; unsynced.controller.clock_synced=false
+  assert.equal((await store.save(unsynced)).current,true)
+  const archived=frameFixture(); archived.boot_id='boot-archive-unknown'; archived.sequence=1000
+  assert.equal((await store.save(archived,'archive')).current,false)
+  assert.equal((await store.latest(frame.device_id,'real')).frame.boot_id,unsynced.boot_id)
+  const beforeArchive=await repository.getLatestMeasurement('real')
+  const historyOnly=await repository.createMeasurement({timestamp:new Date(Date.now()+1000),dataSource:'real',historicalOnly:true,ingestKey:'db-historical-only',indoor:{co2:9000,temperature:23,humidity:45,pm25:5},outdoor:{temperature:18,humidity:50,pm25:8},windowOpen:false})
+  assert.equal((await repository.getLatestMeasurement('real'))?.id,beforeArchive?.id)
+  assert.equal((await repository.listMeasurements({dataSource:'real',limit:100})).some(row=>row.id===historyOnly.id),true)
   console.log('telemetry: passed (concurrency, retry, conflict rollback, late history, reboot, isolation, pruning)')
 } finally { await repository.close(); await pool.end() }

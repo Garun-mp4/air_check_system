@@ -53,6 +53,14 @@ export function parseTelemetry(payload: unknown, now = Date.now()): TelemetryFra
   if (controller.clock_synced !== (sampledAt !== null)) fail('sampled_at', 'состояние часов не согласовано с датой')
   if (info.sd_status !== undefined) controller.sd_status = choice(info.sd_status, 'controller.sd_status', ['disabled', 'missing', 'ready', 'full', 'error'] as const)
   if (info.sd_backlog !== undefined) controller.sd_backlog = number(info.sd_backlog, 'controller.sd_backlog', 0, 1000000)
+  if (info.stack_watermarks !== undefined) {
+    const stacks = record(info.stack_watermarks, 'controller.stack_watermarks')
+    if (Object.keys(stacks).length > 16) fail('controller.stack_watermarks', 'слишком много задач')
+    controller.stack_watermarks = Object.fromEntries(Object.entries(stacks).slice(0,16).map(([key, value]) => {
+      if (!/^[a-z0-9_]{1,32}$/.test(key)) fail('controller.stack_watermarks', 'недопустимое имя задачи')
+      return [key, value === null ? null : number(value, 'controller.stack_watermarks.' + key, 0, 1048576)]
+    }))
+  }
   let edge: TelemetryFrame['edge_forecast']
   if (root.edge_forecast !== undefined) {
     const value = record(root.edge_forecast, 'edge_forecast')

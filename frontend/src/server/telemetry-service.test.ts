@@ -15,11 +15,25 @@ function setup() {
   const repository = new MemoryRepository()
   const store = new MemoryTelemetryStore()
   const predictor = { predict: vi.fn(async () => ({ predictedCo2_15min: 950, model: 'test', modelVersion: 'test' })) }
-  const air = new AirQualityService(repository, predictor, { ...getConfig(), deviceId: 'room-01', automationEnabled: false })
+  const air = new AirQualityService(repository, predictor, { ...getConfig(), dataSource: 'real', deviceId: 'room-01', automationEnabled: false })
   return { repository, store, predictor, air, service: new TelemetryService(store, repository, air, 'room-01') }
 }
 
 describe('telemetry, persistence and confirmed control', () => {
+  it('archives a recent frame for history without changing current measurements, feedback, ACK or automation', async () => {
+    const { repository, service, air, predictor } = setup()
+    const { commands } = await air.issueControl({ deviceId: 'room-01', target: 'window', action: 'open' })
+    const frame = frameFixture(); frame.sensors[0].values.co2 = 3000
+    frame.actuators.window.position_percent=100; frame.actuators.window.open_limit=true; frame.actuators.window.close_limit=false
+    frame.command_results=[{ id: commands[0].id, status: 'applied' }]
+    expect((await service.ingest(frame,'archive')).current).toBe(false)
+    expect(await repository.getLatestMeasurement()).toBeNull()
+    expect(await repository.listMeasurements({ limit: 20 })).toHaveLength(1)
+    expect((await repository.listPendingControlCommands('room-01',20))[0].id).toBe(commands[0].id)
+    expect((await repository.getControlState('room-01')).lastReportedAt).toBeNull()
+    expect(predictor.predict).not.toHaveBeenCalled()
+    expect(await repository.getLatestRecommendation()).toBeNull()
+  })
   it('projects complete channels, and a retry does not create measurements or recommendations again', async () => {
     const { repository, service } = setup()
     const first = await service.ingest(frameFixture())

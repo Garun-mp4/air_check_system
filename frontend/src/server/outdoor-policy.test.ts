@@ -11,6 +11,7 @@ import { evaluateRecommendation } from './recommendation'
 import { getNodeSettingsDefaults } from './settings'
 import type { Measurement } from './types'
 const current = (pm25 = 8, temperature = 18, co2 = 1200): Measurement => ({
+  dataSource: 'simulator',
   id: 1,
   createdAt: new Date(),
   timestamp: new Date(),

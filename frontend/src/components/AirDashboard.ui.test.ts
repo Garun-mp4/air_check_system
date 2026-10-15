@@ -282,6 +282,21 @@ describe('dashboard states and control actions', () => {
     await user.click(within(alert).getByRole('button', { name: 'Повторить' }))
     await waitFor(() => expect(within(main).queryByRole('alert')).toBeNull())
   })
+  it('stops presenting cached readings and actuator states as confirmed when live requests fail', async () => {
+    vi.useFakeTimers()
+    try {
+      mocks.getLatestDashboard.mockResolvedValueOnce(dashboardData).mockRejectedValue(new Error('offline'))
+      mocks.getControlStatus.mockResolvedValueOnce(controlStatus).mockRejectedValue(new Error('offline'))
+      const { container } = render(createElement(AirDashboard))
+      await act(async () => { await vi.advanceTimersByTimeAsync(0) })
+      expect(container.querySelector('.current-reading-value')?.textContent).toContain('650')
+      await act(async () => { await vi.advanceTimersByTimeAsync(DASHBOARD_LIVE_REFRESH_INTERVAL_MS) })
+      expect(container.querySelector('.current-reading-value')?.textContent).toContain('—')
+      setHash('#controls')
+      await act(async () => { window.dispatchEvent(new HashChangeEvent('hashchange')) })
+      expect(screen.getAllByText('Нет подтверждения')).toHaveLength(2)
+    } finally { vi.useRealTimers() }
+  })
 
   it.each([
     { role: 'user', canOperate: false },

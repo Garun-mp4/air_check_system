@@ -254,6 +254,26 @@ def _wait_for(predicate, timeout: float = 2.0) -> bool:
         time.sleep(0.005)
     return predicate()
 
+def test_v2_packets_and_20_minute_forecast_keep_the_network_worker_alive():
+    from aircheck_simulator_3d.networking.telemetry import TelemetryBuilder
+    from aircheck_simulator_3d.networking.workers import TelemetryAccepted
+    class Backend(_SwitchableBackend):
+        def send_measurement(self, payload):
+            super().send_measurement(payload)
+            return BackendForecast(None, predicted_co2=1300, horizon_minutes=20)
+    backend=Backend(); backend.available.set()
+    network=NetworkIntegration(_config(),'room-01',backend)
+    builder=TelemetryBuilder('room-01'); state=new_simulation().state
+    network.start()
+    try:
+        for count in (1,2):
+            network.publish_telemetry(builder.build(state,datetime.now(timezone.utc)))
+            assert _wait_for(lambda: len(backend.measurements)==count)
+            assert network.running
+        events=[]
+        assert _wait_for(lambda: bool(events.extend(network.drain_events()) or any(isinstance(event,TelemetryAccepted) and event.forecast.horizon_minutes==20 for event in events)))
+    finally: network.close()
+
 
 def test_worker_offline_reconnect_telemetry_commands_execution_and_ack() -> None:
     backend = _SwitchableBackend()

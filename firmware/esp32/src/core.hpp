@@ -46,6 +46,7 @@ struct Policy {
     float co2_on = 1000, co2_off = 800, outdoor_pm25_max = 35, outdoor_pm25_recovery = 30;
     float outdoor_min_c = 5, outdoor_recovery_c = 7;
     uint32_t manual_override_ms = 1800000, minimum_ventilation_ms = 180000;
+    uint32_t max_sensor_age_ms = 15000;
 };
 bool valid_policy(const Policy& policy);
 class Controller {
@@ -67,12 +68,14 @@ private:
     unsigned completed_cursor_ = 0;
     uint64_t manual_until_ = 0;
     Policy policy_{};
-    bool pollution_blocked_ = false, cold_blocked_ = false, auto_fans_ = false;
+    bool pollution_blocked_ = false, cold_blocked_ = false;
+    std::array<bool, 2> automatic_fans_{};
     bool safe_window_ = false, safe_fans_ = false;
     bool auto_window_active_ = false, auto_window_desired_ = false;
     uint64_t auto_window_started_ = 0, auto_opened_at_ = 0;
     void finish(unsigned target, Outcome outcome);
     void stop_window();
+    void stop_automatic_fans();
 };
 // Bounded queue with peek/ack semantics: a failed upload keeps the same identity.
 template <typename T, size_t N> class Queue {

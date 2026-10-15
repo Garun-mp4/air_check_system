@@ -45,7 +45,7 @@ export async function operationalQuality() {
       SELECT m.indoor_co2 FROM measurements m WHERE m.data_source=p.data_source AND m.timestamp<=clock_timestamp()
       AND m.timestamp BETWEEN p.target_time-interval '60 seconds' AND p.target_time+interval '60 seconds'
       ORDER BY abs(extract(epoch FROM m.timestamp-p.target_time)), m.id LIMIT 1
-    ) a ON true WHERE p.source_timestamp IS NOT NULL AND p.target_time<=clock_timestamp()
+    ) a ON true WHERE p.source_timestamp IS NOT NULL AND p.created_at<=p.target_time AND p.target_time<=clock_timestamp()
     AND p.target_time>=clock_timestamp()-($1::double precision*interval '1 hour')
     GROUP BY p.data_source,p.model_version ORDER BY p.data_source,p.model_version`,
     [getConfig().dataRetentionHours],

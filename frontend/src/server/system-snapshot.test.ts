@@ -5,7 +5,7 @@ import { frameFixture } from './test-fixtures/telemetry'
 import { getConfig } from './config'
 import { MemoryRepository } from './repository'
 import { AirQualityService } from './service'
-import { liveMeasurement } from '../lib/telemetry-view'
+import { liveMeasurement, mergeObservationHistory } from '../lib/telemetry-view'
 import { isSystemSnapshot } from '../components/simulator/useSimulatorState'
 import { createStateStream } from './state-stream'
 
@@ -18,6 +18,18 @@ async function fixture() {
   return { controls, settings, dashboard, record: { id: 1, received_at: new Date().toISOString(), frame: frameFixture() } }
 }
 describe('shared real system state', () => {
+  it('updates healthy live history during a partial failure without colliding with legacy IDs or retaining an old range', async () => {
+    const { record } = await fixture()
+    record.frame.sensors[3].status = 'timeout'
+    const current = liveMeasurement(record, null)!
+    const legacy = { ...current, observation_key: undefined, timestamp: new Date(Date.now()-5000).toISOString() }
+    const merged = mergeObservationHistory([legacy], current, Date.now()-10000)
+    expect(merged).toHaveLength(2)
+    expect(merged[1].indoor.co2).toBe(900); expect(merged[1].outdoor.pm25).toBeNull()
+    expect(mergeObservationHistory(merged, current, Date.now()-10000)).toHaveLength(2)
+    expect(mergeObservationHistory(merged, current, Date.now()-10000,1)).toEqual([current])
+    expect(mergeObservationHistory(merged, current, Date.now()+1000)).toEqual([])
+  })
   it('keeps actual readings, static geometry and unknown unmeasured power/flow without physics', async () => {
     const { record, controls, settings, dashboard } = await fixture()
     const snapshot = realSystemSnapshot(record, controls, settings, dashboard)
@@ -46,6 +58,9 @@ describe('shared real system state', () => {
     expect(current?.indoor.pm25).toBe(8)
     expect(current?.outdoor.pm25).toBeNull()
     expect(record.frame.sensors[3].values.pm25).toBe(12)
+    record.frame.sensors[0].status = 'timeout'
+    expect(liveMeasurement(record, null)?.indoor.co2).toBeNull()
+    expect(liveMeasurement(record, null)?.indoor.pm25).toBe(8)
     record.frame.actuators.window.open_limit = true
     expect(liveMeasurement(record, null)?.window_open).toBeNull()
     expect(liveMeasurement(record, null, Date.now() + 16000)?.indoor.co2).toBeNull()

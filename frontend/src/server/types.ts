@@ -10,6 +10,7 @@ export interface SensorValues {
 export type DataSource = 'real' | 'simulator' | 'unknown'
 
 export interface MeasurementInput {
+  historicalOnly?: boolean
   ingestKey?: string
   outdoorSampledAt?: Date
   dataSource?: DataSource

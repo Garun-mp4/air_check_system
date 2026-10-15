@@ -57,12 +57,21 @@ describe('raw device telemetry ordering and identity', () => {
     expect((await store.latest('room-01', 'real'))?.frame.sensors[0].values.co2).toBe(900)
     expect((await store.latest('room-01', 'simulator'))?.frame.sensors[0].values.co2).toBe(4000)
   })
-  it('does not let unsynchronized time replace a dated state', async () => {
+  it('does not let an unsynchronized archive replace a dated state', async () => {
     const store = new MemoryTelemetryStore()
     const original = await store.save(frameFixture())
     const unknown = frameFixture(); unknown.boot_id = 'boot-00000002'; unknown.sampled_at = null; unknown.controller.clock_synced = false
-    expect((await store.save(unknown)).current).toBe(false)
+    expect((await store.save(unknown, 'archive')).current).toBe(false)
     expect((await store.latest('room-01', 'real'))?.id).toBe(original.record.id)
+  })
+  it('shows a live reboot with unknown clock instead of old confirmed state, and rejects its old SD replay', async () => {
+    const store = new MemoryTelemetryStore()
+    await store.save(frameFixture())
+    const reboot = frameFixture(); reboot.boot_id = 'boot-00000002'; reboot.sampled_at = null; reboot.controller.clock_synced = false
+    expect((await store.save(reboot)).current).toBe(true)
+    const old = frameFixture(); old.sequence=100
+    expect((await store.save(old, 'archive')).current).toBe(false)
+    expect((await store.latest('room-01','real'))?.frame.boot_id).toBe(reboot.boot_id)
   })
   it('returns independent copies and retains the head when pruning', async () => {
     const store = new MemoryTelemetryStore(() => new Date('2026-10-15T12:00:00Z'))

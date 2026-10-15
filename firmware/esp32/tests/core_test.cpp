@@ -56,7 +56,10 @@ static void controls() {
     fans.command({6,Target::intake,true,epoch+10000},5000,epoch+5000); fans.tick(6000,epoch+6000,{false,false,0,900}); CHECK(fans.state().results[1].outcome==Outcome::applied);
     fans.tick(11000,epoch+11000,{}); CHECK(fans.state().fan_fault[1] && !fans.state().outputs.intake);
     Controller autonomous(true); autonomous.autonomous(100,good({1200,23,45},100),good({20,45},100),good({10},100),approved); CHECK(autonomous.state().outputs.exhaust && autonomous.state().outputs.intake);
-    autonomous.autonomous(200,good({700,23,45},200),good({20,45},200),good({10},200),approved); CHECK(!autonomous.state().outputs.exhaust);
+    autonomous.autonomous(200,good({700,23,45},200),good({20,45},200),good({10},200),approved); CHECK(autonomous.state().outputs.exhaust);
+    autonomous.autonomous(181000,good({700,23,45},181000),good({20,45},181000),good({10},181000),approved); CHECK(!autonomous.state().outputs.exhaust && !autonomous.state().outputs.intake);
+    autonomous.autonomous(182000,good({1200,23,45},182000),good({20,45},182000),good({10},182000),approved);
+    autonomous.safety(182100,good({1200,23,45},182100),good({20,45},182100),good({100},182100),approved); CHECK(!autonomous.state().outputs.exhaust);
     Controller unsafe(true); unsafe.autonomous(100,good({1200,23,45},100),good({-10,45},100),good({10},100),approved); CHECK(!unsafe.state().outputs.exhaust);
     Controller manual(true); manual.command({8,Target::exhaust,false,epoch+10000},0,epoch); manual.tick(1000,epoch+1000,{});
     manual.autonomous(2000,good({1200,23,45},2000),good({20,45},2000),good({10},2000),approved); CHECK(!manual.state().outputs.exhaust);
@@ -74,8 +77,11 @@ static void controls() {
     Controller filter(true); filter.autonomous(100,good({1200,23,45},100),good({20,45},100),good({100},100),filtered);
     CHECK(filter.state().outputs.intake && !filter.state().outputs.open);
     filter.configure({}); CHECK(!filter.state().outputs.intake);
+    Controller remote_auto(true); remote_auto.configure(approved); remote_auto.command({202,Target::exhaust,true,epoch+10000,false},0,epoch); remote_auto.tick(1000,epoch+1000,{false,false,900,0}); remote_auto.configure({}); CHECK(!remote_auto.state().outputs.exhaust);
+    Controller remote_manual(true); remote_manual.configure(approved); remote_manual.command({203,Target::exhaust,true,epoch+10000,true},0,epoch); remote_manual.tick(1000,epoch+1000,{false,false,900,0}); remote_manual.configure({}); CHECK(remote_manual.state().outputs.exhaust);
     Controller disabled_auto(true); disabled_auto.autonomous(100,good({1200,23,45},100),good({20,45},100),good({10},100),{}); CHECK(!disabled_auto.state().outputs.exhaust);
     Policy bad=approved; bad.co2_off=2000; CHECK(!valid_policy(bad)); bad=approved; bad.outdoor_pm25_recovery=100; CHECK(!valid_policy(bad));
+    Policy maximum=approved; maximum.minimum_ventilation_ms=120*60000; CHECK(valid_policy(maximum)); maximum.minimum_ventilation_ms+=1; CHECK(!valid_policy(maximum));
     Controller local_window(true); approved.auto_window=true;
     local_window.tick(0,epoch,{false,true,0,0}); local_window.autonomous(100,good({1200,23,45},100),good({20,45},100),good({10},100),approved);
     local_window.tick(200,epoch+200,{false,true,0,0}); CHECK(local_window.state().outputs.open);

@@ -100,13 +100,11 @@ def train_and_evaluate(
         "baseline": {'name': 'persistence', **baseline},
         "beats_baseline": metrics[selected_name]['rmse'] < baseline['rmse'] * 0.95,
     }
-    (output_path / "training_metrics.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
     # Export the separately evaluated linear candidate, even when the server selects RF.
     from edge_export import export_linear
-    export_linear(fitted['linear_regression'], test_x, output_path, data_source, horizon_minutes, model_version,
-        metrics['linear_regression'], baseline)
+    edge = export_linear(fitted['linear_regression'], test_x, output_path, data_source, horizon_minutes, model_version,
+        metrics['linear_regression'], baseline, test_y)
+    report['edge_candidate'] = {key: edge[key] for key in ('metrics','reference_metrics','quantization_max_error_ppm','qualified','parameter_bytes')}
+    (output_path / "training_metrics.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return report
 

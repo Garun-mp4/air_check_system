@@ -4,6 +4,7 @@ import { AirQualityService } from './service'
 import { MlServiceError } from './ml-client'
 import { getConfig } from './config'
 const input = (timestamp: Date) => ({
+  dataSource: 'simulator' as const,
   timestamp,
   indoor: { co2: 950, temperature: 23, humidity: 45, pm25: 5 },
   outdoor: { temperature: 18, humidity: 60, pm25: 8 },
@@ -61,7 +62,7 @@ describe('prediction provenance and freshness', () => {
     expect((await service.latest()).diagnostics?.prediction).toBe('stale')
     expect((await service.latest()).prediction).toBeNull()
   })
-  it('preserves legacy artifacts without pretending that their timestamps prove a binding', async () => {
+  it('preserves unknown legacy artifacts without exposing them in simulation', async () => {
     const r = new MemoryRepository(),
       service = new AirQualityService(r, { predict: vi.fn() }, getConfig())
     const m = await r.createMeasurement(input(new Date()))
@@ -73,7 +74,7 @@ describe('prediction provenance and freshness', () => {
     })
     const result = await service.latest()
     expect(result.prediction).toBeNull()
-    expect(result.diagnostics?.prediction).toBe('legacy')
+    expect(result.diagnostics?.prediction).toBe('pending')
     expect((await r.getLatestPrediction())?.modelName).toBe('legacy')
   })
   it('reports no data and separately tracks connection loss', async () => {

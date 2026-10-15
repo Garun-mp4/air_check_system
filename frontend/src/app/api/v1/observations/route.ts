@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     ])
     const data = [
       ...raw.flatMap(record => { const value = liveMeasurement(record, null, Date.parse(record.frame.sampled_at ?? '')); return value ? [value] : [] }),
-      ...complete.filter(value => !value.ingestKey?.startsWith('v2:')).map(serializeMeasurement),
+      ...complete.filter(value => !value.ingestKey?.startsWith('v2:')).map(value => ({ ...serializeMeasurement(value), observation_key: 'legacy:' + value.id })),
     ].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp) || a.id - b.id).slice(-limit)
     return NextResponse.json({ data, meta: { count: data.length, from: from.toISOString(), to: to.toISOString(), limit } }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) { return errorResponse(error) }

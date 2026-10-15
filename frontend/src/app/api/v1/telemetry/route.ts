@@ -33,9 +33,11 @@ async function readPayload(request: Request): Promise<unknown> {
 export async function POST(request: Request) {
   try {
     requireDeviceToken(request)
+    const delivery = request.headers.get('x-aircheck-delivery') ?? 'live'
+    if (delivery !== 'live' && delivery !== 'archive') throw new ApiError('invalid_delivery', 'Ожидается live или archive', 400)
     const frame = parseTelemetry(await readPayload(request))
     if (frame.data_source !== activeDataSource()) throw new ApiError('inactive_source', 'Источник не соответствует режиму установки', 409)
-    const result = await getTelemetryService().ingest(frame)
+    const result = await getTelemetryService().ingest(frame, delivery)
     return NextResponse.json({ data: { id: result.record.id, received_at: result.record.received_at, duplicate: result.duplicate, current: result.current, measurement_id: result.measurementId, prediction: serializePrediction(result.prediction) } }, { status: result.duplicate ? 200 : 201 })
   } catch (error) { return accessErrorResponse(error) ?? errorResponse(error) }
 }

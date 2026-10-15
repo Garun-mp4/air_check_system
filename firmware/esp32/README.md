@@ -20,6 +20,8 @@ python -m pytest tests/firmware tests/infrastructure/test_hardware_contract.py -
 
 ## Локальная конфигурация
 
+В телеметрии передаются минимальные остатки стеков семи задач (`stack_watermarks`, в байтах ESP-IDF), текущая и минимальная свободная heap-память. Эти значения появляются только после измерения на плате; размер статической RAM из отчёта компоновщика не заменяет их. Сборка ограничена двумя параллельными заданиями по умолчанию; `--jobs` позволяет явно изменить лимит.
+
 Основной способ — NVS namespace `aircheck`: строки `ssid`, `password`, `server`, `device_id`, `token`, `root_ca`, `ntp_server`; u8 `commissioned` (по умолчанию 0). Необязательный `include/secrets.h` повторяет шаблон `secrets.example.h` и исключён из Git. Корневой сертификат берётся из конкретной установки Caddy. Нельзя подменять его отключением проверки TLS. `ntp_server` по умолчанию совпадает с именем HTTPS-сервера; он должен предоставлять SNTP в локальной сети на UDP123, чтобы синхронизация не зависела от внешнего интернета.
 
 Создать закрытый JSON вне Git с полями `ssid`, `password`, `server` (HTTPS origin), `device_id`, `token` (от 32 символов), `ca_file` (путь относительно JSON к корневому PEM), `commissioned: false`. Для генерации использовать Python с установленными requirements-build.txt (включает официальный esp-idf-nvs-partition-gen 0.3.0):

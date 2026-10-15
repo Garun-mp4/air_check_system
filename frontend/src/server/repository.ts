@@ -137,8 +137,12 @@ function cloneNodeSettings(settings: NodeSettings): NodeSettings {
   }
 }
 
+// Commands from previous runtime modes remain in history, but cannot describe the active installation.
+export const activeCommandEpochSql = "created_at >= COALESCE((SELECT updated_at FROM runtime_device_modes WHERE device_id=$1 AND data_source IS NOT NULL), '-infinity'::timestamptz)"
+
 export class MemoryRepository implements Repository {
   private activeModes = new Map<string, 'real' | 'simulator'>()
+  private activeCommandFloor = new Map<string, number>()
   private measurements: Measurement[] = []
   private predictions: Prediction[] = []
   private recommendations: Recommendation[] = []
@@ -155,6 +159,7 @@ export class MemoryRepository implements Repository {
     const state = this.ensureControlState(deviceId)
     Object.assign(state, { reported: emptyControlSnapshot(), desired: emptyControlSnapshot(), knownTargets: [], lastReportedAt: null, windowMode: 'auto', overrideUntil: null, windowOpenSince: null, ventilationStartedAt: null, outdoorSafety: null, updatedAt: new Date() })
     this.activeModes.set(deviceId, source)
+    this.activeCommandFloor.set(deviceId, this.nextId)
   }
 
   async createMeasurement(input: MeasurementInput): Promise<Measurement> {
@@ -179,7 +184,7 @@ export class MemoryRepository implements Repository {
   }
 
   async getLatestMeasurement(source?: DataSource): Promise<Measurement | null> {
-    return this.measurements.filter(item => item.timestamp.getTime() <= Date.now() + 5000 && (source === undefined || (item.dataSource ?? 'unknown') === source)).sort(sortByTimestamp).at(-1) ?? null
+    return this.measurements.filter(item => !item.historicalOnly && item.timestamp.getTime() <= Date.now() + 5000 && (source === undefined || (item.dataSource ?? 'unknown') === source)).sort(sortByTimestamp).at(-1) ?? null
   }
 
   async listMeasurements(query: HistoryQuery): Promise<Measurement[]> {
@@ -347,7 +352,7 @@ export class MemoryRepository implements Repository {
     this.settleCommands(deviceId)
     const state = this.ensureControlState(deviceId)
     const commands = this.controlCommands.filter(
-      (command) => command.deviceId === deviceId,
+      (command) => command.deviceId === deviceId && command.id >= (this.activeCommandFloor.get(deviceId) ?? 0),
     )
     state.pendingCommands = commands.filter(
       (command) => command.status === 'pending',
@@ -364,7 +369,7 @@ export class MemoryRepository implements Repository {
   ): Promise<ControlCommand | null> {
     const command = [...this.controlCommands]
       .filter(
-        (item) => item.deviceId === deviceId && item.target === target,
+        (item) => item.deviceId === deviceId && item.target === target && item.id >= (this.activeCommandFloor.get(deviceId) ?? 0),
       )
       .sort(sortCommands)[0]
     return command ? { ...command } : null
@@ -391,7 +396,7 @@ export class MemoryRepository implements Repository {
           : item.target === 'intake'
             ? state.reported.intakeOn
             : state.reported.windowOpen
-      const previous = this.controlCommands.filter(c => c.deviceId === item.deviceId && c.target === item.target).at(-1)
+      const previous = this.controlCommands.filter(c => c.deviceId === item.deviceId && c.target === item.target && c.id >= (this.activeCommandFloor.get(item.deviceId) ?? 0)).at(-1)
       if (item.source === 'automatic' && previous?.source === 'automatic' && previous.desiredState === item.desiredState && ['failed', 'expired', 'cancelled'].includes(previous.status)) continue
       const pendingForTarget = this.controlCommands.some(
         (command) =>
@@ -582,6 +587,7 @@ export class MemoryRepository implements Repository {
 }
 
 interface MeasurementRow {
+  historical_only: boolean
   ingest_key: string | null
   outdoor_sampled_at: Date | string | null
   data_source: Measurement['dataSource']
@@ -682,6 +688,7 @@ function asNumber(value: number | string): number {
 
 function mapMeasurement(row: MeasurementRow): Measurement {
   return {
+    ...(row.historical_only ? { historicalOnly: true } : {}),
     id: Number(row.id),
     createdAt: asDate(row.created_at),
     timestamp: asDate(row.measurement_timestamp),
@@ -817,7 +824,7 @@ const measurementColumns = [
   'outdoor_humidity',
   'outdoor_pm25',
   'window_open',
-  'prediction_status', 'prediction_error', 'prediction_error_code', 'data_source', 'ingest_key', 'outdoor_sampled_at',
+  'prediction_status', 'prediction_error', 'prediction_error_code', 'data_source', 'ingest_key', 'outdoor_sampled_at', 'historical_only',
 ].join(', ')
 
 export class PostgresRepository implements Repository {
@@ -858,8 +865,8 @@ export class PostgresRepository implements Repository {
     const key = measurementIdentity(input)
     const result = await this.pool.query<MeasurementRow>(
       'INSERT INTO measurements ("timestamp", indoor_co2, indoor_temperature, indoor_humidity, ' +
-        'indoor_pm25, outdoor_temperature, outdoor_humidity, outdoor_pm25, window_open, data_source, co2_limit, pm25_limit, ventilation_on, ingest_key, outdoor_sampled_at) ' +
-        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) ON CONFLICT (ingest_key) DO NOTHING RETURNING ' +
+        'indoor_pm25, outdoor_temperature, outdoor_humidity, outdoor_pm25, window_open, data_source, co2_limit, pm25_limit, ventilation_on, ingest_key, outdoor_sampled_at, historical_only) ' +
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) ON CONFLICT (ingest_key) DO NOTHING RETURNING ' +
         measurementColumns,
       [
         input.timestamp,
@@ -872,7 +879,7 @@ export class PostgresRepository implements Repository {
         input.outdoor.pm25,
         input.windowOpen,
         input.dataSource ?? 'unknown',
-        input.co2Limit ?? null, input.pm25Limit ?? null, input.ventilationOn ?? null, key, input.outdoorSampledAt ?? null,
+        input.co2Limit ?? null, input.pm25Limit ?? null, input.ventilationOn ?? null, key, input.outdoorSampledAt ?? null, input.historicalOnly ?? false,
       ],
     )
     if (result.rows[0]) return mapMeasurement(result.rows[0])
@@ -887,7 +894,7 @@ export class PostgresRepository implements Repository {
     const result = await this.pool.query<MeasurementRow>(
       'SELECT ' +
         measurementColumns +
-        " FROM measurements WHERE \"timestamp\" <= clock_timestamp() + interval '5 seconds' AND ($1::text IS NULL OR data_source=$1) ORDER BY \"timestamp\" DESC, id DESC LIMIT 1",
+        " FROM measurements WHERE NOT historical_only AND \"timestamp\" <= clock_timestamp() + interval '5 seconds' AND ($1::text IS NULL OR data_source=$1) ORDER BY \"timestamp\" DESC, id DESC LIMIT 1",
       [source ?? null],
     )
     return result.rows[0] ? mapMeasurement(result.rows[0]) : null
@@ -1036,10 +1043,10 @@ export class PostgresRepository implements Repository {
     )
     const lastCommandResult = await client.query<ControlCommandRow>(
       'SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at, expires_at, completed_at, failure_reason ' +
-        'FROM actuator_commands WHERE device_id = $1 ORDER BY created_at DESC, id DESC LIMIT 1',
+        'FROM actuator_commands WHERE device_id = $1 AND ' + activeCommandEpochSql + ' ORDER BY created_at DESC, id DESC LIMIT 1',
       [deviceId],
     )
-    const recent = await client.query<ControlCommandRow>('SELECT * FROM actuator_commands WHERE device_id = $1 AND batch_id IN (SELECT batch_id FROM actuator_commands WHERE device_id = $1 GROUP BY batch_id ORDER BY MAX(id) DESC LIMIT 20) ORDER BY created_at DESC, id DESC', [deviceId])
+    const recent = await client.query<ControlCommandRow>('SELECT * FROM actuator_commands WHERE device_id = $1 AND ' + activeCommandEpochSql + ' AND batch_id IN (SELECT batch_id FROM actuator_commands WHERE device_id = $1 GROUP BY batch_id ORDER BY MAX(id) DESC LIMIT 20) ORDER BY created_at DESC, id DESC', [deviceId])
     return { ...mapControlState(
       stateResult.rows[0],
       Number(pendingResult.rows[0]?.count ?? 0),
@@ -1115,7 +1122,7 @@ export class PostgresRepository implements Repository {
   ): Promise<ControlCommand | null> {
     const result = await this.pool.query<ControlCommandRow>(
       'SELECT id, device_id, target, desired_state, source, reason, batch_id, status, created_at, applied_at, expires_at, completed_at, failure_reason ' +
-        'FROM actuator_commands WHERE device_id = $1 AND target = $2 ' +
+        'FROM actuator_commands WHERE device_id = $1 AND target = $2 AND ' + activeCommandEpochSql + ' ' +
         'ORDER BY created_at DESC, id DESC LIMIT 1',
       [deviceId, target],
     )
@@ -1161,7 +1168,7 @@ export class PostgresRepository implements Repository {
             : item.target === 'intake'
               ? current.reported.intakeOn
               : current.reported.windowOpen
-        const previousResult = await client.query<ControlCommandRow>('SELECT * FROM actuator_commands WHERE device_id = $1 AND target = $2 ORDER BY id DESC LIMIT 1', [item.deviceId, item.target])
+        const previousResult = await client.query<ControlCommandRow>('SELECT * FROM actuator_commands WHERE device_id = $1 AND target = $2 AND ' + activeCommandEpochSql + ' ORDER BY id DESC LIMIT 1', [item.deviceId, item.target])
         const previous = previousResult.rows[0]
         if (item.source === 'automatic' && previous?.source === 'automatic' && previous.desired_state === item.desiredState && ['failed', 'expired', 'cancelled'].includes(previous.status)) continue
         const pendingForTarget = pendingResult.rows.some(
@@ -1407,7 +1414,7 @@ export class PostgresRepository implements Repository {
   }
 
   async ping(): Promise<void> {
-    const result = await this.pool.query("SELECT to_regclass('device_telemetry') IS NOT NULL AND to_regclass('runtime_device_modes') IS NOT NULL AND to_regclass('node_settings') IS NOT NULL AS ready")
+    const result = await this.pool.query("SELECT to_regclass('device_telemetry') IS NOT NULL AND to_regclass('runtime_device_modes') IS NOT NULL AND to_regclass('node_settings') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='measurements' AND column_name='historical_only') AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='device_telemetry' AND column_name='delivery_kind') AS ready")
     if (!result.rows[0]?.ready) throw new Error('Database migrations are required')
   }
 

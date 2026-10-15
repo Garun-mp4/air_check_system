@@ -3,6 +3,9 @@ import type { Pool, PoolClient } from 'pg'
 import { getAuthPool } from './auth'
 import { getConfig } from './config'
 import { ApiError } from './api'
+import { liveMeasurement } from '../lib/telemetry-view'
+import type { TelemetryFrame } from '../lib/telemetry'
+import { activeCommandEpochSql } from './repository'
 import {
   emptyCondition,
   stepCondition,
@@ -205,12 +208,19 @@ export async function refreshEvents(
       "SELECT pg_advisory_xact_lock(hashtext('aircheck-notifications'))",
     )
     const settings = await notificationSettings(client)
-    const measurement = (
+    let measurement: { timestamp: Date; indoor_co2: number } | undefined = (
       await client.query<{ timestamp: Date; indoor_co2: number }>(
-        "SELECT timestamp,indoor_co2 FROM measurements WHERE timestamp <= clock_timestamp() + interval '5 seconds' AND ($1::text IS NULL OR data_source=$1) ORDER BY timestamp DESC,id DESC LIMIT 1",
+        "SELECT timestamp,indoor_co2 FROM measurements WHERE NOT historical_only AND timestamp <= clock_timestamp() + interval '5 seconds' AND ($1::text IS NULL OR data_source=$1) ORDER BY timestamp DESC,id DESC LIMIT 1",
         [config.dataSource ?? null],
       )
     ).rows[0]
+    if (config.dataSource) {
+      const raw = (await client.query<{ payload: TelemetryFrame }>('SELECT t.payload FROM device_telemetry_heads h JOIN device_telemetry t ON t.id=h.frame_id WHERE h.device_id=$1 AND h.data_source=$2', [config.deviceId, config.dataSource])).rows[0]
+      if (raw) {
+        const current = liveMeasurement({ id: 0, received_at: now.toISOString(), frame: raw.payload }, null, now.getTime())
+        measurement = current?.indoor.co2 != null ? { timestamp: new Date(current.timestamp), indoor_co2: current.indoor.co2 } : undefined
+      }
+    }
     const state = (
       await client.query<{ last_reported_at: Date | null }>(
         'SELECT last_reported_at FROM actuator_states WHERE device_id=$1',
@@ -241,7 +251,7 @@ export async function refreshEvents(
         target: string
         failure_reason: string | null
       }>(
-        `SELECT * FROM (SELECT DISTINCT ON(target) id,target,status,failure_reason FROM actuator_commands WHERE device_id=$1 AND status IN ('applied','failed','expired') ORDER BY target,id DESC) latest WHERE status IN ('failed','expired') ORDER BY id DESC LIMIT 1`,
+        `SELECT * FROM (SELECT DISTINCT ON(target) id,target,status,failure_reason FROM actuator_commands WHERE device_id=$1 AND ${activeCommandEpochSql} AND status IN ('applied','failed','expired') ORDER BY target,id DESC) latest WHERE status IN ('failed','expired') ORDER BY id DESC LIMIT 1`,
         [config.deviceId],
       )
     ).rows[0]
@@ -254,7 +264,7 @@ export async function refreshEvents(
     }> = [
       {
         kind: 'co2_high',
-        bad: fresh ? measurement.indoor_co2 >= threshold : null,
+        bad: fresh && measurement ? measurement.indoor_co2 >= threshold : null,
         duration: settings.co2_duration_seconds,
         problem: `CO₂ длительно превышает ${threshold} ppm`,
         recovery: 'CO₂ вернулся ниже порога',

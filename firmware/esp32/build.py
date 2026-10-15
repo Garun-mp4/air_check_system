@@ -16,7 +16,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", choices=("esp32", "fake"), default="esp32")
     parser.add_argument('--edge-model', type=Path, help='Qualified real edge-model.json; excluded when not supplied')
+    parser.add_argument('--jobs', type=int, default=2, help='Bound compiler concurrency on memory-constrained hosts')
     args = parser.parse_args()
+    if not 1 <= args.jobs <= 16: parser.error('--jobs must be from 1 to 16')
     root = Path(__file__).resolve().parent
     # System TEMP may itself contain spaces; pick an explicit short path on Windows.
     default_base = Path(root.anchor) / "acbuild" if os.name == "nt" else Path(tempfile.gettempdir()) / "aircheck-build"
@@ -28,7 +30,7 @@ def main():
         if args.edge_model:
             from prepare_model import prepare
             checksum=prepare(args.edge_model, staged/'include/edge_model.hpp')
-        result = subprocess.run([sys.executable, "-m", "platformio", "run", "-d", str(staged), "-e", args.env], check=False)
+        result = subprocess.run([sys.executable, "-m", "platformio", "run", "-j", str(args.jobs), "-d", str(staged), "-e", args.env], check=False)
         if result.returncode:
             return result.returncode
         output = root / ".pio" / "staged" / (args.env + ('-edge-' + checksum[:12] if args.edge_model else ''))

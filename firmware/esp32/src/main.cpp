@@ -7,7 +7,7 @@
 #include "driver/spi_common.h"
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
-#if __has_include("edge_model.hpp") && !defined(AIRCHECK_FAKE_SENSORS)
+#if __has_include("edge_model.hpp")
 #include "edge_model.hpp"
 #define AIRCHECK_EDGE_MODEL 1
 #endif
@@ -93,6 +93,7 @@ struct Packet {
     float forecast=-1;
     unsigned inference_us=0;
     unsigned sd_status=0, sd_backlog=0;
+    std::array<unsigned,7> stack_min{};
 };
 SemaphoreHandle_t state_mutex;
 QueueHandle_t telemetry_queue, command_queue;
@@ -122,6 +123,8 @@ bool initialize_identity() {
 std::atomic<bool> wifi_online{false};
 std::atomic<unsigned> dropped_packets{0};
 std::atomic<unsigned> storage_status{0}, storage_backlog{0};
+std::array<std::atomic<unsigned>,7> task_stack_min{};
+std::array<uint64_t,7> stack_sample_after{};
 Journal journal;
 sdmmc_card_t* sd_card=nullptr;
 bool sd_bus_ready=false;
@@ -129,6 +132,10 @@ std::atomic<uint32_t> last_server_ms{0};
 portMUX_TYPE tach_mux=portMUX_INITIALIZER_UNLOCKED;
 unsigned tach_counts[2]={};
 uint64_t monotonic_ms() { return esp_timer_get_time()/1000; }
+void sample_stack(unsigned index) {
+    const auto now=monotonic_ms();
+    if(now>=stack_sample_after[index]) { task_stack_min[index]=uxTaskGetStackHighWaterMark(nullptr); stack_sample_after[index]=now+5000; }
+}
 int64_t epoch_ms() { timeval t{}; gettimeofday(&t,nullptr); const int64_t ms=int64_t(t.tv_sec)*1000+t.tv_usec/1000; return ms>=1700000000000LL?ms:0; }
 std::string iso(int64_t ms) {
     if(!ms) return {};
@@ -146,7 +153,7 @@ void sensor_task(void* argument) {
         const Quality result=driver.read(values,count,now);
         if(result==Quality::ok) monitor.success(values,count,now); else monitor.failure(result,now);
         xSemaphoreTake(state_mutex,portMAX_DELAY); shared_samples[index]=monitor.read(monotonic_ms()); xSemaphoreGive(state_mutex);
-        esp_task_wdt_reset(); xTaskDelayUntil(&last,pdMS_TO_TICKS(board::telemetry_period_ms));
+        sample_stack(index); esp_task_wdt_reset(); xTaskDelayUntil(&last,pdMS_TO_TICKS(board::telemetry_period_ms));
     }
 }
 void IRAM_ATTR tach_interrupt(void* argument) {
@@ -181,7 +188,7 @@ void control_task(void*) {
         if(!wifi_online || uint32_t(now)-last_server_ms.load()>board::offline_after_ms) controller.autonomous(now,shared_samples[0],shared_samples[1],shared_samples[3],local_policy);
         const auto outputs=controller.state().outputs;
         xSemaphoreGive(state_mutex);
-        write_outputs(outputs); esp_task_wdt_reset(); xTaskDelayUntil(&last,pdMS_TO_TICKS(20));
+        write_outputs(outputs); sample_stack(4); esp_task_wdt_reset(); xTaskDelayUntil(&last,pdMS_TO_TICKS(20));
     }
 }
 void sampler_task(void*) {
@@ -192,12 +199,13 @@ void sampler_task(void*) {
         xSemaphoreTake(state_mutex,portMAX_DELAY); packet.sensors=shared_samples; packet.controls=controller.state(); xSemaphoreGive(state_mutex);
         packet.heap=esp_get_free_heap_size(); packet.min_heap=esp_get_minimum_free_heap_size(); packet.dropped=dropped_packets; packet.queue_depth=uxQueueMessagesWaiting(telemetry_queue);
         packet.sd_status=storage_status; packet.sd_backlog=storage_backlog;
+        sample_stack(5); for(unsigned i=0;i<7;++i) packet.stack_min[i]=task_stack_min[i];
         const auto& s=packet.sensors;
         const bool good=packet.epoch_ms && std::all_of(s.begin(),s.end(),[&](const Sample& sample){ return sample.quality==Quality::ok && sample.count && packet.monotonic_ms>=sample.last_good_ms && packet.monotonic_ms-sample.last_good_ms<=board::sensor_stale_ms; });
         if(good) history.push(packet.monotonic_ms,s[0].values[0]);
 #if defined(AIRCHECK_EDGE_MODEL)
         float delta5=0,delta10=0;
-        if(edge_model::enabled && good && packet.controls.position_percent>=0 && history.change(packet.monotonic_ms,300000,s[0].values[0],delta5) && history.change(packet.monotonic_ms,600000,s[0].values[0],delta10)) {
+        if(edge_model::enabled && std::strcmp(SOURCE,"real")==0 && good && packet.controls.position_percent>=0 && history.change(packet.monotonic_ms,300000,s[0].values[0],delta5) && history.change(packet.monotonic_ms,600000,s[0].values[0],delta10)) {
             const time_t seconds=packet.epoch_ms/1000; tm utc{}; gmtime_r(&seconds,&utc);
             std::array<float,11> features={s[0].values[0],s[0].values[1],s[0].values[2],s[2].values[0],s[1].values[0],s[1].values[1],s[3].values[0],packet.controls.position_percent>0?1.f:0.f,delta5,delta10,float(utc.tm_hour)};
             const auto started=esp_timer_get_time(); float result=0;
@@ -237,7 +245,10 @@ std::string serialize(const Packet& p) {
     cJSON_AddNumberToObject(info,"dropped_packets",p.dropped); cJSON_AddNumberToObject(info,"queue_depth",p.queue_depth);
     constexpr const char* storage_names[]={"disabled","missing","ready","full","error"};
     cJSON_AddStringToObject(info,"sd_status",storage_names[std::min(p.sd_status,4u)]); cJSON_AddNumberToObject(info,"sd_backlog",p.sd_backlog);
-#if defined(AIRCHECK_EDGE_MODEL)
+    auto stacks=cJSON_AddObjectToObject(info,"stack_watermarks");
+    constexpr const char* task_names[]={"indoor_climate","outdoor_climate","indoor_particles","outdoor_particles","control","sampler","network"};
+    for(unsigned i=0;i<7;++i) { if(p.stack_min[i]==UINT32_MAX) cJSON_AddNullToObject(stacks,task_names[i]); else cJSON_AddNumberToObject(stacks,task_names[i],p.stack_min[i]); }
+#if defined(AIRCHECK_EDGE_MODEL) && !defined(AIRCHECK_FAKE_SENSORS)
     auto edge=cJSON_AddObjectToObject(root,"edge_forecast");
     cJSON_AddStringToObject(edge,"model_sha256",edge_model::sha256); cJSON_AddNumberToObject(edge,"horizon_minutes",edge_model::horizon_minutes);
     if(p.forecast>=250) cJSON_AddNumberToObject(edge,"predicted_co2",p.forecast); else cJSON_AddNullToObject(edge,"predicted_co2");
@@ -269,7 +280,7 @@ esp_err_t http_event(esp_http_client_event_t* event) {
     }
     return ESP_OK;
 }
-int request(const char* path,const std::string* body,Response& response) {
+int request(const char* path,const std::string* body,Response& response,bool archive=false) {
     if(std::strncmp(node.server,"https://",8)!=0 || std::strlen(node.ca_pem)<32 || std::strlen(node.token)<32) return 0;
     const std::string url=std::string(node.server)+path;
     esp_http_client_config_t config{}; config.url=url.c_str(); config.cert_pem=node.ca_pem;
@@ -279,6 +290,7 @@ int request(const char* path,const std::string* body,Response& response) {
     const std::string auth=std::string("Bearer ")+node.token;
     esp_http_client_set_header(client,"Authorization",auth.c_str());
     esp_http_client_set_header(client,"X-AirCheck-Source",SOURCE);
+    esp_http_client_set_header(client,"X-AirCheck-Delivery",archive?"archive":"live");
     if(body) { esp_http_client_set_method(client,HTTP_METHOD_POST); esp_http_client_set_header(client,"Content-Type","application/json"); esp_http_client_set_post_field(client,body->c_str(),body->size()); }
     const auto error=esp_http_client_perform(client); const int status=error==ESP_OK && !response.overflow?esp_http_client_get_status_code(client):0;
     esp_http_client_cleanup(client); return status;
@@ -303,8 +315,11 @@ bool parse_policy(const std::string& body, Policy& p) {
     number(data,"co2_normal_threshold",p.co2_off); number(data,"co2_critical_threshold",p.co2_on);
     number(outdoor,"maxPm25",p.outdoor_pm25_max); number(outdoor,"pm25Recovery",p.outdoor_pm25_recovery);
     number(outdoor,"minTemperature",p.outdoor_min_c); number(outdoor,"temperatureRecovery",p.outdoor_recovery_c);
+    float max_age=0; number(outdoor,"maxAgeSeconds",max_age);
+    if(max_age<5 || max_age>3600) valid=false;
+    else p.max_sensor_age_ms=uint32_t(std::min(max_age*1000.f,15000.f));
     float manual=0,minimum=0; number(data,"manual_override_minutes",manual); number(data,"auto_ventilation_minimum_minutes",minimum);
-    if(manual<1 || manual>1440 || minimum<1 || minimum>60) valid=false;
+    if(manual<1 || manual>1440 || minimum<1 || minimum>120) valid=false;
     else { p.manual_override_ms=uint32_t(manual*60000); p.minimum_ventilation_ms=uint32_t(minimum*60000); }
     cJSON_Delete(root); return valid && valid_policy(p);
 }
@@ -396,7 +411,7 @@ void network_task(void*) {
         if(wifi_online && epoch_ms() && !has_pending && uxQueueMessagesWaiting(telemetry_queue)==0 && journal.healthy()) {
             std::string body; unsigned slot=0;
             if(journal.peek(body,slot)) {
-                Response response; const auto status=request("/api/v1/telemetry",&body,response);
+                Response response; const auto status=request("/api/v1/telemetry",&body,response,true);
                 if((status>=200 && status<300) || status==400 || status==409 || status==422) {
                     if(!(status>=200 && status<300)) ++dropped_packets;
                     journal.acknowledge(slot);
@@ -410,7 +425,7 @@ void network_task(void*) {
             else if(sd_card) storage_status=4;
         }
         vTaskDelay(pdMS_TO_TICKS(failures?std::min(5000u,500u*(1u<<std::min(failures,3u))):1000));
-        esp_task_wdt_reset();
+        sample_stack(6); esp_task_wdt_reset();
     }
 }
 void wifi_event(void*,esp_event_base_t base,int32_t event,void*) {
@@ -433,6 +448,7 @@ void start_wifi() {
 }
 }
 extern "C" void app_main() {
+    for(auto& watermark:task_stack_min) watermark=UINT32_MAX;
     for(auto pin:OUT) { gpio_set_level(pin,0); gpio_set_direction(pin,GPIO_MODE_OUTPUT); }
     for(auto pin:LIMITS) gpio_set_direction(pin,GPIO_MODE_INPUT);
     gpio_install_isr_service(0);
@@ -453,6 +469,6 @@ extern "C" void app_main() {
     if(xTaskCreate(control_task,"control",4096,nullptr,6,nullptr)!=pdPASS) return;
     xTaskCreate(sampler_task,"sampler",4096,nullptr,2,nullptr);
     if(identity_ready) start_wifi();
-    xTaskCreate(network_task,"network",12288,nullptr,1,nullptr);
+    if(identity_ready) xTaskCreate(network_task,"network",12288,nullptr,1,nullptr);
     ESP_LOGI(TAG,"Firmware %s, source %s, outputs %s",VERSION,SOURCE,node.commissioned?"commissioned":"disabled");
 }

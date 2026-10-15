@@ -3,7 +3,7 @@ import ModelPanel from './ModelPanel'
 import LongHistoryPanel from './LongHistoryPanel'
 import NotificationPanel from './NotificationPanel'
 import EventJournal from './EventJournal'
-import { liveMeasurement } from '../lib/telemetry-view'
+import { liveMeasurement, mergeObservationHistory } from '../lib/telemetry-view'
 import TelemetryDiagnostics from './TelemetryDiagnostics'
 
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
@@ -2033,21 +2033,10 @@ export default function AirDashboard() {
         const latest = latestResult.value
         setDashboard(latest)
         setLastUpdated(new Date().toISOString())
-        const latestMeasurement = latest.measurement
+        const latestMeasurement = liveMeasurement(latest.telemetry, latest.measurement)
         if (latestMeasurement) {
           const rangeStart = Date.now() - rangeMinutes[range] * 60 * 1000
-          setHistory((current) => {
-            const measurementTime = Date.parse(latestMeasurement.timestamp)
-            if (!Number.isFinite(measurementTime) || measurementTime < rangeStart) {
-              return current
-            }
-            const next = current.filter((item) => item.id !== latestMeasurement.id)
-            next.push(latestMeasurement)
-            return next.sort(
-              (left, right) =>
-                Date.parse(left.timestamp) - Date.parse(right.timestamp) || left.id - right.id,
-            )
-          })
+          setHistory(current => mergeObservationHistory(current, latestMeasurement, rangeStart))
         }
         setError(null)
       } else if (!(latestResult.reason instanceof Error && latestResult.reason.name === 'AbortError')) {
@@ -2252,9 +2241,9 @@ export default function AirDashboard() {
     }
   }, [closeSettings, settingsOpen])
 
-  const measurement = liveMeasurement(dashboard?.telemetry, dashboard?.measurement ?? null)
-  const prediction: ClientPrediction | null = dashboard?.prediction ?? null
-  const recommendation: ClientRecommendation | null = dashboard?.recommendation ?? null
+  const measurement = error ? null : liveMeasurement(dashboard?.telemetry, dashboard?.measurement ?? null)
+  const prediction: ClientPrediction | null = error ? null : dashboard?.prediction ?? null
+  const recommendation: ClientRecommendation | null = error ? null : dashboard?.recommendation ?? null
   const currentCo2 = measurement?.indoor.co2 ?? null
   const activeCo2Thresholds = useMemo(
     () => ({
@@ -2304,7 +2293,7 @@ export default function AirDashboard() {
     : 'ожидание синхронизации'
   const systemStatus = error ? 'нужна проверка' : dashboard?.diagnostics?.measurement === 'stale' ? 'данные устарели' : dashboard?.diagnostics?.device === 'offline' ? 'устройство не на связи' : measurement ? 'в сети' : 'ожидание'
   const systemTone = error ? 'error' : dashboard?.diagnostics?.measurement === 'stale' || dashboard?.diagnostics?.device === 'offline' ? 'warning' : measurement ? 'success' : 'neutral'
-  const currentWindowOpen = controls ? controls.feedback_known && !controls.feedback_known.includes('window') || controls.connection.status !== 'online' ? null : controls.reported.window_open : measurement?.window_open ?? null
+  const currentWindowOpen = controlError ? null : controls ? controls.feedback_known && !controls.feedback_known.includes('window') || controls.connection.status !== 'online' ? null : controls.reported.window_open : measurement?.window_open ?? null
   const windowLabel = currentWindowOpen === null ? '—' : currentWindowOpen ? 'Открыто' : 'Закрыто'
   const windowMode = controls?.window.mode ?? 'auto'
   const windowDesiredOpen = controls?.desired.window_open ?? currentWindowOpen === true
@@ -2328,7 +2317,7 @@ export default function AirDashboard() {
           ? 'Остановить проветривание'
           : 'Запустить проветривание'
   const ventilationStateLabel =
-    controls === null || controls.connection.status !== 'online' || controls.feedback_known && (!controls.feedback_known.includes('intake') || !controls.feedback_known.includes('exhaust'))
+    controlError || controls === null || controls.connection.status !== 'online' || controls.feedback_known && (!controls.feedback_known.includes('intake') || !controls.feedback_known.includes('exhaust'))
       ? 'Состояние неизвестно'
       : ventilationPending
         ? 'Ожидается подтверждение'
@@ -2474,7 +2463,7 @@ export default function AirDashboard() {
 
               <div className="forecast-reading">
                 <div className="forecast-reading-head">
-                  <span>{prediction ? 'Прогноз на ' + formatTime(prediction.target_time) : 'Прогноз через 15 мин'}</span>
+                  <span>{prediction ? 'Прогноз на ' + formatTime(prediction.target_time) : 'Прогноз CO₂'}</span>
                   <span className={'forecast-status forecast-status-' + (prediction ? 'ready' : 'waiting')}>
                     {dashboard?.diagnostics ? predictionStatusLabels[dashboard.diagnostics.prediction] : prediction ? 'готов' : 'нет данных'}
                   </span>
@@ -2550,7 +2539,7 @@ export default function AirDashboard() {
                   icon="exhaust"
                   label="Вытяжка"
                   description="удаление воздуха из комнаты"
-                  active={controls?.connection.status !== 'online' || controls?.feedback_known && !controls.feedback_known.includes('exhaust') ? null : controls?.reported.exhaust_on ?? null}
+                  active={controlError || controls?.connection.status !== 'online' || controls?.feedback_known && !controls.feedback_known.includes('exhaust') ? null : controls?.reported.exhaust_on ?? null}
                   desiredActive={controls?.desired.exhaust_on ?? false}
                   pending={controls === null ||
                     controls?.reported.exhaust_on !== controls?.desired.exhaust_on ||
@@ -2562,7 +2551,7 @@ export default function AirDashboard() {
                   icon="intake"
                   label="Приток"
                   description="подача воздуха через фильтр"
-                  active={controls?.connection.status !== 'online' || controls?.feedback_known && !controls.feedback_known.includes('intake') ? null : controls?.reported.intake_on ?? null}
+                  active={controlError || controls?.connection.status !== 'online' || controls?.feedback_known && !controls.feedback_known.includes('intake') ? null : controls?.reported.intake_on ?? null}
                   desiredActive={controls?.desired.intake_on ?? false}
                   pending={controls === null ||
                     controls?.reported.intake_on !== controls?.desired.intake_on ||

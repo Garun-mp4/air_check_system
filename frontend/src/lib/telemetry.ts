@@ -42,6 +42,7 @@ export interface TelemetryFrame {
     queue_depth: number
     sd_status?: 'disabled' | 'missing' | 'ready' | 'full' | 'error'
     sd_backlog?: number
+    stack_watermarks?: Record<string, number | null>
   }
   actuators: {
     window: {
@@ -59,6 +60,7 @@ export interface TelemetryFrame {
 }
 
 export interface StoredTelemetry {
+  delivery_kind?: 'live' | 'archive'
   id: number
   received_at: string
   frame: TelemetryFrame
@@ -101,6 +103,7 @@ export function controllerWarnings(frame: TelemetryFrame): string[] {
   if (c.sd_status === 'missing') warnings.push('SD-карта не обнаружена; работает ограниченный буфер в RAM')
   if (c.sd_status === 'full') warnings.push('SD-журнал заполнен; новые данные могут теряться до восстановления связи')
   if (c.sd_status === 'error') warnings.push('Ошибка SD-карты; управление продолжает работать')
+  for (const [name, bytes] of Object.entries(c.stack_watermarks ?? {})) if (bytes !== null && bytes < 512) warnings.push(`Малый запас стека задачи ${name}: ${bytes} байт`)
   if (a.window.open_limit && a.window.close_limit) warnings.push('Противоречивые концевики окна')
   else if (!windowFeedbackValid(a.window)) warnings.push('Датчики положения окна не согласованы')
   const i2c = frame.sensors.filter(sensor => sensor.sensor_id.endsWith('_climate'))
