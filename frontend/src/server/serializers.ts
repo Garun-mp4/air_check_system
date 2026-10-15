@@ -40,6 +40,7 @@ export function serializeControlCommand(command: ControlCommand) {
 
 export function serializeControlStatus(status: ControlStatus) {
   return {
+    ...(status.knownTargets ? { feedback_known: status.knownTargets } : {}),
     device_id: status.deviceId,
     connection: {
       status: status.connectionStatus,
@@ -94,6 +95,7 @@ export function serializeMeasurement(measurement: Measurement) {
     id: measurement.id,
     created_at: measurement.createdAt.toISOString(),
     timestamp: measurement.timestamp.toISOString(),
+    ...(measurement.outdoorSampledAt ? { outdoor_timestamp: measurement.outdoorSampledAt.toISOString() } : {}),
     ...(measurement.dataSource ? { data_source: measurement.dataSource } : {}),
     indoor: {
       co2: measurement.indoor.co2,

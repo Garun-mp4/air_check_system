@@ -79,6 +79,10 @@ export function buildFeatureVector(
   measurements: Measurement[],
   current: Measurement,
 ): FeatureVector {
+  if (current.outdoorSampledAt) {
+    const age = current.timestamp.getTime() - current.outdoorSampledAt.getTime()
+    if (age < -5000 || age > 15000) throw new InsufficientHistoryError('Наружные измерения недостоверны или устарели; прогноз не построен')
+  }
   const records = sortMeasurements(
     measurements.some((record) => record.id === current.id)
       ? measurements

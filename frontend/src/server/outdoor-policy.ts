@@ -66,7 +66,7 @@ export function assessOutdoor(
   previous?: OutdoorSafety | null,
   now = new Date(),
 ): OutdoorSafety {
-  const age = now.getTime() - measurement.timestamp.getTime()
+  const age = now.getTime() - (measurement.outdoorSampledAt ?? measurement.timestamp).getTime()
   const unavailable =
     age < -5000 ||
     age > policy.maxAgeSeconds * 1000 ||

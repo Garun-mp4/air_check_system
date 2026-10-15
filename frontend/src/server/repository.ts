@@ -1,3 +1,5 @@
+import { assertDeviceTime } from './device-time.ts'
+import { measurementIdentity, measurementContentHash, IngestConflictError } from './ingest-identity.ts'
 import { assessOutdoor, defaultOutdoorPolicy, type OutdoorPolicy, type OutdoorSafety } from './outdoor-policy.ts'
 import { Pool } from 'pg'
 
@@ -104,6 +106,7 @@ function cloneControlState(state: ControlState): ControlState {
   return {
     ...state,
     reported: { ...state.reported },
+    ...(state.knownTargets ? { knownTargets: [...state.knownTargets] } : {}),
     desired: { ...state.desired },
     overrideUntil: state.overrideUntil ? new Date(state.overrideUntil) : null,
     windowOpenSince: state.windowOpenSince
@@ -142,8 +145,16 @@ export class MemoryRepository implements Repository {
   private nextId = 1
 
   async createMeasurement(input: MeasurementInput): Promise<Measurement> {
+    assertDeviceTime(input.timestamp)
+    const key = measurementIdentity(input)
+    const existing = this.measurements.find(item => item.ingestKey === key)
+    if (existing) {
+      if (measurementContentHash(existing) !== measurementContentHash(input)) throw new IngestConflictError()
+      return existing
+    }
     const measurement: Measurement = {
       ...input,
+      ingestKey: key,
       id: this.nextId,
       createdAt: new Date(),
       indoor: { ...input.indoor },
@@ -155,7 +166,7 @@ export class MemoryRepository implements Repository {
   }
 
   async getLatestMeasurement(): Promise<Measurement | null> {
-    return [...this.measurements].sort(sortByTimestamp).at(-1) ?? null
+    return this.measurements.filter(item => item.timestamp.getTime() <= Date.now() + 5000).sort(sortByTimestamp).at(-1) ?? null
   }
 
   async listMeasurements(query: HistoryQuery): Promise<Measurement[]> {
@@ -172,6 +183,8 @@ export class MemoryRepository implements Repository {
   }
 
   async createPrediction(input: PredictionInput): Promise<Prediction> {
+    const existing = input.ingestKey ? this.predictions.find(item => item.ingestKey === input.ingestKey) : null
+    if (existing) return existing
     const prediction: Prediction = {
       ...input,
       id: this.nextId,
@@ -195,10 +208,16 @@ export class MemoryRepository implements Repository {
   async setPredictionOutcome(id: number, status: PredictionStatus, error: string | null, code: string | null): Promise<void> {
     const measurement = this.measurements.find(m => m.id === id)
     if (!measurement) throw new NotFoundError()
-    measurement.predictionStatus = status; measurement.predictionError = error; measurement.predictionErrorCode = code
+    const ready = this.predictions.some(item => item.measurementId === id)
+    measurement.predictionStatus = ready ? 'ready' : status; measurement.predictionError = ready ? null : error; measurement.predictionErrorCode = ready ? null : code
   }
 
   async createRecommendation(input: RecommendationDraft): Promise<Recommendation> {
+    const existing = input.ingestKey ? this.recommendations.find(item => item.ingestKey === input.ingestKey) : null
+    if (existing) {
+      if (input.forecastUsed || !existing.forecastUsed) Object.assign(existing, input)
+      return existing
+    }
     const recommendation: Recommendation = {
       ...input,
       id: this.nextId,
@@ -419,15 +438,23 @@ export class MemoryRepository implements Repository {
   }
 
   async reportControlState(input: DeviceStateReport): Promise<ControlState> {
+    assertDeviceTime(input.timestamp)
     this.settleCommands(input.deviceId)
     const state = this.ensureControlState(input.deviceId)
     const reportedAt = new Date(input.timestamp)
     if (
       state.lastReportedAt !== null &&
-      reportedAt.getTime() < state.lastReportedAt.getTime()
+      reportedAt.getTime() < state.lastReportedAt.getTime() && state.lastReportedAt.getTime() <= Date.now() + 5000
     ) {
       return this.getControlState(input.deviceId)
     }
+    const known = new Set(input.knownTargets ?? ['exhaust', 'intake', 'window'])
+    const reported = {
+      exhaustOn: known.has('exhaust') ? input.reported.exhaustOn : state.reported.exhaustOn,
+      intakeOn: known.has('intake') ? input.reported.intakeOn : state.reported.intakeOn,
+      windowOpen: known.has('window') ? input.reported.windowOpen : state.reported.windowOpen,
+    }
+    state.knownTargets = input.knownTargets ? [...input.knownTargets] : undefined
     const pendingTargets = new Set(
       this.controlCommands
         .filter(
@@ -437,28 +464,30 @@ export class MemoryRepository implements Repository {
         .map((command) => command.target),
     )
     const previouslyOpen = state.reported.windowOpen
-    state.reported = { ...input.reported }
-    state.ventilationStartedAt = input.reported.exhaustOn || input.reported.intakeOn ? state.ventilationStartedAt ?? reportedAt : null
+    if (state.windowOpenSince && state.windowOpenSince.getTime() > Date.now() + 5000) state.windowOpenSince = reportedAt
+    if (state.ventilationStartedAt && state.ventilationStartedAt.getTime() > Date.now() + 5000) state.ventilationStartedAt = reportedAt
+    state.reported = { ...reported }
+    state.ventilationStartedAt = reported.exhaustOn || reported.intakeOn ? state.ventilationStartedAt ?? reportedAt : null
     if (!pendingTargets.has('exhaust')) {
-      state.desired.exhaustOn = input.reported.exhaustOn
+      state.desired.exhaustOn = reported.exhaustOn
     }
     if (!pendingTargets.has('intake')) {
-      state.desired.intakeOn = input.reported.intakeOn
+      state.desired.intakeOn = reported.intakeOn
     }
     if (!pendingTargets.has('window')) {
-      state.desired.windowOpen = input.reported.windowOpen
+      state.desired.windowOpen = reported.windowOpen
     }
     state.lastReportedAt = reportedAt
-    state.windowOpenSince = input.reported.windowOpen
+    state.windowOpenSince = reported.windowOpen
       ? state.windowOpenSince ?? reportedAt
       : null
-    if (!previouslyOpen && input.reported.windowOpen) {
+    if (!previouslyOpen && reported.windowOpen) {
       state.windowOpenSince = reportedAt
     }
     const actualStateByTarget = {
-      exhaust: input.reported.exhaustOn,
-      intake: input.reported.intakeOn,
-      window: input.reported.windowOpen,
+      exhaust: reported.exhaustOn,
+      intake: reported.intakeOn,
+      window: reported.windowOpen,
     }
     for (const failure of input.failedCommands ?? []) {
       const command = this.controlCommands.find(c => c.id === failure.id && c.deviceId === input.deviceId && c.status === 'pending')
@@ -471,7 +500,7 @@ export class MemoryRepository implements Repository {
           item.deviceId === input.deviceId &&
           item.status === 'pending',
       )
-      if (command && actualStateByTarget[command.target] === command.desiredState) {
+      if (command && known.has(command.target) && actualStateByTarget[command.target] === command.desiredState) {
         command.status = 'applied'
         command.appliedAt = new Date()
         command.completedAt = command.appliedAt
@@ -539,6 +568,8 @@ export class MemoryRepository implements Repository {
 }
 
 interface MeasurementRow {
+  ingest_key: string | null
+  outdoor_sampled_at: Date | string | null
   data_source: Measurement['dataSource']
   prediction_status: PredictionStatus | 'pending'
   prediction_error: string | null
@@ -579,6 +610,7 @@ interface RecommendationRow {
 }
 
 interface ControlStateRow {
+  known_targets: ControlState['knownTargets'] | null
   outdoor_safety: OutdoorSafety | null
   ventilation_started_at: Date | string | null
   device_id: string
@@ -639,6 +671,8 @@ function mapMeasurement(row: MeasurementRow): Measurement {
     id: Number(row.id),
     createdAt: asDate(row.created_at),
     timestamp: asDate(row.measurement_timestamp),
+    ...(row.ingest_key ? { ingestKey: row.ingest_key } : {}),
+    ...(row.outdoor_sampled_at ? { outdoorSampledAt: asDate(row.outdoor_sampled_at) } : {}),
     ...(row.data_source !== 'unknown' ? { dataSource: row.data_source } : {}),
     predictionStatus: row.prediction_status,
     predictionError: row.prediction_error,
@@ -710,6 +744,7 @@ function mapControlState(
 ): ControlState {
   return {
     deviceId: row.device_id,
+    ...(row.known_targets ? { knownTargets: row.known_targets } : {}),
     reported: {
       exhaustOn: row.exhaust_on,
       intakeOn: row.intake_on,
@@ -768,7 +803,7 @@ const measurementColumns = [
   'outdoor_humidity',
   'outdoor_pm25',
   'window_open',
-  'prediction_status', 'prediction_error', 'prediction_error_code', 'data_source',
+  'prediction_status', 'prediction_error', 'prediction_error_code', 'data_source', 'ingest_key', 'outdoor_sampled_at',
 ].join(', ')
 
 export class PostgresRepository implements Repository {
@@ -784,10 +819,12 @@ export class PostgresRepository implements Repository {
   }
 
   async createMeasurement(input: MeasurementInput): Promise<Measurement> {
+    assertDeviceTime(input.timestamp)
+    const key = measurementIdentity(input)
     const result = await this.pool.query<MeasurementRow>(
       'INSERT INTO measurements ("timestamp", indoor_co2, indoor_temperature, indoor_humidity, ' +
-        'indoor_pm25, outdoor_temperature, outdoor_humidity, outdoor_pm25, window_open, data_source, co2_limit, pm25_limit, ventilation_on) ' +
-        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING ' +
+        'indoor_pm25, outdoor_temperature, outdoor_humidity, outdoor_pm25, window_open, data_source, co2_limit, pm25_limit, ventilation_on, ingest_key, outdoor_sampled_at) ' +
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) ON CONFLICT (ingest_key) DO NOTHING RETURNING ' +
         measurementColumns,
       [
         input.timestamp,
@@ -800,17 +837,22 @@ export class PostgresRepository implements Repository {
         input.outdoor.pm25,
         input.windowOpen,
         input.dataSource ?? 'unknown',
-        input.co2Limit ?? null, input.pm25Limit ?? null, input.ventilationOn ?? null,
+        input.co2Limit ?? null, input.pm25Limit ?? null, input.ventilationOn ?? null, key, input.outdoorSampledAt ?? null,
       ],
     )
-    return mapMeasurement(result.rows[0])
+    if (result.rows[0]) return mapMeasurement(result.rows[0])
+    const existing = await this.pool.query<MeasurementRow>('SELECT ' + measurementColumns + ' FROM measurements WHERE ingest_key = $1', [key])
+    if (!existing.rows[0]) throw new NotFoundError()
+    const measurement = mapMeasurement(existing.rows[0])
+    if (measurementContentHash(measurement) !== measurementContentHash(input)) throw new IngestConflictError()
+    return measurement
   }
 
   async getLatestMeasurement(): Promise<Measurement | null> {
     const result = await this.pool.query<MeasurementRow>(
       'SELECT ' +
         measurementColumns +
-        ' FROM measurements ORDER BY "timestamp" DESC, id DESC LIMIT 1',
+        " FROM measurements WHERE \"timestamp\" <= clock_timestamp() + interval '5 seconds' ORDER BY \"timestamp\" DESC, id DESC LIMIT 1",
     )
     return result.rows[0] ? mapMeasurement(result.rows[0]) : null
   }
@@ -841,9 +883,9 @@ export class PostgresRepository implements Repository {
 
   async createPrediction(input: PredictionInput): Promise<Prediction> {
     const result = await this.pool.query<PredictionRow>(
-      'INSERT INTO predictions (target_time, predicted_co2, model_name, model_version, measurement_id, source_timestamp, data_source) ' +
-        'VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at, target_time, predicted_co2, model_name, model_version, measurement_id, source_timestamp, data_source',
-      [input.targetTime, input.predictedCo2, input.modelName, input.modelVersion, input.measurementId ?? null, input.sourceTimestamp ?? null, input.dataSource ?? 'unknown'],
+      'INSERT INTO predictions (target_time, predicted_co2, model_name, model_version, measurement_id, source_timestamp, data_source, ingest_key) ' +
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (ingest_key) DO UPDATE SET ingest_key = EXCLUDED.ingest_key RETURNING id, created_at, target_time, predicted_co2, model_name, model_version, measurement_id, source_timestamp, data_source',
+      [input.targetTime, input.predictedCo2, input.modelName, input.modelVersion, input.measurementId ?? null, input.sourceTimestamp ?? null, input.dataSource ?? 'unknown', input.ingestKey ?? null],
     )
     return mapPrediction(result.rows[0])
   }
@@ -865,17 +907,21 @@ export class PostgresRepository implements Repository {
     return result.rows[0] ? mapRecommendation(result.rows[0]) : null
   }
   async setPredictionOutcome(id: number, status: PredictionStatus, error: string | null, code: string | null): Promise<void> {
-    const result = await this.pool.query('UPDATE measurements SET prediction_status = $2, prediction_error = $3, prediction_error_code = $4 WHERE id = $1', [id, status, error, code])
+    const result = await this.pool.query("UPDATE measurements SET prediction_status = CASE WHEN EXISTS (SELECT 1 FROM predictions WHERE measurement_id=$1) THEN 'ready' ELSE $2 END, prediction_error = CASE WHEN EXISTS (SELECT 1 FROM predictions WHERE measurement_id=$1) THEN NULL ELSE $3 END, prediction_error_code = CASE WHEN EXISTS (SELECT 1 FROM predictions WHERE measurement_id=$1) THEN NULL ELSE $4 END WHERE id = $1", [id, status, error, code])
     if (!result.rowCount) throw new NotFoundError()
   }
 
   async createRecommendation(input: RecommendationDraft): Promise<Recommendation> {
     const result = await this.pool.query<RecommendationRow>(
-      'INSERT INTO recommendations (type, message, duration_minutes, reason, measurement_id) ' +
-        'VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at, type, message, duration_minutes, reason, measurement_id',
-      [input.type, input.message, input.durationMinutes, input.reason, input.measurementId ?? null],
+      'INSERT INTO recommendations (type, message, duration_minutes, reason, measurement_id, ingest_key, forecast_used) ' +
+        'VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (ingest_key) DO UPDATE SET type=EXCLUDED.type, message=EXCLUDED.message, duration_minutes=EXCLUDED.duration_minutes, reason=EXCLUDED.reason, forecast_used=EXCLUDED.forecast_used ' +
+        'WHERE EXCLUDED.forecast_used OR NOT recommendations.forecast_used RETURNING id,created_at,type,message,duration_minutes,reason,measurement_id',
+      [input.type,input.message,input.durationMinutes,input.reason,input.measurementId ?? null,input.ingestKey ?? null,input.forecastUsed ?? false],
     )
-    return mapRecommendation(result.rows[0])
+    if (result.rows[0]) return mapRecommendation(result.rows[0])
+    const existing = await this.pool.query<RecommendationRow>('SELECT * FROM recommendations WHERE ingest_key=$1', [input.ingestKey])
+    if (!existing.rows[0]) throw new NotFoundError()
+    return mapRecommendation(existing.rows[0])
   }
 
   async getLatestRecommendation(): Promise<Recommendation | null> {
@@ -937,7 +983,7 @@ export class PostgresRepository implements Repository {
     const stateResult = await client.query<ControlStateRow>(
       'SELECT device_id, exhaust_on, intake_on, window_open, desired_exhaust_on, ' +
         'desired_intake_on, desired_window_open, window_mode, override_until, ' +
-        'window_open_since, last_reported_at, updated_at, outdoor_safety, ventilation_started_at FROM actuator_states ' +
+        'window_open_since, last_reported_at, updated_at, outdoor_safety, ventilation_started_at, known_targets FROM actuator_states ' +
         'WHERE device_id = $1',
       [deviceId],
     )
@@ -1152,30 +1198,39 @@ export class PostgresRepository implements Repository {
   }
 
   async reportControlState(input: DeviceStateReport): Promise<ControlState> {
+    assertDeviceTime(input.timestamp)
     const client = await this.pool.connect()
     try {
       await client.query('BEGIN')
       await client.query('INSERT INTO actuator_states (device_id) VALUES ($1) ON CONFLICT DO NOTHING', [input.deviceId])
       await client.query('SELECT device_id FROM actuator_states WHERE device_id = $1 FOR UPDATE', [input.deviceId])
       await this.settleCommands(input.deviceId, client)
+      const previous = await this.readControlState(input.deviceId, client)
+      const known = new Set(input.knownTargets ?? ['exhaust', 'intake', 'window'])
+      const reported = {
+        exhaustOn: known.has('exhaust') ? input.reported.exhaustOn : previous.reported.exhaustOn,
+        intakeOn: known.has('intake') ? input.reported.intakeOn : previous.reported.intakeOn,
+        windowOpen: known.has('window') ? input.reported.windowOpen : previous.reported.windowOpen,
+      }
+
       const reportResult = await client.query<{ device_id: string }>(
         'INSERT INTO actuator_states (device_id, exhaust_on, intake_on, window_open, desired_exhaust_on, desired_intake_on, desired_window_open, last_reported_at, window_open_since) ' +
           'VALUES ($1, $2::boolean, $3::boolean, $4::boolean, $2::boolean, $3::boolean, $4::boolean, $5::timestamptz, CASE WHEN $4::boolean THEN $5::timestamptz ELSE NULL::timestamptz END) ' +
           'ON CONFLICT (device_id) DO UPDATE SET exhaust_on = EXCLUDED.exhaust_on, intake_on = EXCLUDED.intake_on, ' +
-          'window_open = EXCLUDED.window_open, window_open_since = CASE WHEN EXCLUDED.window_open THEN COALESCE(actuator_states.window_open_since, EXCLUDED.last_reported_at) ELSE NULL END, ' +
+          "window_open = EXCLUDED.window_open, window_open_since = CASE WHEN EXCLUDED.window_open THEN CASE WHEN actuator_states.window_open_since > clock_timestamp() + interval '5 seconds' THEN EXCLUDED.last_reported_at ELSE COALESCE(actuator_states.window_open_since, EXCLUDED.last_reported_at) END ELSE NULL END, " +
           "desired_exhaust_on = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'exhaust' AND status = 'pending') THEN actuator_states.desired_exhaust_on ELSE EXCLUDED.exhaust_on END, " +
           "desired_intake_on = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'intake' AND status = 'pending') THEN actuator_states.desired_intake_on ELSE EXCLUDED.intake_on END, " +
           "desired_window_open = CASE WHEN EXISTS (SELECT 1 FROM actuator_commands WHERE device_id = EXCLUDED.device_id AND target = 'window' AND status = 'pending') THEN actuator_states.desired_window_open ELSE EXCLUDED.window_open END, " +
-          'ventilation_started_at = CASE WHEN EXCLUDED.exhaust_on OR EXCLUDED.intake_on THEN COALESCE(actuator_states.ventilation_started_at, EXCLUDED.last_reported_at) ELSE NULL END, ' +
-          'last_reported_at = EXCLUDED.last_reported_at, updated_at = NOW() ' +
-          'WHERE actuator_states.last_reported_at IS NULL OR EXCLUDED.last_reported_at >= actuator_states.last_reported_at ' +
+          "ventilation_started_at = CASE WHEN EXCLUDED.exhaust_on OR EXCLUDED.intake_on THEN CASE WHEN actuator_states.ventilation_started_at > clock_timestamp() + interval '5 seconds' THEN EXCLUDED.last_reported_at ELSE COALESCE(actuator_states.ventilation_started_at, EXCLUDED.last_reported_at) END ELSE NULL END, " +
+          'last_reported_at = EXCLUDED.last_reported_at, known_targets = $6::text[], updated_at = NOW() ' +
+          "WHERE actuator_states.last_reported_at IS NULL OR EXCLUDED.last_reported_at >= actuator_states.last_reported_at OR actuator_states.last_reported_at > clock_timestamp() + interval '5 seconds' " +
           'RETURNING device_id',
         [
           input.deviceId,
-          input.reported.exhaustOn,
-          input.reported.intakeOn,
-          input.reported.windowOpen,
-          input.timestamp,
+          reported.exhaustOn,
+          reported.intakeOn,
+          reported.windowOpen,
+          input.timestamp, input.knownTargets ?? null,
         ],
       )
       if ((reportResult.rowCount ?? 0) > 0) {
@@ -1191,15 +1246,15 @@ export class PostgresRepository implements Repository {
         await client.query(
           "UPDATE actuator_commands SET status = 'applied', applied_at = NOW(), completed_at = NOW() " +
             "WHERE device_id = $1 AND status = 'pending' AND expires_at > clock_timestamp() AND id = ANY($2::bigint[]) " +
-            "AND ((target = 'exhaust' AND desired_state = $3::boolean) " +
+            "AND target = ANY($6::text[]) AND ((target = 'exhaust' AND desired_state = $3::boolean) " +
             "OR (target = 'intake' AND desired_state = $4::boolean) " +
             "OR (target = 'window' AND desired_state = $5::boolean))",
           [
             input.deviceId,
             input.appliedCommandIds,
-            input.reported.exhaustOn,
-            input.reported.intakeOn,
-            input.reported.windowOpen,
+            reported.exhaustOn,
+            reported.intakeOn,
+            reported.windowOpen, [...known],
           ],
         )
       }

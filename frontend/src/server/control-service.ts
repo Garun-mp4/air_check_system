@@ -66,6 +66,7 @@ function connectionStatus(
     return 'offline'
   }
   const elapsed = now.getTime() - lastReportedAt.getTime()
+  if (elapsed < -5000) return 'offline'
   if (elapsed <= heartbeatTimeoutMs) {
     return 'online'
   }
@@ -97,6 +98,7 @@ function withAutomationSummary(
       }) +
       '.'
   } else if (
+    (status.knownTargets !== undefined && status.knownTargets.length < 3) ||
     status.pendingCommands > 0 ||
     status.connectionStatus !== 'online' ||
     status.reported.exhaustOn !== status.desired.exhaustOn ||
@@ -105,7 +107,9 @@ function withAutomationSummary(
   ) {
     automationStatus = 'waiting_for_device'
     message =
-      status.pendingCommands > 0
+      status.knownTargets !== undefined && status.knownTargets.length < 3
+        ? 'Обратная связь части исполнительных каналов не подтверждена.'
+        : status.pendingCommands > 0
         ? 'Команда ожидает подтверждения локального узла.'
         : status.reported.exhaustOn !== status.desired.exhaustOn ||
             status.reported.intakeOn !== status.desired.intakeOn ||
@@ -266,6 +270,7 @@ export class ControlService {
     }
 
     let state = await this.repository.getControlState(this.config.deviceId)
+    if (state.knownTargets !== undefined && state.knownTargets.length < 3) return []
     if (
       state.windowMode === 'manual' &&
       state.overrideUntil !== null &&

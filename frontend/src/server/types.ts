@@ -9,6 +9,8 @@ export interface SensorValues {
 export type DataSource = 'real' | 'simulator' | 'unknown'
 
 export interface MeasurementInput {
+  ingestKey?: string
+  outdoorSampledAt?: Date
   dataSource?: DataSource
   co2Limit?: number
   pm25Limit?: number
@@ -30,6 +32,7 @@ export interface Measurement extends MeasurementInput {
 export type PredictionStatus = 'ready' | 'insufficient_history' | 'unavailable'
 
 export interface PredictionInput {
+  ingestKey?: string
   dataSource?: DataSource
   measurementId?: number | null
   sourceTimestamp?: Date | null
@@ -52,6 +55,8 @@ export type RecommendationType =
   | 'ventilating'
 
 export interface RecommendationDraft {
+  ingestKey?: string
+  forecastUsed?: boolean
   measurementId?: number | null
   type: RecommendationType
   message: string
@@ -140,6 +145,7 @@ export interface ControlCommand extends ControlCommandInput {
 }
 
 export interface ControlState {
+  knownTargets?: ControlTarget[]
   deviceId: string
   reported: ControlSnapshot
   desired: ControlSnapshot
@@ -170,6 +176,7 @@ export interface ControlStatus extends ControlState {
 }
 
 export interface DeviceStateReport {
+  knownTargets?: ControlTarget[]
   deviceId: string
   timestamp: Date
   reported: ControlSnapshot

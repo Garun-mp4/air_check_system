@@ -58,6 +58,7 @@ def test_migration_files_are_ordered_and_complete() -> None:
         "009_measurement_sources.sql",
         "010_long_term_history.sql",
         "011_notifications.sql",
+        "012_device_telemetry.sql",
     ]
 
 

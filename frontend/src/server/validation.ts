@@ -99,6 +99,9 @@ export function parseMeasurementInput(payload: unknown): MeasurementInput {
   const indoor = requiredObject(payload.indoor, 'indoor', issues)
   const outdoor = requiredObject(payload.outdoor, 'outdoor', issues)
   const timestamp = timestampField(payload.timestamp, 'timestamp', issues)
+  if (timestamp.getTime() > Date.now() + 5000) issues.push({ field: 'timestamp', message: 'более чем на 5 секунд в будущем' })
+  const outdoorSampledAt = payload.outdoor_timestamp === undefined ? undefined : timestampField(payload.outdoor_timestamp, 'outdoor_timestamp', issues)
+  if (outdoorSampledAt && (outdoorSampledAt.getTime() > Date.now() + 5000 || outdoorSampledAt.getTime() > timestamp.getTime() + 5000)) issues.push({ field: 'outdoor_timestamp', message: 'наружное измерение находится в будущем' })
   const windowOpen = payload.window_open
   if (typeof windowOpen !== 'boolean') {
     issues.push({ field: 'window_open', message: 'должно быть boolean' })
@@ -151,6 +154,7 @@ export function parseMeasurementInput(payload: unknown): MeasurementInput {
   }
   return {
     timestamp,
+    ...(outdoorSampledAt ? { outdoorSampledAt } : {}),
     ...(payload.data_source !== undefined ? { dataSource: payload.data_source as MeasurementInput['dataSource'] } : {}),
     indoor: indoorValues,
     outdoor: outdoorValues,
@@ -529,6 +533,7 @@ export function parseDeviceStateReport(
     }
   }
   const timestamp = timestampField(payload.timestamp, 'timestamp', issues)
+  if (timestamp.getTime() > Date.now() + 5000) issues.push({ field: 'timestamp', message: 'более чем на 5 секунд в будущем' })
   const booleans = ['exhaust_on', 'intake_on', 'window_open'] as const
   const values: Record<(typeof booleans)[number], boolean> = {
     exhaust_on: false,

@@ -1,4 +1,5 @@
-import { defaultOutdoorPolicy, validateOutdoorPolicy } from './outdoor-policy'
+import { assessOutdoor, defaultOutdoorPolicy, validateOutdoorPolicy } from './outdoor-policy'
+import { IngestConflictError, measurementContentHash, measurementIdentity } from './ingest-identity'
 import {
   buildFeatureVector,
   InsufficientHistoryError,
@@ -40,6 +41,7 @@ import type {
 } from './types'
 
 export class AirQualityService {
+  private readonly inFlight = new Map<string, { hash: string; result: Promise<IngestResult> }>()
   constructor(
     private readonly repository: Repository,
     private readonly predictor: Predictor,
@@ -48,6 +50,20 @@ export class AirQualityService {
   ) {}
 
   async ingest(input: MeasurementInput): Promise<IngestResult> {
+    const key = measurementIdentity(input)
+    const hash = measurementContentHash(input)
+    const existing = this.inFlight.get(key)
+    if (existing) {
+      if (existing.hash !== hash) throw new IngestConflictError()
+      return existing.result
+    }
+    const pending = this.ingestOnce({ ...input, ingestKey: key })
+    this.inFlight.set(key, { hash, result: pending })
+    try { return await pending }
+    finally { if (this.inFlight.get(key)?.result === pending) this.inFlight.delete(key) }
+  }
+
+  private async ingestOnce(input: MeasurementInput): Promise<IngestResult> {
     const settings = await this.nodeSettings()
     const controls = await this.repository.getControlState(this.config.deviceId)
     const reportFresh = controls.lastReportedAt && Date.now()-controls.lastReportedAt.getTime()<=this.config.deviceHeartbeatTimeoutMs && Date.now()-controls.lastReportedAt.getTime()>=-5000 && input.timestamp.getTime()-controls.lastReportedAt.getTime()>=-5000 && input.timestamp.getTime()-controls.lastReportedAt.getTime()<=this.config.deviceHeartbeatTimeoutMs
@@ -55,12 +71,16 @@ export class AirQualityService {
       co2Limit:settings.co2CriticalThreshold,pm25Limit:settings.pm25ElevatedLimit,
       ventilationOn:reportFresh ? controls.reported.intakeOn||controls.reported.exhaustOn : null,
     })
-    let prediction: Prediction | null = null
-    let predictionStatus: PredictionStatus = 'insufficient_history'
+    let prediction: Prediction | null = await this.repository.getPredictionForMeasurement(measurement.id)
+    const existingRecommendation = await this.repository.getRecommendationForMeasurement(measurement.id)
+    if (existingRecommendation && measurement.predictionStatus && measurement.predictionStatus !== 'pending') {
+      return { measurement, prediction, recommendation: existingRecommendation, predictionStatus: measurement.predictionStatus, predictionError: measurement.predictionError ?? null }
+    }
+    let predictionStatus: PredictionStatus = prediction ? 'ready' : 'insufficient_history'
     let predictionError: string | null = null
     let predictionErrorCode: string | null = null
 
-    try {
+    if (!prediction) try {
       const history = await this.repository.listMeasurements({
         from: new Date(
           measurement.timestamp.getTime() - 12 * 60 * 1000,
@@ -92,7 +112,10 @@ export class AirQualityService {
 
     await this.repository.setPredictionOutcome(measurement.id, predictionStatus, predictionError, predictionErrorCode)
     measurement.predictionStatus = predictionStatus; measurement.predictionError = predictionError; measurement.predictionErrorCode = predictionErrorCode
-    const safety = await this.repository.assessOutdoorAir(this.config.deviceId, measurement, settings.outdoorPolicy ?? defaultOutdoorPolicy)
+    const latest = await this.repository.getLatestMeasurement()
+    const current = latest?.id === measurement.id && Date.now() - measurement.timestamp.getTime() <= this.config.deviceHeartbeatTimeoutMs
+    const policy = settings.outdoorPolicy ?? defaultOutdoorPolicy
+    const safety = current ? await this.repository.assessOutdoorAir(this.config.deviceId, measurement, policy) : assessOutdoor(measurement, policy)
     const recommendation = await this.repository.createRecommendation(
       { ...evaluateRecommendation(
         measurement,
@@ -105,10 +128,10 @@ export class AirQualityService {
           pm25Elevated: settings.pm25ElevatedLimit,
           alertsEnabled: settings.alertsEnabled,
         },
-      ), measurementId: measurement.id },
+      ), measurementId: measurement.id, ingestKey: measurement.ingestKey + ':recommendation', forecastUsed: prediction !== null },
     )
     try {
-      await this.controlService.reconcile(measurement, prediction, safety)
+      if (current) await this.controlService.reconcile(measurement, prediction, safety)
     } catch (error) {
       console.error('automatic control reconciliation failed', error)
     }
@@ -274,6 +297,7 @@ export class AirQualityService {
     result: MlPredictionResult,
   ): Promise<Prediction> {
     return this.repository.createPrediction({
+      ingestKey: measurement.ingestKey ? measurement.ingestKey + ':prediction' : undefined,
       measurementId: measurement.id,
       dataSource: measurement.dataSource,
       sourceTimestamp: measurement.timestamp,
