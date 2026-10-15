@@ -231,6 +231,7 @@ int request(const char* path,const std::string* body,Response& response) {
     auto client=esp_http_client_init(&config); if(!client) return 0;
     const std::string auth=std::string("Bearer ")+node.token;
     esp_http_client_set_header(client,"Authorization",auth.c_str());
+    esp_http_client_set_header(client,"X-AirCheck-Source",SOURCE);
     if(body) { esp_http_client_set_method(client,HTTP_METHOD_POST); esp_http_client_set_header(client,"Content-Type","application/json"); esp_http_client_set_post_field(client,body->c_str(),body->size()); }
     const auto error=esp_http_client_perform(client); const int status=error==ESP_OK && !response.overflow?esp_http_client_get_status_code(client):0;
     esp_http_client_cleanup(client); return status;

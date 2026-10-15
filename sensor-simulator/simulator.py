@@ -153,7 +153,7 @@ class SensorSimulator:
 
 
 def get_pending_control_commands(config: SimulatorConfig) -> list[dict[str, Any]]:
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "X-AirCheck-Source": "simulator"}
     if config.device_api_token:
         headers["Authorization"] = "Bearer " + config.device_api_token
     request = Request(
@@ -188,6 +188,7 @@ def report_control_state(
         config.backend_url + "/api/v1/controls/state",
         data=body,
         headers={
+            "X-AirCheck-Source": "simulator",
             "Content-Type": "application/json",
             "Accept": "application/json",
             **({"Authorization": "Bearer " + config.device_api_token} if config.device_api_token else {}),
@@ -238,6 +239,7 @@ def post_measurement(config: SimulatorConfig, payload: dict[str, Any]) -> None:
         config.backend_url + "/api/v1/measurements",
         data=body,
         headers={
+            "X-AirCheck-Source": "simulator",
             "Content-Type": "application/json",
             "Accept": "application/json",
             **({"Authorization": "Bearer " + config.device_api_token} if config.device_api_token else {}),

@@ -1,0 +1,70 @@
+{
+  "room_volume_m3": 48.0,
+  "room_dimensions": {
+    "width_m": 6.0,
+    "depth_m": 4.2,
+    "height_m": 3.2,
+    "wall_thickness_m": 0.16,
+    "window_width_m": 1.8,
+    "window_height_m": 1.25,
+    "window_sill_height_m": 0.9,
+    "window_open_angle_degrees": 55.0,
+    "outdoor_depth_m": 4.5
+  },
+  "layout": {
+    "indoor_sensor_center": [
+      -2.25,
+      2.0500000000000003,
+      1.344
+    ],
+    "outdoor_station_center": [
+      1.56,
+      2.4400000000000004,
+      1.2480000000000002
+    ],
+    "control_cabinet_center": [
+      2.19,
+      2.02,
+      1.0
+    ],
+    "controller_drop_x": 1.7999999999999998,
+    "rear_channel_y": 2.065,
+    "rear_wire_y": 2.018,
+    "exterior_channel_y": 2.2950000000000004,
+    "exterior_wire_y": 2.2950000000000004,
+    "trunk_z": 2.83,
+    "exterior_entry_x": 0.98,
+    "outdoor_gland_x": 1.4100000000000001,
+    "outdoor_gland_z": 0.9560000000000002,
+    "indoor_drop_x": -2.68
+  },
+  "mount_dimensions": {
+    "control_cabinet_width_m": 0.78,
+    "control_cabinet_height_m": 0.98,
+    "indoor_panel_width_m": 0.54,
+    "indoor_panel_height_m": 0.66
+  },
+  "camera": {
+    "start_position": [
+      3.6,
+      -8.0,
+      3.0
+    ],
+    "start_target": [
+      0.0,
+      0.0,
+      1.4
+    ],
+    "move_speed_m_s": 4.2,
+    "fast_move_multiplier": 3.0,
+    "mouse_sensitivity": 115.0,
+    "wheel_step_m": 1.1,
+    "transition_seconds": 0.55,
+    "min_pitch_degrees": -82.0,
+    "max_pitch_degrees": 82.0,
+    "field_of_view_degrees": 52.0,
+    "near_plane_m": 0.08,
+    "far_plane_m": 180.0,
+    "focus_distance_min_m": 2.4
+  }
+}

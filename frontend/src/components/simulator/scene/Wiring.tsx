@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Text } from '@react-three/drei'
+import { SceneText as Text } from './SceneText'
 import type { SimulatorSnapshot } from '../types'
 import { CylinderBetween, Housing } from './models/parts'
 import { MAINS_ENTRY_CLEARANCE_M } from './models/geometry'

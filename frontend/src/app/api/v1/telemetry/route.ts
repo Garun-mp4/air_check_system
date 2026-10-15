@@ -4,6 +4,7 @@ import { ApiError, errorResponse, getTelemetryService } from '../../../../server
 import { getConfig } from '../../../../server/config'
 import { activeDataSource } from '../../../../server/runtime-mode'
 import { parseTelemetry } from '../../../../server/telemetry-validation'
+import { serializePrediction } from '../../../../server/serializers'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     const frame = parseTelemetry(await readPayload(request))
     if (frame.data_source !== activeDataSource()) throw new ApiError('inactive_source', 'Источник не соответствует режиму установки', 409)
     const result = await getTelemetryService().ingest(frame)
-    return NextResponse.json({ data: { id: result.record.id, received_at: result.record.received_at, duplicate: result.duplicate, current: result.current, measurement_id: result.measurementId } }, { status: result.duplicate ? 200 : 201 })
+    return NextResponse.json({ data: { id: result.record.id, received_at: result.record.received_at, duplicate: result.duplicate, current: result.current, measurement_id: result.measurementId, prediction: serializePrediction(result.prediction) } }, { status: result.duplicate ? 200 : 201 })
   } catch (error) { return accessErrorResponse(error) ?? errorResponse(error) }
 }
 

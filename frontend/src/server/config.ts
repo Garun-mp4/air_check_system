@@ -1,4 +1,6 @@
+import { activeDataSource } from './runtime-mode'
 export interface AppConfig {
+  dataSource?: 'real' | 'simulator'
   databaseUrl: string
   mlServiceUrl: string
   historyLimit: number
@@ -58,6 +60,7 @@ export function getConfig(): AppConfig {
   }
 
   return {
+    ...(process.env.AIRCHECK_MODE !== undefined ? { dataSource: activeDataSource() } : {}),
     databaseUrl:
       process.env.DATABASE_URL ??
       'postgres://air_quality:air_quality_dev@localhost:5432/air_quality',

@@ -1,6 +1,6 @@
 'use client'
 
-import { Text } from '@react-three/drei'
+import { SceneText as Text } from '../SceneText'
 import type { SimulatorSnapshot, VisualizationMode } from '../../types'
 import { Pickable } from '../Pickable'
 import { Housing, MountingScrews, StatusLed, VentSlats } from './parts'

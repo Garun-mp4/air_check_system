@@ -16,7 +16,7 @@ function FlowTrack({
   visible,
 }: {
   points: Point[]
-  volume: number
+  volume: number | null
   color: string
   visible: boolean
 }) {
@@ -25,8 +25,8 @@ function FlowTrack({
   const curve = useMemo(() => new CatmullRomCurve3(points.map((point) => new Vector3(...point))), [points])
   const geometry = useMemo(() => curve, [curve])
   useFrame((_, delta) => {
-    const active = visible && volume > 0.05
-    const rate = 0.18 + Math.min(0.50, volume / 120)
+    const active = visible && volume !== null && volume > 0.05
+    const rate = 0.18 + Math.min(0.50, (volume ?? 0) / 120)
     for (let index = 0; index < progress.current.length; index += 1) {
       const bead = beads.current[index]
       if (!bead) continue
@@ -37,7 +37,7 @@ function FlowTrack({
       bead.position.copy(point)
     }
   })
-  const active = visible && volume > 0.05
+  const active = visible && volume !== null && volume > 0.05
   return (
     <group>
       {active ? <mesh><tubeGeometry args={[geometry, 32, 0.018, 7, false]} /><meshBasicMaterial color={color} transparent opacity={0.45} /></mesh> : null}

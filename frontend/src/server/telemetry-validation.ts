@@ -43,14 +43,14 @@ export function parseTelemetry(payload: unknown, now = Date.now()): TelemetryFra
   const sampledAt = date(root.sampled_at, 'sampled_at')
   const info = record(root.controller, 'controller')
   const controller: TelemetryFrame['controller'] = {
-    uptime_ms: number(info.uptime_ms, 'controller.uptime_ms'), reset_reason: number(info.reset_reason, 'controller.reset_reason', 0, 255),
+    uptime_ms: number(info.uptime_ms, 'controller.uptime_ms'), reset_reason: info.reset_reason === null ? null : number(info.reset_reason, 'controller.reset_reason', 0, 255),
     firmware_version: text(info.firmware_version, 'controller.firmware_version', 80),
-    free_heap: number(info.free_heap, 'controller.free_heap', 0, 1_073_741_824), minimum_free_heap: number(info.minimum_free_heap, 'controller.minimum_free_heap', 0, 1_073_741_824),
+    free_heap: info.free_heap === null ? null : number(info.free_heap, 'controller.free_heap', 0, 1_073_741_824), minimum_free_heap: info.minimum_free_heap === null ? null : number(info.minimum_free_heap, 'controller.minimum_free_heap', 0, 1_073_741_824),
     clock_synced: boolean(info.clock_synced, 'controller.clock_synced'), outputs_commissioned: boolean(info.outputs_commissioned, 'controller.outputs_commissioned'),
     dropped_packets: number(info.dropped_packets, 'controller.dropped_packets'), queue_depth: number(info.queue_depth, 'controller.queue_depth', 0, 100000),
   }
   if (controller.clock_synced !== (sampledAt !== null)) fail('sampled_at', 'состояние часов не согласовано с датой')
-  if (controller.minimum_free_heap > controller.free_heap) fail('controller.minimum_free_heap', 'минимум не может превышать текущее значение')
+  if (controller.minimum_free_heap !== null && controller.free_heap !== null && controller.minimum_free_heap > controller.free_heap) fail('controller.minimum_free_heap', 'минимум не может превышать текущее значение')
   const sensors: TelemetryFrame['sensors'] = []
   if (!Array.isArray(root.sensors) || root.sensors.length !== 4) fail('sensors', 'требуются четыре известных датчика')
   const seen = new Set<string>()
@@ -102,7 +102,7 @@ export function parseTelemetry(payload: unknown, now = Date.now()): TelemetryFra
     schema_version: 2, device_id: deviceId, boot_id: bootId,
     data_source: choice(root.data_source, 'data_source', ['real', 'simulator'] as const), sequence: number(root.sequence, 'sequence'), sampled_at: sampledAt,
     sensors, controller, actuators: {
-      window: { open_limit: boolean(window.open_limit, 'actuators.window.open_limit'), close_limit: boolean(window.close_limit, 'actuators.window.close_limit'), position_percent: position, position_quality: positionQuality, motion: choice(window.motion, 'actuators.window.motion', ['stopped', 'opening', 'closing', 'fault'] as const) },
+      window: { open_limit: boolean(window.open_limit, 'actuators.window.open_limit'), close_limit: boolean(window.close_limit, 'actuators.window.close_limit'), ...(window.reed_switch !== undefined ? { reed_switch: window.reed_switch === null ? null : boolean(window.reed_switch, 'actuators.window.reed_switch') } : {}), position_percent: position, position_quality: positionQuality, motion: choice(window.motion, 'actuators.window.motion', ['stopped', 'opening', 'closing', 'fault'] as const) },
       exhaust: fan(actuators.exhaust, 'actuators.exhaust'), intake: fan(actuators.intake, 'actuators.intake'),
     }, command_results: results,
   }

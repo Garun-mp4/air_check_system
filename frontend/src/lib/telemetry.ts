@@ -31,10 +31,10 @@ export interface TelemetryFrame {
   sensors: SensorTelemetry[]
   controller: {
     uptime_ms: number
-    reset_reason: number
+    reset_reason: number | null
     firmware_version: string
-    free_heap: number
-    minimum_free_heap: number
+    free_heap: number | null
+    minimum_free_heap: number | null
     clock_synced: boolean
     outputs_commissioned: boolean
     dropped_packets: number
@@ -44,6 +44,7 @@ export interface TelemetryFrame {
     window: {
       open_limit: boolean
       close_limit: boolean
+      reed_switch?: boolean | null
       position_percent: number | null
       position_quality: 'unknown' | 'measured' | 'estimated'
       motion: 'stopped' | 'opening' | 'closing' | 'fault'
@@ -67,6 +68,16 @@ export const sensorQualityLabels: Record<SensorQuality, string> = {
   suspect_stuck: 'Значение долго не меняется; нужна проверка',
 }
 
+export function windowFeedbackValid(window: TelemetryFrame['actuators']['window']): boolean {
+  if (window.open_limit && window.close_limit) return false
+  if (window.open_limit && window.reed_switch === false) return false
+  if (window.position_quality === 'measured' && window.position_percent !== null) {
+    if (window.open_limit && window.position_percent !== 100) return false
+    if (window.close_limit && window.position_percent !== 0) return false
+  }
+  return true
+}
+
 export function assessSensor(sensor: SensorTelemetry, now = Date.now(), clockSynced = true) {
   const at = sensor.last_good_at ? Date.parse(sensor.last_good_at) : Number.NaN
   const ageMs = Number.isFinite(at) ? now - at : null
@@ -80,11 +91,14 @@ export function controllerWarnings(frame: TelemetryFrame): string[] {
   const { controller: c, actuators: a } = frame
   if (!c.clock_synced) warnings.push('Часы устройства не синхронизированы')
   if (!c.outputs_commissioned) warnings.push('Исполнительные каналы не введены в эксплуатацию')
-  if ([5, 6, 7].includes(c.reset_reason)) warnings.push('Последний перезапуск вызван watchdog')
+  if (c.reset_reason !== null && [5, 6, 7].includes(c.reset_reason)) warnings.push('Последний перезапуск вызван watchdog')
   if (c.reset_reason === 9) warnings.push('Последний перезапуск: падение питания (brownout)')
-  if (c.minimum_free_heap < 32768) warnings.push('Малый запас свободной памяти')
+  if (c.minimum_free_heap !== null && c.minimum_free_heap < 32768) warnings.push('Малый запас свободной памяти')
   if (c.dropped_packets) warnings.push(`Пропущено пакетов: ${c.dropped_packets}`)
   if (a.window.open_limit && a.window.close_limit) warnings.push('Противоречивые концевики окна')
+  else if (!windowFeedbackValid(a.window)) warnings.push('Датчики положения окна не согласованы')
+  const i2c = frame.sensors.filter(sensor => sensor.sensor_id.endsWith('_climate'))
+  if (i2c.length === 2 && i2c.every(sensor => ['timeout', 'crc', 'protocol'].includes(sensor.status))) warnings.push('Возможна общая проблема I²C или питания; проверьте оба климатических датчика и шину')
   if (a.window.motion === 'fault') warnings.push('Ошибка привода окна; движение остановлено')
   if (a.window.position_quality !== 'measured') warnings.push('Положение окна не подтверждено измерением')
   for (const [name, fan] of [['Вытяжка', a.exhaust], ['Приток', a.intake]] as const) {

@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 
 import type { AccessInfo, AccessRole } from '../lib/access-types'
 import { getAuth, getAuthPool } from './auth'
+import { activeDataSource } from './runtime-mode'
 
 export type { AccessRole } from '../lib/access-types'
 
@@ -113,7 +114,11 @@ export function assertSameOrigin(request: Request): void {
 }
 
 export function requireDeviceToken(request: Request): void {
-  const expected = process.env.DEVICE_API_TOKEN?.trim() ?? ''
+  const scoped = process.env.AIRCHECK_MODE !== undefined
+  const source = scoped ? activeDataSource() : null
+  const declared = request.headers.get('x-aircheck-source')
+  if (scoped && (declared && declared !== source || source === 'real' && declared !== 'real')) throw new AccessDeniedError(403, 'Источник устройства не соответствует режиму установки')
+  const expected = (source === 'simulator' ? process.env.SIMULATOR_DEVICE_TOKEN?.trim() || process.env.DEVICE_API_TOKEN?.trim() : process.env.DEVICE_API_TOKEN?.trim()) ?? ''
   if (expected.length < 32) {
     throw new AccessDeniedError(403, 'Device API token is not configured')
   }
@@ -129,6 +134,7 @@ export function requireDeviceToken(request: Request): void {
     throw new AccessDeniedError(401, 'Valid device credentials are required')
   }
 }
+
 
 export async function requireSignedIn(request: Request): Promise<AccessContext> {
   const access = await readAccess(request)

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from aircheck_simulator_3d.networking.telemetry import DeviceTelemetryPayload
 
 import json
 import logging
@@ -63,8 +64,9 @@ class HttpAirCheckBackend:
                 LOGGER.warning("ignoring malformed control command: %s", exc)
         return commands
 
-    def send_measurement(self, payload: MeasurementPayload) -> BackendForecast | None:
-        response = self._request("POST", self.routes.measurements, payload.to_mapping())
+    def send_measurement(self, payload: MeasurementPayload | DeviceTelemetryPayload) -> BackendForecast | None:
+        endpoint = f"{self.routes.backend_url}/api/v1/telemetry" if isinstance(payload, DeviceTelemetryPayload) else self.routes.measurements
+        response = self._request("POST", endpoint, payload.to_mapping())
         data = response.get("data")
         if not isinstance(data, dict) or "prediction" not in data:
             raise BackendProtocolError("measurement response must contain data.prediction")
@@ -88,7 +90,7 @@ class HttpAirCheckBackend:
 
     def _request(self, method: str, url: str, payload: dict[str, object] | None = None) -> dict[str, Any]:
         body = None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/json", "X-AirCheck-Source": "simulator"}
         if self.device_token:
             headers["Authorization"] = f"Bearer {self.device_token}"
         if body is not None:

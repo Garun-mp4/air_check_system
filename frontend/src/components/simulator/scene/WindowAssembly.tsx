@@ -1,6 +1,6 @@
 'use client'
 
-import { Text } from '@react-three/drei'
+import { SceneText as Text } from './SceneText'
 import type { CutawayMode, SimulatorSnapshot, VisualizationMode } from '../types'
 import { Pickable } from './Pickable'
 import { CylinderBetween, Fastener, Housing, StatusLed } from './models/parts'
@@ -50,7 +50,8 @@ export default function WindowAssembly({
   const { sashWidth, sashHeight } = geometry
   const frameWidth = 0.075
   const { sashPlaneZ, openingAngle } = geometry
-  const sashAngle = openingAngle * snapshot.window.actual_position_percent / 100
+  // Unknown feedback keeps the last visual pose; zero is only the initial reference geometry.
+  const sashAngle = openingAngle * (snapshot.window.actual_position_percent ?? snapshot.window.last_known_position_percent ?? 0) / 100
   const motorMoving = snapshot.window.motor_state === 'opening' || snapshot.window.motor_state === 'closing'
 
   const magnetLocal = geometry.magnetLocal
@@ -150,7 +151,7 @@ export default function WindowAssembly({
       <Pickable id="window.reed_switch" position={geometry.reedCenter} bounds={[0.085, 0.060, 0.050]} selectedId={selectedId} mode={mode} onSelect={onSelect}>
         <Housing position={[0, 0, 0]} size={[0.070, 0.045, 0.027]} color="#e0e5de" radius={0.006} />
         <Housing position={[0.006, 0.004, 0.016]} size={[0.032, 0.010, 0.004]} color="#68787a" radius={0.003} />
-        <StatusLed position={[0.033, 0.020, 0.018]} active={snapshot.window.reed_switch} size={0.005} />
+        <StatusLed position={[0.033, 0.020, 0.018]} active={snapshot.window.reed_switch === true} size={0.005} />
         {WINDOW_REED_CONTACT_OFFSETS.map((contact, index) => (
           <group key={index}>
             <mesh position={contact}>
@@ -190,7 +191,7 @@ export default function WindowAssembly({
           <sphereGeometry args={[0.006, 10, 8]} />
           <meshStandardMaterial color="#657275" metalness={0.62} roughness={0.36} />
         </mesh>
-        <StatusLed position={[0.032, 0.026, 0.018]} active={snapshot.window.open_limit_switch} size={0.005} />
+        <StatusLed position={[0.032, 0.026, 0.018]} active={snapshot.window.open_limit_switch === true} size={0.005} />
         {WINDOW_LIMIT_CONTACT_OFFSETS.map(([x, y, z], index) => <mesh key={index} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.0022, 0.0022, 0.006, 8]} />
           <meshStandardMaterial color="#c2a55b" metalness={0.72} roughness={0.3} />
@@ -199,7 +200,7 @@ export default function WindowAssembly({
       <Pickable id="window.limit_close" position={geometry.closeLimitCenter} bounds={[0.075, 0.065, 0.055]} selectedId={selectedId} mode={mode} onSelect={onSelect}>
         <Housing position={[0, 0, 0]} size={[0.061, 0.047, 0.029]} color="#495a5d" radius={0.006} />
         <CylinderBetween from={[0, 0.005, 0.010]} to={[0, 0.030, 0.010]} radius={0.005} color="#c4ceca" segments={8} />
-        <StatusLed position={[0.032, 0.026, 0.018]} active={snapshot.window.close_limit_switch} size={0.005} />
+        <StatusLed position={[0.032, 0.026, 0.018]} active={snapshot.window.close_limit_switch === true} size={0.005} />
         {WINDOW_LIMIT_CONTACT_OFFSETS.map(([x, y, z], index) => <mesh key={index} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.0022, 0.0022, 0.006, 8]} />
           <meshStandardMaterial color="#c2a55b" metalness={0.72} roughness={0.3} />
@@ -212,7 +213,7 @@ export default function WindowAssembly({
       )))}
       <StatusLed position={[0.070, 0.086, -d.wall_thickness_m / 2 - 0.104]} active={!motorMoving} size={0.006} />
       {mode === 'technical' ? <DirectionTag position={[0, height + frameWidth + 0.105, -d.wall_thickness_m / 2 - 0.030]}>ПОВОРОТНАЯ СТВОРКА · 12 V</DirectionTag> : null}
-      {mode === 'technical' ? <DirectionTag position={[0, -0.19, -d.wall_thickness_m / 2 - 0.18]}>{`ОТКРЫТИЕ ${snapshot.window.actual_position_percent.toFixed(0)}% · ${snapshot.window.motor_state.toUpperCase()}`}</DirectionTag> : null}
+      {mode === 'technical' ? <DirectionTag position={[0, -0.19, -d.wall_thickness_m / 2 - 0.18]}>{snapshot.window.actual_position_percent === null ? 'ПОЛОЖЕНИЕ НЕИЗВЕСТНО' : `ОТКРЫТИЕ ${snapshot.window.actual_position_percent.toFixed(0)}% · ${snapshot.window.motor_state.toUpperCase()}`}</DirectionTag> : null}
     </group>
   )
 }

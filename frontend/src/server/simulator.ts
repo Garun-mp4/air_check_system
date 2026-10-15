@@ -1,6 +1,8 @@
 import { ApiError } from './api'
+import { runtimeMode } from './runtime-mode'
 
 function getSimulatorConfig(): { url: string; token: string } {
+  if (runtimeMode() === 'real') throw new ApiError('simulation_disabled', 'Испытательная симуляция отключена в реальном режиме', 403)
   const url = process.env.SIMULATOR_INTERNAL_URL?.trim().replace(/\/+$/, '')
   const token = process.env.SIMULATOR_INTERNAL_TOKEN?.trim()
   if (!url || !/^https?:\/\//.test(url) || !token || token.length < 32) {

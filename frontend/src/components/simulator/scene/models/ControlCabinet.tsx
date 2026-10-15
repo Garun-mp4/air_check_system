@@ -1,6 +1,6 @@
 'use client'
 
-import { Text } from '@react-three/drei'
+import { SceneText as Text } from '../SceneText'
 import type { SimulatorSnapshot, VisualizationMode } from '../../types'
 import { Pickable } from '../Pickable'
 import { CylinderBetween, Fastener, Housing, StatusLed } from './parts'
@@ -192,7 +192,7 @@ export default function ControlCabinet({
   const face = wallInside - 0.200
   const railZ = wallInside - 0.072
   const doorZ = wallInside - 0.068
-  const controllerOnline = snapshot.backend.online
+  const controllerOnline = snapshot.connection ? snapshot.connection.controller === 'online' : snapshot.backend.online
   const modules = CONTROL_CABINET_MODULES
 
   return (

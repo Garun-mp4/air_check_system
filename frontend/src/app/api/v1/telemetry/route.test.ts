@@ -12,7 +12,7 @@ import { TelemetryConflictError } from '../../../../server/telemetry-store'
 const token = 'test-only-device-token-32-characters'
 const now = Date.parse('2026-10-15T12:00:01Z')
 function request(body: string, authorization = 'Bearer ' + token) {
-  return new Request('http://aircheck.test/api/v1/telemetry', { method: 'POST', headers: { authorization }, body })
+  return new Request('http://aircheck.test/api/v1/telemetry', { method: 'POST', headers: { authorization, 'x-aircheck-source': 'real' }, body })
 }
 beforeEach(() => {
   mocks.ingest.mockReset(); mocks.latest.mockReset()
@@ -30,7 +30,7 @@ describe('HTTP device telemetry', () => {
     mocks.ingest.mockResolvedValue({ record: { id: 7, received_at: new Date(now).toISOString() }, duplicate: false, current: true, measurementId: 9 })
     const first = await POST(request(JSON.stringify(frameFixture())))
     expect(first.status).toBe(201)
-    expect((await first.json()).data).toEqual({ id: 7, received_at: new Date(now).toISOString(), duplicate: false, current: true, measurement_id: 9 })
+    expect((await first.json()).data).toEqual({ id: 7, received_at: new Date(now).toISOString(), duplicate: false, current: true, measurement_id: 9, prediction: null })
     mocks.ingest.mockResolvedValue({ record: { id: 7, received_at: new Date(now).toISOString() }, duplicate: true, current: true, measurementId: 9 })
     expect((await POST(request(JSON.stringify(frameFixture())))).status).toBe(200)
   })

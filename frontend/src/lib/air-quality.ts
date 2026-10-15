@@ -2,6 +2,14 @@ export const PM25_GOOD_LIMIT = 15
 export const PM25_ELEVATED_LIMIT = 35
 export const PM25_SCALE_MAX = 50
 
+export type Co2Level = 'normal' | 'elevated' | 'critical' | 'unknown'
+export interface Co2Thresholds { normal: number; critical: number }
+export const defaultCo2Thresholds: Co2Thresholds = { normal: 800, critical: 1000 }
+export function getCo2Level(value: number | null | undefined, thresholds = defaultCo2Thresholds): Co2Level {
+  if (value === null || value === undefined || !Number.isFinite(value)) return 'unknown'
+  return value >= thresholds.critical ? 'critical' : value >= thresholds.normal ? 'elevated' : 'normal'
+}
+
 export type Pm25Level = 'good' | 'elevated' | 'high' | 'unknown'
 export type Pm25Tone = 'success' | 'warning' | 'error' | 'neutral'
 

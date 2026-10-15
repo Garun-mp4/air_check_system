@@ -1,4 +1,4 @@
-import { assessSensor, type SensorId, type StoredTelemetry, type TelemetryFrame } from '../lib/telemetry'
+import { assessSensor, windowFeedbackValid, type SensorId, type StoredTelemetry, type TelemetryFrame } from '../lib/telemetry'
 import type { AirQualityService } from './service'
 import type { Repository } from './repository'
 import type { TelemetryStore } from './telemetry-store'
@@ -16,7 +16,7 @@ export function completeMeasurement(frame: TelemetryFrame): MeasurementInput | n
   const at = Date.parse(frame.sampled_at)
   if (frame.sensors.length !== 4 || frame.sensors.some(sensor => !assessSensor(sensor, at).usable)) return null
   const window = frame.actuators.window
-  if (window.position_quality !== 'measured' || window.position_percent === null || window.open_limit && window.close_limit) return null
+  if (window.position_quality !== 'measured' || window.position_percent === null || !windowFeedbackValid(window)) return null
   const channel = (id: SensorId, name: 'co2' | 'temperature' | 'humidity' | 'pm25'): number => {
     const value = frame.sensors.find(sensor => sensor.sensor_id === id)?.values[name]
     if (typeof value !== 'number' || !Number.isFinite(value)) throw new ValidationError([{ field: id + '.' + name, message: 'нет достоверного значения' }])
@@ -28,7 +28,7 @@ export function completeMeasurement(frame: TelemetryFrame): MeasurementInput | n
     timestamp: new Date(at), dataSource: frame.data_source, outdoorSampledAt: new Date(Math.min(...outdoorDates)),
     indoor: { co2: channel('indoor_climate', 'co2'), temperature: channel('indoor_climate', 'temperature'), humidity: channel('indoor_climate', 'humidity'), pm25: channel('indoor_particles', 'pm25') },
     outdoor: { temperature: channel('outdoor_climate', 'temperature'), humidity: channel('outdoor_climate', 'humidity'), pm25: channel('outdoor_particles', 'pm25') },
-    windowOpen: window.position_percent > 0,
+    windowOpen: window.reed_switch ?? window.position_percent > 0,
   }
 }
 
@@ -52,7 +52,7 @@ export class TelemetryService {
       const { window, exhaust, intake } = frame.actuators
       const valid = frame.controller.clock_synced && frame.controller.outputs_commissioned
       const known: ControlTarget[] = []
-      if (valid && window.position_quality === 'measured' && window.position_percent !== null && !(window.open_limit && window.close_limit) && window.motion !== 'fault') known.push('window')
+      if (valid && window.position_quality === 'measured' && window.position_percent !== null && windowFeedbackValid(window) && window.motion !== 'fault') known.push('window')
       if (valid && exhaust.status === 'measured' && exhaust.rpm !== null) known.push('exhaust')
       if (valid && intake.status === 'measured' && intake.rpm !== null) known.push('intake')
       const applied = frame.command_results.filter(result => {
@@ -65,14 +65,14 @@ export class TelemetryService {
       }).map(result => result.id)
       await this.air.reportControlState({
         deviceId: frame.device_id, timestamp: new Date(saved.record.received_at), knownTargets: known,
-        reported: { windowOpen: window.position_percent === null ? previous.reported.windowOpen : window.position_percent > 0, exhaustOn: exhaust.rpm === null ? previous.reported.exhaustOn : exhaust.rpm > 0, intakeOn: intake.rpm === null ? previous.reported.intakeOn : intake.rpm > 0 },
+        reported: { windowOpen: window.position_percent === null ? previous.reported.windowOpen : window.reed_switch ?? window.position_percent > 0, exhaustOn: exhaust.rpm === null ? previous.reported.exhaustOn : exhaust.rpm > 0, intakeOn: intake.rpm === null ? previous.reported.intakeOn : intake.rpm > 0 },
         appliedCommandIds: applied,
         failedCommands: frame.command_results.flatMap(result => result.status === 'applied' ? [] : [{ id: result.id, reason: commandFailureMessages[result.status] }]),
       })
     }
     const measurement = completeMeasurement(frame)
     const projected = measurement ? await this.air.ingest(measurement) : null
-    return { ...saved, measurementId: projected?.measurement.id ?? null }
+    return { ...saved, measurementId: projected?.measurement.id ?? null, prediction: projected?.prediction ?? null }
   }
 
   latest(source: TelemetryFrame['data_source']): Promise<StoredTelemetry | null> {

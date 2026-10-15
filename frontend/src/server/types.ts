@@ -1,4 +1,5 @@
 import type { OutdoorPolicy, OutdoorSafety } from './outdoor-policy'
+import type { StoredTelemetry } from '../lib/telemetry'
 export interface SensorValues {
   co2: number
   temperature: number
@@ -70,6 +71,7 @@ export interface Recommendation extends RecommendationDraft {
 }
 
 export interface HistoryQuery {
+  dataSource?: DataSource
   from?: Date
   to?: Date
   limit: number
@@ -84,7 +86,7 @@ export interface RetentionCleanupResult {
 }
 
 export interface DashboardDiagnostics {
-  measurement: 'missing' | 'fresh' | 'stale'
+  measurement: 'missing' | 'fresh' | 'stale' | 'partial'
   device: DeviceConnectionStatus
   prediction: 'stale' | 'ready' | 'pending' | 'insufficient_history' | 'model_untrained' | 'unavailable' | 'error' | 'legacy'
   predictionMessage: string | null
@@ -93,6 +95,7 @@ export interface DashboardDiagnostics {
 }
 
 export interface DashboardResult {
+  telemetry?: StoredTelemetry | null
   diagnostics?: DashboardDiagnostics
   measurement: Measurement | null
   prediction: Prediction | null

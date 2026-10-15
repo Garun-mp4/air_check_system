@@ -207,7 +207,8 @@ export async function refreshEvents(
     const settings = await notificationSettings(client)
     const measurement = (
       await client.query<{ timestamp: Date; indoor_co2: number }>(
-        'SELECT timestamp,indoor_co2 FROM measurements ORDER BY timestamp DESC,id DESC LIMIT 1',
+        "SELECT timestamp,indoor_co2 FROM measurements WHERE timestamp <= clock_timestamp() + interval '5 seconds' AND ($1::text IS NULL OR data_source=$1) ORDER BY timestamp DESC,id DESC LIMIT 1",
+        [config.dataSource ?? null],
       )
     ).rows[0]
     const state = (

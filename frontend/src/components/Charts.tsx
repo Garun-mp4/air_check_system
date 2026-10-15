@@ -23,7 +23,7 @@ const chartDataGapThresholdMs = 10 * 60 * 1000
 
 export interface SeriesPoint {
   timestamp: string
-  value: number
+  value: number | null
 }
 
 export interface ChartViewport {
@@ -206,7 +206,7 @@ function formatChartValue(value: number, unit: string): string {
 
 function validData(data: SeriesPoint[]): SeriesPoint[] {
   return data.filter((point) => (
-    Number.isFinite(point.value) && Number.isFinite(new Date(point.timestamp).getTime())
+    (point.value === null || Number.isFinite(point.value)) && Number.isFinite(new Date(point.timestamp).getTime())
   ))
 }
 
@@ -353,7 +353,7 @@ export function buildTimeSeriesOption(
   const data = validData(inputData)
   const appliedViewport = clampViewport(viewport, data.length)
   const zoomRange = viewportPercent(appliedViewport, data.length)
-  const values = data.map((point) => point.value)
+  const values = data.map((point) => point.value).filter((value): value is number => value !== null)
   const rawMin = values.length > 0 ? Math.min(...values) : 0
   const rawMax = values.length > 0 ? Math.max(...values) : 1
   const spread = Math.max(rawMax - rawMin, unit === '°C' ? 0.5 : 1)

@@ -159,7 +159,7 @@ export class ControlService {
     ) {
       state = await this.repository.setWindowControlMode(deviceId, 'auto', null)
     }
-    const measurement = await this.repository.getLatestMeasurement()
+    const measurement = await this.repository.getLatestMeasurement(this.config.dataSource)
     if (measurement) {
       const safety = await this.repository.assessOutdoorAir(deviceId, measurement, settings.outdoorPolicy ?? defaultOutdoorPolicy)
       if (safety.unavailable && deviceId === this.config.deviceId) await this.reconcile(measurement, null, safety)
@@ -286,7 +286,7 @@ export class ControlService {
       return []
     }
 
-    const latestMeasurement = await this.repository.getLatestMeasurement()
+    const latestMeasurement = await this.repository.getLatestMeasurement(this.config.dataSource)
     if (latestMeasurement && latestMeasurement.timestamp > measurement.timestamp) return []
     const safety = outdoorSafety ?? await this.repository.assessOutdoorAir(this.config.deviceId, measurement, settings.outdoorPolicy ?? defaultOutdoorPolicy)
     const currentCo2 = measurement.indoor.co2

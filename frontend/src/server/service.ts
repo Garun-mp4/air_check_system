@@ -1,5 +1,7 @@
 import { assessOutdoor, defaultOutdoorPolicy, validateOutdoorPolicy } from './outdoor-policy'
 import { IngestConflictError, measurementContentHash, measurementIdentity } from './ingest-identity'
+import { assessSensor } from '../lib/telemetry'
+import type { TelemetryStore } from './telemetry-store'
 import {
   buildFeatureVector,
   InsufficientHistoryError,
@@ -28,6 +30,7 @@ import type {
   ControlStatus,
   DeviceStateReport,
   DashboardResult,
+  DashboardDiagnostics,
   HistoryQuery,
   IngestResult,
   Measurement,
@@ -42,14 +45,28 @@ import type {
 
 export class AirQualityService {
   private readonly inFlight = new Map<string, { hash: string; result: Promise<IngestResult> }>()
+  private modeReady: Promise<void> | null = null
   constructor(
     private readonly repository: Repository,
     private readonly predictor: Predictor,
     private readonly config: AppConfig,
     private readonly controlService = new ControlService(repository, config),
+    private readonly telemetryStore?: TelemetryStore,
   ) {}
 
+  readyForRuntime(): Promise<void> {
+    if (!this.modeReady) this.modeReady = (this.config.dataSource ? this.repository.activateMode(this.config.deviceId, this.config.dataSource) : Promise.resolve()).catch(error => { this.modeReady = null; throw error })
+    return this.modeReady
+  }
+
+  private assertActiveDevice(deviceId: string): void {
+    if (this.config.dataSource && deviceId !== this.config.deviceId) throw new ValidationError([{ field: 'device_id', message: 'устройство не относится к установке' }])
+  }
+
   async ingest(input: MeasurementInput): Promise<IngestResult> {
+    await this.readyForRuntime()
+    if (this.config.dataSource && input.dataSource && input.dataSource !== this.config.dataSource) throw new ValidationError([{ field: 'data_source', message: 'источник не соответствует режиму установки' }])
+    if (this.config.dataSource) input = { ...input, dataSource: this.config.dataSource }
     const key = measurementIdentity(input)
     const hash = measurementContentHash(input)
     const existing = this.inFlight.get(key)
@@ -82,6 +99,7 @@ export class AirQualityService {
 
     if (!prediction) try {
       const history = await this.repository.listMeasurements({
+        dataSource: measurement.dataSource ?? 'unknown',
         from: new Date(
           measurement.timestamp.getTime() - 12 * 60 * 1000,
         ),
@@ -112,7 +130,7 @@ export class AirQualityService {
 
     await this.repository.setPredictionOutcome(measurement.id, predictionStatus, predictionError, predictionErrorCode)
     measurement.predictionStatus = predictionStatus; measurement.predictionError = predictionError; measurement.predictionErrorCode = predictionErrorCode
-    const latest = await this.repository.getLatestMeasurement()
+    const latest = await this.repository.getLatestMeasurement(this.config.dataSource)
     const current = latest?.id === measurement.id && Date.now() - measurement.timestamp.getTime() <= this.config.deviceHeartbeatTimeoutMs
     const policy = settings.outdoorPolicy ?? defaultOutdoorPolicy
     const safety = current ? await this.repository.assessOutdoorAir(this.config.deviceId, measurement, policy) : assessOutdoor(measurement, policy)
@@ -145,50 +163,60 @@ export class AirQualityService {
   }
 
   async latest(): Promise<DashboardResult> {
-    const measurement = await this.repository.getLatestMeasurement()
+    await this.readyForRuntime()
+    const measurement = await this.repository.getLatestMeasurement(this.config.dataSource)
     const candidate = measurement ? await this.repository.getPredictionForMeasurement(measurement.id) : null
     const candidateRecommendation = measurement ? await this.repository.getRecommendationForMeasurement(measurement.id) : null
     const control = await this.controlService.status()
-    const lastPrediction = candidate ? null : await this.repository.getLatestPrediction()
+    const lastPrediction = candidate ? null : await this.repository.getLatestPrediction(this.config.dataSource)
     const legacy = !!lastPrediction && lastPrediction.measurementId == null && !lastPrediction.sourceTimestamp
     const now = new Date()
     const age = measurement ? now.getTime() - measurement.timestamp.getTime() : null
-    const freshness = age === null ? 'missing' : age < -5000 || age > this.config.deviceHeartbeatTimeoutMs ? 'stale' : 'fresh'
-    const prediction = candidate && freshness === 'fresh' && candidate.targetTime > now ? candidate : null
-    const recommendation = freshness === 'fresh' ? candidateRecommendation : null
-    const status = candidate && !prediction ? 'stale' : prediction ? 'ready'
+    let freshness: DashboardDiagnostics['measurement'] = age === null ? 'missing' : age < -5000 || age > this.config.deviceHeartbeatTimeoutMs ? 'stale' : 'fresh'
+    let prediction = candidate && freshness === 'fresh' && candidate.targetTime > now ? candidate : null
+    let recommendation = freshness === 'fresh' ? candidateRecommendation : null
+    let status: DashboardDiagnostics['prediction'] = candidate && !prediction ? 'stale' : prediction ? 'ready'
       : measurement?.predictionErrorCode === 'model_unavailable' ? 'model_untrained'
       : measurement?.predictionErrorCode === 'invalid_response' ? 'error'
       : measurement?.predictionStatus === 'unavailable' ? 'unavailable'
       : measurement?.predictionStatus === 'insufficient_history' ? 'insufficient_history'
       : measurement?.predictionStatus === 'ready' ? 'error' : legacy ? 'legacy' : 'pending'
+    const telemetry = this.telemetryStore ? await this.telemetryStore.latest(this.config.deviceId, this.config.dataSource ?? 'simulator') : undefined
+    let message = status === 'stale' ? 'Измерение или прогноз устарели; ожидается новая телеметрия' : measurement?.predictionError ?? (status === 'legacy' ? 'Старый прогноз не связан с текущим измерением' : null)
+    if (telemetry) {
+      const frame = telemetry.frame
+      const usable = frame.sensors.filter(sensor => assessSensor(sensor, now.getTime(), frame.controller.clock_synced).usable).length
+      freshness = usable === 4 ? 'fresh' : usable > 0 ? 'partial' : 'stale'
+      const key = `v2:${frame.data_source}:${frame.device_id}:${frame.boot_id}:${frame.sequence}`
+      if (measurement?.ingestKey !== key || usable < 4) {
+        prediction = null; recommendation = null; status = 'unavailable'
+        message = usable < 4 ? 'Прогноз ждёт достоверных данных всех необходимых каналов' : 'Прогноз ждёт подтверждённого положения окна и полного набора признаков'
+      }
+    }
     return {
+      ...(this.telemetryStore ? { telemetry: telemetry ?? null } : {}),
       measurement, prediction, recommendation,
       diagnostics: { measurement: freshness, device: control.connectionStatus, prediction: status,
-        predictionMessage: status === 'stale' ? 'Измерение или прогноз устарели; ожидается новая телеметрия' : measurement?.predictionError ?? (status === 'legacy' ? 'Старый прогноз не связан с текущим измерением' : null),
-        measuredAt: measurement?.timestamp.toISOString() ?? null, assessedAt: now.toISOString() },
+        predictionMessage: message,
+        measuredAt: telemetry ? telemetry.frame.sampled_at : measurement?.timestamp.toISOString() ?? null, assessedAt: now.toISOString() },
     }
   }
 
   async latestPrediction(): Promise<Prediction | null> {
-    const measurement = await this.repository.getLatestMeasurement()
-    if (!measurement) return null
-    const age = Date.now() - measurement.timestamp.getTime()
-    if (age < -5000 || age > this.config.deviceHeartbeatTimeoutMs) return null
-    const prediction = await this.repository.getPredictionForMeasurement(measurement.id)
-    return prediction && prediction.targetTime.getTime() > Date.now() ? prediction : null
+    return (await this.latest()).prediction
   }
 
   async latestRecommendation(): Promise<Recommendation | null> {
-    const measurement = await this.repository.getLatestMeasurement()
-    return measurement && Date.now() - measurement.timestamp.getTime() >= -5000 && Date.now() - measurement.timestamp.getTime() <= this.config.deviceHeartbeatTimeoutMs ? this.repository.getRecommendationForMeasurement(measurement.id) : null
+    return (await this.latest()).recommendation
   }
 
   async history(query: HistoryQuery): Promise<Measurement[]> {
-    return this.repository.listMeasurements(query)
+    await this.readyForRuntime()
+    return this.repository.listMeasurements({ ...query, ...(this.config.dataSource ? { dataSource: this.config.dataSource } : {}) })
   }
 
   async cleanupExpiredData(now = new Date()): Promise<RetentionCleanupResult> {
+    await this.readyForRuntime()
     const cutoff = new Date(
       now.getTime() - this.config.dataRetentionHours * 60 * 60 * 1000,
     )
@@ -196,10 +224,14 @@ export class AirQualityService {
   }
 
   async controlsStatus(deviceId = this.config.deviceId): Promise<ControlStatus> {
+    await this.readyForRuntime()
+    this.assertActiveDevice(deviceId)
     return this.controlService.status(deviceId)
   }
 
   async nodeSettings(deviceId = this.config.deviceId): Promise<NodeSettings> {
+    await this.readyForRuntime()
+    this.assertActiveDevice(deviceId)
     return this.repository.getNodeSettings(deviceId, getNodeSettingsDefaults(this.config))
   }
 
@@ -207,6 +239,8 @@ export class AirQualityService {
     deviceId: string,
     patch: NodeSettingsPatch,
   ): Promise<NodeSettings> {
+    await this.readyForRuntime()
+    this.assertActiveDevice(deviceId)
     const current = await this.nodeSettings(deviceId)
     const next = { ...current, ...patch }
     if (patch.outdoorPolicy) {
@@ -270,10 +304,14 @@ export class AirQualityService {
   }
 
   async issueControl(request: ControlRequest): Promise<ControlCommandResult> {
+    await this.readyForRuntime()
+    this.assertActiveDevice(request.deviceId)
     return this.controlService.issue(request)
   }
 
   async issueVentilation(request: VentilationRequest): Promise<ControlCommandResult> {
+    await this.readyForRuntime()
+    this.assertActiveDevice(request.deviceId)
     return this.controlService.issueVentilation(request)
   }
 
@@ -281,14 +319,20 @@ export class AirQualityService {
     deviceId = this.config.deviceId,
     limit = 20,
   ): Promise<ControlCommand[]> {
+    await this.readyForRuntime()
+    this.assertActiveDevice(deviceId)
     return this.controlService.pendingCommands(deviceId, limit)
   }
 
   async commandAction(deviceId: string, id: number, action: 'cancel' | 'retry'): Promise<ControlCommandResult> {
+    await this.readyForRuntime()
+    this.assertActiveDevice(deviceId)
     return this.controlService.commandAction(deviceId, id, action)
   }
 
   async reportControlState(input: DeviceStateReport): Promise<ControlStatus> {
+    await this.readyForRuntime()
+    this.assertActiveDevice(input.deviceId)
     return this.controlService.report(input)
   }
 

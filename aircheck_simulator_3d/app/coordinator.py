@@ -14,16 +14,11 @@ from aircheck_simulator_3d.app.automatic_demo import AutomaticDemoController
 from aircheck_simulator_3d.app.config import AppConfig
 from aircheck_simulator_3d.app.developer_controls import DeveloperControls
 from aircheck_simulator_3d.app.scenarios import ScenarioController
-from aircheck_simulator_3d.app.stand_layout import (
-    CONTROL_CABINET_HEIGHT_M,
-    CONTROL_CABINET_WIDTH_M,
-    INDOOR_MOUNT_PANEL_HEIGHT_M,
-    INDOOR_MOUNT_PANEL_WIDTH_M,
-    EquipmentLayout,
-)
+from aircheck_simulator_3d.app.scene_reference import scene_reference
 from aircheck_simulator_3d.devices.command_executor import DeviceCommandExecutor
 from aircheck_simulator_3d.devices.device_layer import DeviceLayer
 from aircheck_simulator_3d.networking.contracts import ControlStateReport, MeasurementPayload
+from aircheck_simulator_3d.networking.telemetry import TelemetryBuilder
 from aircheck_simulator_3d.networking.workers import (
     AcknowledgementAccepted,
     BackendStatusUpdate,
@@ -69,6 +64,7 @@ class SimulationCoordinator:
         self.forecast: dict[str, Any] | None = None
         self.last_telemetry_at: str | None = None
         self._next_telemetry_at = time.monotonic()
+        self._telemetry = TelemetryBuilder(config.devices.device_id)
         self._last_demo_status = self.demo.status
         self._actions: queue.Queue[tuple[str, dict[str, Any], Future[dict[str, Any]]]] = queue.Queue()
         self._state_lock = threading.RLock()
@@ -167,7 +163,6 @@ class SimulationCoordinator:
                     "elapsed_seconds": state.elapsed_seconds,
                     "speed": state.simulation_speed,
                     "fixed_step_seconds": state.fixed_step_seconds,
-                    "room_volume_m3": state.room_volume_m3,
                     "occupancy": state.environment.occupancy,
                     "scenario": self.scenarios.active_scenario,
                     "scenarios": [
@@ -185,39 +180,7 @@ class SimulationCoordinator:
                         for name, parameter in self.config.demo.developer_parameters.items()
                     },
                     "supported_speeds": [0.0, *self.simulation.supported_speeds],
-                    "room_dimensions": {
-                        "width_m": self.config.scene.room_width_m,
-                        "depth_m": self.config.scene.room_depth_m,
-                        "height_m": self.config.scene.room_height_m,
-                        "wall_thickness_m": self.config.scene.wall_thickness_m,
-                        "window_width_m": self.config.scene.window_width_m,
-                        "window_height_m": self.config.scene.window_height_m,
-                        "window_sill_height_m": self.config.scene.window_sill_height_m,
-                        "window_open_angle_degrees": self.config.scene.window_open_angle_degrees,
-                        "outdoor_depth_m": self.config.scene.outdoor_depth_m,
-                    },
-                    "layout": asdict(EquipmentLayout.from_config(self.config.scene)),
-                    "mount_dimensions": {
-                        "control_cabinet_width_m": CONTROL_CABINET_WIDTH_M,
-                        "control_cabinet_height_m": CONTROL_CABINET_HEIGHT_M,
-                        "indoor_panel_width_m": INDOOR_MOUNT_PANEL_WIDTH_M,
-                        "indoor_panel_height_m": INDOOR_MOUNT_PANEL_HEIGHT_M,
-                    },
-                    "camera": {
-                        "start_position": list(self.config.camera.start_position),
-                        "start_target": list(self.config.camera.start_target),
-                        "move_speed_m_s": self.config.camera.move_speed_m_s,
-                        "fast_move_multiplier": self.config.camera.fast_move_multiplier,
-                        "mouse_sensitivity": self.config.camera.mouse_sensitivity,
-                        "wheel_step_m": self.config.camera.wheel_step_m,
-                        "transition_seconds": self.config.camera.transition_seconds,
-                        "min_pitch_degrees": self.config.camera.min_pitch_degrees,
-                        "max_pitch_degrees": self.config.camera.max_pitch_degrees,
-                        "field_of_view_degrees": self.config.camera.field_of_view_degrees,
-                        "near_plane_m": self.config.camera.near_plane_m,
-                        "far_plane_m": self.config.camera.far_plane_m,
-                        "focus_distance_min_m": self.config.camera.focus_distance_min_m,
-                    },
+                    **scene_reference(self.config),
                 },
                 "indoor": self._air_mapping(state.indoor),
                 "outdoor": self._air_mapping(state.outdoor),
@@ -296,10 +259,7 @@ class SimulationCoordinator:
             )
             monotonic_now = time.monotonic()
             if monotonic_now >= self._next_telemetry_at:
-                try:
-                    self.network.publish_telemetry(MeasurementPayload.from_state(self.simulation.state, now))
-                except (SensorReadingUnavailable, ValueError) as exc:
-                    LOGGER.info("Virtual sensor telemetry withheld: %s", exc)
+                self.network.publish_telemetry(self._telemetry.build(self.simulation.state, now))
                 self._next_telemetry_at = monotonic_now + self.network.config.telemetry_interval_seconds
             self._last_demo_status = self.demo.update(self.simulation.state, self.backend_online)
             self._revision += 1

@@ -9,7 +9,7 @@ export const predictionStatusLabels: Record<
   pending: 'Ожидание прогноза',
   insufficient_history: 'Недостаточно истории',
   model_untrained: 'Модель не обучена',
-  unavailable: 'ML недоступен',
+  unavailable: 'Прогноз недоступен',
   error: 'Ошибка ответа ML',
   legacy: 'Старый прогноз без связи с измерением',
   stale: 'Прогноз устарел',
@@ -31,7 +31,9 @@ export default function DataStatus({
           ? 'Измерений пока нет'
           : diagnostics.measurement === 'stale'
             ? 'Измерения устарели'
-            : 'Измерения актуальны'}
+            : diagnostics.measurement === 'partial'
+              ? 'Часть каналов недоступна'
+              : 'Измерения актуальны'}
       </strong>
       <span>
         Устройство:{' '}

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { sendControlCommand } from '../../lib/client-api'
+import { getCo2Level } from '../../lib/air-quality'
+import { sensorQualityLabels } from '../../lib/telemetry'
 import SceneCanvas from './SceneLoader'
 import { useSimulatorState } from './useSimulatorState'
 import type { CutawayMode, SimulatorSnapshot, VisualizationMode } from './types'
@@ -66,6 +68,18 @@ function fmt(value: number | null | undefined, digits = 0): string {
     : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: digits }).format(value)
 }
 
+function co2ToneClass(snapshot: SimulatorSnapshot): string {
+  const sensor = snapshot.sensors.find(item => item.id === 'indoor_climate')
+  const level = sensor?.online && snapshot.settings ? getCo2Level(snapshot.indoor.co2_ppm, {
+    normal: snapshot.settings.co2_normal_threshold, critical: snapshot.settings.co2_critical_threshold,
+  }) : 'unknown'
+  return level === 'normal' ? 'is-good' : level === 'elevated' ? 'is-warning' : level === 'critical' ? 'is-danger' : ''
+}
+function fanStateLabel(fan: SimulatorSnapshot['ventilation']['intake']): string {
+  return fan.enabled === null ? 'нет подтверждения' : fan.enabled ? `${fmt(fan.rpm)} об/мин` : 'остановлен'
+}
+function signalLabel(value: boolean | null): string { return value === null ? 'нет данных' : value ? 'активен' : 'неактивен' }
+
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { ...init, cache: 'no-store', headers: { 'Content-Type': 'application/json', ...init?.headers } })
   const result: unknown = await response.json().catch(() => null)
@@ -82,7 +96,16 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export default function SimulatorApp() {
-  const { snapshot, connected, error } = useSimulatorState()
+  const { snapshot: reportedSnapshot, connected, error } = useSimulatorState()
+  const snapshot = useMemo<SimulatorSnapshot | null>(() => {
+    if (!reportedSnapshot || connected) return reportedSnapshot
+    return { ...reportedSnapshot,
+      sensors: reportedSnapshot.sensors.map(sensor => ({ ...sensor, online: false, quality: 'unknown', reason: 'Нет обновлений браузерного потока; показано последнее значение' })),
+      window: { ...reportedSnapshot.window, motor_state: 'unknown', position_quality: reportedSnapshot.window.actual_position_percent === null ? 'unknown' : 'stale' },
+      ventilation: { ...reportedSnapshot.ventilation, intake: { ...reportedSnapshot.ventilation.intake, enabled: null }, exhaust: { ...reportedSnapshot.ventilation.exhaust, enabled: null } },
+    }
+  }, [reportedSnapshot, connected])
+  const realMode = snapshot?.mode === 'real'
   const { access, status: accessStatus } = useAccessSession()
   const [mode, setMode] = useState<VisualizationMode>('normal')
   const [cutaway, setCutaway] = useState<CutawayMode>('hidden')
@@ -110,6 +133,7 @@ export default function SimulatorApp() {
   }, [])
 
   const callAction = useCallback(async (action: string, payload: Record<string, string | number | boolean> = {}) => {
+    if (realMode) { setNotice('Испытательные сценарии доступны в режиме симуляции.'); return }
     setBusy(true)
     setNotice(null)
     try {
@@ -119,7 +143,7 @@ export default function SimulatorApp() {
     } finally {
       setBusy(false)
     }
-  }, [])
+  }, [realMode])
 
   const sendDeviceCommand = useCallback(async (target: 'window' | 'intake' | 'exhaust', action: 'open' | 'close' | 'on' | 'off') => {
     if (!isOperator) return
@@ -185,9 +209,9 @@ export default function SimulatorApp() {
         </header>
         <section className="simulator-unavailable-card">
           <span className="sim-status-dot is-offline" />
-          <h1>3D-симулятор пока недоступен</h1>
-          <p>{error ?? 'Ожидаем запуска headless simulator.'}</p>
-          <p className="sim-muted">Запустите стандартный Compose-стек и обновите страницу. Headless-процесс продолжает локальную симуляцию даже при временно недоступном backend.</p>
+          <h1>3D-стенд пока недоступен</h1>
+          <p>{error ?? 'Загружаем состояние системы.'}</p>
+          <p className="sim-muted">Проверьте связь с сервером. Страница повторит подключение автоматически.</p>
           <div className="simulator-unavailable-actions"><a className="sim-button sim-button-primary" href="/">Вернуться к панели</a><a className="sim-button" href={getLoginHref('/simulator')}>Войти</a></div>
         </section>
       </main>
@@ -207,8 +231,8 @@ export default function SimulatorApp() {
         </a>
         <nav className="simulator-primary-nav" aria-label="Основная навигация"><a href="/">Панель</a><a href="/simulator" aria-current="page">3D-стенд</a></nav>
         <div className="simulator-topbar-center">
-          <span className={'sim-status-pill ' + (connected ? 'is-online' : 'is-offline')}><i />{connected ? 'Симулятор подключён' : 'Нет потока симуляции'}</span>
-          <span className={'sim-status-pill ' + (snapshot.backend.online ? 'is-online' : 'is-warning')}><i />Backend {snapshot.backend.online ? 'online' : 'offline'}</span>
+          <span className={'sim-status-pill ' + (connected ? 'is-online' : 'is-offline')}><i />{connected ? 'Поток подключён' : 'Нет обновлений'}</span>
+          <span className={'sim-status-pill ' + (connected && snapshot.backend.online ? 'is-online' : 'is-warning')}><i />{connected ? snapshot.backend.online ? 'Сервер доступен' : 'Нет связи с сервером данных' : 'Нет свежего статуса сервера'}</span>
           <span className="sim-device-id">Узел <strong>{snapshot.device_id}</strong></span>
         </div>
         <div className="simulator-topbar-actions">
@@ -219,9 +243,9 @@ export default function SimulatorApp() {
       </header>
 
       <div className={'simulator-main-nav ' + (mobileMenuOpen ? 'is-open' : '')}>
-        <div className="simulator-nav-title"><span className="eyebrow">Интерактивный стенд</span><h1>AirCheck <span>·</span> цифровой двойник</h1></div>
+        <div className="simulator-nav-title"><h1>Цифровой стенд</h1><p className="sim-muted">{realMode ? 'Реальная система · ESP32' : 'Симуляция · испытательный режим'}</p></div>
         <nav className="simulator-nav-tabs" aria-label="Разделы цифрового стенда">
-          {(['devices', 'controls', 'tools'] as const).map((item) => <button key={item} type="button" aria-pressed={panel === item} className={panel === item ? 'is-active' : ''} onClick={() => { setPanel(item); setMobileDevicePanelOpen(item === 'devices'); setMobileMenuOpen(false) }}>{item === 'devices' ? 'Устройства' : item === 'controls' ? 'Сценарии' : 'Инструменты'}</button>)}
+          {(['devices', 'controls', 'tools'] as const).map((item) => <button key={item} type="button" aria-pressed={panel === item} className={panel === item ? 'is-active' : ''} onClick={() => { setPanel(item); setMobileDevicePanelOpen(item === 'devices'); setMobileMenuOpen(false) }}>{item === 'devices' ? 'Устройства' : item === 'controls' ? 'Сценарии' : realMode ? 'Диагностика' : 'Инструменты'}</button>)}
         </nav>
       </div>
 
@@ -248,7 +272,7 @@ export default function SimulatorApp() {
               </div>
             </div>
             <div className={'simulator-stage-hud' + (mobileMetricsExpanded ? ' is-expanded' : '')}>
-              <div className="sim-hud-card sim-hud-co2"><span>CO₂ · ВНУТРИ</span><strong>{fmt(snapshot.indoor.co2_ppm)} <small>ppm</small></strong><i className={snapshot.indoor.co2_ppm >= 1000 ? 'is-danger' : snapshot.indoor.co2_ppm >= 800 ? 'is-warning' : ''} /></div>
+              <div className="sim-hud-card sim-hud-co2"><span>CO₂ · ВНУТРИ</span><strong>{fmt(snapshot.indoor.co2_ppm)} <small>ppm</small></strong><i className={co2ToneClass(snapshot)} /></div>
               <button className="sim-hud-mobile-toggle" type="button" aria-expanded={mobileMetricsExpanded} aria-controls="simulator-air-metrics" onClick={() => setMobileMetricsExpanded((expanded) => !expanded)}>{mobileMetricsExpanded ? 'Скрыть показатели' : 'Показатели воздуха'}</button>
               <div className="sim-hud-secondary" id="simulator-air-metrics">
                 <div className="sim-hud-card"><span>PM2.5 · ВНУТРИ</span><strong>{fmt(snapshot.indoor.pm25_ug_m3, 1)} <small>мкг/м³</small></strong></div>
@@ -259,8 +283,8 @@ export default function SimulatorApp() {
             </div>
             <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} />
             <div className="simulator-stage-footer">
-              <div className="sim-stage-state"><span className={windowMoving ? 'sim-live-indicator is-moving' : 'sim-live-indicator'} /><strong>Окно</strong> {snapshot.window.motor_state === 'opening' ? 'открывается' : snapshot.window.motor_state === 'closing' ? 'закрывается' : snapshot.window.motor_state === 'fault' ? 'ошибка' : `${fmt(snapshot.window.actual_position_percent)}%`}<span className="sim-state-divider" /><strong>Приток</strong> {snapshot.ventilation.intake.enabled ? `${fmt(snapshot.ventilation.intake.airflow_m3_h)} м³/ч` : 'выкл.'}<span className="sim-state-divider" /><strong>Вытяжка</strong> {snapshot.ventilation.exhaust.enabled ? `${fmt(snapshot.ventilation.exhaust.airflow_m3_h)} м³/ч` : 'выкл.'}</div>
-              <div className="sim-flow-caption">Эффективный расход <strong>{fmt(airflow.total_effective_m3_h)} м³/ч</strong> · {fmt(airflow.air_changes_per_hour, 2)} ACH</div>
+              <div className="sim-stage-state"><span className={windowMoving ? 'sim-live-indicator is-moving' : 'sim-live-indicator'} /><strong>Окно</strong> {snapshot.window.motor_state === 'opening' ? 'открывается' : snapshot.window.motor_state === 'closing' ? 'закрывается' : snapshot.window.motor_state === 'fault' ? 'ошибка' : snapshot.window.motor_state === 'unknown' || snapshot.window.actual_position_percent === null ? 'нет подтверждения' : `${fmt(snapshot.window.actual_position_percent)}%`}<span className="sim-state-divider" /><strong>Приток</strong> {fanStateLabel(snapshot.ventilation.intake)}<span className="sim-state-divider" /><strong>Вытяжка</strong> {fanStateLabel(snapshot.ventilation.exhaust)}</div>
+              <div className="sim-flow-caption">{realMode ? 'Расход и энергия не измеряются' : <>Оценка модели: <strong>{fmt(airflow.total_effective_m3_h)} м³/ч</strong> · {fmt(airflow.air_changes_per_hour, 2)} ACH</>}</div>
             </div>
           </div>
 
@@ -293,6 +317,7 @@ export default function SimulatorApp() {
           className={'simulator-sidebar' + (panel === 'devices' ? ' is-device-panel' : '') + (panel === 'devices' && mobileDevicePanelOpen ? ' is-mobile-sheet-open' : '')}
           aria-label={panel === 'devices' ? 'Информация об устройстве' : panel === 'controls' ? 'Сценарии симуляции' : 'Инструменты стенда'}
         >
+          {panel === 'devices' ? <label className="sim-tool-group"><span className="sim-tool-title">Выбрать устройство</span><select className="form-select" aria-label="Устройство стенда" value={selectedId ?? ''} onChange={event => { setSelectedId(event.target.value || null); setPanel('devices'); setMobileDevicePanelOpen(true) }}><option value="">Все устройства</option>{Object.entries(DEVICE_INFO).map(([id, info]) => <option key={id} value={id}>{info.title} · {info.zone}</option>)}</select></label> : null}
           {panel === 'devices' && mobileDevicePanelOpen ? <button className="simulator-mobile-device-close" type="button" onClick={closeMobileDevicePanel}>Закрыть сведения об устройстве</button> : null}
           {panel === 'devices' ? (
             <DevicePanel snapshot={snapshot} selectedId={selectedId} info={selectedInfo} sensor={selectedSensor} isOperator={isOperator} busy={busy} onCommand={sendDeviceCommand} />
@@ -304,7 +329,7 @@ export default function SimulatorApp() {
           <div className="simulator-sidebar-bottom">
             {notice ? <p className="sim-feedback" role="status">{notice}</p> : null}
             <div className="sim-outdoor-strip"><span><i className="sim-outdoor-icon">↗</i><span>Наружный воздух</span></span><strong>{fmt(snapshot.outdoor.temperature_c, 1)} °C <b>·</b> {fmt(snapshot.outdoor.humidity_percent)}% RH</strong><small>PM2.5 {fmt(snapshot.outdoor.pm25_ug_m3, 1)} мкг/м³</small></div>
-            <div className="simulator-footnote"><span>SIM {connected ? 'LIVE' : 'RECONNECTING'}</span><span>{new Date(snapshot.timestamp).toLocaleTimeString('ru-RU')}</span></div>
+            <div className="simulator-footnote"><span>{realMode ? 'ESP32' : 'SIM'} · {connected ? 'поток активен' : 'последний снимок'}</span><span>{new Date(snapshot.timestamp).toLocaleTimeString('ru-RU')}</span></div>
           </div>
         </aside>
       </section>
@@ -334,14 +359,14 @@ function DevicePanel({
   onCommand: (target: 'window' | 'intake' | 'exhaust', action: 'open' | 'close' | 'on' | 'off') => Promise<void>
 }) {
   const stateRows: Array<[string, string]> = []
-  if (selectedId === 'window.assembly' || selectedId === 'window.actuator') stateRows.push(['Положение', `${fmt(snapshot.window.actual_position_percent)}% / цель ${fmt(snapshot.window.target_position_percent)}%`], ['Привод', snapshot.window.motor_state.toUpperCase()], ['Геркон', snapshot.window.reed_switch ? 'ОТКРЫТ' : 'ЗАКРЫТ'], ['Концевики', `ОТКР ${snapshot.window.open_limit_switch ? 'ON' : 'OFF'} · ЗАКР ${snapshot.window.close_limit_switch ? 'ON' : 'OFF'}`])
-  if (selectedId === 'window.reed_switch' || selectedId === 'window.limit_open' || selectedId === 'window.limit_close') stateRows.push(['Сигнал геркона', snapshot.window.reed_switch ? 'ON' : 'OFF'], ['Концевик открытия', snapshot.window.open_limit_switch ? 'ON' : 'OFF'], ['Концевик закрытия', snapshot.window.close_limit_switch ? 'ON' : 'OFF'])
+  if (selectedId === 'window.assembly' || selectedId === 'window.actuator') stateRows.push(['Положение', `${fmt(snapshot.window.actual_position_percent)}% / цель ${fmt(snapshot.window.target_position_percent)}%`], ['Привод', snapshot.window.motor_state.toUpperCase()], ['Геркон', snapshot.window.reed_switch === null ? 'Нет данных' : snapshot.window.reed_switch ? 'Активен' : 'Неактивен'], ['Концевики', `ОТКР ${signalLabel(snapshot.window.open_limit_switch)} · ЗАКР ${signalLabel(snapshot.window.close_limit_switch)}`])
+  if (selectedId === 'window.reed_switch' || selectedId === 'window.limit_open' || selectedId === 'window.limit_close') stateRows.push(['Сигнал геркона', signalLabel(snapshot.window.reed_switch)], ['Концевик открытия', signalLabel(snapshot.window.open_limit_switch)], ['Концевик закрытия', signalLabel(snapshot.window.close_limit_switch)])
   if (selectedId === 'fan.intake' || selectedId === 'fan.exhaust') {
     const fan = selectedId === 'fan.intake' ? snapshot.ventilation.intake : snapshot.ventilation.exhaust
-    stateRows.push(['Состояние', fan.enabled ? 'РАБОТАЕТ' : 'ОСТАНОВЛЕН'], ['Обороты', `${fmt(fan.rpm)} об/мин`], ['Расход', `${fmt(fan.airflow_m3_h)} м³/ч`], ['Фильтр', `${snapshot.ventilation.filter_enabled ? 'включён' : 'выключен'} · ${fmt(snapshot.ventilation.filter_efficiency * 100)}%`])
+    stateRows.push(['Состояние', fan.enabled === null ? 'Нет подтверждения' : fan.enabled ? 'Вращение подтверждено' : 'Вращение не обнаружено'], ['Обороты', `${fmt(fan.rpm)} об/мин`], ['Расход', `${fmt(fan.airflow_m3_h)} м³/ч`], ['Фильтр', snapshot.ventilation.filter_enabled === null ? 'Нет измерения' : `${snapshot.ventilation.filter_enabled ? 'установлен' : 'не используется'} · ${fmt(snapshot.ventilation.filter_efficiency === null ? null : snapshot.ventilation.filter_efficiency * 100)}%`])
   }
   if (selectedId?.startsWith('power.')) stateRows.push(['Виртуальное состояние', 'Силовой узел стенда'], ['Система питания', '12 V DC → DC/DC 5 V'], ['Связь с узлом', snapshot.backend.online ? 'Backend online' : 'Локальный режим'])
-  if (selectedId === 'device.esp32') stateRows.push(['Связь', snapshot.backend.online ? 'ONLINE' : 'OFFLINE'], ['Device ID', snapshot.device_id], ['Команды в очереди', String(snapshot.backend.pending_commands)])
+  if (selectedId === 'device.esp32') stateRows.push(['Связь ESP32–сервер', snapshot.connection ? snapshot.connection.controller === 'online' ? 'Есть свежий отчёт' : snapshot.connection.controller === 'stale' ? 'Отчёт устарел' : 'Нет свежего отчёта' : snapshot.backend.online ? 'Виртуальный узел на связи' : 'Нет связи'], ['Device ID', snapshot.device_id], ['Команды в очереди', String(snapshot.backend.pending_commands)])
 
   const readings = sensor?.readings ?? {}
   const readingEntries = Object.entries(readings).filter(([, value]) => value !== null)
@@ -353,7 +378,7 @@ function DevicePanel({
         </PanelHeading>
         {info ? <dl className="sim-device-meta"><div><dt>Размещение</dt><dd>{info.zone}</dd></div><div><dt>Интерфейс</dt><dd>{info.interface}</dd></div><div><dt>Доступ</dt><dd>{isOperator ? 'Управление доступно' : 'Только просмотр'}</dd></div></dl> : null}
         {sensor ? (
-          <div className="sim-reading-group"><div className="sim-reading-group-title"><span>Текущие показания</span><span className={'sim-device-online ' + (sensor.online ? 'is-online' : 'is-offline')}>{sensor.online ? 'исправен' : 'ошибка датчика'}</span></div>
+          <div className="sim-reading-group"><div className="sim-reading-group-title"><span>Текущие показания</span><span className={'sim-device-online ' + (sensor.online ? 'is-online' : 'is-offline')}>{sensor.reason ?? (sensor.quality ? sensorQualityLabels[sensor.quality] : sensor.online ? 'Данные получены' : 'Нет достоверных данных')}</span></div>
             {readingEntries.length ? readingEntries.map(([key, value]) => <div className="sim-reading-row" key={key}><span>{key === 'co2' ? 'CO₂' : key === 'pm25' ? 'PM2.5' : key === 'temperature' ? 'Температура' : key === 'humidity' ? 'Влажность' : key}</span><strong>{fmt(value, key === 'pm25' || key === 'temperature' ? 1 : 0)} <small>{key === 'co2' ? 'ppm' : key === 'pm25' ? 'мкг/м³' : key === 'temperature' ? '°C' : key === 'humidity' ? '%' : ''}</small></strong></div>) : <p className="sim-muted">Датчик недоступен или ещё не передал показания.</p>}
           </div>
         ) : null}
@@ -368,9 +393,10 @@ function DevicePanel({
 }
 
 function windowMoving(snapshot: SimulatorSnapshot) { return snapshot.window.motor_state === 'opening' || snapshot.window.motor_state === 'closing' }
-function windowClosed(snapshot: SimulatorSnapshot) { return snapshot.window.actual_position_percent <= 0.01 || snapshot.window.motor_state === 'closing' }
+function windowClosed(snapshot: SimulatorSnapshot) { return snapshot.window.actual_position_percent !== null && snapshot.window.actual_position_percent <= 0.01 || snapshot.window.motor_state === 'closing' }
 
 function ScenarioPanel({ snapshot, isOperator, busy, onAction }: { snapshot: SimulatorSnapshot; isOperator: boolean; busy: boolean; onAction: (action: string, payload?: Record<string, string | number | boolean>) => Promise<void> }) {
+  if (snapshot.mode === 'real') return <div className="sim-sidebar-primary"><PanelHeading eyebrow="Источник данных" title="Подключена ESP32" description="Сцена показывает телеметрию физической системы. Испытательные сценарии доступны при запуске системы в режиме симуляции." /><p className="sim-muted">Команды реальным механизмам находятся на вкладке «Устройства».</p></div>
   return (
     <div className="sim-sidebar-primary">
       <PanelHeading eyebrow="Среда помещения" title="Сценарии демонстрации" description="Готовые исходные условия загружаются из конфигурации Simulation Core. Формулы и автоматика остаются в Python/backend." />
@@ -383,20 +409,21 @@ function ScenarioPanel({ snapshot, isOperator, busy, onAction }: { snapshot: Sim
 }
 
 function ToolsPanel({ snapshot, isOperator, busy, onAction, onMode, onCutaway }: { snapshot: SimulatorSnapshot; isOperator: boolean; busy: boolean; onAction: (action: string, payload?: Record<string, string | number | boolean>) => Promise<void>; onMode: (mode: VisualizationMode) => void; onCutaway: (mode: CutawayMode) => void }) {
+  const real = snapshot.mode === 'real'
   return (
     <div className="sim-sidebar-primary">
-      <PanelHeading eyebrow="Представление сцены" title="Инструменты стенда" description="Управление камерой, слоями оборудования и тестовыми параметрами симуляции." />
-      <div className="sim-tool-group"><span className="sim-tool-title">Скорость симуляции</span><div className="sim-speed-options">{snapshot.simulation.supported_speeds.map((speed) => <button key={speed} type="button" disabled={!isOperator || busy} className={snapshot.simulation.speed === speed ? 'is-active' : ''} onClick={() => void onAction('speed', { speed })}>{speed === 0 ? 'Пауза' : `${fmt(speed)}×`}</button>)}</div></div>
+      <PanelHeading eyebrow="Представление сцены" title={real ? 'Диагностика системы' : 'Инструменты стенда'} description={real ? 'Состояние контроллера и слои отображения.' : 'Управление камерой, слоями оборудования и тестовыми параметрами симуляции.'} />
+      {real ? <div className="sim-reading-group"><p className="sim-muted">Последний приём: {snapshot.connection?.received_at ? new Date(snapshot.connection.received_at).toLocaleString('ru-RU') : 'нет данных'}</p>{snapshot.telemetry ? <dl className="sim-device-meta"><div><dt>Прошивка</dt><dd>{snapshot.telemetry.frame.controller.firmware_version}</dd></div><div><dt>Uptime</dt><dd>{fmt(snapshot.telemetry.frame.controller.uptime_ms / 1000)} с</dd></div><div><dt>Свободная память</dt><dd>{fmt(snapshot.telemetry.frame.controller.free_heap)} байт</dd></div><div><dt>Минимум памяти</dt><dd>{fmt(snapshot.telemetry.frame.controller.minimum_free_heap)} байт</dd></div><div><dt>Пакет / очередь</dt><dd>{snapshot.telemetry.frame.sequence} / {snapshot.telemetry.frame.controller.queue_depth}</dd></div></dl> : null}{snapshot.warnings?.map(message => <p className="sim-readonly-note" key={message}>{message}</p>)}</div> : <div className="sim-tool-group"><span className="sim-tool-title">Скорость симуляции</span><div className="sim-speed-options">{snapshot.simulation.supported_speeds.map((speed) => <button key={speed} type="button" disabled={!isOperator || busy} className={snapshot.simulation.speed === speed ? 'is-active' : ''} onClick={() => void onAction('speed', { speed })}>{speed === 0 ? 'Пауза' : `${fmt(speed)}×`}</button>)}</div></div>}
       <div className="sim-tool-group"><span className="sim-tool-title">Слои отображения</span><div className="sim-tool-choice-list">{MODE_OPTIONS.map((option) => <button key={option.id} type="button" className={undefined} onClick={() => onMode(option.id)}><span>{option.label}</span><small>{option.help}</small></button>)}</div></div>
       <div className="sim-tool-group"><span className="sim-tool-title">Стена</span><div className="sim-cutaway-options">{(['visible', 'transparent', 'hidden'] as const).map((value) => <button key={value} type="button" onClick={() => onCutaway(value)}>{value === 'visible' ? 'Видимая' : value === 'transparent' ? 'Прозрачная' : 'Скрыта'}</button>)}</div></div>
-      <details className="sim-debug-panel" open={false}>
+      {!real ? <details className="sim-debug-panel" open={false}>
         <summary><span><b>Developer / Debug</b><small>Изменение условий среды</small></span><i>⌄</i></summary>
         {!isOperator ? <p className="sim-readonly-note">Настройки доступны только оператору.</p> : <div className="sim-debug-fields">{Object.entries(snapshot.simulation.developer_parameters).map(([key, parameter]) => {
           const value = snapshot.simulation.developer_values[key]
           if (value === undefined) return null
           return <label className="sim-debug-slider" key={key}><span>{DEBUG_LABELS[key] ?? key}<strong>{fmt(value, parameter.integral ? 0 : 2)}{key.endsWith('percent') || key === 'filter_efficiency' ? '%' : key.endsWith('_c') ? ' °C' : key.endsWith('_m3_h') ? ' м³/ч' : ''}</strong></span><input type="range" min={parameter.minimum} max={parameter.maximum} step={parameter.step} defaultValue={value} disabled={busy} onChange={(event) => { const input = event.currentTarget; const output = input.parentElement?.querySelector('strong'); if (output) output.textContent = `${fmt(Number(input.value), parameter.integral ? 0 : 2)}${key.endsWith('percent') || key === 'filter_efficiency' ? '%' : key.endsWith('_c') ? ' °C' : key.endsWith('_m3_h') ? ' м³/ч' : ''}` }} onPointerUp={(event) => void onAction('debug_set', { key, value: Number(event.currentTarget.value) })} onKeyUp={(event) => void onAction('debug_set', { key, value: Number(event.currentTarget.value) })} /></label>
         })}</div>}
-      </details>
+      </details> : null}
       {snapshot.backend.message ? <div className="sim-backend-message"><span className={snapshot.backend.online ? 'is-online' : 'is-offline'} />{snapshot.backend.message}</div> : null}
     </div>
   )

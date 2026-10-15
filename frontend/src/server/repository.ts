@@ -7,6 +7,7 @@ import type {
   ControlCommand,
   ControlCommandInput,
   ControlState,
+  DataSource,
   DeviceStateReport,
   HistoryQuery,
   Measurement,
@@ -24,11 +25,12 @@ import type {
 } from './types'
 
 export interface Repository {
+  activateMode(deviceId: string, source: 'real' | 'simulator'): Promise<void>
   createMeasurement(input: MeasurementInput): Promise<Measurement>
-  getLatestMeasurement(): Promise<Measurement | null>
+  getLatestMeasurement(source?: DataSource): Promise<Measurement | null>
   listMeasurements(query: HistoryQuery): Promise<Measurement[]>
   createPrediction(input: PredictionInput): Promise<Prediction>
-  getLatestPrediction(): Promise<Prediction | null>
+  getLatestPrediction(source?: DataSource): Promise<Prediction | null>
   getPredictionForMeasurement(id: number): Promise<Prediction | null>
   getRecommendationForMeasurement(id: number): Promise<Recommendation | null>
   setPredictionOutcome(id: number, status: PredictionStatus, error: string | null, code: string | null): Promise<void>
@@ -136,6 +138,7 @@ function cloneNodeSettings(settings: NodeSettings): NodeSettings {
 }
 
 export class MemoryRepository implements Repository {
+  private activeModes = new Map<string, 'real' | 'simulator'>()
   private measurements: Measurement[] = []
   private predictions: Prediction[] = []
   private recommendations: Recommendation[] = []
@@ -143,6 +146,16 @@ export class MemoryRepository implements Repository {
   private controlCommands: ControlCommand[] = []
   private nodeSettings = new Map<string, NodeSettings>()
   private nextId = 1
+
+  async activateMode(deviceId: string, source: 'real' | 'simulator'): Promise<void> {
+    if (this.activeModes.get(deviceId) === source) return
+    for (const command of this.controlCommands) if (command.deviceId === deviceId && command.status === 'pending') {
+      command.status = 'cancelled'; command.completedAt = new Date(); command.failureReason = 'Изменён режим установки; команда предыдущего источника отменена'
+    }
+    const state = this.ensureControlState(deviceId)
+    Object.assign(state, { reported: emptyControlSnapshot(), desired: emptyControlSnapshot(), knownTargets: [], lastReportedAt: null, windowMode: 'auto', overrideUntil: null, windowOpenSince: null, ventilationStartedAt: null, outdoorSafety: null, updatedAt: new Date() })
+    this.activeModes.set(deviceId, source)
+  }
 
   async createMeasurement(input: MeasurementInput): Promise<Measurement> {
     assertDeviceTime(input.timestamp)
@@ -165,8 +178,8 @@ export class MemoryRepository implements Repository {
     return measurement
   }
 
-  async getLatestMeasurement(): Promise<Measurement | null> {
-    return this.measurements.filter(item => item.timestamp.getTime() <= Date.now() + 5000).sort(sortByTimestamp).at(-1) ?? null
+  async getLatestMeasurement(source?: DataSource): Promise<Measurement | null> {
+    return this.measurements.filter(item => item.timestamp.getTime() <= Date.now() + 5000 && (source === undefined || (item.dataSource ?? 'unknown') === source)).sort(sortByTimestamp).at(-1) ?? null
   }
 
   async listMeasurements(query: HistoryQuery): Promise<Measurement[]> {
@@ -174,6 +187,7 @@ export class MemoryRepository implements Repository {
       .filter((measurement) => {
         const timestamp = measurement.timestamp.getTime()
         return (
+          (query.dataSource === undefined || (measurement.dataSource ?? 'unknown') === query.dataSource) &&
           (query.from === undefined || timestamp >= query.from.getTime()) &&
           (query.to === undefined || timestamp <= query.to.getTime())
         )
@@ -195,8 +209,8 @@ export class MemoryRepository implements Repository {
     return prediction
   }
 
-  async getLatestPrediction(): Promise<Prediction | null> {
-    return [...this.predictions].sort(sortPredictions)[0] ?? null
+  async getLatestPrediction(source?: DataSource): Promise<Prediction | null> {
+    return this.predictions.filter(item => source === undefined || (item.dataSource ?? 'unknown') === source).sort(sortPredictions)[0] ?? null
   }
 
   async getPredictionForMeasurement(id: number): Promise<Prediction | null> {
@@ -388,7 +402,7 @@ export class MemoryRepository implements Repository {
       )
       if (
         currentDesired === item.desiredState &&
-        (currentReported === item.desiredState || pendingForTarget)
+        ((state.knownTargets === undefined || state.knownTargets.includes(item.target)) && currentReported === item.desiredState || pendingForTarget)
       ) {
         continue
       }
@@ -818,6 +832,27 @@ export class PostgresRepository implements Repository {
     })
   }
 
+  async activateMode(deviceId: string, source: 'real' | 'simulator'): Promise<void> {
+    const client = await this.pool.connect()
+    try {
+      await client.query('BEGIN')
+      await client.query('INSERT INTO runtime_device_modes (device_id) VALUES ($1) ON CONFLICT DO NOTHING', [deviceId])
+      const previous = await client.query<{ data_source: DataSource | null }>('SELECT data_source FROM runtime_device_modes WHERE device_id=$1 FOR UPDATE', [deviceId])
+      await client.query("INSERT INTO actuator_states (device_id,known_targets) VALUES ($1,'{}') ON CONFLICT DO NOTHING", [deviceId])
+      if (previous.rows[0].data_source !== source) {
+        await client.query("SELECT pg_advisory_xact_lock(hashtext('aircheck-notifications'))")
+        await client.query("UPDATE notification_events SET delivery_status='disabled',delivery_error='Изменён режим установки; доставка предыдущего источника отменена',next_attempt_at=NULL WHERE device_id=$1 AND delivery_status IN ('pending','sending')", [deviceId])
+        await client.query('DELETE FROM notification_conditions WHERE device_id=$1', [deviceId])
+        await client.query("UPDATE actuator_commands SET status='cancelled',completed_at=clock_timestamp(),failure_reason='Изменён режим установки; команда предыдущего источника отменена' WHERE device_id=$1 AND status='pending'", [deviceId])
+        await client.query('INSERT INTO actuator_states (device_id) VALUES ($1) ON CONFLICT DO NOTHING', [deviceId])
+        await client.query("UPDATE actuator_states SET exhaust_on=false,intake_on=false,window_open=false,desired_exhaust_on=false,desired_intake_on=false,desired_window_open=false,known_targets='{}',last_reported_at=NULL,window_mode='auto',override_until=NULL,window_open_since=NULL,ventilation_started_at=NULL,outdoor_safety=NULL,updated_at=clock_timestamp() WHERE device_id=$1", [deviceId])
+        await client.query('UPDATE runtime_device_modes SET data_source=$2,updated_at=clock_timestamp() WHERE device_id=$1', [deviceId, source])
+      }
+      await client.query('COMMIT')
+    } catch (error) { await client.query('ROLLBACK'); throw error }
+    finally { client.release() }
+  }
+
   async createMeasurement(input: MeasurementInput): Promise<Measurement> {
     assertDeviceTime(input.timestamp)
     const key = measurementIdentity(input)
@@ -848,11 +883,12 @@ export class PostgresRepository implements Repository {
     return measurement
   }
 
-  async getLatestMeasurement(): Promise<Measurement | null> {
+  async getLatestMeasurement(source?: DataSource): Promise<Measurement | null> {
     const result = await this.pool.query<MeasurementRow>(
       'SELECT ' +
         measurementColumns +
-        " FROM measurements WHERE \"timestamp\" <= clock_timestamp() + interval '5 seconds' ORDER BY \"timestamp\" DESC, id DESC LIMIT 1",
+        " FROM measurements WHERE \"timestamp\" <= clock_timestamp() + interval '5 seconds' AND ($1::text IS NULL OR data_source=$1) ORDER BY \"timestamp\" DESC, id DESC LIMIT 1",
+      [source ?? null],
     )
     return result.rows[0] ? mapMeasurement(result.rows[0]) : null
   }
@@ -860,6 +896,9 @@ export class PostgresRepository implements Repository {
   async listMeasurements(query: HistoryQuery): Promise<Measurement[]> {
     const conditions: string[] = []
     const values: unknown[] = []
+    if (query.dataSource !== undefined) {
+      values.push(query.dataSource); conditions.push('data_source=$' + values.length)
+    }
     if (query.from) {
       values.push(query.from)
       conditions.push('"timestamp" >= $' + values.length)
@@ -890,10 +929,11 @@ export class PostgresRepository implements Repository {
     return mapPrediction(result.rows[0])
   }
 
-  async getLatestPrediction(): Promise<Prediction | null> {
+  async getLatestPrediction(source?: DataSource): Promise<Prediction | null> {
     const result = await this.pool.query<PredictionRow>(
       'SELECT id, created_at, target_time, predicted_co2, model_name, model_version, measurement_id, source_timestamp, data_source ' +
-        'FROM predictions ORDER BY target_time DESC, created_at DESC, id DESC LIMIT 1',
+        'FROM predictions WHERE ($1::text IS NULL OR data_source=$1) ORDER BY target_time DESC, created_at DESC, id DESC LIMIT 1',
+      [source ?? null],
     )
     return result.rows[0] ? mapPrediction(result.rows[0]) : null
   }
@@ -1131,7 +1171,7 @@ export class PostgresRepository implements Repository {
         )
         if (
           currentDesired === item.desiredState &&
-          (currentReported === item.desiredState || pendingForTarget)
+          ((current.knownTargets === undefined || current.knownTargets.includes(item.target)) && currentReported === item.desiredState || pendingForTarget)
         ) {
           continue
         }

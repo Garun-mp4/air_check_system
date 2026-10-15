@@ -9,6 +9,7 @@ import { ValidationError } from './validation'
 import { getAuthPool } from './auth'
 import { PostgresTelemetryStore } from './telemetry-store'
 import { TelemetryService } from './telemetry-service'
+import { realSystemSnapshot } from './system-snapshot'
 
 export class ApiError extends Error {
   constructor(
@@ -39,6 +40,15 @@ export function getTelemetryService(): TelemetryService {
   return telemetryService
 }
 
+export async function getRealSystemSnapshot() {
+  const air = getAirQualityService()
+  await air.readyForRuntime()
+  const [record, controls, settings, dashboard] = await Promise.all([
+    getTelemetryStore().latest(getConfig().deviceId, 'real'), air.controlsStatus(), air.nodeSettings(), air.latest(),
+  ])
+  return realSystemSnapshot(record, controls, settings, dashboard)
+}
+
 const RETENTION_CLEANUP_INTERVAL_MS = 15 * 60 * 1000
 
 function startRetentionCleanup(nextService: AirQualityService): void {
@@ -66,7 +76,7 @@ function startRetentionCleanup(nextService: AirQualityService): void {
 
   if (automationTimer === null) {
     automationTimer = setInterval(() => {
-      void nextService.controlsStatus().catch(error => console.error('automatic safety refresh failed', error))
+      void nextService.readyForRuntime().then(() => { startNotificationWorker(); return nextService.controlsStatus() }).catch(error => console.error('automatic safety refresh failed', error))
     }, 10_000)
     automationTimer.unref?.()
   }
@@ -82,10 +92,12 @@ export function getAirQualityService(): AirQualityService {
       getRepository(config.databaseUrl),
       new MlClient(config.mlServiceUrl, config.mlRequestTimeoutMs),
       config,
+      undefined,
+      config.dataSource ? getTelemetryStore() : undefined,
     )
     service = nextService
     startRetentionCleanup(nextService)
-    startNotificationWorker()
+    void nextService.readyForRuntime().then(() => startNotificationWorker()).catch(error => console.error('runtime initialization failed; will retry', error))
   }
   return service
 }

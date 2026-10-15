@@ -3,6 +3,8 @@ import ModelPanel from './ModelPanel'
 import LongHistoryPanel from './LongHistoryPanel'
 import NotificationPanel from './NotificationPanel'
 import EventJournal from './EventJournal'
+import { liveMeasurement } from '../lib/telemetry-view'
+import TelemetryDiagnostics from './TelemetryDiagnostics'
 
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
@@ -38,6 +40,7 @@ import {
   getPm25Level,
   getPm25MarkerPosition,
   getPm25Tone,
+  getCo2Level,
 } from '../lib/air-quality'
 import { getLoginHref } from '../lib/auth-navigation'
 import BrandLogo from './BrandLogo'
@@ -308,8 +311,8 @@ function getAirComparisonInsight(
   const indoorPm25 = measurement?.indoor.pm25
   const outdoorPm25 = measurement?.outdoor.pm25
   if (
-    indoorPm25 === undefined ||
-    outdoorPm25 === undefined ||
+    indoorPm25 == null ||
+    outdoorPm25 == null ||
     !Number.isFinite(indoorPm25) ||
     !Number.isFinite(outdoorPm25)
   ) {
@@ -396,7 +399,7 @@ export function getWindowHistorySummary(
   for (let index = 1; index < ordered.length; index += 1) {
     const previous = ordered[index - 1]
     const current = ordered[index]
-    if (previous.window_open !== current.window_open) {
+    if (previous.window_open !== null && current.window_open !== null && previous.window_open !== current.window_open) {
       transitionCount += 1
       lastChange = {
         from: previous.window_open,
@@ -436,32 +439,14 @@ function co2BadgeClass(
   value: number | null | undefined,
   thresholds: Co2Thresholds = defaultCo2Thresholds,
 ): string {
-  if (value === null || value === undefined) {
-    return 'badge-neutral'
-  }
-  if (value >= thresholds.critical) {
-    return 'badge-error'
-  }
-  if (value >= thresholds.normal) {
-    return 'badge-warning'
-  }
-  return 'badge-success'
+  return { unknown: 'badge-neutral', critical: 'badge-error', elevated: 'badge-warning', normal: 'badge-success' }[getCo2Level(value, thresholds)]
 }
 
 function co2Label(
   value: number | null | undefined,
   thresholds: Co2Thresholds = defaultCo2Thresholds,
 ): string {
-  if (value === null || value === undefined) {
-    return 'Ожидание данных'
-  }
-  if (value >= thresholds.critical) {
-    return 'Нужна вентиляция'
-  }
-  if (value >= thresholds.normal) {
-    return 'Зона внимания'
-  }
-  return 'В комфортной зоне'
+  return { unknown: 'Ожидание данных', critical: 'Нужна вентиляция', elevated: 'Зона внимания', normal: 'В комфортной зоне' }[getCo2Level(value, thresholds)]
 }
 
 function recommendationTone(
@@ -548,7 +533,7 @@ function getCo2Change(
       reference = item
     }
   }
-  return reference ? latest.indoor.co2 - reference.indoor.co2 : null
+  return reference?.indoor.co2 != null && latest.indoor.co2 !== null ? latest.indoor.co2 - reference.indoor.co2 : null
 }
 
 function formatDelta(value: number | null, minutes: number): string {
@@ -735,7 +720,7 @@ function ActuatorRow({
   icon: 'exhaust' | 'intake'
   label: string
   description: string
-  active: boolean
+  active: boolean | null
   desiredActive: boolean
   pending: boolean
 }) {
@@ -755,7 +740,7 @@ function ActuatorRow({
           className={'control-state-badge control-state-badge-' + (active ? 'on' : 'off')}
           title={pending ? 'Ожидается подтверждение локального узла' : undefined}
         >
-          {controlStateLabel(target, active)}
+          {active === null ? 'Нет подтверждения' : controlStateLabel(target, active)}
         </span>
         {pending ? <small className="actuator-pending-label">ожидание подтверждения</small> : null}
       </div>
@@ -2267,7 +2252,7 @@ export default function AirDashboard() {
     }
   }, [closeSettings, settingsOpen])
 
-  const measurement = dashboard?.measurement ?? null
+  const measurement = liveMeasurement(dashboard?.telemetry, dashboard?.measurement ?? null)
   const prediction: ClientPrediction | null = dashboard?.prediction ?? null
   const recommendation: ClientRecommendation | null = dashboard?.recommendation ?? null
   const currentCo2 = measurement?.indoor.co2 ?? null
@@ -2319,9 +2304,7 @@ export default function AirDashboard() {
     : 'ожидание синхронизации'
   const systemStatus = error ? 'нужна проверка' : dashboard?.diagnostics?.measurement === 'stale' ? 'данные устарели' : dashboard?.diagnostics?.device === 'offline' ? 'устройство не на связи' : measurement ? 'в сети' : 'ожидание'
   const systemTone = error ? 'error' : dashboard?.diagnostics?.measurement === 'stale' || dashboard?.diagnostics?.device === 'offline' ? 'warning' : measurement ? 'success' : 'neutral'
-  const currentWindowOpen = controls
-    ? controls.reported.window_open
-    : measurement?.window_open ?? null
+  const currentWindowOpen = controls ? controls.feedback_known && !controls.feedback_known.includes('window') || controls.connection.status !== 'online' ? null : controls.reported.window_open : measurement?.window_open ?? null
   const windowLabel = currentWindowOpen === null ? '—' : currentWindowOpen ? 'Открыто' : 'Закрыто'
   const windowMode = controls?.window.mode ?? 'auto'
   const windowDesiredOpen = controls?.desired.window_open ?? currentWindowOpen === true
@@ -2478,6 +2461,7 @@ export default function AirDashboard() {
             </div>
 
             <DataStatus diagnostics={dashboard?.diagnostics} />
+            <TelemetryDiagnostics telemetry={dashboard?.telemetry} />
             <div className="current-air-body">
               <div className="current-reading">
                 <span className="reading-label">CO₂</span>
@@ -2549,6 +2533,7 @@ export default function AirDashboard() {
             </span>
           </div>
 
+          <TelemetryDiagnostics telemetry={dashboard?.telemetry} />
           <div className="controls-grid">
             <article className="dashboard-card ventilation-card">
               <div className="control-card-header">
@@ -2565,7 +2550,7 @@ export default function AirDashboard() {
                   icon="exhaust"
                   label="Вытяжка"
                   description="удаление воздуха из комнаты"
-                  active={controls?.reported.exhaust_on ?? false}
+                  active={controls?.connection.status !== 'online' || controls?.feedback_known && !controls.feedback_known.includes('exhaust') ? null : controls?.reported.exhaust_on ?? null}
                   desiredActive={controls?.desired.exhaust_on ?? false}
                   pending={controls === null ||
                     controls?.reported.exhaust_on !== controls?.desired.exhaust_on ||
@@ -2577,7 +2562,7 @@ export default function AirDashboard() {
                   icon="intake"
                   label="Приток"
                   description="подача воздуха через фильтр"
-                  active={controls?.reported.intake_on ?? false}
+                  active={controls?.connection.status !== 'online' || controls?.feedback_known && !controls.feedback_known.includes('intake') ? null : controls?.reported.intake_on ?? null}
                   desiredActive={controls?.desired.intake_on ?? false}
                   pending={controls === null ||
                     controls?.reported.intake_on !== controls?.desired.intake_on ||

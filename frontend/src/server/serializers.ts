@@ -145,6 +145,7 @@ export function serializeRecommendation(recommendation: Recommendation | null) {
 
 export function serializeDashboard(result: DashboardResult) {
   return {
+    ...(result.telemetry !== undefined ? { telemetry: result.telemetry } : {}),
     ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
     measurement: result.measurement
       ? serializeMeasurement(result.measurement)

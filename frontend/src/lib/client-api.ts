@@ -1,21 +1,22 @@
 import type { DashboardDiagnostics } from '../server/types'
+import type { StoredTelemetry } from './telemetry'
 import type { OutdoorPolicy, OutdoorSafety } from '../server/outdoor-policy'
 export interface ClientMeasurement {
   id: number
   created_at: string
   timestamp: string
   indoor: {
-    co2: number
-    temperature: number
-    humidity: number
-    pm25: number
+    co2: number | null
+    temperature: number | null
+    humidity: number | null
+    pm25: number | null
   }
   outdoor: {
-    temperature: number
-    humidity: number
-    pm25: number
+    temperature: number | null
+    humidity: number | null
+    pm25: number | null
   }
-  window_open: boolean
+  window_open: boolean | null
 }
 
 export interface ClientPrediction {
@@ -40,6 +41,7 @@ export interface ClientRecommendation {
 }
 
 export interface DashboardData {
+  telemetry?: StoredTelemetry | null
   diagnostics?: DashboardDiagnostics
   measurement: ClientMeasurement | null
   prediction: ClientPrediction | null
@@ -68,6 +70,7 @@ export interface ClientControlCommand {
 }
 
 export interface ClientControlStatus {
+  feedback_known?: ClientControlTarget[]
   outdoor_safety?: OutdoorSafety | null
   device_id: string
   connection: {

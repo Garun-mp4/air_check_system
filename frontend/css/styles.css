@@ -9398,3 +9398,11 @@ body.is-chart-expanded {
 .notification-fields > .outdoor-filter-check { display: flex; }
 .notification-fields input[type="checkbox"] { min-height: 0; }
 .event-list { list-style: none; margin: 0; padding: 0; }
+
+.telemetry-diagnostics { padding: 16px 20px; margin: 12px 0; color: var(--color-body); }
+.telemetry-diagnostics summary { cursor: pointer; font-weight: 600; color: var(--color-ink); }
+.telemetry-diagnostics p, .telemetry-diagnostics dd { font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.telemetry-diagnostics dl > div { padding: 8px 0; border-top: 1px solid var(--color-hairline); }
+.telemetry-diagnostics dt { font-size: 13px; font-weight: 600; }
+.telemetry-diagnostics dd { margin: 4px 0 0; }
+.simulator-sidebar select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--color-hairline); border-radius: 8px; color: var(--color-ink); background: var(--color-canvas); }

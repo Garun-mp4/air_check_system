@@ -36,6 +36,8 @@ services:
     build:
       context: ./frontend
     environment:
+      AIRCHECK_MODE: ${AIRCHECK_MODE:-simulation}
+      SIMULATOR_DEVICE_TOKEN: ${SIMULATOR_DEVICE_TOKEN:-${DEVICE_API_TOKEN:-}}
       PORT: ${PORT:-3000}
       HOSTNAME: 0.0.0.0
       DATABASE_URL: postgres://${POSTGRES_USER:-air_quality}:${POSTGRES_PASSWORD:-air_quality_dev}@postgres:5432/${POSTGRES_DB:-air_quality}
@@ -80,7 +82,7 @@ services:
     environment:
       BACKEND_URL: http://backend:3000
       DEVICE_ID: ${DEVICE_ID:-room-01}
-      DEVICE_API_TOKEN: ${DEVICE_API_TOKEN:-}
+      DEVICE_API_TOKEN: ${SIMULATOR_DEVICE_TOKEN:-${DEVICE_API_TOKEN:-}}
       SIMULATOR_LOCK_DIRECTORY: /var/run/aircheck-simulator
       SIMULATOR_MODE: ${SIMULATOR_MODE:-live}
       SIMULATOR_INTERVAL_SECONDS: ${SIMULATOR_INTERVAL_SECONDS:-30}
@@ -110,7 +112,7 @@ services:
       BACKEND_URL: http://backend:3000
       DASHBOARD_URL: ${AIR_CHECK_PUBLIC_URL:-https://${AIR_CHECK_DOMAIN:-aircheck.home.arpa}}
       DEVICE_ID: ${DEVICE_ID:-room-01}
-      DEVICE_API_TOKEN: ${DEVICE_API_TOKEN:-}
+      DEVICE_API_TOKEN: ${SIMULATOR_DEVICE_TOKEN:-${DEVICE_API_TOKEN:-}}
       SIMULATOR_INTERNAL_TOKEN: ${SIMULATOR_INTERNAL_TOKEN:-}
       SIMULATOR_LOCK_DIRECTORY: /var/run/aircheck-simulator
       SIMULATOR_INTERVAL_SECONDS: ${WEB_SIMULATOR_INTERVAL_SECONDS:-5}

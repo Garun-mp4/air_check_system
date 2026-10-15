@@ -1,4 +1,5 @@
 from __future__ import annotations
+from aircheck_simulator_3d.networking.telemetry import DeviceTelemetryPayload
 
 import logging
 import queue
@@ -61,7 +62,7 @@ class TelemetrySender:
     def __init__(self, backend: AirCheckBackend) -> None:
         self._backend = backend
 
-    def send(self, payload: MeasurementPayload) -> BackendForecast | None:
+    def send(self, payload: MeasurementPayload | DeviceTelemetryPayload) -> BackendForecast | None:
         return self._backend.send_measurement(payload)
 
 
@@ -118,7 +119,7 @@ class NetworkIntegration:
         self._pending_acks: deque[ControlStateReport] = deque()
         self._known_command_ids: set[int] = set()
         self._latest_lock = threading.Lock()
-        self._latest_telemetry: MeasurementPayload | None = None
+        self._latest_telemetry: MeasurementPayload | DeviceTelemetryPayload | None = None
         self._telemetry_revision = 0
         self._latest_state: ControlStateReport | None = None
         self._forecast: BackendForecast | None = None
@@ -153,7 +154,7 @@ class NetworkIntegration:
             if self._thread.is_alive():
                 LOGGER.error("network worker did not stop within the configured request timeout")
 
-    def publish_telemetry(self, payload: MeasurementPayload) -> None:
+    def publish_telemetry(self, payload: MeasurementPayload | DeviceTelemetryPayload) -> None:
         with self._latest_lock:
             self._latest_telemetry = payload
             self._telemetry_revision += 1
@@ -375,7 +376,7 @@ class NetworkIntegration:
             if all(command_id in known_ids for command_id in report.applied_command_ids):
                 self._pending_acks.append(report)
 
-    def _get_latest_telemetry(self) -> tuple[int, MeasurementPayload] | None:
+    def _get_latest_telemetry(self) -> tuple[int, MeasurementPayload | DeviceTelemetryPayload] | None:
         with self._latest_lock:
             if self._latest_telemetry is None:
                 return None

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from aircheck_simulator_3d.networking.telemetry import DeviceTelemetryPayload
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -194,7 +195,7 @@ class AirCheckBackend(Protocol):
 
     def pending_commands(self) -> list[PendingControlCommand]: ...
 
-    def send_measurement(self, payload: MeasurementPayload) -> BackendForecast | None: ...
+    def send_measurement(self, payload: MeasurementPayload | DeviceTelemetryPayload) -> BackendForecast | None: ...
 
     def report_control_state(self, report: ControlStateReport) -> None: ...
 

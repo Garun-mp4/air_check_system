@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useRef } from 'react'
-import { Text } from '@react-three/drei'
+import { SceneText as Text } from './SceneText'
 import { useFrame } from '@react-three/fiber'
 import { Shape } from 'three'
 import type { Mesh } from 'three'
@@ -32,8 +32,9 @@ function FanRotor({ state }: { state: FanState }) {
     shape.quadraticCurveTo(0.032, 0.013, 0.025, -0.011)
     return shape
   }, [])
-  const rotationSpeed = state.enabled && state.nominal_rpm > 0
-    ? Math.min(25, (state.rpm / state.nominal_rpm) * 20)
+  const visualScale = state.nominal_rpm !== null && state.nominal_rpm > 0 ? state.nominal_rpm : 1200
+  const rotationSpeed = state.enabled === true && state.rpm !== null
+    ? Math.min(25, (state.rpm / visualScale) * 20)
     : 0
   useFrame((_, delta) => {
     if (rotor.current && rotationSpeed > 0) rotor.current.rotation.z -= delta * rotationSpeed
@@ -124,7 +125,7 @@ function Fan({
           </group>
         )))}
         <Housing position={[0.084, 0.088, 0.045]} size={[0.045, 0.027, 0.039]} color="#3e4d50" radius={0.005} />
-        <StatusLed position={[0.083, 0.090, 0.067]} active={state.enabled} size={0.006} />
+        <StatusLed position={[0.083, 0.090, 0.067]} active={state.enabled === true} size={0.006} />
         <Housing position={[0, -0.106, 0.048]} size={[0.055, 0.018, 0.029]} color="#49595b" radius={0.004} />
         {FAN_CABLE_OFFSETS.map(([x, y, z], index) => <mesh key={index} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.0026, 0.0026, 0.006, 8]} />
