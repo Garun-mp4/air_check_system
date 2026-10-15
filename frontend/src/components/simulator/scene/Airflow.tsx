@@ -6,6 +6,7 @@ import { CatmullRomCurve3, Vector3 } from 'three'
 import type { Mesh } from 'three'
 
 import type { SimulatorSnapshot } from '../types'
+import { useReducedMotion } from '../useReducedMotion'
 
 type Point = [number, number, number]
 
@@ -21,11 +22,12 @@ function FlowTrack({
   visible: boolean
 }) {
   const beads = useRef<Array<Mesh | null>>([])
+  const reducedMotion = useReducedMotion()
   const progress = useRef(Array.from({ length: 8 }, (_, index) => index / 8))
   const curve = useMemo(() => new CatmullRomCurve3(points.map((point) => new Vector3(...point))), [points])
   const geometry = useMemo(() => curve, [curve])
   useFrame((_, delta) => {
-    const active = visible && volume !== null && volume > 0.05
+    const active = !reducedMotion && visible && volume !== null && volume > 0.05
     const rate = 0.18 + Math.min(0.50, (volume ?? 0) / 120)
     for (let index = 0; index < progress.current.length; index += 1) {
       const bead = beads.current[index]

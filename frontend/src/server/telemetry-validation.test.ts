@@ -7,6 +7,13 @@ import { frameFixture } from './test-fixtures/telemetry'
 const now = Date.parse('2026-10-15T12:00:00Z')
 
 describe('device telemetry v2', () => {
+  it('rejects impossible calendar dates and invalid edge forecast metadata', () => {
+    const frame = frameFixture(); frame.sampled_at = '2026-02-30T12:00:00Z'
+    expect(() => parseTelemetry(frame, now)).toThrow()
+    const valid = frameFixture(); valid.edge_forecast = { model_sha256: 'a'.repeat(64), horizon_minutes: 20, predicted_co2: 1200, inference_us: 15 }
+    expect(parseTelemetry(valid, now).edge_forecast?.horizon_minutes).toBe(20)
+    valid.edge_forecast.model_sha256 = 'wrong'; expect(() => parseTelemetry(valid, now)).toThrow()
+  })
   it('accepts a complete frame and keeps stable channel identities', () => {
     expect(parseTelemetry(frameFixture(), now)).toEqual(frameFixture())
   })

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from bisect import bisect_left, bisect_right
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -164,18 +165,22 @@ def _lookup_at_or_after(
     return None
 
 
-def build_training_rows(measurements: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def build_training_rows(measurements: list[dict[str, Any]], horizon_minutes: int = 15) -> list[dict[str, Any]]:
+    if horizon_minutes not in (15, 20):
+        raise ValueError('Forecast horizon must be 15 or 20 minutes')
     records = sorted((flatten_measurement(item) | {"id": item.get("id", 0)} for item in measurements), key=_measurement_sort_key)
+    records = list({record['timestamp']: record for record in records}.values())
+    times = [record['timestamp'] for record in records]
     rows: list[dict[str, Any]] = []
     for index, current in enumerate(records):
-        history = records[: index + 1]
-        previous_5 = _lookup_at_or_before(history, current["timestamp"] - LOOKBACK_5_MINUTES, MAX_LOOKBACK_GAP)
-        previous_10 = _lookup_at_or_before(history, current["timestamp"] - LOOKBACK_10_MINUTES, MAX_LOOKBACK_GAP)
-        target = _lookup_at_or_after(
-            records[index + 1 :],
-            current["timestamp"] + HORIZON_15_MINUTES,
-            MAX_TARGET_GAP,
-        )
+        def before(lookback):
+            at = current['timestamp'] - lookback
+            selected = bisect_right(times, at, 0, index + 1) - 1
+            return records[selected] if selected >= 0 and at - times[selected] <= MAX_LOOKBACK_GAP else None
+        previous_5, previous_10 = before(LOOKBACK_5_MINUTES), before(LOOKBACK_10_MINUTES)
+        at = current['timestamp'] + timedelta(minutes=horizon_minutes)
+        selected = bisect_left(times, at, index + 1)
+        target = records[selected] if selected < len(records) and times[selected] - at <= MAX_TARGET_GAP else None
         if previous_5 is None or previous_10 is None or target is None:
             continue
         features = {
@@ -196,6 +201,8 @@ def build_training_rows(measurements: list[dict[str, Any]]) -> list[dict[str, An
                 "timestamp": current["timestamp"],
                 "features": features,
                 "co2_after_15min": target["co2"],
+                "target_co2": target["co2"],
+                "horizon_minutes": horizon_minutes,
                 "target_timestamp": target["timestamp"],
             }
         )

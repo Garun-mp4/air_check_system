@@ -33,7 +33,10 @@ export function realSystemSnapshot(record: StoredTelemetry | null, controls: Con
       readings: Object.fromEntries(sensorChannels[id].map(key => [key, sensor?.values[key] ?? null])),
     }
   })
-  const reading = (id: SensorId, key: 'co2' | 'temperature' | 'humidity' | 'pm25') => sensors.find(sensor => sensor.id === id)?.readings[key] ?? null
+  const reading = (id: SensorId, key: 'co2' | 'temperature' | 'humidity' | 'pm25') => {
+    const sensor = sensors.find(item => item.id === id)
+    return sensor?.online ? sensor.readings[key] ?? null : null
+  }
   const fan = (target: 'intake' | 'exhaust'): FanState => {
     const feedback = frame?.actuators[target]
     const rpm = feedback?.rpm ?? null
@@ -46,6 +49,7 @@ export function realSystemSnapshot(record: StoredTelemetry | null, controls: Con
   const windowPending = controls.recentCommands?.some(command => command.target === 'window' && command.status === 'pending')
   const key = frame ? `v2:${frame.data_source}:${frame.device_id}:${frame.boot_id}:${frame.sequence}` : null
   const prediction = dashboard.measurement?.ingestKey === key ? dashboard.prediction : null
+  const horizon = prediction ? Math.round((prediction.targetTime.getTime() - (prediction.sourceTimestamp ?? dashboard.measurement?.timestamp ?? now).getTime()) / 60000) : 15
   return {
     schema_version: 2, mode: 'real', data_source: 'real', revision: record?.id ?? 0, device_id: controls.deviceId,
     timestamp: frame?.sampled_at ?? record?.received_at ?? now.toISOString(), telemetry: record,
@@ -71,7 +75,7 @@ export function realSystemSnapshot(record: StoredTelemetry | null, controls: Con
     airflow: { infiltration_m3_h: null, window_m3_h: null, intake_m3_h: null, exhaust_m3_h: null, total_effective_m3_h: null, air_changes_per_hour: null },
     energy: { fan_energy_wh: null, estimated_ventilation_heat_loss_wh: null, total_relative_energy: null },
     backend: { online: true, message: connection === 'online' ? null : 'Нет свежего отчёта устройства; показано последнее известное состояние', last_telemetry_at: record?.received_at ?? null, pending_commands: controls.pendingCommands,
-      forecast: prediction ? { predicted_co2_15min: prediction.predictedCo2, target_time: prediction.targetTime.toISOString(), model_name: prediction.modelName, model_version: prediction.modelVersion } : null },
+      forecast: prediction ? { predicted_co2_15min: horizon === 15 ? prediction.predictedCo2 : null, predicted_co2: prediction.predictedCo2, horizon_minutes: horizon, target_time: prediction.targetTime.toISOString(), model_name: prediction.modelName, model_version: prediction.modelVersion } : null },
     demo: { active: false, phase: 'disabled', detail: 'Реальный режим' },
   }
 }

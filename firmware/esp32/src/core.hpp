@@ -41,13 +41,21 @@ struct ControllerState {
     std::array<bool, 2> fan_fault{};
     std::array<Result, 3> results{};
 };
-struct Policy { float co2_on = 1000; float co2_off = 800; float outdoor_pm25_max = 35; float outdoor_min_c = 5; float outdoor_max_c = 35; };
+struct Policy {
+    bool enabled = false, auto_window = false, filtered_intake = false;
+    float co2_on = 1000, co2_off = 800, outdoor_pm25_max = 35, outdoor_pm25_recovery = 30;
+    float outdoor_min_c = 5, outdoor_recovery_c = 7;
+    uint32_t manual_override_ms = 1800000, minimum_ventilation_ms = 180000;
+};
+bool valid_policy(const Policy& policy);
 class Controller {
 public:
     explicit Controller(bool commissioned) : commissioned_(commissioned) {}
     Outcome command(const Command& command, uint64_t now, int64_t epoch_ms);
     void tick(uint64_t now, int64_t epoch_ms, const Feedback& feedback);
     void autonomous(uint64_t now, const Sample& indoor, const Sample& outdoor, const Sample& outdoor_pm, const Policy& policy);
+    void safety(uint64_t now, const Sample& indoor, const Sample& outdoor, const Sample& outdoor_pm, const Policy& policy);
+    void configure(const Policy& policy);
     void reconcile_pending(const uint64_t* ids, size_t count);
     const ControllerState& state() const { return state_; }
 private:
@@ -58,6 +66,11 @@ private:
     std::array<uint64_t, 32> completed_{};
     unsigned completed_cursor_ = 0;
     uint64_t manual_until_ = 0;
+    Policy policy_{};
+    bool pollution_blocked_ = false, cold_blocked_ = false, auto_fans_ = false;
+    bool safe_window_ = false, safe_fans_ = false;
+    bool auto_window_active_ = false, auto_window_desired_ = false;
+    uint64_t auto_window_started_ = 0, auto_opened_at_ = 0;
     void finish(unsigned target, Outcome outcome);
     void stop_window();
 };

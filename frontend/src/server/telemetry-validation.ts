@@ -1,5 +1,6 @@
 import { sensorChannels, type FanTelemetry, type SensorId, type SensorQuality, type TelemetryFrame } from '../lib/telemetry'
 import { ValidationError, type ValidationIssue } from './validation'
+import { validRfc3339 } from '../lib/iso-time'
 
 const qualities: SensorQuality[] = ['unknown', 'warmup', 'ok', 'timeout', 'crc', 'protocol', 'range', 'stale', 'suspect_jump', 'suspect_stuck']
 const resultStatuses: TelemetryFrame['command_results'][number]['status'][] = ['applied', 'expired', 'clock_unsynced', 'disabled', 'fault', 'cancelled', 'unsafe_air']
@@ -31,7 +32,7 @@ export function parseTelemetry(payload: unknown, now = Date.now()): TelemetryFra
     if (value === null) return null
     const candidate = text(value, field, 40)
     const parsed = Date.parse(candidate)
-    if (!/T.*(?:Z|[+-]\d\d:\d\d)$/.test(candidate) || !Number.isFinite(parsed) || parsed > now + 5000) { fail(field, 'нужна дата RFC3339 не более чем на 5 секунд в будущем'); return null }
+    if (!validRfc3339(candidate) || parsed > now + 5000) { fail(field, 'нужна дата RFC3339 не более чем на 5 секунд в будущем'); return null }
     return new Date(parsed).toISOString()
   }
   const root = record(payload, 'body')
@@ -50,6 +51,17 @@ export function parseTelemetry(payload: unknown, now = Date.now()): TelemetryFra
     dropped_packets: number(info.dropped_packets, 'controller.dropped_packets'), queue_depth: number(info.queue_depth, 'controller.queue_depth', 0, 100000),
   }
   if (controller.clock_synced !== (sampledAt !== null)) fail('sampled_at', 'состояние часов не согласовано с датой')
+  if (info.sd_status !== undefined) controller.sd_status = choice(info.sd_status, 'controller.sd_status', ['disabled', 'missing', 'ready', 'full', 'error'] as const)
+  if (info.sd_backlog !== undefined) controller.sd_backlog = number(info.sd_backlog, 'controller.sd_backlog', 0, 1000000)
+  let edge: TelemetryFrame['edge_forecast']
+  if (root.edge_forecast !== undefined) {
+    const value = record(root.edge_forecast, 'edge_forecast')
+    const hash = text(value.model_sha256, 'edge_forecast.model_sha256', 64)
+    if (!/^[0-9a-f]{64}$/.test(hash)) fail('edge_forecast.model_sha256', 'требуется SHA-256 модели')
+    const horizon = number(value.horizon_minutes, 'edge_forecast.horizon_minutes', 15, 20)
+    if (horizon !== 15 && horizon !== 20) fail('edge_forecast.horizon_minutes', 'поддерживается 15 или 20 минут')
+    edge = { model_sha256: hash, horizon_minutes: horizon === 20 ? 20 : 15, predicted_co2: value.predicted_co2 === null ? null : number(value.predicted_co2, 'edge_forecast.predicted_co2', 250, 10000, false), inference_us: number(value.inference_us, 'edge_forecast.inference_us', 0, 1000000) }
+  }
   if (controller.minimum_free_heap !== null && controller.free_heap !== null && controller.minimum_free_heap > controller.free_heap) fail('controller.minimum_free_heap', 'минимум не может превышать текущее значение')
   const sensors: TelemetryFrame['sensors'] = []
   if (!Array.isArray(root.sensors) || root.sensors.length !== 4) fail('sensors', 'требуются четыре известных датчика')
@@ -101,7 +113,7 @@ export function parseTelemetry(payload: unknown, now = Date.now()): TelemetryFra
   const frame: TelemetryFrame = {
     schema_version: 2, device_id: deviceId, boot_id: bootId,
     data_source: choice(root.data_source, 'data_source', ['real', 'simulator'] as const), sequence: number(root.sequence, 'sequence'), sampled_at: sampledAt,
-    sensors, controller, actuators: {
+    sensors, controller, ...(edge ? { edge_forecast: edge } : {}), actuators: {
       window: { open_limit: boolean(window.open_limit, 'actuators.window.open_limit'), close_limit: boolean(window.close_limit, 'actuators.window.close_limit'), ...(window.reed_switch !== undefined ? { reed_switch: window.reed_switch === null ? null : boolean(window.reed_switch, 'actuators.window.reed_switch') } : {}), position_percent: position, position_quality: positionQuality, motion: choice(window.motion, 'actuators.window.motion', ['stopped', 'opening', 'closing', 'fault'] as const) },
       exhaust: fan(actuators.exhaust, 'actuators.exhaust'), intake: fan(actuators.intake, 'actuators.intake'),
     }, command_results: results,

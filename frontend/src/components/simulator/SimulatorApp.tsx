@@ -79,6 +79,13 @@ function fanStateLabel(fan: SimulatorSnapshot['ventilation']['intake']): string 
   return fan.enabled === null ? 'нет подтверждения' : fan.enabled ? `${fmt(fan.rpm)} об/мин` : 'остановлен'
 }
 function signalLabel(value: boolean | null): string { return value === null ? 'нет данных' : value ? 'активен' : 'неактивен' }
+function devicePoint(id: string, snapshot: SimulatorSnapshot): Point {
+  const { layout, room_dimensions: d } = snapshot.simulation
+  const reference = id.includes('outdoor') ? layout.outdoor_station_center : id.startsWith('sensor.') ? layout.indoor_sensor_center : layout.control_cabinet_center
+  if (id.startsWith('window.')) return [0, d.window_sill_height_m + d.window_height_m / 2, d.depth_m / 2]
+  if (id.startsWith('fan.')) return [(id === 'fan.intake' ? -1 : 1) * d.width_m * .37, d.height_m * .81, d.depth_m / 2]
+  return [reference[0], reference[2], reference[1]]
+}
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { ...init, cache: 'no-store', headers: { 'Content-Type': 'application/json', ...init?.headers } })
@@ -278,7 +285,7 @@ export default function SimulatorApp() {
                 <div className="sim-hud-card"><span>PM2.5 · ВНУТРИ</span><strong>{fmt(snapshot.indoor.pm25_ug_m3, 1)} <small>мкг/м³</small></strong></div>
                 <div className="sim-hud-card"><span>ТЕМПЕРАТУРА · ВНУТРИ</span><strong>{fmt(snapshot.indoor.temperature_c, 1)} <small>°C</small></strong></div>
                 <div className="sim-hud-card"><span>ВЛАЖНОСТЬ · ВНУТРИ</span><strong>{fmt(snapshot.indoor.humidity_percent)} <small>%</small></strong></div>
-                <div className="sim-hud-card sim-hud-forecast"><span>ПРОГНОЗ AIRCHECK · +15 МИН</span><strong>{snapshot.backend.forecast ? `${fmt(snapshot.backend.forecast.predicted_co2_15min)} ppm` : 'Ожидание ML'}</strong></div>
+                <div className="sim-hud-card sim-hud-forecast"><span>ПРОГНОЗ AIRCHECK{snapshot.backend.forecast ? ` · +${snapshot.backend.forecast.horizon_minutes ?? 15} МИН` : ''}</span><strong>{snapshot.backend.forecast ? `${fmt(snapshot.backend.forecast.predicted_co2 ?? snapshot.backend.forecast.predicted_co2_15min)} ppm` : 'Ожидание ML'}</strong></div>
               </div>
             </div>
             <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} />
@@ -317,7 +324,7 @@ export default function SimulatorApp() {
           className={'simulator-sidebar' + (panel === 'devices' ? ' is-device-panel' : '') + (panel === 'devices' && mobileDevicePanelOpen ? ' is-mobile-sheet-open' : '')}
           aria-label={panel === 'devices' ? 'Информация об устройстве' : panel === 'controls' ? 'Сценарии симуляции' : 'Инструменты стенда'}
         >
-          {panel === 'devices' ? <label className="sim-tool-group"><span className="sim-tool-title">Выбрать устройство</span><select className="form-select" aria-label="Устройство стенда" value={selectedId ?? ''} onChange={event => { setSelectedId(event.target.value || null); setPanel('devices'); setMobileDevicePanelOpen(true) }}><option value="">Все устройства</option>{Object.entries(DEVICE_INFO).map(([id, info]) => <option key={id} value={id}>{info.title} · {info.zone}</option>)}</select></label> : null}
+          {panel === 'devices' ? <label className="sim-tool-group"><span className="sim-tool-title">Выбрать устройство</span><select className="form-select" aria-label="Устройство стенда" value={selectedId ?? ''} onChange={event => { const id = event.target.value; setSelectedId(id || null); setSelectedPoint(id ? devicePoint(id, snapshot) : null); setPanel('devices'); setMobileDevicePanelOpen(true) }}><option value="">Все устройства</option>{Object.entries(DEVICE_INFO).map(([id, info]) => <option key={id} value={id}>{info.title} · {info.zone}</option>)}</select></label> : null}
           {panel === 'devices' && mobileDevicePanelOpen ? <button className="simulator-mobile-device-close" type="button" onClick={closeMobileDevicePanel}>Закрыть сведения об устройстве</button> : null}
           {panel === 'devices' ? (
             <DevicePanel snapshot={snapshot} selectedId={selectedId} info={selectedInfo} sensor={selectedSensor} isOperator={isOperator} busy={busy} onCommand={sendDeviceCommand} />
@@ -378,7 +385,7 @@ function DevicePanel({
         </PanelHeading>
         {info ? <dl className="sim-device-meta"><div><dt>Размещение</dt><dd>{info.zone}</dd></div><div><dt>Интерфейс</dt><dd>{info.interface}</dd></div><div><dt>Доступ</dt><dd>{isOperator ? 'Управление доступно' : 'Только просмотр'}</dd></div></dl> : null}
         {sensor ? (
-          <div className="sim-reading-group"><div className="sim-reading-group-title"><span>Текущие показания</span><span className={'sim-device-online ' + (sensor.online ? 'is-online' : 'is-offline')}>{sensor.reason ?? (sensor.quality ? sensorQualityLabels[sensor.quality] : sensor.online ? 'Данные получены' : 'Нет достоверных данных')}</span></div>
+          <div className="sim-reading-group"><div className="sim-reading-group-title"><span>{sensor.online ? 'Текущие показания' : 'Последние полученные показания'}</span><span className={'sim-device-online ' + (sensor.online ? 'is-online' : 'is-offline')}>{sensor.reason ?? (sensor.quality ? sensorQualityLabels[sensor.quality] : sensor.online ? 'Данные получены' : 'Нет достоверных данных')}</span></div>{sensor.last_good_at ? <p className="sim-muted">Измерено: {new Date(sensor.last_good_at).toLocaleString('ru-RU')}</p> : null}
             {readingEntries.length ? readingEntries.map(([key, value]) => <div className="sim-reading-row" key={key}><span>{key === 'co2' ? 'CO₂' : key === 'pm25' ? 'PM2.5' : key === 'temperature' ? 'Температура' : key === 'humidity' ? 'Влажность' : key}</span><strong>{fmt(value, key === 'pm25' || key === 'temperature' ? 1 : 0)} <small>{key === 'co2' ? 'ppm' : key === 'pm25' ? 'мкг/м³' : key === 'temperature' ? '°C' : key === 'humidity' ? '%' : ''}</small></strong></div>) : <p className="sim-muted">Датчик недоступен или ещё не передал показания.</p>}
           </div>
         ) : null}

@@ -130,7 +130,7 @@ describe('read and settings API route contracts', () => {
         id: 5,
         created_at: '2026-09-06T10:00:00.000Z',
         target_time: '2026-09-06T10:15:00.000Z',
-        predicted_co2_15min: 910,
+        predicted_co2_15min: 910, predicted_co2: 910, horizon_minutes: 15,
         measurement_id: null, source_timestamp: null, provenance: 'legacy',
         model_name: 'linear_regression',
         model_version: '1.2',
@@ -225,7 +225,7 @@ describe('read and settings API route contracts', () => {
 
     expect(await (await getLatestPrediction()).json()).toEqual({ data: {
       id: 5, created_at: '2026-09-06T10:00:00.000Z', target_time: '2026-09-06T10:15:00.000Z',
-      predicted_co2_15min: 910, model_name: 'linear_regression', model_version: '1.2',
+      predicted_co2_15min: 910, predicted_co2: 910, horizon_minutes: 15, model_name: 'linear_regression', model_version: '1.2',
       measurement_id: null, source_timestamp: null, provenance: 'legacy',
     } })
     expect(await (await getRecommendation()).json()).toEqual({ data: {

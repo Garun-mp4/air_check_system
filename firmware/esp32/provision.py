@@ -48,6 +48,9 @@ def validate(config, folder):
     if not isinstance(commissioned, bool):
         raise ValueError('commissioned must be a boolean')
     result['commissioned'] = int(commissioned)
+    sd_enabled = config.get('sd_enabled', False)
+    if not isinstance(sd_enabled, bool): raise ValueError('sd_enabled must be a boolean')
+    result['sd_enabled'] = int(sd_enabled)
     return result
 
 
@@ -72,7 +75,7 @@ def main():
                 writer.writerow(['key', 'type', 'encoding', 'value'])
                 writer.writerow(['aircheck', 'namespace', '', ''])
                 for key, value in values.items():
-                    writer.writerow([key, 'data', 'u8' if key == 'commissioned' else 'string', value])
+                    writer.writerow([key, 'data', 'u8' if key in ('commissioned', 'sd_enabled') else 'string', value])
             # The IDF environment supplies cryptography used by its NVS generator.
             run = subprocess.run([sys.executable, str(generator), 'generate', str(csv_path), str(args.out.resolve()), '0x6000'], capture_output=True, text=True, timeout=30)
             if run.returncode:

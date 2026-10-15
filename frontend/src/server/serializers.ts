@@ -116,14 +116,17 @@ export function serializePrediction(prediction: Prediction | null) {
   if (!prediction) {
     return null
   }
+  const horizon = prediction.sourceTimestamp ? Math.round((prediction.targetTime.getTime() - prediction.sourceTimestamp.getTime()) / 60000) : 15
   return {
+    predicted_co2: prediction.predictedCo2,
+    horizon_minutes: horizon,
     id: prediction.id,
     created_at: prediction.createdAt.toISOString(),
     measurement_id: prediction.measurementId ?? null,
     source_timestamp: prediction.sourceTimestamp?.toISOString() ?? null,
     provenance: prediction.measurementId != null ? 'linked' : prediction.sourceTimestamp ? 'archived' : 'legacy',
     target_time: prediction.targetTime.toISOString(),
-    predicted_co2_15min: prediction.predictedCo2,
+    predicted_co2_15min: horizon === 15 ? prediction.predictedCo2 : null,
     model_name: prediction.modelName,
     model_version: prediction.modelVersion,
   }

@@ -28,6 +28,16 @@ afterEach(() => {
 })
 
 describe('ML HTTP client contract', () => {
+  it('checks explicit source, schema and horizon and supports an honest 20 minute response', async () => {
+    const scoped = { ...payload, data_source: 'real' as const, schema_version: 1 as const, horizon_minutes: 20 as const }
+    const result = { predicted_co2: 1000, predicted_co2_15min: null, model: 'linear', model_version: 'v2', data_source: 'real', schema_version: 1, horizon_minutes: 20 }
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(result))))
+    expect(await new MlClient('http://ml.test', 1000).predict(scoped)).toMatchObject({ predictedCo2_15min: 1000, horizonMinutes: 20 })
+    for (const change of [{ data_source: 'simulator' }, { horizon_minutes: 15 }, { schema_version: 2 }]) {
+      vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ ...result, ...change }))))
+      await expect(new MlClient('http://ml.test', 1000).predict(scoped)).rejects.toBeInstanceOf(InvalidMlResponseError)
+    }
+  })
   it('maps an HTTP error response to a status-bearing service error', async () => {
     vi.stubGlobal(
       'fetch',

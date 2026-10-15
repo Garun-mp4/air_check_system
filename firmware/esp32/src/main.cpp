@@ -1,6 +1,16 @@
 #include "core.hpp"
 #include "board.hpp"
 #include "drivers.hpp"
+#include "edge.hpp"
+#include "journal.hpp"
+#include "driver/sdspi_host.h"
+#include "driver/spi_common.h"
+#include "esp_vfs_fat.h"
+#include "sdmmc_cmd.h"
+#if __has_include("edge_model.hpp") && !defined(AIRCHECK_FAKE_SENSORS)
+#include "edge_model.hpp"
+#define AIRCHECK_EDGE_MODEL 1
+#endif
 #include "cJSON.h"
 #include "driver/gpio.h"
 #include "esp_event.h"
@@ -53,7 +63,7 @@ struct NodeConfig {
     char server[256]=AIRCHECK_SERVER, device_id[81]=AIRCHECK_DEVICE_ID;
     char token[257]=AIRCHECK_TOKEN, ca_pem[4096]=AIRCHECK_CA_PEM;
     char ntp_server[256]="aircheck.home.arpa";
-    bool commissioned=false;
+    bool commissioned=false, sd_enabled=false;
 } node;
 void load_config() {
     nvs_handle_t handle;
@@ -67,8 +77,10 @@ void load_config() {
     read("token",node.token,sizeof(node.token)); read("root_ca",node.ca_pem,sizeof(node.ca_pem));
     read("ntp_server",node.ntp_server,sizeof(node.ntp_server));
     uint8_t commissioned=0; nvs_get_u8(handle,"commissioned",&commissioned);
+    uint8_t sd=0; nvs_get_u8(handle,"sd_enabled",&sd);
 #if !defined(AIRCHECK_FAKE_SENSORS)
     node.commissioned=commissioned==1 && AIRCHECK_OUTPUTS_COMMISSIONED;
+    node.sd_enabled=sd==1;
 #endif
     nvs_close(handle);
 }
@@ -78,11 +90,15 @@ struct Packet {
     std::array<Sample,4> sensors;
     ControllerState controls;
     unsigned heap, min_heap, dropped, queue_depth;
+    float forecast=-1;
+    unsigned inference_us=0;
+    unsigned sd_status=0, sd_backlog=0;
 };
 SemaphoreHandle_t state_mutex;
 QueueHandle_t telemetry_queue, command_queue;
 std::array<Sample,4> shared_samples{};
 Controller controller(false);
+Policy local_policy{};
 i2c_master_bus_handle_t bus=nullptr;
 char boot_id[33];
 bool initialize_identity() {
@@ -105,6 +121,10 @@ bool initialize_identity() {
 }
 std::atomic<bool> wifi_online{false};
 std::atomic<unsigned> dropped_packets{0};
+std::atomic<unsigned> storage_status{0}, storage_backlog{0};
+Journal journal;
+sdmmc_card_t* sd_card=nullptr;
+bool sd_bus_ready=false;
 std::atomic<uint32_t> last_server_ms{0};
 portMUX_TYPE tach_mux=portMUX_INITIALIZER_UNLOCKED;
 unsigned tach_counts[2]={};
@@ -156,8 +176,9 @@ void control_task(void*) {
         xSemaphoreTake(state_mutex,portMAX_DELAY);
         Command command;
         while(xQueueReceive(command_queue,&command,0)==pdTRUE) controller.command(command,now,epoch_ms());
+        controller.safety(now,shared_samples[0],shared_samples[1],shared_samples[3],local_policy);
         controller.tick(now,epoch_ms(),feedback);
-        if(!wifi_online || uint32_t(now)-last_server_ms.load()>board::offline_after_ms) controller.autonomous(now,shared_samples[0],shared_samples[1],shared_samples[3],{});
+        if(!wifi_online || uint32_t(now)-last_server_ms.load()>board::offline_after_ms) controller.autonomous(now,shared_samples[0],shared_samples[1],shared_samples[3],local_policy);
         const auto outputs=controller.state().outputs;
         xSemaphoreGive(state_mutex);
         write_outputs(outputs); esp_task_wdt_reset(); xTaskDelayUntil(&last,pdMS_TO_TICKS(20));
@@ -165,11 +186,29 @@ void control_task(void*) {
 }
 void sampler_task(void*) {
     esp_task_wdt_add(nullptr); TickType_t last=xTaskGetTickCount(); uint64_t sequence=0;
+    EdgeHistory history;
     while(true) {
         Packet packet{}; packet.sequence=sequence++; packet.monotonic_ms=monotonic_ms(); packet.epoch_ms=epoch_ms();
         xSemaphoreTake(state_mutex,portMAX_DELAY); packet.sensors=shared_samples; packet.controls=controller.state(); xSemaphoreGive(state_mutex);
         packet.heap=esp_get_free_heap_size(); packet.min_heap=esp_get_minimum_free_heap_size(); packet.dropped=dropped_packets; packet.queue_depth=uxQueueMessagesWaiting(telemetry_queue);
-        if(xQueueSend(telemetry_queue,&packet,0)!=pdTRUE) ++dropped_packets;
+        packet.sd_status=storage_status; packet.sd_backlog=storage_backlog;
+        const auto& s=packet.sensors;
+        const bool good=packet.epoch_ms && std::all_of(s.begin(),s.end(),[&](const Sample& sample){ return sample.quality==Quality::ok && sample.count && packet.monotonic_ms>=sample.last_good_ms && packet.monotonic_ms-sample.last_good_ms<=board::sensor_stale_ms; });
+        if(good) history.push(packet.monotonic_ms,s[0].values[0]);
+#if defined(AIRCHECK_EDGE_MODEL)
+        float delta5=0,delta10=0;
+        if(edge_model::enabled && good && packet.controls.position_percent>=0 && history.change(packet.monotonic_ms,300000,s[0].values[0],delta5) && history.change(packet.monotonic_ms,600000,s[0].values[0],delta10)) {
+            const time_t seconds=packet.epoch_ms/1000; tm utc{}; gmtime_r(&seconds,&utc);
+            std::array<float,11> features={s[0].values[0],s[0].values[1],s[0].values[2],s[2].values[0],s[1].values[0],s[1].values[1],s[3].values[0],packet.controls.position_percent>0?1.f:0.f,delta5,delta10,float(utc.tm_hour)};
+            const auto started=esp_timer_get_time(); float result=0;
+            if(linear_predict(features,edge_model::weights,edge_model::bias,result)) packet.forecast=result;
+            packet.inference_us=esp_timer_get_time()-started;
+        }
+#endif
+        if(xQueueSend(telemetry_queue,&packet,0)!=pdTRUE) {
+            Packet discarded; xQueueReceive(telemetry_queue,&discarded,0); ++dropped_packets;
+            if(xQueueSend(telemetry_queue,&packet,0)!=pdTRUE) ++dropped_packets;
+        }
         esp_task_wdt_reset(); xTaskDelayUntil(&last,pdMS_TO_TICKS(board::telemetry_period_ms));
     }
 }
@@ -196,6 +235,14 @@ std::string serialize(const Packet& p) {
     cJSON_AddStringToObject(info,"firmware_version",VERSION); cJSON_AddNumberToObject(info,"free_heap",p.heap); cJSON_AddNumberToObject(info,"minimum_free_heap",p.min_heap);
     cJSON_AddBoolToObject(info,"clock_synced",p.epoch_ms!=0); cJSON_AddBoolToObject(info,"outputs_commissioned",node.commissioned);
     cJSON_AddNumberToObject(info,"dropped_packets",p.dropped); cJSON_AddNumberToObject(info,"queue_depth",p.queue_depth);
+    constexpr const char* storage_names[]={"disabled","missing","ready","full","error"};
+    cJSON_AddStringToObject(info,"sd_status",storage_names[std::min(p.sd_status,4u)]); cJSON_AddNumberToObject(info,"sd_backlog",p.sd_backlog);
+#if defined(AIRCHECK_EDGE_MODEL)
+    auto edge=cJSON_AddObjectToObject(root,"edge_forecast");
+    cJSON_AddStringToObject(edge,"model_sha256",edge_model::sha256); cJSON_AddNumberToObject(edge,"horizon_minutes",edge_model::horizon_minutes);
+    if(p.forecast>=250) cJSON_AddNumberToObject(edge,"predicted_co2",p.forecast); else cJSON_AddNullToObject(edge,"predicted_co2");
+    cJSON_AddNumberToObject(edge,"inference_us",p.inference_us);
+#endif
     auto a=cJSON_AddObjectToObject(root,"actuators"); auto w=cJSON_AddObjectToObject(a,"window");
     cJSON_AddBoolToObject(w,"open_limit",p.controls.feedback.open_limit); cJSON_AddBoolToObject(w,"close_limit",p.controls.feedback.close_limit);
     if(!node.commissioned || p.controls.position_percent<0) cJSON_AddNullToObject(w,"position_percent"); else cJSON_AddNumberToObject(w,"position_percent",p.controls.position_percent);
@@ -244,6 +291,45 @@ int64_t parse_date(const char* text) {
     if(std::strcmp(end,"Z")!=0) return 0;
     return int64_t(timegm(&utc))*1000;
 }
+bool parse_policy(const std::string& body, Policy& p) {
+    auto root=cJSON_Parse(body.c_str()); if(!root) return false;
+    auto data=cJSON_GetObjectItemCaseSensitive(root,"data");
+    auto outdoor=cJSON_GetObjectItemCaseSensitive(data,"outdoor_policy");
+    auto id=cJSON_GetObjectItemCaseSensitive(data,"device_id");
+    bool valid=cJSON_IsObject(data) && cJSON_IsObject(outdoor) && cJSON_IsString(id) && !std::strcmp(id->valuestring,node.device_id);
+    auto boolean=[&](cJSON* object,const char* key,bool& value) { auto field=cJSON_GetObjectItemCaseSensitive(object,key); if(!cJSON_IsBool(field)) valid=false; else value=cJSON_IsTrue(field); };
+    auto number=[&](cJSON* object,const char* key,float& value) { auto field=cJSON_GetObjectItemCaseSensitive(object,key); if(!cJSON_IsNumber(field) || !std::isfinite(field->valuedouble)) valid=false; else value=field->valuedouble; };
+    boolean(data,"automation_enabled",p.enabled); boolean(data,"auto_window_enabled",p.auto_window); boolean(outdoor,"filteredIntake",p.filtered_intake);
+    number(data,"co2_normal_threshold",p.co2_off); number(data,"co2_critical_threshold",p.co2_on);
+    number(outdoor,"maxPm25",p.outdoor_pm25_max); number(outdoor,"pm25Recovery",p.outdoor_pm25_recovery);
+    number(outdoor,"minTemperature",p.outdoor_min_c); number(outdoor,"temperatureRecovery",p.outdoor_recovery_c);
+    float manual=0,minimum=0; number(data,"manual_override_minutes",manual); number(data,"auto_ventilation_minimum_minutes",minimum);
+    if(manual<1 || manual>1440 || minimum<1 || minimum>60) valid=false;
+    else { p.manual_override_ms=uint32_t(manual*60000); p.minimum_ventilation_ms=uint32_t(minimum*60000); }
+    cJSON_Delete(root); return valid && valid_policy(p);
+}
+void restore_policy() {
+    nvs_handle_t handle; if(nvs_open("aircheck",NVS_READONLY,&handle)!=ESP_OK) return;
+    char body[4096]; size_t size=sizeof(body); Policy policy;
+    const auto result=nvs_get_str(handle,"policy",body,&size); nvs_close(handle);
+    if(result==ESP_OK && parse_policy(body,policy)) { local_policy=policy; controller.configure(policy); }
+}
+void sync_policy() {
+    static uint64_t next=0; static std::string previous;
+    const auto now=monotonic_ms(); if(now<next) return; next=now+60000;
+    Response response; const std::string path=std::string("/api/v1/settings?device_id=")+node.device_id;
+    if(request(path.c_str(),nullptr,response)!=200 || response.body.size()>=4096) return;
+    Policy policy; if(!parse_policy(response.body,policy)) return;
+    // Persist only a changed policy, before enabling autonomous actions.
+    if(response.body!=previous) {
+        nvs_handle_t handle; if(nvs_open("aircheck",NVS_READWRITE,&handle)!=ESP_OK) return;
+        const auto write=nvs_set_str(handle,"policy",response.body.c_str());
+        const auto committed=write==ESP_OK?nvs_commit(handle):write; nvs_close(handle);
+        if(committed!=ESP_OK) return;
+        previous=response.body;
+    }
+    xSemaphoreTake(state_mutex,portMAX_DELAY); local_policy=policy; controller.configure(policy); xSemaphoreGive(state_mutex);
+}
 void poll_commands() {
     Response response; const std::string path=std::string("/api/v1/controls/commands?device_id=")+node.device_id+"&limit=20";
     if(request(path.c_str(),nullptr,response)!=200) return;
@@ -269,9 +355,27 @@ void poll_commands() {
 }
 void network_task(void*) {
     esp_task_wdt_add(nullptr); Packet pending{}; bool has_pending=false; unsigned failures=0;
+    uint64_t mount_after=0;
+    auto release_storage=[]() {
+        journal.close();
+        if(sd_card) { esp_vfs_fat_sdcard_unmount("/sdcard",sd_card); sd_card=nullptr; }
+        if(sd_bus_ready) { spi_bus_free(SPI2_HOST); sd_bus_ready=false; }
+    };
     while(true) {
+        if(node.sd_enabled && !journal.healthy() && monotonic_ms()>=mount_after) {
+            release_storage(); mount_after=monotonic_ms()+30000;
+            sdmmc_host_t host=SDSPI_HOST_DEFAULT(); host.slot=SPI2_HOST; host.max_freq_khz=10000;
+            spi_bus_config_t bus_config{}; bus_config.mosi_io_num=board::sd_mosi; bus_config.miso_io_num=board::sd_miso; bus_config.sclk_io_num=board::sd_sck; bus_config.quadwp_io_num=-1; bus_config.quadhd_io_num=-1; bus_config.max_transfer_sz=4000;
+            sd_bus_ready=spi_bus_initialize(SPI2_HOST,&bus_config,SDSPI_DEFAULT_DMA)==ESP_OK;
+            sdspi_device_config_t slot=SDSPI_DEVICE_CONFIG_DEFAULT(); slot.gpio_cs=gpio_num_t(board::sd_cs); slot.host_id=SPI2_HOST;
+            esp_vfs_fat_sdmmc_mount_config_t mount{}; mount.format_if_mount_failed=false; mount.max_files=2; mount.allocation_unit_size=16384;
+            const auto mounted=sd_bus_ready?esp_vfs_fat_sdspi_mount("/sdcard",&host,&slot,&mount,&sd_card):ESP_FAIL;
+            if(mounted==ESP_OK && journal.open("/sdcard/aircheck.journal")) { storage_status=2; dropped_packets+=journal.corrupt_records(); }
+            else { storage_status=mounted==ESP_FAIL?4:1; release_storage(); }
+            esp_task_wdt_reset();
+        }
+        if(!has_pending) has_pending=xQueueReceive(telemetry_queue,&pending,0)==pdTRUE;
         if(wifi_online && epoch_ms()) {
-            if(!has_pending) has_pending=xQueueReceive(telemetry_queue,&pending,0)==pdTRUE;
             if(has_pending) {
                 const auto body=serialize(pending); Response response;
                 const auto status=body.empty()?0:request("/api/v1/telemetry",&body,response);
@@ -280,7 +384,30 @@ void network_task(void*) {
                 else ++failures;
                 esp_task_wdt_reset();
             }
-            poll_commands(); esp_task_wdt_reset();
+            sync_policy(); esp_task_wdt_reset(); poll_commands(); esp_task_wdt_reset();
+        }
+        // Only the network task touches FAT. Control and sensor tasks never wait for it.
+        if(has_pending && journal.healthy() && (!wifi_online || failures)) {
+            if(journal.append(serialize(pending))) has_pending=false;
+            else storage_status=journal.healthy() && journal.backlog()==Journal::slots?3:4;
+            esp_task_wdt_reset();
+        }
+        // Live frames take precedence. Replays retain the stored JSON identity and timestamp.
+        if(wifi_online && epoch_ms() && !has_pending && uxQueueMessagesWaiting(telemetry_queue)==0 && journal.healthy()) {
+            std::string body; unsigned slot=0;
+            if(journal.peek(body,slot)) {
+                Response response; const auto status=request("/api/v1/telemetry",&body,response);
+                if((status>=200 && status<300) || status==400 || status==409 || status==422) {
+                    if(!(status>=200 && status<300)) ++dropped_packets;
+                    journal.acknowledge(slot);
+                }
+                esp_task_wdt_reset();
+            }
+        }
+        if(node.sd_enabled) {
+            storage_backlog=journal.backlog();
+            if(journal.healthy()) storage_status=journal.backlog()==Journal::slots?3:2;
+            else if(sd_card) storage_status=4;
         }
         vTaskDelay(pdMS_TO_TICKS(failures?std::min(5000u,500u*(1u<<std::min(failures,3u))):1000));
         esp_task_wdt_reset();
@@ -316,6 +443,7 @@ extern "C" void app_main() {
     const bool identity_ready=nvs==ESP_OK && initialize_identity();
     if(!identity_ready) ESP_LOGE(TAG,"Boot identity could not be persisted; network stays disabled");
     controller=Controller(node.commissioned);
+    if(nvs==ESP_OK) restore_policy();
     state_mutex=xSemaphoreCreateMutex(); telemetry_queue=xQueueCreate(8,sizeof(Packet)); command_queue=xQueueCreate(8,sizeof(Command));
     if(!state_mutex || !telemetry_queue || !command_queue) { ESP_LOGE(TAG,"Insufficient memory; outputs remain inactive"); return; }
     i2c_master_bus_config_t config{}; config.i2c_port=I2C_NUM_0; config.sda_io_num=gpio_num_t(board::sda); config.scl_io_num=gpio_num_t(board::scl);

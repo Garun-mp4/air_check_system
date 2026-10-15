@@ -15,6 +15,7 @@ import tempfile
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", choices=("esp32", "fake"), default="esp32")
+    parser.add_argument('--edge-model', type=Path, help='Qualified real edge-model.json; excluded when not supplied')
     args = parser.parse_args()
     root = Path(__file__).resolve().parent
     # System TEMP may itself contain spaces; pick an explicit short path on Windows.
@@ -24,10 +25,13 @@ def main():
     with tempfile.TemporaryDirectory(prefix="fw-", dir=base) as temp:
         staged = Path(temp) / "node"
         shutil.copytree(root, staged, ignore=shutil.ignore_patterns(".pio", "sdkconfig", "__pycache__"))
+        if args.edge_model:
+            from prepare_model import prepare
+            checksum=prepare(args.edge_model, staged/'include/edge_model.hpp')
         result = subprocess.run([sys.executable, "-m", "platformio", "run", "-d", str(staged), "-e", args.env], check=False)
         if result.returncode:
             return result.returncode
-        output = root / ".pio" / "staged" / args.env
+        output = root / ".pio" / "staged" / (args.env + ('-edge-' + checksum[:12] if args.edge_model else ''))
         output.mkdir(parents=True, exist_ok=True)
         for filename in ("firmware.bin", "firmware.elf", "bootloader.bin", "partitions.bin"):
             shutil.copy2(staged / ".pio/build" / args.env / filename, output / filename)

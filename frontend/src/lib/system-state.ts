@@ -145,7 +145,9 @@ export interface SystemSnapshot {
     last_telemetry_at: string | null
     pending_commands: number
     forecast: null | {
-      predicted_co2_15min: number
+      predicted_co2_15min: number | null
+      predicted_co2?: number
+      horizon_minutes?: number
       target_time: string | null
       model_name: string | null
       model_version: string | null

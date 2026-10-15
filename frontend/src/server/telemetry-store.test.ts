@@ -4,6 +4,16 @@ import { frameFixture } from './test-fixtures/telemetry'
 import { MemoryTelemetryStore, telemetryHash, TelemetryConflictError } from './telemetry-store'
 
 describe('raw device telemetry ordering and identity', () => {
+  it('keeps partial historical channels and filters the source before the limit', async () => {
+    const store = new MemoryTelemetryStore()
+    const frame = frameFixture(); frame.sensors[3].status = 'timeout'
+    await store.save(frame)
+    for (let i=0; i<10; i++) await store.save({ ...frame, sequence: 10+i, data_source: 'simulator' })
+    const rows = await store.history('room-01','real',new Date('2026-10-15T11:00:00Z'),new Date('2026-10-15T13:00:00Z'),1)
+    expect(rows).toHaveLength(1)
+    expect(rows[0].frame.sensors[0].values.co2).toBe(900)
+    expect(rows[0].frame.sensors[3].status).toBe('timeout')
+  })
   it('accepts a retry once, preserves receipt time, and rejects conflicting reuse', async () => {
     let now = new Date('2026-10-15T12:00:01Z')
     const store = new MemoryTelemetryStore(() => now)

@@ -75,6 +75,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--model-version", default=os.environ.get("MODEL_VERSION", "1.0"))
     parser.add_argument("--data-source", choices=("real","simulator","unknown"))
+    parser.add_argument('--horizon-minutes', type=int, choices=(15,20), default=15)
     parser.add_argument("--timeout", type=float, default=10.0)
     return parser.parse_args()
 
@@ -95,10 +96,10 @@ def main() -> int:
             raise ValueError('Mixed data sources: choose --data-source explicitly')
         source = args.data_source or next(iter(sources),'unknown')
         measurements = [m for m in measurements if m.get('data_source','unknown')==source]
-        rows = build_training_rows(measurements)
+        rows = build_training_rows(measurements, args.horizon_minutes)
         save_dataset(rows, args.dataset_output)
         manager = ModelJobs(Path(args.output_dir)/'model.joblib',args.min_rows)
-        manager.submit(measurements,source,args.model_version)
+        manager.submit(measurements,source,args.model_version,args.horizon_minutes)
         while True:
             state = manager.status()['job']
             if state['status']=='failed': raise ValueError(state['error'])

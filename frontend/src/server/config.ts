@@ -1,5 +1,6 @@
 import { activeDataSource } from './runtime-mode'
 export interface AppConfig {
+  mlForecastHorizonMinutes?: 15 | 20
   dataSource?: 'real' | 'simulator'
   databaseUrl: string
   mlServiceUrl: string
@@ -48,6 +49,8 @@ function readBoolean(name: string, fallback: boolean): boolean {
 }
 
 export function getConfig(): AppConfig {
+  const horizon = readNumber('ML_FORECAST_HORIZON_MINUTES', 15, 15)
+  if (horizon !== 15 && horizon !== 20) throw new Error('ML_FORECAST_HORIZON_MINUTES must be 15 or 20')
   const normal = readNumber('CO2_NORMAL_THRESHOLD', 800, 0)
   const critical = readNumber('CO2_CRITICAL_THRESHOLD', 1000, normal)
   if (critical <= normal) {
@@ -60,6 +63,7 @@ export function getConfig(): AppConfig {
   }
 
   return {
+    mlForecastHorizonMinutes: horizon,
     ...(process.env.AIRCHECK_MODE !== undefined ? { dataSource: activeDataSource() } : {}),
     databaseUrl:
       process.env.DATABASE_URL ??

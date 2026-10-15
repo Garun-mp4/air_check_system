@@ -137,7 +137,7 @@ export function errorResponse(error: unknown): NextResponse {
       { status: 404 },
     )
   }
-  console.error('api request failed', error)
+  console.error('api request failed', error instanceof Error ? error.name : 'unknown')
   return NextResponse.json(
     {
       error: {

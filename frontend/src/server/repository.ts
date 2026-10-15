@@ -1407,7 +1407,8 @@ export class PostgresRepository implements Repository {
   }
 
   async ping(): Promise<void> {
-    await this.pool.query('SELECT 1')
+    const result = await this.pool.query("SELECT to_regclass('device_telemetry') IS NOT NULL AND to_regclass('runtime_device_modes') IS NOT NULL AND to_regclass('node_settings') IS NOT NULL AS ready")
+    if (!result.rows[0]?.ready) throw new Error('Database migrations are required')
   }
 
   async close(): Promise<void> {

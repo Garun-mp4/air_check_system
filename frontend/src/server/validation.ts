@@ -1,4 +1,5 @@
 import { validateOutdoorPolicy } from './outdoor-policy'
+import { validRfc3339 } from '../lib/iso-time'
 import type {
   ControlAction,
   ControlTarget,
@@ -68,7 +69,7 @@ function timestampField(value: unknown, field: string, issues: ValidationIssue[]
   const candidate = value.trim()
   const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(candidate)
   const parsed = new Date(candidate)
-  if (!hasTimezone || Number.isNaN(parsed.getTime())) {
+  if (!hasTimezone || !validRfc3339(candidate)) {
     issues.push({ field, message: 'должна быть датой RFC3339 с часовым поясом' })
     return new Date(Number.NaN)
   }

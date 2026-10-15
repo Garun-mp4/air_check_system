@@ -43,12 +43,20 @@ class Predictor:
     def predict(self, payload: dict[str, Any]) -> dict[str, Any]:
         features = feature_row_from_prediction_payload(payload)
         artifact = self._load_if_needed()
+        requested_source = payload.get('data_source')
+        source = artifact.get('data_source', artifact.get('training_report', {}).get('source', 'unknown'))
+        if requested_source is not None and (requested_source not in ('real', 'simulator', 'unknown') or source != requested_source):
+            raise ModelUnavailableError('Источник модели не соответствует источнику измерений; требуется обучение для этого режима')
+        horizon = artifact.get('horizon_minutes', 15)
+        if payload.get('horizon_minutes', 15) != horizon or artifact.get('schema_version', 1) != payload.get('schema_version', 1):
+            raise ModelUnavailableError('Горизонт или схема модели не соответствует запросу')
         result = artifact["model"].predict([features])
         value = float(result[0])
         if not math.isfinite(value) or value < 0:
             raise ModelUnavailableError("Модель вернула некорректный прогноз")
         return {
-            "predicted_co2_15min": round(value, 2),
+            "predicted_co2_15min": round(value, 2) if horizon == 15 else None,
+            "predicted_co2": round(value, 2), "horizon_minutes": horizon, "data_source": source, "schema_version": 1,
             "model": str(artifact.get("model_name", "unknown")),
             "model_version": str(
                 artifact.get("model_version", self.default_model_version)
@@ -66,6 +74,7 @@ class Predictor:
             "model_version": artifact.get("model_version", self.default_model_version),
             "feature_names": FEATURE_NAMES,
             "trained_at": artifact.get("trained_at"),
+            "data_source": artifact.get('data_source', 'unknown'), "horizon_minutes": artifact.get('horizon_minutes', 15),
             "training": artifact.get("training_report"),
         }
 

@@ -12,6 +12,9 @@ import {
 } from './Charts'
 
 describe('chart viewport controls', () => {
+  it('retains an explicit missing channel point so the chart cannot bridge a sensor fault', () => {
+    expect(insertChartDataGaps([{ timestamp: '2026-09-09T10:00:00Z', value: 650 }, { timestamp: '2026-09-09T10:00:05Z', value: null }, { timestamp: '2026-09-09T10:00:10Z', value: 700 }])).toEqual([['2026-09-09T10:00:00Z',650],['2026-09-09T10:00:05Z',null],['2026-09-09T10:00:10Z',700]])
+  })
   it('leaves a visible gap instead of connecting readings across a long outage', () => {
     expect(insertChartDataGaps([
       { timestamp: '2026-09-09T10:00:00Z', value: 650 },

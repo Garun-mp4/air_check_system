@@ -38,6 +38,9 @@ export class InsufficientHistoryError extends FeatureError {
 }
 
 export interface MlPredictionPayload {
+  data_source?: 'real' | 'simulator' | 'unknown'
+  schema_version?: 1
+  horizon_minutes?: 15 | 20
   co2: number
   temperature: number
   humidity: number

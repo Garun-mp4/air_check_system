@@ -1940,7 +1940,7 @@ export default function AirDashboard() {
     try {
       const [latestResult, historyResult, settingsResult] = await Promise.allSettled([
         getLatestDashboard(signal),
-        getHistory(from, to, 5000, signal),
+        getHistory(from, to, 20000, signal),
         getNodeSettings(undefined, signal),
       ])
       if (!isLatestLoad()) {
@@ -2328,7 +2328,7 @@ export default function AirDashboard() {
           ? 'Остановить проветривание'
           : 'Запустить проветривание'
   const ventilationStateLabel =
-    controls === null
+    controls === null || controls.connection.status !== 'online' || controls.feedback_known && (!controls.feedback_known.includes('intake') || !controls.feedback_known.includes('exhaust'))
       ? 'Состояние неизвестно'
       : ventilationPending
         ? 'Ожидается подтверждение'
@@ -2482,7 +2482,7 @@ export default function AirDashboard() {
                 <div className="forecast-reading-values">
                   <span><small>сейчас</small><strong>{formatValue(currentCo2)} <em>ppm</em></strong></span>
                   <Icon name="arrow" />
-                  <span><small>ожидается</small><strong>{formatValue(prediction?.predicted_co2_15min)} <em>ppm</em></strong></span>
+                  <span><small>ожидается</small><strong>{formatValue(prediction?.predicted_co2 ?? prediction?.predicted_co2_15min)} <em>ppm</em></strong></span>
                 </div>
               </div>
             </div>

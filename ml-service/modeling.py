@@ -19,6 +19,8 @@ def train_and_evaluate(
     output_dir: str | Path,
     min_training_rows: int = 30,
     model_version: str = "1.0",
+    data_source: str = 'unknown',
+    horizon_minutes: int = 15,
 ) -> dict[str, Any]:
     if len(rows) < min_training_rows:
         raise ValueError(
@@ -38,6 +40,8 @@ def train_and_evaluate(
     test_y = np.asarray(target[split_index:], dtype=float)
     if len(test_y) == 0:
         raise ValueError("time split produced an empty test set")
+    persistence = test_x[:, FEATURE_NAMES.index('current_co2')]
+    baseline = {'mae': float(mean_absolute_error(test_y, persistence)), 'rmse': float(np.sqrt(mean_squared_error(test_y, persistence)))}
 
     candidates = {
         "linear_regression": LinearRegression(),
@@ -74,6 +78,7 @@ def train_and_evaluate(
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "training_rows": len(train_y),
         "test_rows": len(test_y),
+        "data_source": data_source, "schema_version": 1, "horizon_minutes": horizon_minutes,
     }
     joblib.dump(artifact, output_path / "model.joblib")
     report = {
@@ -91,10 +96,17 @@ def train_and_evaluate(
         "models": metrics,
         "selected_model": selected_name,
         "model_version": model_version,
+        "source": data_source, "schema_version": 1, "horizon_minutes": horizon_minutes,
+        "baseline": {'name': 'persistence', **baseline},
+        "beats_baseline": metrics[selected_name]['rmse'] < baseline['rmse'] * 0.95,
     }
     (output_path / "training_metrics.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    # Export the separately evaluated linear candidate, even when the server selects RF.
+    from edge_export import export_linear
+    export_linear(fitted['linear_regression'], test_x, output_path, data_source, horizon_minutes, model_version,
+        metrics['linear_regression'], baseline)
     return report
 

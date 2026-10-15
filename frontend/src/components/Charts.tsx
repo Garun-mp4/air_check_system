@@ -1205,7 +1205,7 @@ export function LineChart({
   }
   const reset = () => dispatchViewport(createFullViewport(data.length))
 
-  if (data.length === 0) {
+  if (!data.some(point => point.value !== null)) {
     return <div className="chart-empty" role="status">Нет данных за выбранный период</div>
   }
 

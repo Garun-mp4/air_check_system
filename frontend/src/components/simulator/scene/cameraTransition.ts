@@ -30,6 +30,9 @@ export class CameraTransition {
 
   advance(cameraPosition: Vector3, target: Vector3, delta: number, duration: number): void {
     if (!this.active) return
+    if (duration <= 0) {
+      cameraPosition.copy(this.positionGoal); target.copy(this.targetGoal); this.cancel(); return
+    }
 
     const easing = 1 - Math.exp(-delta / Math.max(0.08, duration))
     cameraPosition.lerp(this.positionGoal, easing)

@@ -8,6 +8,7 @@ import { PerspectiveCamera, Vector3 } from 'three'
 
 import type { SimulatorSnapshot } from '../types'
 import { CameraTransition } from './cameraTransition'
+import { useReducedMotion } from '../useReducedMotion'
 import { CAMERA_MOUSE_BUTTONS, CAMERA_TOUCHES, trackCameraKeyDown, trackCameraKeyUp } from './cameraInput'
 
 type Point = [number, number, number]
@@ -27,6 +28,7 @@ export default function CameraRig({
   touchNavigationEnabled: boolean
 }) {
   const controls = useRef<OrbitControlsImpl>(null)
+  const reducedMotion = useReducedMotion()
   const { camera } = useThree()
   const keys = useRef(new Set<string>())
   const transition = useRef(new CameraTransition())
@@ -100,7 +102,7 @@ export default function CameraRig({
       movement.y += vertical * speed
       transition.current.move(camera.position, orbit.target, movement)
     } else {
-      transition.current.advance(camera.position, orbit.target, delta, cameraSettings.transition_seconds)
+      transition.current.advance(camera.position, orbit.target, delta, reducedMotion ? 0 : cameraSettings.transition_seconds)
     }
     orbit.update()
   })
@@ -110,7 +112,7 @@ export default function CameraRig({
       ref={controls}
       makeDefault
       enabled={touchNavigationEnabled}
-      enableDamping
+      enableDamping={!reducedMotion}
       dampingFactor={0.085}
       minDistance={cameraSettings.focus_distance_min_m ?? 1.1}
       maxDistance={Math.max(24, snapshot.simulation.room_dimensions.outdoor_depth_m * 3)}

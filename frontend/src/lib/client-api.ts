@@ -20,13 +20,15 @@ export interface ClientMeasurement {
 }
 
 export interface ClientPrediction {
+  predicted_co2?: number
+  horizon_minutes?: number
   measurement_id?: number | null
   source_timestamp?: string | null
   provenance?: 'legacy' | 'linked' | 'archived'
   id: number
   created_at: string
   target_time: string
-  predicted_co2_15min: number
+  predicted_co2_15min: number | null
   model_name: string
   model_version: string
 }
@@ -284,7 +286,7 @@ export async function getLatestDashboard(
 export async function getHistory(
   from: Date,
   to: Date,
-  limit = 5000,
+  limit = 20000,
   signal?: AbortSignal,
 ): Promise<{ data: ClientMeasurement[]; meta: HistoryMeta }> {
   const params = new URLSearchParams({
@@ -295,7 +297,7 @@ export async function getHistory(
   const payload = await requestJson<{
     data: ClientMeasurement[]
     meta: HistoryMeta
-  }>('/api/v1/measurements/history?' + params.toString(), signal)
+  }>('/api/v1/observations?' + params.toString(), signal)
   return payload
 }
 

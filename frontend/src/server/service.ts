@@ -108,7 +108,9 @@ export class AirQualityService {
       })
       const sourceHistory = history.filter(point => (point.dataSource ?? 'unknown') === (measurement.dataSource ?? 'unknown'))
       const features = buildFeatureVector(sourceHistory, measurement)
-      const result = await this.predictor.predict(toMlPredictionPayload(features))
+      const payload = toMlPredictionPayload(features)
+      if (this.config.dataSource) Object.assign(payload, { data_source: measurement.dataSource ?? 'unknown', schema_version: 1, horizon_minutes: this.config.mlForecastHorizonMinutes ?? 15 })
+      const result = await this.predictor.predict(payload)
       prediction = await this.savePrediction(measurement, result)
       predictionStatus = 'ready'
     } catch (error) {
@@ -346,7 +348,7 @@ export class AirQualityService {
       dataSource: measurement.dataSource,
       sourceTimestamp: measurement.timestamp,
       targetTime: new Date(
-        measurement.timestamp.getTime() + PREDICTION_HORIZON_MS,
+        measurement.timestamp.getTime() + (result.horizonMinutes ? result.horizonMinutes * 60000 : PREDICTION_HORIZON_MS),
       ),
       predictedCo2: result.predictedCo2_15min,
       modelName: result.model,

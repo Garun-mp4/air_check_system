@@ -165,10 +165,12 @@ class ControlStateReport:
 class BackendForecast:
     """Prediction produced and stored by the AirCheck ML service."""
 
-    predicted_co2_15min: float
+    predicted_co2_15min: float | None
     target_time: str | None = None
     model_name: str | None = None
     model_version: str | None = None
+    predicted_co2: float | None = None
+    horizon_minutes: int = 15
 
     @classmethod
     def from_mapping(cls, raw: object) -> BackendForecast | None:
@@ -176,14 +178,16 @@ class BackendForecast:
             return None
         if not isinstance(raw, Mapping):
             raise ValueError("prediction response must be an object or null")
-        co2 = raw.get("predicted_co2_15min")
+        co2 = raw.get("predicted_co2", raw.get("predicted_co2_15min"))
         if isinstance(co2, bool) or not isinstance(co2, (int, float)):
             raise ValueError("prediction must contain numeric predicted_co2_15min")
         value = float(co2)
         if not math.isfinite(value) or value < 0:
             raise ValueError("predicted CO2 must be finite and non-negative")
         return cls(
-            predicted_co2_15min=value,
+            predicted_co2_15min=value if raw.get('horizon_minutes', 15) == 15 else None,
+            predicted_co2=value,
+            horizon_minutes=raw.get('horizon_minutes', 15),
             target_time=_optional_text(raw.get("target_time")),
             model_name=_optional_text(raw.get("model_name")),
             model_version=_optional_text(raw.get("model_version")),

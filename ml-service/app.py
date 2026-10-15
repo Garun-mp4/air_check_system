@@ -75,7 +75,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         )
 
     def do_POST(self) -> None:
-        if self.path in ('/management/train','/management/rollback'):
+        if self.path in ('/management/train','/management/rollback','/management/readiness'):
             if not self._management_auth(): return
             try:
                 if self.path.endswith('/rollback'):
@@ -83,7 +83,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                 length = int(self.headers.get('Content-Length','0'))
                 if not 0<length<=10_485_760: raise ValueError('Request too large or empty')
                 payload = json.loads(self.rfile.read(length))
-                job = model_jobs().submit(payload.get('measurements'),payload.get('source'))
+                if self.path.endswith('/readiness'):
+                    from readiness import dataset_readiness
+                    self._write_json(HTTPStatus.OK, dataset_readiness(payload.get('measurements', []), payload.get('source'), payload.get('horizon_minutes', 15))); return
+                job = model_jobs().submit(payload.get('measurements'),payload.get('source'),horizon_minutes=payload.get('horizon_minutes',15))
                 self._write_json(HTTPStatus.ACCEPTED,job)
             except BusyError as exc:
                 self._write_json(HTTPStatus.CONFLICT,error_payload('training_busy',str(exc)))

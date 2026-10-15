@@ -37,7 +37,7 @@ function jsonRequest(body: string): Request {
 }
 
 describe('POST /api/v1/measurements', () => {
-  beforeEach(() => mocks.ingest.mockReset())
+  beforeEach(() => { mocks.ingest.mockReset() })
   afterEach(() => vi.restoreAllMocks())
 
   it('returns 201 with the stable serialized ingest contract', async () => {
@@ -115,9 +115,7 @@ describe('POST /api/v1/measurements', () => {
 
   it('hides unexpected service details behind the stable internal error response', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    mocks.ingest.mockImplementation(async () => {
-      throw new Error('database credentials should not leak')
-    })
+    mocks.ingest.mockRejectedValue(new Error('database credentials should not leak'))
 
     const response = await POST(jsonRequest(JSON.stringify(validPayload())))
 

@@ -7,6 +7,7 @@ import { Shape } from 'three'
 import type { Mesh } from 'three'
 import type { FanState, SimulatorSnapshot, VisualizationMode } from '../types'
 import { Pickable } from './Pickable'
+import { useReducedMotion } from '../useReducedMotion'
 import { CylinderBetween, Fastener, Housing, StatusLed } from './models/parts'
 import { EXHAUST_HOOD_HOUSING_DEPTH_M, exteriorFanCenterZ, FAN_CABLE_OFFSETS, INTAKE_FILTER_HOUSING_DEPTH_M } from './models/geometry'
 
@@ -22,6 +23,7 @@ function FanBlade({ rotation, shape }: { rotation: number; shape: Shape }) {
 }
 
 function FanRotor({ state }: { state: FanState }) {
+  const reducedMotion = useReducedMotion()
   const rotor = useRef<Mesh>(null)
   const blade = useMemo(() => {
     const shape = new Shape()
@@ -37,7 +39,7 @@ function FanRotor({ state }: { state: FanState }) {
     ? Math.min(25, (state.rpm / visualScale) * 20)
     : 0
   useFrame((_, delta) => {
-    if (rotor.current && rotationSpeed > 0) rotor.current.rotation.z -= delta * rotationSpeed
+    if (!reducedMotion && rotor.current && rotationSpeed > 0) rotor.current.rotation.z -= delta * rotationSpeed
   })
   return (
     <group ref={rotor}>

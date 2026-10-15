@@ -1,6 +1,7 @@
 import type { MlPredictionPayload } from './features'
 
 export interface MlPredictionResult {
+  horizonMinutes?: 15 | 20
   predictedCo2_15min: number
   model: string
   modelVersion: string
@@ -82,7 +83,10 @@ export class MlClient implements Predictor {
         throw new InvalidMlResponseError()
       }
 
-      const predicted = parsed.predicted_co2_15min
+      const predicted = parsed.predicted_co2 ?? parsed.predicted_co2_15min
+      if (payload.data_source && (parsed.data_source !== payload.data_source || parsed.schema_version !== 1 || parsed.horizon_minutes !== (payload.horizon_minutes ?? 15))) {
+        throw new InvalidMlResponseError('Источник, схема или горизонт прогноза не совпадает с запросом')
+      }
       const model = parsed.model
       const modelVersion = parsed.model_version
       if (
@@ -99,6 +103,7 @@ export class MlClient implements Predictor {
         )
       }
       return {
+        ...(parsed.horizon_minutes === 15 || parsed.horizon_minutes === 20 ? { horizonMinutes: parsed.horizon_minutes } : {}),
         predictedCo2_15min: predicted,
         model,
         modelVersion,

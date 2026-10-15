@@ -2,6 +2,9 @@
 import React, { useCallback, useEffect, useState } from 'react'
 type Metrics = { mae: number; rmse: number }
 type Training = {
+  horizon_minutes?: number
+  baseline?: Metrics
+  beats_baseline?: boolean
   source: string
   train_rows: number
   test_rows: number
@@ -11,6 +14,7 @@ type Training = {
   selected_model: string
 }
 type ModelStatus = {
+  configured_horizon_minutes?: number
   model: {
     status: string
     model_version?: string
@@ -35,6 +39,7 @@ export default function ModelPanel({
     [error, setError] = useState(''),
     [source, setSource] = useState('real'),
     [busy, setBusy] = useState(false)
+  const [readiness, setReadiness] = useState<{ ready: boolean; span_hours: number; training_rows: number; rejected: number; reasons: string[]; next_steps: string[] } | null>(null)
   const refresh = useCallback(async () => {
     try {
       const r = await fetch('/api/v1/model', { cache: 'no-store' })
@@ -61,6 +66,7 @@ export default function ModelPanel({
       })
       const j = await r.json()
       if (!r.ok) throw new Error(j.error?.message)
+      if (action === 'readiness') setReadiness(j.data)
       await refresh()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Ошибка ML')
@@ -133,6 +139,8 @@ export default function ModelPanel({
                   : 'Обучение не запускалось'}
             </span>
           </p>
+          <p>Горизонт прогноза: {data.configured_horizon_minutes ?? 15} мин.</p>
+          {training?.baseline ? <p>Baseline «текущее CO₂»: RMSE {training.baseline.rmse.toFixed(1)} ppm. {training.beats_baseline ? 'Модель улучшает RMSE минимум на 5%.' : 'Улучшение не подтверждено.'}</p> : null}
           {data.job?.error ? <p role="alert">{data.job.error}</p> : null}
           <p>
             Качество эксплуатации за доступные {data.quality.retention_hours} ч;
@@ -170,6 +178,7 @@ export default function ModelPanel({
         </select>
       </label>
       <div className="settings-form-actions">
+        <button className="button-secondary" disabled={working || !canTrain || !data} onClick={() => void action('readiness')}>Проверить данные</button>
         <button
           className="button-primary"
           disabled={working || !canTrain || !data}
@@ -185,6 +194,7 @@ export default function ModelPanel({
           Вернуть предыдущую модель
         </button>
       </div>
+      {readiness ? <div role="status"><p>{readiness.ready ? 'Данные допускают обучение кандидата.' : 'Данные пока не готовы.'} {readiness.span_hours} ч · {readiness.training_rows} строк · отклонено {readiness.rejected}.</p>{readiness.reasons.concat(readiness.next_steps).map(reason => <p key={reason}>{reason}</p>)}</div> : null}
       {!canTrain ? (
         <p>Запуск обучения и возврат версии доступны владельцу.</p>
       ) : null}

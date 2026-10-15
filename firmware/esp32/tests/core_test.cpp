@@ -1,10 +1,12 @@
 #include "core.hpp"
 #include "sensor_protocol.hpp"
+#include "journal.hpp"
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <limits>
 #include <vector>
+#include <unistd.h>
 using namespace aircheck;
 #define CHECK(expression) do { if (!(expression)) { std::fprintf(stderr, "FAIL %s:%d: %s\n", __FILE__, __LINE__, #expression); std::exit(1); } } while (0)
 static constexpr int64_t epoch = 1800000000000LL;
@@ -29,6 +31,7 @@ static void sensors() {
     std::puts("PASS sensor range/NaN, CRC, retained time, stale, jump, stuck, independence");
 }
 static void controls() {
+    Policy approved; approved.enabled=true;
     Controller disabled(false); CHECK(disabled.command({1,Target::window,true,epoch+10000},0,epoch)==Outcome::disabled);
     Controller c(true);
     CHECK(c.command({10,Target::window,true,epoch+10000},0,0)==Outcome::clock_unsynced);
@@ -52,15 +55,31 @@ static void controls() {
     fans.tick(5000,epoch+5000,{}); CHECK(fans.state().fan_fault[0]); CHECK(!fans.state().outputs.exhaust); CHECK(fans.state().results[0].outcome==Outcome::fault);
     fans.command({6,Target::intake,true,epoch+10000},5000,epoch+5000); fans.tick(6000,epoch+6000,{false,false,0,900}); CHECK(fans.state().results[1].outcome==Outcome::applied);
     fans.tick(11000,epoch+11000,{}); CHECK(fans.state().fan_fault[1] && !fans.state().outputs.intake);
-    Controller autonomous(true); autonomous.autonomous(100,good({1200,23,45},100),good({20,45},100),good({10},100),{}); CHECK(autonomous.state().outputs.exhaust && autonomous.state().outputs.intake);
-    autonomous.autonomous(200,good({700,23,45},200),good({20,45},200),good({10},200),{}); CHECK(!autonomous.state().outputs.exhaust);
-    Controller unsafe(true); unsafe.autonomous(100,good({1200,23,45},100),good({-10,45},100),good({10},100),{}); CHECK(!unsafe.state().outputs.exhaust);
+    Controller autonomous(true); autonomous.autonomous(100,good({1200,23,45},100),good({20,45},100),good({10},100),approved); CHECK(autonomous.state().outputs.exhaust && autonomous.state().outputs.intake);
+    autonomous.autonomous(200,good({700,23,45},200),good({20,45},200),good({10},200),approved); CHECK(!autonomous.state().outputs.exhaust);
+    Controller unsafe(true); unsafe.autonomous(100,good({1200,23,45},100),good({-10,45},100),good({10},100),approved); CHECK(!unsafe.state().outputs.exhaust);
     Controller manual(true); manual.command({8,Target::exhaust,false,epoch+10000},0,epoch); manual.tick(1000,epoch+1000,{});
-    manual.autonomous(2000,good({1200,23,45},2000),good({20,45},2000),good({10},2000),{}); CHECK(!manual.state().outputs.exhaust);
-    manual.autonomous(1800001,good({1200,23,45},1800001),good({20,45},1800001),good({10},1800001),{}); CHECK(manual.state().outputs.exhaust);
+    manual.autonomous(2000,good({1200,23,45},2000),good({20,45},2000),good({10},2000),approved); CHECK(!manual.state().outputs.exhaust);
+    manual.autonomous(1800001,good({1200,23,45},1800001),good({20,45},1800001),good({10},1800001),approved); CHECK(manual.state().outputs.exhaust);
     Controller safety(true); safety.command({9,Target::intake,true,epoch+10000},0,epoch);
     safety.autonomous(100,good({1200,23,45},100),good({20,45},100),good({100},100),{});
     CHECK(!safety.state().outputs.intake && !safety.state().fan_fault[1] && safety.state().results[1].outcome==Outcome::unsafe_air);
+    Controller online(true); online.command({100,Target::window,true,epoch+60000},0,epoch);
+    online.safety(100,{},good({20,45},100),good({10},100),approved); online.tick(100,epoch+100,{});
+    CHECK(!online.state().outputs.open && online.state().results[2].outcome==Outcome::unsafe_air);
+    online.command({101,Target::window,false,epoch+60000},200,epoch+200);
+    online.safety(300,{},{},{},approved); online.tick(300,epoch+300,{});
+    CHECK(online.state().outputs.close && !online.state().outputs.open);
+    Policy filtered=approved; filtered.filtered_intake=true;
+    Controller filter(true); filter.autonomous(100,good({1200,23,45},100),good({20,45},100),good({100},100),filtered);
+    CHECK(filter.state().outputs.intake && !filter.state().outputs.open);
+    filter.configure({}); CHECK(!filter.state().outputs.intake);
+    Controller disabled_auto(true); disabled_auto.autonomous(100,good({1200,23,45},100),good({20,45},100),good({10},100),{}); CHECK(!disabled_auto.state().outputs.exhaust);
+    Policy bad=approved; bad.co2_off=2000; CHECK(!valid_policy(bad)); bad=approved; bad.outdoor_pm25_recovery=100; CHECK(!valid_policy(bad));
+    Controller local_window(true); approved.auto_window=true;
+    local_window.tick(0,epoch,{false,true,0,0}); local_window.autonomous(100,good({1200,23,45},100),good({20,45},100),good({10},100),approved);
+    local_window.tick(200,epoch+200,{false,true,0,0}); CHECK(local_window.state().outputs.open);
+    local_window.safety(300,{},{},{},approved); local_window.tick(300,epoch+300,{}); CHECK(!local_window.state().outputs.open);
     std::puts("PASS commissioning, clock, expiry, replay, reversal, limits, travel, tach, autonomous hysteresis");
 }
 static void protocols() {
@@ -88,4 +107,21 @@ static void queue() {
     Queue<int,2> q; CHECK(!q.peek()); CHECK(q.push(1) && q.push(2)); CHECK(!q.push(3)); CHECK(*q.peek()==1); CHECK(*q.peek()==1); q.pop(); CHECK(q.push(3)); CHECK(*q.peek()==2); q.pop(); CHECK(*q.peek()==3); q.pop(); q.pop(); CHECK(q.size()==0);
     std::puts("PASS bounded queue overflow/retry/ack/wrap");
 }
-int main() { sensors(); controls(); protocols(); queue(); }
+static void storage() {
+    const char* path="/tmp/aircheck-journal-native.bin"; std::remove(path);
+    Journal j; CHECK(!j.open("/does-not-exist/aircheck.bin")); CHECK(j.open(path));
+    CHECK(j.append("{\"boot_id\":\"old\",\"sequence\":7}")); CHECK(j.append("next"));
+    unsigned slot=0; std::string body; CHECK(j.peek(body,slot) && body.find("old")!=std::string::npos);
+    j.close(); CHECK(j.open(path)); CHECK(j.backlog()==2 && j.peek(body,slot));
+    CHECK(j.acknowledge(slot)); CHECK(j.peek(body,slot) && body=="next");
+    j.close(); FILE* file=std::fopen(path,"r+b"); CHECK(file); CHECK(std::fseek(file,long(slot)*Journal::stride+16,SEEK_SET)==0); CHECK(std::fputc('X',file)!=EOF); std::fclose(file);
+    CHECK(j.open(path)); CHECK(j.backlog()==0 && j.corrupt_records()==1);
+    CHECK(!j.append(std::string(Journal::max_record+1,'x')));
+    for(unsigned i=0;i<Journal::slots;++i) CHECK(j.append("immutable-frame"));
+    CHECK(!j.append("full")); CHECK(j.healthy()); CHECK(j.peek(body,slot)); CHECK(j.acknowledge(slot)); CHECK(j.append("after-rotation"));
+    j.close(); CHECK(j.open(path)); CHECK(j.backlog()==Journal::slots); j.close();
+    file=std::fopen(path,"r+b"); CHECK(file); CHECK(ftruncate(fileno(file),Journal::stride+20)==0); std::fclose(file);
+    CHECK(j.open(path)); CHECK(j.backlog()<=1); j.close(); std::remove(path);
+    std::puts("PASS SD bounded journal, CRC, restart, torn write, full, rotation, immutable replay");
+}
+int main() { sensors(); controls(); protocols(); queue(); storage(); }

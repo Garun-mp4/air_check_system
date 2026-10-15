@@ -216,6 +216,8 @@ def test_training_split_fits_only_the_oldest_rows_and_evaluates_the_newest(
             self.evaluation_features = None
 
         def fit(self, features, targets):
+            self.coef_ = [0.0] * len(EXPECTED_FEATURE_NAMES)
+            self.intercept_ = 0.0
             self.fit_features = features.copy()
             self.fit_targets = targets.copy()
             return self
@@ -290,7 +292,7 @@ def test_trained_artifact_round_trips_schema_metrics_and_model_version(tmp_path)
         for model_metrics in metrics["models"].values()
         for value in model_metrics.values()
     )
-    assert set(prediction) == {"predicted_co2_15min", "model", "model_version"}
+    assert set(prediction) == {"predicted_co2_15min", "predicted_co2", "horizon_minutes", "data_source", "schema_version", "model", "model_version"}
     assert math.isfinite(prediction["predicted_co2_15min"])
     assert prediction["predicted_co2_15min"] >= 0
     assert prediction["model"] == report["selected_model"]
@@ -333,7 +335,7 @@ def test_predict_endpoint_returns_the_documented_forecast_contract_with_nonnegat
 
     assert status == 200
     assert content_type.startswith("application/json")
-    assert set(body) == {"predicted_co2_15min", "model", "model_version"}
+    assert set(body) == {"predicted_co2_15min", "predicted_co2", "horizon_minutes", "data_source", "schema_version", "model", "model_version"}
     assert body["predicted_co2_15min"] == 934.12
     assert math.isfinite(body["predicted_co2_15min"])
     assert body["predicted_co2_15min"] >= 0

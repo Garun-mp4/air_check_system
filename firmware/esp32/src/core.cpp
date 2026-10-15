@@ -66,7 +66,9 @@ Outcome Controller::command(const Command& c, uint64_t now, int64_t epoch_ms) {
     if ((t == 2 && state_.window_fault) || (t < 2 && state_.fan_fault[t] && c.desired)) return reject(Outcome::fault);
     if (active_[t].id) finish(t, Outcome::expired);
     active_[t] = c; started_[t] = now;
-    if (c.manual) manual_until_ = now + 30 * 60 * 1000;
+    if (c.manual) manual_until_ = now + policy_.manual_override_ms;
+    if (t == 2) auto_window_active_ = false;
+    if (t < 2) auto_fans_ = false;
     state_.results[t] = {c.id, Outcome::accepted};
     if (t == 0) state_.outputs.exhaust = c.desired;
     if (t == 1) state_.outputs.intake = c.desired;
@@ -114,22 +116,68 @@ void Controller::tick(uint64_t now, int64_t epoch_ms, const Feedback& f) {
     // Loss of expected feedback is a fault even after an acknowledged command.
     if (state_.outputs.exhaust && f.exhaust_rpm == 0 && now - started_[0] >= board::fan_start_ms) { state_.fan_fault[0] = true; state_.outputs.exhaust = false; }
     if (state_.outputs.intake && f.intake_rpm == 0 && now - started_[1] >= board::fan_start_ms) { state_.fan_fault[1] = true; state_.outputs.intake = false; }
+    if (auto_window_active_) {
+        if (state_.window_fault || (auto_window_desired_ ? f.open_limit : f.close_limit)) {
+            stop_window(); auto_window_active_ = false;
+            if (f.open_limit) auto_opened_at_ = now;
+        } else if (now - auto_window_started_ >= board::window_travel_ms) {
+            state_.window_fault = true; stop_window(); auto_window_active_ = false;
+        } else if (now - auto_window_started_ >= 100) {
+            state_.outputs.open = auto_window_desired_; state_.outputs.close = !auto_window_desired_;
+        }
+    }
+}
+bool valid_policy(const Policy& p) {
+    return std::isfinite(p.co2_on) && std::isfinite(p.co2_off) && p.co2_off >= 0 && p.co2_on > p.co2_off && p.co2_on <= 10000 &&
+        std::isfinite(p.outdoor_pm25_max) && p.outdoor_pm25_max >= 1 && p.outdoor_pm25_max <= 1000 &&
+        std::isfinite(p.outdoor_pm25_recovery) && p.outdoor_pm25_recovery >= 0 && p.outdoor_pm25_recovery < p.outdoor_pm25_max &&
+        std::isfinite(p.outdoor_min_c) && p.outdoor_min_c >= -40 && p.outdoor_min_c <= 40 &&
+        std::isfinite(p.outdoor_recovery_c) && p.outdoor_recovery_c > p.outdoor_min_c && p.outdoor_recovery_c <= 45 &&
+        p.manual_override_ms >= 60000 && p.manual_override_ms <= 86400000 && p.minimum_ventilation_ms >= 60000 && p.minimum_ventilation_ms <= 3600000;
+}
+void Controller::configure(const Policy& p) {
+    if(!valid_policy(p)) return;
+    policy_=p;
+    if(!p.enabled) {
+        if(auto_fans_) { state_.outputs.exhaust=false; state_.outputs.intake=false; auto_fans_=false; }
+        if(auto_window_active_) { stop_window(); auto_window_active_=false; }
+    }
+}
+void Controller::safety(uint64_t now, const Sample& indoor, const Sample& outdoor, const Sample& pm, const Policy& p) {
+    auto fresh = [now](const Sample& s) { return s.quality == Quality::ok && s.count && now >= s.last_good_ms && now - s.last_good_ms <= board::sensor_stale_ms; };
+    const bool known = fresh(indoor) && fresh(outdoor) && fresh(pm);
+    if (known) {
+        pollution_blocked_ = pm.values[0] >= (pollution_blocked_ ? p.outdoor_pm25_recovery : p.outdoor_pm25_max);
+        cold_blocked_ = outdoor.values[0] <= (cold_blocked_ ? p.outdoor_recovery_c : p.outdoor_min_c);
+    }
+    safe_window_ = commissioned_ && valid_policy(p) && known && !cold_blocked_ && !pollution_blocked_;
+    safe_fans_ = commissioned_ && valid_policy(p) && known && !cold_blocked_ && (!pollution_blocked_ || p.filtered_intake);
+    for (unsigned t = 0; t < 3; ++t) {
+        const bool unsafe = t == 2 ? !safe_window_ : !safe_fans_;
+        if (unsafe && active_[t].id && active_[t].desired) { if(t==2) stop_window(); finish(t, Outcome::unsafe_air); }
+    }
+    if (!safe_fans_) { state_.outputs.exhaust = false; state_.outputs.intake = false; auto_fans_ = false; }
+    if (!safe_window_ && (state_.outputs.open || (auto_window_active_ && auto_window_desired_))) { stop_window(); auto_window_active_ = false; }
 }
 void Controller::autonomous(uint64_t now, const Sample& indoor, const Sample& outdoor, const Sample& pm, const Policy& p) {
-    if (!commissioned_) return;
-    auto fresh = [now](const Sample& s) { return s.quality == Quality::ok && s.count && now - s.last_good_ms <= board::sensor_stale_ms; };
-    const bool safe = fresh(outdoor) && fresh(pm) && pm.values[0] <= p.outdoor_pm25_max && outdoor.values[0] >= p.outdoor_min_c && outdoor.values[0] <= p.outdoor_max_c;
-    if (!safe || !fresh(indoor)) {
-        // Stop uncertain movement. A closed window is never inferred or forced without feedback.
-        stop_window();
-        state_.outputs.exhaust = false; state_.outputs.intake = false;
-        for (unsigned target = 0; target < 3; ++target) if (active_[target].id) finish(target, Outcome::unsafe_air);
+    safety(now,indoor,outdoor,pm,p);
+    if (!commissioned_ || !p.enabled) {
+        if(auto_fans_) { state_.outputs.exhaust=false; state_.outputs.intake=false; auto_fans_=false; }
+        if(auto_window_active_) { stop_window(); auto_window_active_=false; }
         return;
     }
     if (now < manual_until_ || active_[0].id || active_[1].id || active_[2].id) return;
-    if (indoor.values[0] >= p.co2_on) {
+    if (safe_fans_ && indoor.values[0] >= p.co2_on) {
+        auto_fans_ = true;
         if (!state_.fan_fault[0] && !state_.outputs.exhaust) { started_[0] = now; state_.outputs.exhaust = true; }
         if (!state_.fan_fault[1] && !state_.outputs.intake) { started_[1] = now; state_.outputs.intake = true; }
     } else if (indoor.values[0] <= p.co2_off) { state_.outputs.exhaust = false; state_.outputs.intake = false; }
+    if (p.auto_window && !state_.window_fault && !auto_window_active_) {
+        const bool open = safe_window_ && indoor.values[0] >= p.co2_on;
+        const bool close = !safe_window_ || (indoor.values[0] <= p.co2_off && now - auto_opened_at_ >= p.minimum_ventilation_ms);
+        if ((open && state_.position_percent == 0) || (close && state_.position_percent == 100)) {
+            stop_window(); auto_window_active_=true; auto_window_desired_=open; auto_window_started_=now;
+        }
+    }
 }
 }

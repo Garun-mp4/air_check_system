@@ -28,6 +28,7 @@ export interface TelemetryFrame {
   boot_id: string
   sequence: number
   sampled_at: string | null
+  edge_forecast?: { model_sha256: string; horizon_minutes: 15 | 20; predicted_co2: number | null; inference_us: number }
   sensors: SensorTelemetry[]
   controller: {
     uptime_ms: number
@@ -39,6 +40,8 @@ export interface TelemetryFrame {
     outputs_commissioned: boolean
     dropped_packets: number
     queue_depth: number
+    sd_status?: 'disabled' | 'missing' | 'ready' | 'full' | 'error'
+    sd_backlog?: number
   }
   actuators: {
     window: {
@@ -95,6 +98,9 @@ export function controllerWarnings(frame: TelemetryFrame): string[] {
   if (c.reset_reason === 9) warnings.push('Последний перезапуск: падение питания (brownout)')
   if (c.minimum_free_heap !== null && c.minimum_free_heap < 32768) warnings.push('Малый запас свободной памяти')
   if (c.dropped_packets) warnings.push(`Пропущено пакетов: ${c.dropped_packets}`)
+  if (c.sd_status === 'missing') warnings.push('SD-карта не обнаружена; работает ограниченный буфер в RAM')
+  if (c.sd_status === 'full') warnings.push('SD-журнал заполнен; новые данные могут теряться до восстановления связи')
+  if (c.sd_status === 'error') warnings.push('Ошибка SD-карты; управление продолжает работать')
   if (a.window.open_limit && a.window.close_limit) warnings.push('Противоречивые концевики окна')
   else if (!windowFeedbackValid(a.window)) warnings.push('Датчики положения окна не согласованы')
   const i2c = frame.sensors.filter(sensor => sensor.sensor_id.endsWith('_climate'))

@@ -24,6 +24,7 @@ export async function GET() {
         data: {
           ...(await modelRequest('status')),
           quality: await operationalQuality(),
+          configured_horizon_minutes: getConfig().mlForecastHorizonMinutes ?? 15,
         },
       },
       { headers: { 'Cache-Control': 'no-store' } },
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
     if (body?.action === 'rollback')
       return NextResponse.json({ data: await modelRequest('rollback', {}) })
     if (
-      body?.action !== 'train' ||
+      !['train', 'readiness'].includes(body?.action) ||
       !['real', 'simulator', 'unknown'].includes(body.source)
     )
       throw new ApiError(
@@ -53,16 +54,18 @@ export async function POST(request: Request) {
     const records = await getRepository(config.databaseUrl).listMeasurements({
       to: new Date(),
       from: new Date(Date.now() - config.dataRetentionHours * 3600_000),
-      limit: 5000,
+      dataSource: body.source,
+      limit: 20000,
     })
     return NextResponse.json(
       {
-        data: await modelRequest('train', {
+        data: await modelRequest(body.action, {
           source: body.source,
+          horizon_minutes: config.mlForecastHorizonMinutes ?? 15,
           measurements: records.map(serializeMeasurement),
         }),
       },
-      { status: 202 },
+      { status: body.action === 'train' ? 202 : 200 },
     )
   } catch (error) {
     return accessErrorResponse(error) ?? errorResponse(error)

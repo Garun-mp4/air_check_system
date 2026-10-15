@@ -14,6 +14,7 @@ export interface TelemetryWrite {
 export interface TelemetryStore {
   save(frame: TelemetryFrame): Promise<TelemetryWrite>
   latest(deviceId: string, source: TelemetryFrame['data_source']): Promise<StoredTelemetry | null>
+  history(deviceId: string, source: TelemetryFrame['data_source'], from: Date, to: Date, limit: number): Promise<StoredTelemetry[]>
   prune(cutoff: Date): Promise<number>
 }
 
@@ -63,6 +64,11 @@ export class MemoryTelemetryStore implements TelemetryStore {
   async latest(deviceId: string, source: TelemetryFrame['data_source']): Promise<StoredTelemetry | null> {
     return structuredClone(this.heads.get(`${deviceId}/${source}`) ?? null)
   }
+  async history(deviceId: string, source: TelemetryFrame['data_source'], from: Date, to: Date, limit: number): Promise<StoredTelemetry[]> {
+    return structuredClone([...this.records.values()].map(value => value.record)
+      .filter(value => value.frame.device_id === deviceId && value.frame.data_source === source && value.frame.sampled_at && Date.parse(value.frame.sampled_at) >= from.getTime() && Date.parse(value.frame.sampled_at) <= to.getTime())
+      .sort((a, b) => Date.parse(a.frame.sampled_at!) - Date.parse(b.frame.sampled_at!) || a.id - b.id).slice(-limit))
+  }
   async prune(cutoff: Date): Promise<number> {
     const protectedIds = new Set([...this.heads.values()].map(record => record.id))
     let removed = 0
@@ -107,6 +113,10 @@ export class PostgresTelemetryStore implements TelemetryStore {
   async latest(deviceId: string, source: TelemetryFrame['data_source']): Promise<StoredTelemetry | null> {
     const result = await this.pool.query<Row>('SELECT t.id,t.received_at,t.payload FROM device_telemetry_heads h JOIN device_telemetry t ON t.id=h.frame_id WHERE h.device_id=$1 AND h.data_source=$2', [deviceId, source])
     return result.rows[0] ? mapRow(result.rows[0]) : null
+  }
+  async history(deviceId: string, source: TelemetryFrame['data_source'], from: Date, to: Date, limit: number): Promise<StoredTelemetry[]> {
+    const result = await this.pool.query<Row>('SELECT id,received_at,payload FROM device_telemetry WHERE device_id=$1 AND data_source=$2 AND sampled_at BETWEEN $3 AND $4 ORDER BY sampled_at DESC,id DESC LIMIT $5', [deviceId, source, from, to, Math.min(20000, limit)])
+    return result.rows.map(mapRow).reverse()
   }
   async prune(cutoff: Date): Promise<number> {
     const result = await this.pool.query('DELETE FROM device_telemetry t WHERE received_at < $1 AND NOT EXISTS (SELECT 1 FROM device_telemetry_heads h WHERE h.frame_id=t.id)', [cutoff])
