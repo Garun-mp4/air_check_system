@@ -22,6 +22,9 @@ pgdata/
 .idea/
 .vscode/
 .tools/
+.pio/
+firmware/esp32/sdkconfig
+firmware/esp32/include/secrets.h
 
 # Browser diagnostics may contain authenticated test sessions.
 tests/browser/artifacts/
