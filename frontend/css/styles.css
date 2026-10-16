@@ -9127,6 +9127,7 @@ body.is-chart-expanded {
 
 .simulator-mobile-device-toggle,
 .simulator-mobile-camera-control,
+.simulator-mobile-device-close,
 .simulator-stage-hud .sim-hud-mobile-toggle,
 .simulator-touch-camera-toggle {
   display: none;
@@ -9304,6 +9305,7 @@ body.is-chart-expanded {
   }
 
   .simulator-mobile-device-close {
+    display: block;
     position: sticky;
     top: 0;
     z-index: 1;

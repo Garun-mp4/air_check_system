@@ -66,7 +66,7 @@ function WallRaceways({ snapshot }: { snapshot: SimulatorSnapshot }) {
 
   return (
     <group>
-      {/* Surface-mounted interior trunk and drops; the covers stay visible in every view mode. */}
+      {/* Surface-mounted interior trunk and drops, hidden by the parent in diagnostic layers. */}
       <Raceway position={[0, trunkY, insideZ]} size={[rearWidth, racewayHeight, racewayWidth]} />
       <Raceway position={[layout.controller_drop_x, (cabinetTop + trunkY) / 2, insideZ]} size={[racewayWidth, trunkY - cabinetTop, racewayWidth]} />
       {/* Mains has its own path from the ceiling to the PSU, separated from the sensor/control trunk. */}
@@ -91,7 +91,8 @@ export default function Wiring({ snapshot, visible }: { snapshot: SimulatorSnaps
     + MAINS_ENTRY_CLEARANCE_M
   return (
     <group>
-      <WallRaceways snapshot={snapshot} />
+      {/* Diagnostic layers reveal conductors that opaque raceway covers would hide. */}
+      <group visible={!visible}><WallRaceways snapshot={snapshot} /></group>
       {visible ? (
         <group>
           {routes.map((route) => <Wire key={route.id} points={route.points} color={wireColor(route.kind)} kind={route.kind} muted={route.kind === 'ground'} />)}

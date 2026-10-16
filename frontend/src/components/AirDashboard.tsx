@@ -2450,7 +2450,6 @@ export default function AirDashboard() {
             </div>
 
             <DataStatus diagnostics={dashboard?.diagnostics} />
-            <TelemetryDiagnostics telemetry={dashboard?.telemetry} />
             <div className="current-air-body">
               <div className="current-reading">
                 <span className="reading-label">CO₂</span>
@@ -2503,6 +2502,7 @@ export default function AirDashboard() {
                 {recommendation?.duration_minutes ? ' · ' + recommendation.duration_minutes + ' мин' : ''}
               </span>
             </div>
+            <TelemetryDiagnostics telemetry={dashboard?.telemetry} />
           </article>
 
         </section>
