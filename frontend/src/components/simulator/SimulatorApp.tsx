@@ -7,6 +7,8 @@ import { sendControlCommand } from '../../lib/client-api'
 import { getCo2Level } from '../../lib/air-quality'
 import { sensorQualityLabels } from '../../lib/telemetry'
 import SceneCanvas from './SceneLoader'
+import StandBootScreen from './StandBootScreen'
+import { getSimulatorBootStage } from './boot-state'
 import { useSceneFullscreen } from './useSceneFullscreen'
 import { useSimulatorState } from './useSimulatorState'
 import type { CutawayMode, SimulatorSnapshot, VisualizationMode } from './types'
@@ -122,6 +124,9 @@ export default function SimulatorApp() {
   const [cameraCommand, setCameraCommand] = useState<{ id: number; focus: Point | null }>({ id: 0, focus: null })
   const [panel, setPanel] = useState<'devices' | 'controls' | 'tools'>('devices')
   const [notice, setNotice] = useState<string | null>(null)
+  const [rendererReady, setRendererReady] = useState(false)
+  const [sceneReady, setSceneReady] = useState(false)
+  const [sceneError, setSceneError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [touchCameraMode, setTouchCameraMode] = useState(false)
@@ -134,6 +139,10 @@ export default function SimulatorApp() {
   const fullscreenToggleRef = useRef<HTMLButtonElement>(null)
   const fullscreen = useSceneFullscreen(workspaceRef, fullscreenToggleRef)
   const isOperator = accessStatus === 'ready' && (access?.role === 'operator' || access?.role === 'owner')
+  const bootStage = sceneError ? 'error' : getSimulatorBootStage(Boolean(snapshot), rendererReady, sceneReady)
+  const markRendererReady = useCallback(() => setRendererReady(true), [])
+  const markSceneReady = useCallback(() => setSceneReady(true), [])
+  const reportSceneError = useCallback((message: string) => setSceneError(message), [])
 
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') return
@@ -208,33 +217,15 @@ export default function SimulatorApp() {
   }, [selectedId, snapshot])
 
   if (!snapshot) {
-    return (
-      <main className="simulator-page simulator-unavailable">
-        <header className="simulator-topbar">
-          <a href="/simulator" className="simulator-brand">
-            <BrandLogo className="simulator-brand-logo" width={36} height={27} priority />
-            <span>AirCheck</span>
-            <span className="simulator-brand-subtitle">3D-стенд</span>
-          </a>
-          <nav className="simulator-primary-nav" aria-label="Основная навигация"><a href="/">Панель</a><a href="/simulator" aria-current="page">3D-стенд</a></nav>
-          <AccountMenu variant="simulator" />
-        </header>
-        <section className="simulator-unavailable-card">
-          <span className="sim-status-dot is-offline" />
-          <h1>3D-стенд пока недоступен</h1>
-          <p>{error ?? 'Загружаем состояние системы.'}</p>
-          <p className="sim-muted">Проверьте связь с сервером. Страница повторит подключение автоматически.</p>
-          <div className="simulator-unavailable-actions"><a className="sim-button sim-button-primary" href="/">Вернуться к панели</a><a className="sim-button" href={getLoginHref('/simulator')}>Войти</a></div>
-        </section>
-      </main>
-    )
+    return <StandBootScreen stage="snapshot" errorMessage={error ?? undefined} />
   }
 
   const airflow = snapshot.airflow
   const windowMoving = snapshot.window.motor_state === 'opening' || snapshot.window.motor_state === 'closing'
 
   return (
-    <main className="simulator-page">
+    <>
+    <main className="simulator-page" aria-hidden={bootStage ? true : undefined} inert={bootStage ? true : undefined}>
       <header className="simulator-topbar">
         <a href="/simulator" className="simulator-brand">
           <BrandLogo className="simulator-brand-logo" width={36} height={27} priority />
@@ -299,7 +290,7 @@ export default function SimulatorApp() {
                 <div className="sim-hud-card sim-hud-forecast"><span>ПРОГНОЗ AIRCHECK{snapshot.backend.forecast ? ` · +${snapshot.backend.forecast.horizon_minutes ?? 15} МИН` : ''}</span><strong>{snapshot.backend.forecast ? `${fmt(snapshot.backend.forecast.predicted_co2 ?? snapshot.backend.forecast.predicted_co2_15min)} ppm` : 'Ожидание ML'}</strong></div>
               </div>
             </div>
-            <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} />
+            <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} onRendererReady={markRendererReady} onFirstFrame={markSceneReady} onSceneError={reportSceneError} />
             <div className="simulator-stage-footer">
               <div className="sim-stage-state"><span className={windowMoving ? 'sim-live-indicator is-moving' : 'sim-live-indicator'} /><strong>Окно</strong> {snapshot.window.motor_state === 'opening' ? 'открывается' : snapshot.window.motor_state === 'closing' ? 'закрывается' : snapshot.window.motor_state === 'fault' ? 'ошибка' : snapshot.window.motor_state === 'unknown' || snapshot.window.actual_position_percent === null ? 'нет подтверждения' : `${fmt(snapshot.window.actual_position_percent)}%`}<span className="sim-state-divider" /><strong>Приток</strong> {fanStateLabel(snapshot.ventilation.intake)}<span className="sim-state-divider" /><strong>Вытяжка</strong> {fanStateLabel(snapshot.ventilation.exhaust)}</div>
               <div className="sim-flow-caption">{realMode ? 'Расход и энергия не измеряются' : <>Оценка модели: <strong>{fmt(airflow.total_effective_m3_h)} м³/ч</strong> · {fmt(airflow.air_changes_per_hour, 2)} ACH</>}</div>
@@ -352,6 +343,8 @@ export default function SimulatorApp() {
         </aside>
       </section>
     </main>
+    {bootStage ? <StandBootScreen stage={bootStage} errorMessage={sceneError ?? undefined} onRetry={bootStage === 'error' ? () => window.location.reload() : undefined} /> : null}
+    </>
   )
 }
 

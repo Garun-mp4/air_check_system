@@ -1,0 +1,211 @@
+.screen {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: clamp(16px, 4vw, 36px);
+  background: #f2f5f1;
+}
+
+.card {
+  width: min(100%, 540px);
+  padding: clamp(22px, 5vw, 36px);
+  border: 1px solid var(--sim-line, var(--color-hairline));
+  border-radius: var(--rounded-xl);
+  background: var(--color-canvas);
+  box-shadow: var(--shadow-card);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--color-hairline-soft);
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.logo {
+  width: 34px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.brandDivider {
+  width: 1px;
+  height: 18px;
+  margin-inline: 3px;
+  background: var(--color-hairline);
+}
+
+.brandSubtitle {
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.heading {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  padding-block: 28px 24px;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  margin-top: 5px;
+  border: 3px solid var(--color-surface-strong);
+  border-top-color: var(--sim-teal, var(--color-brand-accent));
+  border-radius: 50%;
+  animation: spin 850ms linear infinite;
+}
+
+.spinnerStopped {
+  border-top-color: var(--color-error);
+  animation: none;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: var(--sim-teal, var(--color-brand-accent));
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.heading h1 {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+.description {
+  margin: 9px 0 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.steps {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-hairline-soft);
+  list-style: none;
+}
+
+.step {
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--color-hairline-soft);
+}
+
+.stepMarker {
+  width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-hairline);
+  border-radius: 50%;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.stepLabel {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.stepState {
+  color: var(--color-muted-soft);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.stepActive .stepMarker {
+  border-color: var(--sim-teal, var(--color-brand-accent));
+  background: var(--sim-teal, var(--color-brand-accent));
+  color: #fff;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.stepActive .stepLabel,
+.stepActive .stepState {
+  color: var(--color-ink);
+}
+
+.stepDone .stepMarker {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: #fff;
+}
+
+.stepDone .stepState {
+  color: var(--color-success);
+}
+
+.error {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--color-error) 25%, var(--color-hairline));
+  border-radius: var(--rounded-md);
+  background: color-mix(in srgb, var(--color-error) 5%, var(--color-canvas));
+  color: var(--color-error-strong);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--sim-teal, var(--color-brand-accent)) 15%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .stepActive .stepMarker {
+    animation: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .card {
+    padding: 20px 16px;
+  }
+
+  .step {
+    grid-template-columns: 22px minmax(0, 1fr);
+    padding-block: 8px;
+  }
+
+  .stepState {
+    grid-column: 2;
+  }
+}

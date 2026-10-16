@@ -1,6 +1,8 @@
 'use client'
 
 import { Canvas } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
+import { useEffect, useRef } from 'react'
 import { ACESFilmicToneMapping } from 'three'
 import type { SimulatorSnapshot, CutawayMode, VisualizationMode } from '../types'
 import Airflow from './Airflow'
@@ -13,6 +15,7 @@ import Wiring from './Wiring'
 
 type Point = [number, number, number]
 type CameraCommand = { id: number; focus: Point | null }
+const noop = () => undefined
 
 export default function SceneCanvas({
   snapshot,
@@ -24,6 +27,9 @@ export default function SceneCanvas({
   touchDevice = false,
   onSelect,
   onClearSelection,
+  onRendererReady = noop,
+  onFirstFrame = noop,
+  onSceneError = noop,
 }: {
   snapshot: SimulatorSnapshot
   mode: VisualizationMode
@@ -34,6 +40,9 @@ export default function SceneCanvas({
   touchDevice?: boolean
   onSelect: (id: string, point: Point) => void
   onClearSelection: () => void
+  onRendererReady?: () => void
+  onFirstFrame?: () => void
+  onSceneError?: (message: string) => void
 }) {
   const d = snapshot.simulation.room_dimensions
 
@@ -49,6 +58,8 @@ export default function SceneCanvas({
         dpr={[1, 1.5]}
         camera={{ position: [7, 3.1, -9], fov: snapshot.simulation.camera.field_of_view_degrees, near: snapshot.simulation.camera.near_plane_m, far: snapshot.simulation.camera.far_plane_m }}
         gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1 }}
+        onCreated={onRendererReady}
+        fallback={<WebGLUnavailable onUnsupported={() => onSceneError('Браузер не смог запустить WebGL для 3D-сцены.')} />}
         onContextMenu={(event) => event.preventDefault()}
         onPointerMissed={(event) => { if (event.button === 0) onClearSelection() }}
       >
@@ -65,6 +76,7 @@ export default function SceneCanvas({
         <Wiring snapshot={snapshot} visible={mode === 'wiring' || mode === 'technical'} />
         <Airflow snapshot={snapshot} visible={mode === 'airflow'} />
         <CameraRig snapshot={snapshot} command={cameraCommand} touchNavigationEnabled={!touchDevice || touchCameraMode} />
+        <FirstFrameSignal onFirstFrame={onFirstFrame} />
         {/* A faint distant ground gives the green platform a horizon under the blue sky. */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.58, 0]} receiveShadow>
           <planeGeometry args={[d.width_m + d.outdoor_depth_m * 8, d.depth_m + d.outdoor_depth_m * 8]} />
@@ -74,4 +86,24 @@ export default function SceneCanvas({
       {!touchDevice ? <div className="simulator-scene-cue"><span className="simulator-cue-dot" /> ЛКМ — сдвиг · ПКМ — вращение · колёсико — масштаб · WASD/QE — камера</div> : null}
     </div>
   )
+}
+
+function FirstFrameSignal({ onFirstFrame }: { onFirstFrame: () => void }) {
+  const frameId = useRef<number | null>(null)
+
+  useFrame(() => {
+    if (frameId.current !== null) return
+    frameId.current = requestAnimationFrame(onFirstFrame)
+  })
+
+  useEffect(() => () => {
+    if (frameId.current !== null) cancelAnimationFrame(frameId.current)
+  }, [])
+
+  return null
+}
+
+function WebGLUnavailable({ onUnsupported }: { onUnsupported: () => void }) {
+  useEffect(() => onUnsupported(), [onUnsupported])
+  return <div className="simulator-scene-loading" role="alert">WebGL недоступен в этом браузере.</div>
 }

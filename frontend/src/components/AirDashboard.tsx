@@ -10,6 +10,7 @@ import type { DataSource } from '../server/types'
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import Link from 'next/link'
 
 import {
   ClientApiError,
@@ -179,11 +180,11 @@ export function DashboardNavigation({
   return (
     <nav className={className} aria-label={label}>
       {visibleItems.map((item) => renderSectionLink(item))}
-      <a className={linkClassName} href="/simulator" data-navigation-item="simulator" aria-label="3D-стенд">
+      <Link className={linkClassName} href="/simulator" data-navigation-item="simulator" aria-label="3D-стенд">
         <span className="nav-link-icon"><Icon name="room" /></span>
         <span className="nav-link-label-full">3D-стенд</span>
         <span className="nav-link-label-short" aria-hidden="true">3D</span>
-      </a>
+      </Link>
       {mobile ? (
         <details
           ref={moreDisclosureRef}
