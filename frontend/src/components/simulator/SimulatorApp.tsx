@@ -127,6 +127,7 @@ export default function SimulatorApp() {
   const [rendererReady, setRendererReady] = useState(false)
   const [sceneReady, setSceneReady] = useState(false)
   const [sceneError, setSceneError] = useState<string | null>(null)
+  const [sceneAttempt, setSceneAttempt] = useState(0)
   const [busy, setBusy] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [touchCameraMode, setTouchCameraMode] = useState(false)
@@ -143,6 +144,15 @@ export default function SimulatorApp() {
   const markRendererReady = useCallback(() => setRendererReady(true), [])
   const markSceneReady = useCallback(() => setSceneReady(true), [])
   const reportSceneError = useCallback((message: string) => setSceneError(message), [])
+  const resetSceneStartup = useCallback(() => {
+    setRendererReady(false)
+    setSceneReady(false)
+    setSceneError(null)
+  }, [])
+  const retryScene = useCallback(() => {
+    resetSceneStartup()
+    setSceneAttempt((attempt) => attempt + 1)
+  }, [resetSceneStartup])
 
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') return
@@ -290,7 +300,7 @@ export default function SimulatorApp() {
                 <div className="sim-hud-card sim-hud-forecast"><span>ПРОГНОЗ AIRCHECK{snapshot.backend.forecast ? ` · +${snapshot.backend.forecast.horizon_minutes ?? 15} МИН` : ''}</span><strong>{snapshot.backend.forecast ? `${fmt(snapshot.backend.forecast.predicted_co2 ?? snapshot.backend.forecast.predicted_co2_15min)} ppm` : 'Ожидание ML'}</strong></div>
               </div>
             </div>
-            <SceneCanvas snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} onRendererReady={markRendererReady} onFirstFrame={markSceneReady} onSceneError={reportSceneError} />
+            <SceneCanvas key={sceneAttempt} snapshot={snapshot} mode={mode} cutaway={cutaway} selectedId={selectedId} cameraCommand={cameraCommand} touchCameraMode={touchCameraMode} touchDevice={coarsePointer} onSelect={pick} onClearSelection={() => { setSelectedId(null); setSelectedPoint(null); setMobileDevicePanelOpen(false) }} onRendererReady={markRendererReady} onFirstFrame={markSceneReady} onSceneRestart={resetSceneStartup} onSceneError={reportSceneError} />
             <div className="simulator-stage-footer">
               <div className="sim-stage-state"><span className={windowMoving ? 'sim-live-indicator is-moving' : 'sim-live-indicator'} /><strong>Окно</strong> {snapshot.window.motor_state === 'opening' ? 'открывается' : snapshot.window.motor_state === 'closing' ? 'закрывается' : snapshot.window.motor_state === 'fault' ? 'ошибка' : snapshot.window.motor_state === 'unknown' || snapshot.window.actual_position_percent === null ? 'нет подтверждения' : `${fmt(snapshot.window.actual_position_percent)}%`}<span className="sim-state-divider" /><strong>Приток</strong> {fanStateLabel(snapshot.ventilation.intake)}<span className="sim-state-divider" /><strong>Вытяжка</strong> {fanStateLabel(snapshot.ventilation.exhaust)}</div>
               <div className="sim-flow-caption">{realMode ? 'Расход и энергия не измеряются' : <>Оценка модели: <strong>{fmt(airflow.total_effective_m3_h)} м³/ч</strong> · {fmt(airflow.air_changes_per_hour, 2)} ACH</>}</div>
@@ -343,7 +353,7 @@ export default function SimulatorApp() {
         </aside>
       </section>
     </main>
-    {bootStage ? <StandBootScreen stage={bootStage} errorMessage={sceneError ?? undefined} onRetry={bootStage === 'error' ? () => window.location.reload() : undefined} /> : null}
+    {bootStage ? <StandBootScreen stage={bootStage} errorMessage={sceneError ?? undefined} onRetry={bootStage === 'error' ? retryScene : undefined} /> : null}
     </>
   )
 }
