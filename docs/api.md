@@ -26,7 +26,7 @@
 
 Дата должна содержать часовой пояс. Сервер проверяет типы, конечность и физически допустимые диапазоны значений, затем сохраняет запись в measurements. В ответе 201 возвращаются измерение, прогноз (если достаточно истории и ML-сервис доступен), рекомендация и prediction_status.
 
-simulator отправляет именно это тело. Поэтому будущая ESP32 сможет заменить simulator без отдельного endpoint или преобразователя.
+Это legacy-формат измерений для режима симуляции. Реальная ESP32 отправляет независимые каналы через `POST /api/v1/telemetry`, `schema_version=2`; при `AIRCHECK_MODE=real` legacy-подмена блокируется. Контракт устройства — [telemetry-v2.md](telemetry-v2.md).
 
 ## GET /api/v1/measurements/latest
 
@@ -234,7 +234,9 @@ GET /api/v1/controls/commands?device_id=room-01&limit=20
 
 `data.diagnostics` содержит:
 
-- `measurement`: missing/fresh/stale, `measuredAt` и `assessedAt`;
+- `source`: активный источник установки (`real`, `simulator`; `unknown` для неуказанного источника). Возвращается также до первого измерения и используется для подписи источника и подсказок пустого состояния.
+
+- `measurement`: missing/fresh/stale/partial, `measuredAt` и `assessedAt`;
 - `device`: online/stale/offline по отчётам локального узла;
 - `prediction`: ready/pending/insufficient_history/model_untrained/unavailable/error/legacy/stale;
 - `predictionMessage`: причина недоступности.

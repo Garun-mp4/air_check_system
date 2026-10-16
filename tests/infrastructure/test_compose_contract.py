@@ -285,7 +285,7 @@ def test_git_ignores_local_env_but_keeps_the_example_template() -> None:
 
 def test_default_compose_config_contains_only_core_services(compose_runner: ComposeRunner) -> None:
     services = set(_services(compose_runner.config()))
-    assert services == {"postgres", "ml-service", "backend", "https-proxy", "web-simulator"}
+    assert services == {"postgres", "ml-service", "backend", "https-proxy", "web-simulator", "migrations"}
 
 
 def test_compose_render_requires_better_auth_secret(compose_runner: ComposeRunner) -> None:
@@ -305,19 +305,20 @@ def test_each_optional_profile_enables_only_its_service(
     compose_runner: ComposeRunner, profile: str, expected_optional_service: str
 ) -> None:
     services = set(_services(compose_runner.config(profile)))
-    expected = {"postgres", "ml-service", "backend", "https-proxy", "web-simulator"}
+    expected = {"postgres", "ml-service", "backend", "https-proxy", "web-simulator", "migrations"}
     if expected_optional_service != "web-simulator":
         expected.add(expected_optional_service)
     assert services == expected
 
 
-def test_backend_waits_for_healthy_database_and_started_ml_service(
+def test_backend_waits_for_healthy_database_ml_and_completed_migrations(
     compose_runner: ComposeRunner,
 ) -> None:
     backend = _services(compose_runner.config())["backend"]
     dependencies = backend["depends_on"]
     assert dependencies["postgres"]["condition"] == "service_healthy"
-    assert dependencies["ml-service"]["condition"] == "service_started"
+    assert dependencies["ml-service"]["condition"] == "service_healthy"
+    assert dependencies["migrations"]["condition"] == "service_completed_successfully"
 
 
 def test_both_simulators_wait_for_backend_and_share_device_lease(
@@ -460,6 +461,7 @@ def test_all_compose_build_contexts_and_dockerfiles_exist(compose_runner: Compos
         "simulator",
         "web-simulator",
         "owner-cli",
+        "migrations",
     }
     for name, service in build_services.items():
         build = service["build"]

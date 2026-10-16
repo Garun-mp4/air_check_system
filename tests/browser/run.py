@@ -1,5 +1,6 @@
 """Real-service E2E. Owns only its uniquely labelled, ephemeral resources."""
 from __future__ import annotations
+import shutil
 import json, os, secrets, signal, socket, subprocess, sys, tempfile, time, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from datetime import datetime, timedelta, timezone
@@ -49,9 +50,16 @@ def main():
         ML_SERVICE_URL=f'http://127.0.0.1:{ml}', ML_PORT=str(ml), BACKEND_URL=base,
         DEVICE_ID='room-01', NEXT_TELEMETRY_DISABLED='1', AIRCHECK_E2E='1',
         AIRCHECK_TELEGRAM_TEST_URL=f'http://127.0.0.1:{telegram.server_port}', E2E_TELEGRAM_URL=f'http://127.0.0.1:{telegram.server_port}')
+    audit_metadata=os.environ.get('AIRCHECK_UI_AUDIT_METADATA')
+    audit_mode=os.environ.get('AIRCHECK_UI_AUDIT_MODE','simulation') if audit_metadata else os.environ.get('AIRCHECK_BROWSER_MODE','simulation')
+    if audit_mode not in ('real','simulation'): raise ValueError('Invalid browser mode')
+    env['AIRCHECK_MODE']=audit_mode
+    env['E2E_SYSTEM_MODE']=audit_mode
+    if audit_metadata or audit_mode=='real':
+        env['DEVICE_HEARTBEAT_TIMEOUT_MS']='4000'
     def start(args, cwd, filename):
         log = (ARTIFACTS / filename).open('w'); logs.append(log)
-        proc = subprocess.Popen(args, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        proc = subprocess.Popen(args, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=os.name!='nt', creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name=='nt' else 0)
         processes.append(proc)
         return proc
     def wait(url):
@@ -64,44 +72,70 @@ def main():
             except Exception: pass
             time.sleep(.5)
         raise RuntimeError(f'Service startup timeout: {url}')
+    private_directory=tempfile.TemporaryDirectory(prefix='aircheck-e2e-')
     try:
-        with tempfile.TemporaryDirectory(prefix='aircheck-e2e-') as private:
-            env['MODEL_PATH'] = str(Path(private) / 'model/model.joblib')
-            env['SIMULATOR_LOCK_DIRECTORY'] = str(Path(private) / 'locks')
-            subprocess.run(['docker', 'run', '-d', '--rm', '--name', name, '--label', f'org.aircheck.e2e={run_id}',
-                '--tmpfs', '/var/lib/postgresql/data:rw,nosuid,nodev,size=512m', '-p', f'127.0.0.1:{db}:5432',
-                '-e', 'POSTGRES_USER=air_quality', '-e', 'POSTGRES_DB=air_quality', '-e', 'POSTGRES_PASSWORD=air_quality_dev',
-                'postgres:16-alpine'], check=True, stdout=subprocess.DEVNULL)
-            for _ in range(60):
-                if subprocess.run(['docker','exec',name,'pg_isready','-h','127.0.0.1','-U','air_quality','-d','air_quality'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0: break
-                time.sleep(.5)
-            for migration in sorted((ROOT/'database/migrations').glob('*.sql')):
-                subprocess.run(['docker','exec','-i',name,'psql','-X','-v','ON_ERROR_STOP=1','-U','air_quality','-d','air_quality'], input=migration.read_bytes(), check=True, stdout=subprocess.DEVNULL)
-            account = {'email':f'owner-{run_id}@e2e.test', 'password':secrets.token_urlsafe(24)}
-            account_file = Path(private)/'account.json'; account_file.write_text(json.dumps(account)); account_file.chmod(0o600)
-            env['E2E_ACCOUNT_FILE'] = str(account_file); env['E2E_BASE_URL'] = base
-            subprocess.run(['node','frontend/scripts/manage-owner.mjs','bootstrap',account['email'],'--password-stdin'], cwd=ROOT,env=env,input=account['password']+'\n'+account['password']+'\n',text=True,check=True,stdout=subprocess.DEVNULL)
-            fixture = Path(private)/'training.json'
-            now = datetime.now(timezone.utc)
-            fixture.write_text(json.dumps([{'timestamp':(now-timedelta(minutes=120-i)).isoformat(), 'indoor':{'co2':700+i*2,'temperature':23,'humidity':45,'pm25':5}, 'outdoor':{'temperature':18,'humidity':60,'pm25':8}, 'window_open':False} for i in range(120)]))
-            subprocess.run([sys.executable,'train.py','--input-file',str(fixture),'--output-dir',str(Path(private)/'model'),'--dataset-output',str(Path(private)/'dataset.csv')],cwd=ROOT/'ml-service',env=env,check=True,stdout=subprocess.DEVNULL)
-            env['E2E_ML_PID'] = str(start([sys.executable,'app.py'], ROOT/'ml-service','ml.log').pid)
-            start(['node','scripts/start-standalone.mjs'],ROOT/'frontend','web.log')
-            wait(base+'/healthz'); wait(env['ML_SERVICE_URL']+'/healthz')
+        private=private_directory.name
+        env['MODEL_PATH'] = str(Path(private) / 'model/model.joblib')
+        env['SIMULATOR_LOCK_DIRECTORY'] = str(Path(private) / 'locks')
+        subprocess.run(['docker', 'run', '-d', '--rm', '--name', name, '--label', f'org.aircheck.e2e={run_id}',
+            '--tmpfs', '/var/lib/postgresql/data:rw,nosuid,nodev,size=512m', '-p', f'127.0.0.1:{db}:5432',
+            '-e', 'POSTGRES_USER=air_quality', '-e', 'POSTGRES_DB=air_quality', '-e', 'POSTGRES_PASSWORD=air_quality_dev',
+            'postgres:16-alpine'], check=True, stdout=subprocess.DEVNULL)
+        for _ in range(60):
+            if subprocess.run(['docker','exec',name,'pg_isready','-h','127.0.0.1','-U','air_quality','-d','air_quality'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0: break
+            time.sleep(.5)
+        for migration in sorted((ROOT/'database/migrations').glob('*.sql')):
+            subprocess.run(['docker','exec','-i',name,'psql','-X','-v','ON_ERROR_STOP=1','-U','air_quality','-d','air_quality'], input=migration.read_bytes(), check=True, stdout=subprocess.DEVNULL)
+        account = {'email':f'owner-{run_id}@e2e.test', 'password':secrets.token_urlsafe(24)}
+        account_file = Path(private)/'account.json'; account_file.write_text(json.dumps(account)); account_file.chmod(0o600)
+        env['E2E_ACCOUNT_FILE'] = str(account_file); env['E2E_BASE_URL'] = base
+        subprocess.run(['node','frontend/scripts/manage-owner.mjs','bootstrap',account['email'],'--password-stdin'], cwd=ROOT,env=env,input=account['password']+'\n'+account['password']+'\n',text=True,check=True,stdout=subprocess.DEVNULL)
+        fixture = Path(private)/'training.json'
+        now = datetime.now(timezone.utc)
+        fixture.write_text(json.dumps([{'timestamp':(now-timedelta(minutes=120-i)).isoformat(), 'indoor':{'co2':700+i*2,'temperature':23,'humidity':45,'pm25':5}, 'outdoor':{'temperature':18,'humidity':60,'pm25':8}, 'window_open':False,'data_source':'simulator'} for i in range(120)]))
+        subprocess.run([sys.executable,'train.py','--input-file',str(fixture),'--output-dir',str(Path(private)/'model'),'--dataset-output',str(Path(private)/'dataset.csv')],cwd=ROOT/'ml-service',env=env,check=True,stdout=subprocess.DEVNULL)
+        env['E2E_ML_PID'] = str(start([sys.executable,'app.py'], ROOT/'ml-service','ml.log').pid)
+        start(['node','scripts/start-standalone.mjs'],ROOT/'frontend','web.log')
+        wait(base+'/healthz'); wait(env['ML_SERVICE_URL']+'/healthz')
+        if audit_mode=='simulation':
             sim_process = start([sys.executable,'-m','uvicorn','aircheck_simulator_3d.networking.web_service:create_web_service','--factory','--host','127.0.0.1','--port',str(sim)],ROOT,'simulator.log')
             env['E2E_SIMULATOR_PID'] = str(sim_process.pid)
-            wait(base+'/api/simulator/state')
-            return subprocess.run(['npx','--no-install','playwright','test','--config','playwright.config.ts'], cwd=ROOT/'frontend',env=env).returncode
+        wait(base+'/api/simulator/state')
+        if audit_metadata:
+            metadata=Path(audit_metadata)
+            metadata.write_text(json.dumps({'base_url':base,'account_file':str(account_file),'device_token':env['DEVICE_API_TOKEN'],'mode':audit_mode,'test_scope':run_id,'database_container':name}))
+            metadata.chmod(0o600)
+            deadline=time.monotonic()+7200
+            while time.monotonic()<deadline and not metadata.with_suffix('.stop').exists():
+                if any(process.poll() is not None for process in processes): raise RuntimeError('Audit service stopped')
+                time.sleep(.25)
+            metadata.unlink(missing_ok=True)
+            return 0
+        if audit_mode=='real':
+            metadata=Path(private)/'real-fixture.json'
+            state_file=Path(private)/'real-state.json'; state_file.write_text('{}')
+            metadata.write_text(json.dumps({'base_url':base,'device_token':env['DEVICE_API_TOKEN'],'mode':'real','test_scope':run_id}))
+            metadata.chmod(0o600)
+            env['E2E_STATE_FILE']=str(state_file)
+            start([sys.executable,'tests/browser/device_fixture.py','--metadata',str(metadata),'--state-file',str(state_file)],ROOT,'device-fixture.log')
+        return subprocess.run([shutil.which('npx') or 'npx','--no-install','playwright','test','--config','playwright.config.ts'], cwd=ROOT/'frontend',env=env).returncode
     finally:
         telegram.shutdown();telegram.server_close()
         for process in reversed(processes):
             if process.poll() is None:
-                os.killpg(process.pid,signal.SIGTERM)
-                try: process.wait(timeout=8)
-                except subprocess.TimeoutExpired: os.killpg(process.pid,signal.SIGKILL); process.wait()
+                if os.name=='nt':
+                    subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],capture_output=True)
+                    process.wait(timeout=10)
+                else:
+                    os.killpg(process.pid,signal.SIGTERM)
+                    try: process.wait(timeout=8)
+                    except subprocess.TimeoutExpired: os.killpg(process.pid,signal.SIGKILL); process.wait()
         for log in logs: log.close()
         check = subprocess.run(['docker','inspect','--format','{{ index .Config.Labels "org.aircheck.e2e" }}',name],capture_output=True,text=True)
         if check.returncode == 0 and check.stdout.strip() == run_id:
             subprocess.run(['docker','stop',name],stdout=subprocess.DEVNULL,check=True)
 
+        if audit_metadata:
+            Path(audit_metadata).unlink(missing_ok=True)
+        private_directory.cleanup()
 if __name__ == '__main__': raise SystemExit(main())

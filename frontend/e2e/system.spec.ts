@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { Pool } from 'pg'
 import { randomUUID } from 'node:crypto'
+import { exerciseSceneFullscreen } from './fullscreen'
 
 test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', async ({
   page,
@@ -108,15 +109,18 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
       )
       .toEqual(['applied', 'applied'])
     console.info('E2E: actual device ACK succeeded')
-    const pending = await operator.post('/api/v1/controls/ventilation', {
+    expect((await operator.post('/api/v1/controls/ventilation', {
       data: { device_id: 'isolated-e2e', action: 'on' },
+    })).status()).toBe(400)
+    const pending = await operator.post('/api/v1/controls/commands', {
+      data: { device_id: 'room-01', target: 'window', action: 'open' },
     })
     expect(pending.status()).toBe(202)
     const id = (await pending.json()).data.commands[0].id
     expect(
       (
         await operator.post('/api/v1/controls/commands/actions', {
-          data: { device_id: 'isolated-e2e', id, action: 'cancel' },
+          data: { device_id: 'room-01', id, action: 'cancel' },
         })
       ).status(),
     ).toBe(200)
@@ -124,21 +128,30 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
       (await db.query('SELECT status FROM actuator_commands WHERE id=$1', [id]))
         .rows[0].status,
     ).toBe('cancelled')
-    const expires = await operator.post('/api/v1/controls/ventilation', {
-      data: { device_id: 'expired-e2e', action: 'on' },
+    const expires = await operator.post('/api/v1/controls/commands', {
+      data: { device_id: 'room-01', target: 'window', action: 'open' },
     })
     expect(expires.status()).toBe(202)
+    const expiresId = (await expires.json()).data.commands[0].id
     await db.query(
-      `UPDATE actuator_commands SET expires_at=clock_timestamp()-interval '1 second' WHERE device_id='expired-e2e'`,
+      `UPDATE actuator_commands SET expires_at=clock_timestamp()-interval '1 second' WHERE id=$1`,
+      [expiresId],
     )
-    await anonymous.get('/api/v1/controls?device_id=expired-e2e')
+    await anonymous.get('/api/v1/controls?device_id=room-01')
     expect(
       (
         await db.query(
-          `SELECT DISTINCT status FROM actuator_commands WHERE device_id='expired-e2e'`,
+          `SELECT status FROM actuator_commands WHERE id=$1`,
+          [expiresId],
         )
       ).rows,
     ).toEqual([{ status: 'expired' }])
+    const recoveredWindow = await operator.post('/api/v1/controls/commands/actions', {
+      data: { device_id: 'room-01', id: expiresId, action: 'retry' },
+    })
+    expect(recoveredWindow.status()).toBe(200)
+    const recoveredWindowId = (await recoveredWindow.json()).data.commands[0].id
+    await expect.poll(async () => (await db.query('SELECT status FROM actuator_commands WHERE id=$1', [recoveredWindowId])).rows[0].status).toBe('applied')
     for (let i = 120; i >= 0; i--) {
       const response = await anonymous.post('/api/v1/measurements', {
         headers: { Authorization: 'Bearer ' + process.env.DEVICE_API_TOKEN },
@@ -181,7 +194,7 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
       [new Date(qualityTarget.getTime() + 45_000)],
     )
     await db.query(
-      `INSERT INTO predictions(target_time,predicted_co2,model_name,model_version,source_timestamp,data_source) VALUES ($1,950,'test','quality-test',$1::timestamptz-interval '15 minutes','real'),($2,2000,'test','quality-test',$2::timestamptz-interval '15 minutes','real')`,
+      `INSERT INTO predictions(target_time,predicted_co2,model_name,model_version,source_timestamp,created_at,data_source) VALUES ($1,950,'test','quality-test',$1::timestamptz-interval '15 minutes',$1::timestamptz-interval '15 minutes','real'),($2,2000,'test','quality-test',$2::timestamptz-interval '15 minutes',$2::timestamptz-interval '15 minutes','real')`,
       [qualityTarget, new Date(Date.now() - 30 * 60_000)],
     )
     await db.query(
@@ -324,6 +337,8 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
     console.info(
       'E2E: monthly aggregate history, CSV and late-data policy succeeded',
     )
+    // Start an independent alert episode after the earlier expiry/retry check.
+    await db.query(`DELETE FROM notification_events WHERE kind='command_failed'; DELETE FROM notification_conditions WHERE kind='command_failed'`)
     expect(
       (
         await operator.patch('/api/v1/notifications', {
@@ -370,6 +385,9 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
       ).status(),
     ).toBe(202)
     await page.waitForTimeout(500)
+    // Explicitly switch this isolated fixture from v2 to the legacy producer.
+    // Keep raw history; the offline simulator must no longer own live feedback.
+    await db.query(`DELETE FROM device_telemetry_heads WHERE device_id='room-01' AND data_source='simulator'`)
     await postPoint(1500)
     await page.request.get('/api/v1/events')
     await page.waitForTimeout(1500)
@@ -485,6 +503,7 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
       })
       .locator('canvas')
     await expect(canvas).toBeVisible()
+    await exerciseSceneFullscreen(page, 'simulation')
     expect(
       await canvas.evaluate(
         (element: HTMLCanvasElement) =>
@@ -510,6 +529,7 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
     process.kill(Number(process.env.E2E_SIMULATOR_PID), 'SIGTERM')
     process.kill(Number(process.env.E2E_ML_PID), 'SIGTERM')
     await page.waitForTimeout(1500)
+    await db.query(`DELETE FROM device_telemetry_heads WHERE device_id='room-01' AND data_source='simulator'`)
     const failed = await anonymous.post('/api/v1/measurements', {
       headers: { Authorization: 'Bearer ' + process.env.DEVICE_API_TOKEN },
       data: {
@@ -531,7 +551,7 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
     await expect(
       page
         .getByLabel('Актуальность данных')
-        .getByText('ML недоступен', { exact: true }),
+        .getByText('Прогноз недоступен', { exact: true }),
     ).toBeVisible()
     await db.query(
       `UPDATE actuator_states SET last_reported_at=clock_timestamp()-interval '10 minutes'`,
@@ -796,7 +816,7 @@ test('real auth, roles, settings, command lifecycle, diagnostics and WebGL', asy
     await expect(
       page
         .getByLabel('Актуальность данных')
-        .getByText('Устройство: не на связи', { exact: true }),
+        .getByText('Симулятор: не на связи', { exact: true }),
     ).toBeVisible()
     await page.locator('.account-menu summary').click()
     await page.getByRole('button', { name: 'Выйти', exact: true }).click()

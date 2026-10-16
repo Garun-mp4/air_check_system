@@ -1,0 +1,8 @@
+services:
+  backend:
+    environment:
+      AIRCHECK_MODE: real
+  web-simulator:
+    profiles: [simulation]
+  ntp:
+    profiles: []

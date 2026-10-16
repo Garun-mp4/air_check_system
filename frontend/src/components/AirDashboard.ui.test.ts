@@ -211,6 +211,19 @@ describe('dashboard states and control actions', () => {
     expect(await screen.findByText('Данных пока нет')).not.toBeNull()
   })
 
+  it.each([
+    { source: 'real' as const, hint: /Ожидается первый пакет от ESP32/ },
+    { source: 'simulator' as const, hint: /Ожидаются данные симулятора/ },
+  ])('explains the empty $source installation without suggesting another source', async ({ source, hint }) => {
+    mocks.getLatestDashboard.mockResolvedValue({ measurement: null, prediction: null, recommendation: null,
+      diagnostics: { source, measurement: 'missing', device: 'offline', prediction: 'pending', predictionMessage: null,
+        measuredAt: null, assessedAt: new Date().toISOString() } })
+    mocks.getHistory.mockResolvedValue({ data: [], meta: {} })
+    render(createElement(AirDashboard))
+    expect(await screen.findByText(hint)).toBeTruthy()
+    if (source === 'real') expect(screen.queryByText(/Запустите simulator/)).toBeNull()
+  })
+
   it('refreshes current readings and actual device state without reloading history', async () => {
     vi.useFakeTimers()
     try {

@@ -5,6 +5,7 @@ import NotificationPanel from './NotificationPanel'
 import EventJournal from './EventJournal'
 import { liveMeasurement, mergeObservationHistory } from '../lib/telemetry-view'
 import TelemetryDiagnostics from './TelemetryDiagnostics'
+import type { DataSource } from '../server/types'
 
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
@@ -1412,6 +1413,7 @@ function SettingsChoiceGroup({
 
 export function SettingsPanel({
   presentation = 'drawer',
+  dataSource = 'unknown',
   controls,
   deviceId,
   measurement,
@@ -1431,6 +1433,7 @@ export function SettingsPanel({
   onSave,
 }: {
   presentation?: 'drawer' | 'page'
+  dataSource?: DataSource
   controls: ClientControlStatus | null
   deviceId: string
   measurement: ClientMeasurement | null
@@ -1620,8 +1623,8 @@ export function SettingsPanel({
               <SettingsFact
                 icon="wifi"
                 label="Источник данных"
-                value={<span translate="no">simulator / ESP32</span>}
-                note="Simulator и будущая ESP32 используют один API-контракт."
+                value={dataSource === 'real' ? 'Одна ESP32' : dataSource === 'simulator' ? 'Симуляция · виртуальная ESP32' : 'Не определён'}
+                note="Реальное оборудование и симуляция работают в отдельных режимах установки."
               />
               <SettingsFact
                 icon="database"
@@ -2371,6 +2374,7 @@ export default function AirDashboard() {
         <h1 className="dashboard-page-title" id="dashboard-view-title">{activeViewTitle}</h1>
         {settingsOpen ? (
           <SettingsPanel
+            dataSource={dashboard?.diagnostics?.source}
             presentation="page"
             controls={controls}
             deviceId={deviceId}
@@ -2411,7 +2415,7 @@ export default function AirDashboard() {
         {isEmpty ? (
           <div className="container">
             <div className="panel-state panel-state-empty">
-              <span><strong>Данных пока нет</strong><br />Запустите simulator или отправьте первое измерение через POST /api/v1/measurements.</span>
+              <span><strong>Данных пока нет</strong><br />{dashboard?.diagnostics?.source === 'real' ? 'Ожидается первый пакет от ESP32. Проверьте питание, Wi-Fi и адрес сервера.' : dashboard?.diagnostics?.source === 'simulator' ? 'Ожидаются данные симулятора. Проверьте, запущена ли демонстрационная система.' : 'Ожидаются измерения устройства. Проверьте соединение с системой.'}</span>
             </div>
           </div>
         ) : null}

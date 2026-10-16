@@ -10,6 +10,8 @@ WORKDIR /app
 COPY owner-tools/package*.json ./
 RUN npm ci --omit=dev
 COPY --chown=node:node scripts/manage-owner.mjs ./scripts/manage-owner.mjs
+COPY --chown=node:node scripts/migrate.mjs ./scripts/migrate.mjs
+COPY --chown=node:node password-policy.json ./password-policy.json
 USER node
 ENTRYPOINT ["node", "scripts/manage-owner.mjs"]
 

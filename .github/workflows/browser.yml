@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,11 +17,22 @@ jobs:
       - run: npm ci
         working-directory: frontend
       - run: pip install -r ml-service/requirements.txt -r aircheck_simulator_3d/requirements-headless.txt
+      - run: pip install pytest==8.4.2
+      - run: python scripts/export_stand_reference.py --check
+      - run: python -m pytest aircheck_simulator_3d/tests sensor-simulator ml-service/tests tests/database tests/infrastructure -q
       - run: npx playwright install --with-deps chromium
         working-directory: frontend
       - run: npm run typecheck && npm test && npm run build
         working-directory: frontend
+      - run: npm audit --audit-level=moderate
+        working-directory: frontend
+      - run: python -m pytest tests/integration/test_compose_e2e.py -q
+        env:
+          AIRCHECK_RUN_COMPOSE_E2E: '1'
       - run: python tests/browser/run.py
+      - run: python tests/browser/run.py
+        env:
+          AIRCHECK_BROWSER_MODE: real
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

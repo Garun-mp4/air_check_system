@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test'
 export default defineConfig({
   testDir: './e2e',
+  testMatch: process.env.E2E_SYSTEM_MODE === 'real' ? 'real-system.spec.ts' : 'system.spec.ts',
   workers: 1,
   fullyParallel: false,
   timeout: 300_000,

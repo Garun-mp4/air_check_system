@@ -28,7 +28,14 @@ firmware/esp32/include/secrets.h
 
 # Browser diagnostics may contain authenticated test sessions.
 tests/browser/artifacts/
+.playwright-cli/
 
 # OpenCAD Studio writes transient locks and recovery snapshots beside DWG files.
 *.ocs.lock
 *.ocs-autosave.sv$
+
+# Installation credentials and complete private backups
+deploy/*.env*
+*.before-secrets
+*.aircheck-backup.zip
+firmware/esp32/include/edge_model.hpp

@@ -203,7 +203,7 @@ export class AirQualityService {
     return {
       ...(this.telemetryStore ? { telemetry: telemetry ?? null } : {}),
       measurement, prediction, recommendation,
-      diagnostics: { measurement: freshness, device: control.connectionStatus, prediction: status,
+      diagnostics: { source: this.config.dataSource ?? 'unknown', measurement: freshness, device: control.connectionStatus, prediction: status,
         predictionMessage: message,
         measuredAt: telemetry ? telemetry.frame.sampled_at : measurement?.timestamp.toISOString() ?? null, assessedAt: now.toISOString() },
     }

@@ -69,6 +69,10 @@ class IsolatedComposeStack:
         while self.simulator_port == self.backend_port:
             self.simulator_port = _free_loopback_port()
         self.device_token = secrets.token_hex(32)
+        self.physical_token = secrets.token_hex(32)
+        self.https_port = _free_loopback_port()
+        self.http_port = _free_loopback_port()
+        self.ntp_port = _free_loopback_port()
         self.simulator_token = secrets.token_hex(32)
         self.temp = tempfile.TemporaryDirectory(prefix="aircheck-e2e-")
         self.temp_path = Path(self.temp.name)
@@ -83,7 +87,9 @@ class IsolatedComposeStack:
             "POSTGRES_USER": "aircheck_test",
             "POSTGRES_PASSWORD": secrets.token_hex(24),
             "DEVICE_ID": self.device_id,
-            "DEVICE_API_TOKEN": self.device_token,
+            "DEVICE_API_TOKEN": self.physical_token,
+            "SIMULATOR_DEVICE_TOKEN": self.device_token,
+            "ML_MANAGEMENT_TOKEN": secrets.token_hex(32),
             "SIMULATOR_INTERNAL_TOKEN": self.simulator_token,
             "BETTER_AUTH_SECRET": secrets.token_urlsafe(48),
             "BETTER_AUTH_URL": auth_url,
@@ -93,10 +99,14 @@ class IsolatedComposeStack:
             "AIR_CHECK_PUBLIC_URL": auth_url,
             "DEVICE_HEARTBEAT_TIMEOUT_MS": "4000",
             "MIN_TRAINING_ROWS": "30",
+            "ML_HISTORY_LIMIT": "2000",
             "AUTOMATION_ENABLED": "true",
             "AUTO_WINDOW_ENABLED": "true",
             "E2E_BACKEND_PORT": str(self.backend_port),
             "E2E_SIMULATOR_PORT": str(self.simulator_port),
+            "E2E_HTTPS_PORT": str(self.https_port),
+            "E2E_HTTP_PORT": str(self.http_port),
+            "E2E_NTP_PORT": str(self.ntp_port),
         }
         self.env_file.write_text(
             "".join(f"{key}={value}\n" for key, value in values.items()),
@@ -104,6 +114,13 @@ class IsolatedComposeStack:
         )
         self.override_file.write_text(
             """services:
+  https-proxy:
+    ports: !override
+      - "127.0.0.1:${E2E_HTTP_PORT}:80"
+      - "127.0.0.1:${E2E_HTTPS_PORT}:443"
+  ntp:
+    ports: !override
+      - "127.0.0.1:${E2E_NTP_PORT}:8123/udp"
   postgres:
     ports: !override []
   ml-service:
@@ -142,6 +159,7 @@ class IsolatedComposeStack:
         profiles: tuple[str, ...] = (),
         timeout: float = 180.0,
         check: bool = True,
+        input_text: str | None = None,
     ) -> subprocess.CompletedProcess[str]:
         command = [
             "docker",
@@ -160,6 +178,7 @@ class IsolatedComposeStack:
         command.extend(args)
         result = subprocess.run(
             command,
+            input=input_text,
             cwd=ROOT,
             capture_output=True,
             text=True,
@@ -183,7 +202,7 @@ class IsolatedComposeStack:
                 "--remove-orphans",
                 "--rmi",
                 "local",
-                profiles=("demo",),
+                profiles=("demo", "hardware"),
                 timeout=180.0,
                 check=False,
             )
@@ -492,3 +511,49 @@ def test_legacy_simulator_cannot_acquire_web_simulator_device_lease(e2e_stack: I
     combined = f"{result.stdout}\n{result.stderr}".lower()
     assert result.returncode != 0, "legacy simulator unexpectedly acquired the active web simulator device lease"
     assert "already served by another simulator process" in combined
+
+
+def test_local_tls_ntp_complete_backup_and_fresh_restore(e2e_stack: IsolatedComposeStack):
+    import importlib.util
+    import ssl
+    import struct
+    stack=e2e_stack
+    password=secrets.token_urlsafe(24)
+    stack.compose('run','--rm','--build','owner-cli','bootstrap','owner@acceptance.invalid','--password-stdin',profiles=('maintenance',),input_text=password+'\n'+password+'\n',timeout=900)
+    stack.compose('up','-d','--build','https-proxy','ntp',profiles=('hardware',),timeout=900)
+    root=_wait_for(lambda: stack.compose('exec','-T','https-proxy','cat','/data/caddy/pki/authorities/local/root.crt',check=False).stdout or None,'local CA certificate')
+    def health():
+        context=ssl.create_default_context(cadata=root)
+        with socket.create_connection(('127.0.0.1',stack.https_port),timeout=3) as tcp:
+            with context.wrap_socket(tcp,server_hostname='aircheck-e2e.invalid') as tls:
+                tls.sendall(b'GET /healthz HTTP/1.1\r\nHost: aircheck-e2e.invalid\r\nConnection: close\r\n\r\n')
+                return b'200 OK' in tls.recv(4096)
+    _wait_for(health,'trusted local TLS and ready backend')
+    def ntp():
+        with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as client:
+            client.settimeout(2); client.sendto(bytes([0x23])+bytes(47),('127.0.0.1',stack.ntp_port)); data,_=client.recvfrom(512)
+            seconds=struct.unpack('!I',data[40:44])[0]-2208988800
+            return len(data)==48 and abs(seconds-time.time())<5
+    _wait_for(ntp,'local NTP with no external time server')
+    spec=importlib.util.spec_from_file_location('aircheck_backup',ROOT/'deploy/backup.py')
+    backup=importlib.util.module_from_spec(spec); spec.loader.exec_module(backup)
+    archive=stack.temp_path/'rehearsal.aircheck-backup.zip'
+    heads=stack.compose('exec','-T','postgres','sh','-c','psql -X -A -t -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT count(*) FROM device_telemetry_heads"').stdout
+    assert int(heads)>0
+    backup.create(archive,stack.env_file,stack.project_name)
+    verified=backup.verify(archive)
+    assert verified['schema_ready'] and verified['measurements']>0 and verified['telemetry']>0
+    assert verified['files_restored']['model.tar.gz']>0 and verified['files_restored']['caddy-data.tar.gz']>0
+    project='aircheck-restored-'+uuid.uuid4().hex[:10]
+    env_file=stack.temp_path/'restored.env'
+    try:
+        result=backup.restore_new(archive,env_file,project,_free_loopback_port())
+        assert result['commands_cancelled'] and not result['backend_started']
+        command=['docker','compose','--project-directory',str(ROOT),'-f',str(ROOT/'docker-compose.yml'),'-f',str(env_file)+'.restore.yml','--env-file',str(env_file),'-p',project]
+        count=backup.run(command+['exec','-T','postgres','sh','-c','psql -X -A -t -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT count(*) FROM measurements"'])
+        assert int(count)==verified['measurements']
+        safety=backup.run(command+['exec','-T','postgres','sh','-c','psql -X -A -t -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT json_build_object(\'heads\',(SELECT count(*) FROM device_telemetry_heads),\'pending\',(SELECT count(*) FROM actuator_commands WHERE status=\'pending\'),\'known\',(SELECT count(*) FROM actuator_states WHERE cardinality(known_targets)>0),\'current_old_commands\',(SELECT count(*) FROM actuator_commands a JOIN runtime_device_modes m ON a.device_id=m.device_id WHERE a.created_at>=m.updated_at))"'])
+        assert json.loads(safety)=={'heads':0,'pending':0,'known':0,'current_old_commands':0}
+    finally:
+        if env_file.exists():
+            backup.run(['docker','compose','--project-directory',str(ROOT),'-f',str(ROOT/'docker-compose.yml'),'-f',str(env_file)+'.restore.yml','--env-file',str(env_file),'-p',project,'down','--volumes','--remove-orphans','--rmi','local'])

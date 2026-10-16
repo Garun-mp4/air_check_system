@@ -36,7 +36,7 @@ export default function DataStatus({
               : 'Измерения актуальны'}
       </strong>
       <span>
-        Устройство:{' '}
+        {diagnostics.source === 'real' ? 'ESP32' : diagnostics.source === 'simulator' ? 'Симулятор' : 'Устройство'}:{' '}
         {diagnostics.device === 'online'
           ? 'на связи'
           : diagnostics.device === 'stale'

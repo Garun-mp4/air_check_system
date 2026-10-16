@@ -9,6 +9,7 @@ describe('data diagnostics', () => {
     render(
       React.createElement(DataStatus, {
         diagnostics: {
+          source: 'real',
           measurement: 'stale',
           device: 'offline',
           prediction: 'model_untrained',
@@ -19,13 +20,14 @@ describe('data diagnostics', () => {
       }),
     )
     expect(screen.getByText('Измерения устарели')).toBeTruthy()
-    expect(screen.getByText('Устройство: не на связи')).toBeTruthy()
+    expect(screen.getByText('ESP32: не на связи')).toBeTruthy()
     expect(screen.getByText('Модель не обучена')).toBeTruthy()
   })
   it('labels a legacy prediction without displaying it as a current forecast', () => {
     render(
       React.createElement(DataStatus, {
         diagnostics: {
+          source: 'simulator',
           measurement: 'fresh',
           device: 'online',
           prediction: 'legacy',
@@ -39,5 +41,6 @@ describe('data diagnostics', () => {
       screen.getByText('Старый прогноз без связи с измерением'),
     ).toBeTruthy()
     expect(screen.queryByText('Прогноз готов')).toBeNull()
+    expect(screen.getByText('Симулятор: на связи')).toBeTruthy()
   })
 })

@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--env", choices=("esp32", "fake"), default="esp32")
     parser.add_argument('--edge-model', type=Path, help='Qualified real edge-model.json; excluded when not supplied')
     parser.add_argument('--jobs', type=int, default=2, help='Bound compiler concurrency on memory-constrained hosts')
+    parser.add_argument('--verify-only', action='store_true', help='Cross-compile without retaining flashable artifacts')
     args = parser.parse_args()
     if not 1 <= args.jobs <= 16: parser.error('--jobs must be from 1 to 16')
     root = Path(__file__).resolve().parent
@@ -33,6 +34,9 @@ def main():
         result = subprocess.run([sys.executable, "-m", "platformio", "run", "-j", str(args.jobs), "-d", str(staged), "-e", args.env], check=False)
         if result.returncode:
             return result.returncode
+        if args.verify_only:
+            print('Cross-compilation verified; no flashable artifacts retained')
+            return 0
         output = root / ".pio" / "staged" / (args.env + ('-edge-' + checksum[:12] if args.edge_model else ''))
         output.mkdir(parents=True, exist_ok=True)
         for filename in ("firmware.bin", "firmware.elf", "bootloader.bin", "partitions.bin"):

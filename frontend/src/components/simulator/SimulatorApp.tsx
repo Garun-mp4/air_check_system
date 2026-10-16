@@ -7,6 +7,7 @@ import { sendControlCommand } from '../../lib/client-api'
 import { getCo2Level } from '../../lib/air-quality'
 import { sensorQualityLabels } from '../../lib/telemetry'
 import SceneCanvas from './SceneLoader'
+import { useSceneFullscreen } from './useSceneFullscreen'
 import { useSimulatorState } from './useSimulatorState'
 import type { CutawayMode, SimulatorSnapshot, VisualizationMode } from './types'
 import { getLoginHref } from '../../lib/auth-navigation'
@@ -128,6 +129,10 @@ export default function SimulatorApp() {
   const [mobileMetricsExpanded, setMobileMetricsExpanded] = useState(false)
   const [mobileDevicePanelOpen, setMobileDevicePanelOpen] = useState(false)
   const devicePanelToggleRef = useRef<HTMLButtonElement>(null)
+  const fullscreenDevicesRef = useRef<HTMLButtonElement>(null)
+  const workspaceRef = useRef<HTMLElement>(null)
+  const fullscreenToggleRef = useRef<HTMLButtonElement>(null)
+  const fullscreen = useSceneFullscreen(workspaceRef, fullscreenToggleRef)
   const isOperator = accessStatus === 'ready' && (access?.role === 'operator' || access?.role === 'owner')
 
   useEffect(() => {
@@ -184,8 +189,8 @@ export default function SimulatorApp() {
 
   const closeMobileDevicePanel = useCallback(() => {
     setMobileDevicePanelOpen(false)
-    devicePanelToggleRef.current?.focus()
-  }, [])
+    ;(fullscreen.expanded ? fullscreenDevicesRef : devicePanelToggleRef).current?.focus({ preventScroll: true })
+  }, [fullscreen.expanded])
 
   const selectedInfo = selectedId ? DEVICE_INFO[selectedId] : null
   const selectedSensor = useMemo(() => {
@@ -256,11 +261,11 @@ export default function SimulatorApp() {
         </nav>
       </div>
 
-      <section className="simulator-workspace">
+      <section id="simulator-workspace" ref={workspaceRef} className={'simulator-workspace' + (fullscreen.expanded ? ' is-expanded' : '')} role={fullscreen.expanded ? 'dialog' : undefined} aria-modal={fullscreen.expanded ? true : undefined} aria-label="Рабочая область 3D-стенда">
         <div className="simulator-stage-column">
           <div className="simulator-stage-frame">
             <div className="simulator-stage-topline">
-              <div><span className="eyebrow">{realMode ? 'Реальная система' : snapshot.simulation.scenario}</span><strong>{realMode ? 'Одна ESP32 · показания устройств' : <>{snapshot.simulation.room_volume_m3.toFixed(1)} м³ · {snapshot.simulation.occupancy} {snapshot.simulation.occupancy === 1 ? 'человек' : 'чел.'}</>}</strong></div>
+              <div><span className="eyebrow">{realMode ? 'Реальная система' : fullscreen.expanded ? 'Симуляция' : snapshot.simulation.scenario}</span><strong>{realMode ? 'Одна ESP32 · показания устройств' : <>{snapshot.simulation.room_volume_m3.toFixed(1)} м³ · {snapshot.simulation.occupancy} {snapshot.simulation.occupancy === 1 ? 'человек' : 'чел.'}</>}</strong></div>
               <div className="sim-stage-quick-actions">
                 <label className="sim-compact-select"><span className="sr-only">Режим стены</span><select value={cutaway} onChange={(event) => setCutaway(event.target.value as CutawayMode)}><option value="visible">Стена: видимая</option><option value="transparent">Стена: прозрачная</option><option value="hidden">Стена: скрыта</option></select></label>
                 {coarsePointer ? (
@@ -276,8 +281,14 @@ export default function SimulatorApp() {
                 ) : null}
                 <button className="sim-icon-button" type="button" onClick={resetCamera} aria-label="Сбросить камеру" title="Сброс камеры">⌖</button>
                 <button className="sim-icon-button" type="button" onClick={() => selectedPoint && setCameraCommand((previous) => ({ id: previous.id + 1, focus: selectedPoint }))} disabled={!selectedPoint} aria-label="Сфокусировать камеру на выбранном устройстве" title="Фокус на выбранном устройстве">◎</button>
+                {fullscreen.expanded ? <button ref={fullscreenDevicesRef} className="sim-icon-button simulator-fullscreen-devices" type="button" aria-expanded={panel === 'devices' && mobileDevicePanelOpen} aria-controls="simulator-device-panel" onClick={() => { setPanel('devices'); setMobileDevicePanelOpen(open => panel === 'devices' ? !open : true) }}>Устройства</button> : null}
+                <button ref={fullscreenToggleRef} className={'sim-icon-button simulator-fullscreen-toggle' + (fullscreen.expanded ? ' is-active' : '')} type="button" onClick={() => void fullscreen.toggle()} disabled={fullscreen.pending} aria-busy={fullscreen.pending} aria-pressed={fullscreen.expanded} aria-controls="simulator-workspace" aria-label={fullscreen.expanded ? 'Выйти из полноэкранного режима' : 'Развернуть 3D-стенд на весь экран'} title={fullscreen.expanded ? 'Выйти из полноэкранного режима · Esc' : 'Развернуть 3D-стенд на весь экран'}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={fullscreen.expanded ? 'M3 8h5V3m8 0v5h5M8 21v-5H3m18 0h-5v5' : 'M8 3H3v5m13-5h5v5M3 16v5h5m8 0h5v-5'} /></svg>
+                  {fullscreen.expanded ? <span>Свернуть стенд</span> : null}
+                </button>
               </div>
             </div>
+            {fullscreen.error ? <p className="control-feedback simulator-fullscreen-notice" role="alert">{fullscreen.error}</p> : null}
             <div className={'simulator-stage-hud' + (mobileMetricsExpanded ? ' is-expanded' : '')}>
               <div className="sim-hud-card sim-hud-co2"><span>CO₂ · ВНУТРИ</span><strong>{fmt(snapshot.indoor.co2_ppm)} <small>ppm</small></strong><i className={co2ToneClass(snapshot)} /></div>
               <button className="sim-hud-mobile-toggle" type="button" aria-expanded={mobileMetricsExpanded} aria-controls="simulator-air-metrics" onClick={() => setMobileMetricsExpanded((expanded) => !expanded)}>{mobileMetricsExpanded ? 'Скрыть показатели' : 'Показатели воздуха'}</button>

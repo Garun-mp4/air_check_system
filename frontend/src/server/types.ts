@@ -87,6 +87,7 @@ export interface RetentionCleanupResult {
 }
 
 export interface DashboardDiagnostics {
+  source: DataSource
   measurement: 'missing' | 'fresh' | 'stale' | 'partial'
   device: DeviceConnectionStatus
   prediction: 'stale' | 'ready' | 'pending' | 'insufficient_history' | 'model_untrained' | 'unavailable' | 'error' | 'legacy'

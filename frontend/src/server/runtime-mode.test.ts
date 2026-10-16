@@ -14,6 +14,11 @@ function service(repository: MemoryRepository, dataSource: 'real' | 'simulator',
 function measurement(dataSource: 'real' | 'simulator', co2 = 650, timestamp = new Date()) { return { dataSource, timestamp, indoor: { co2, temperature: 23, humidity: 45, pm25: 5 }, outdoor: { temperature: 18, humidity: 50, pm25: 8 }, windowOpen: false } }
 
 describe('physical/virtual runtime isolation', () => {
+  it.each(['real', 'simulator'] as const)('reports the active %s source before the first measurement', async dataSource => {
+    const dashboard = await service(new MemoryRepository(), dataSource).latest()
+    expect(dashboard.measurement).toBeNull()
+    expect(dashboard.diagnostics?.source).toBe(dataSource)
+  })
   it('defaults to simulation without admitting physical credentials or a real source', () => {
     vi.stubEnv('AIRCHECK_MODE', undefined); vi.stubEnv('DEVICE_API_TOKEN', physicalToken); vi.stubEnv('SIMULATOR_DEVICE_TOKEN', virtualToken)
     expect(getConfig().dataSource).toBe('simulator')
