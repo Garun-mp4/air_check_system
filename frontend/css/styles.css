@@ -6830,11 +6830,11 @@ body.is-settings-open {
 
 .dashboard-shell .air-context-card-data {
   display: grid;
+  align-content: start;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: var(--spacing-lg);
   row-gap: var(--spacing-xs);
   min-width: 0;
-  margin-top: auto;
 }
 
 .dashboard-shell .air-context-card-metric {
@@ -7188,6 +7188,23 @@ body.is-settings-open {
   color: var(--color-muted);
   font-size: var(--caption-size);
   line-height: 1.45;
+}
+
+/* Share heading, description and readings rows while the cards sit side by side. */
+@media (min-width: 768px) {
+  .dashboard-shell .air-context-card {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    align-items: stretch;
+  }
+
+  .dashboard-shell .air-context-card-content {
+    display: grid;
+    grid-row: 1 / -1;
+    grid-template-rows: subgrid;
+    justify-content: stretch;
+  }
 }
 
 @media (max-width: 767px) {
